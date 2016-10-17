@@ -1,6 +1,6 @@
 {
-  "name": "angular-quickstart",
-  "version": "1.0.0",
+  "name": "angular2-json-schema-form",
+  "version": "0.1.0",
   "description": "QuickStart package.json from the documentation, supplemented with testing support",
   "scripts": {
     "start": "tsc && concurrently \"tsc -w\" \"lite-server\" ",
@@ -19,13 +19,9 @@
     "webdriver:update": "webdriver-manager update"
   },
   "keywords": [],
-  "author": "",
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "https://github.com/angular/angular.io/blob/master/LICENSE"
-    }
-  ],
+  "author": "David Schnell-Davis",
+  "license": "MIT",
+  "repository": {},
   "dependencies": {
     "@angular/common": "~2.0.2",
     "@angular/compiler": "~2.0.2",
@@ -36,25 +32,26 @@
     "@angular/platform-browser-dynamic": "~2.0.2",
     "@angular/router": "~3.0.2",
     "@angular/upgrade": "~2.0.2",
-
+    "ajv": "^4.7.7",
     "angular-in-memory-web-api": "~0.1.5",
     "bootstrap": "^3.3.7",
-    "systemjs": "0.19.39",
+    "buffer": "^5.0.0",
     "core-js": "^2.4.1",
+    "lodash": "^4.16.2",
     "reflect-metadata": "^0.1.8",
     "rxjs": "5.0.0-beta.12",
+    "systemjs": "0.19.39",
     "zone.js": "^0.6.25"
   },
   "devDependencies": {
-    "concurrently": "^3.0.0",
-    "lite-server": "^2.2.2",
-    "typescript": "^2.0.3",
-    "typings": "^1.4.0",
-
+    "@types/ace": "0.0.32",
+    "@types/ajv": "0.0.3",
+    "@types/lodash": "^4.14.37",
+    "brace": "^0.8.0",
     "canonical-path": "0.0.2",
+    "codelyzer": "^1.0.0-beta.1",
+    "concurrently": "^3.0.0",
     "http-server": "^0.9.0",
-    "tslint": "^3.15.1",
-    "lodash": "^4.16.2",
     "jasmine-core": "~2.5.2",
     "karma": "^1.3.0",
     "karma-chrome-launcher": "^2.0.0",
@@ -62,8 +59,16 @@
     "karma-htmlfile-reporter": "^0.3.4",
     "karma-jasmine": "^1.0.2",
     "karma-jasmine-html-reporter": "^0.2.2",
+    "lite-server": "^2.2.2",
     "protractor": "^3.3.0",
-    "rimraf": "^2.5.4"
+    "rimraf": "^2.5.4",
+    "tslint": "^3.15.1",
+    "typescript": "^2.0.3",
+    "typings": "^1.4.0"
   },
-  "repository": {}
+  "optionalDependencies": {
+    "bootstrap": "^3.3.7",
+    "ng2-bootstrap": "^1.1.12",
+    "spectrum-colorpicker": "^1.8.0"
+  }
 }

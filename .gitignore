@@ -6,6 +6,8 @@ link-checker-results.txt
 **/*npm-debug.log.*
 *.js
 *.js.map
+json-schema-form/**/*.d.ts
+playground/**/*.d.ts
 e2e/**/*.js
 e2e/**/*.js.map
 _test-output

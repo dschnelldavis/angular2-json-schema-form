@@ -2,12 +2,27 @@
   "compilerOptions": {
     "target": "es5",
     "module": "commonjs",
+    "declaration": true,
     "moduleResolution": "node",
-    "sourceMap": true,
+    "sourceMap": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "removeComments": false,
-    "noImplicitAny": true,
-    "suppressImplicitAnyIndexErrors": true
-  }
+    "removeComments": true,
+    "newLine": "LF",
+    "noImplicitAny": false,
+    "noEmitOnError": false,
+    "allowUnreachableCode": true
+  },
+  "filesGlob": [
+    "main.ts",
+    "typings.d.ts",
+    "typings/**/*",
+    "json-schema-form/**/*.ts",
+    "playground/**/*.ts",
+    "node_modules/@types/**/*.ts",
+    "node_modules/**/*.d.ts",
+    "!json-schema-form/**/*.spec.ts",
+    "!playground/**/*.spec.ts",
+    "!node_modules/**/*.ts"
+  ]
 }
