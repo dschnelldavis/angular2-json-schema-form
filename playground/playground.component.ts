@@ -12,6 +12,7 @@ import 'rxjs/add/operator/map';
 import * as _ from 'lodash';
 
 import { JsonPointer } from '../json-schema-form/utilities/jsonpointer';
+import { forOwnDeep } from '../json-schema-form/utilities/utility-functions';
 
 @Component({
   moduleId: module.id,

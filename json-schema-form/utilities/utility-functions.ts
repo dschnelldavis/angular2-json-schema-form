@@ -6,6 +6,17 @@ import * as _ from 'lodash';
 
 import { JsonPointer } from './jsonpointer';
 import { JsonValidators } from '../validators/json-validators';
+import {
+  isPresent, isBlank, isSet, isNotSet, isEmpty, isString, isNumber,
+  isInteger, isBoolean, isFunction, isObject, isArray, getType, isType,
+  toJavaScriptType, toSchemaType, xor, hasOwn, forOwn
+} from '../validators/validator-functions';
+
+export {
+  isPresent, isBlank, isSet, isNotSet, isEmpty, isString, isNumber,
+  isInteger, isBoolean, isFunction, isObject, isArray, getType, isType,
+  toJavaScriptType, toSchemaType, xor, hasOwn, forOwn
+}
 
 /**
  * 'listInputOptions' function
@@ -51,23 +62,41 @@ export function getInputType(schema: any): string {
   if (
     isObject(schema['x-schema-form']) && isSet(schema['x-schema-form']['type'])
   ) return schema['x-schema-form']['type'];
-  if (schema.type === 'boolean') return 'checkbox';
-  if (schema.type === 'object') {
+  let schemaType = schema.type;
+  if (isArray(schemaType)) { // If multiple types OK, use most permissive
+    if (schemaType.indexOf('string') !== -1) {
+      schemaType = 'string';
+    } else if (schemaType.indexOf('number') !== -1) {
+      schemaType = 'number';
+    } else if (schemaType.indexOf('integer') !== -1) {
+      schemaType = 'integer';
+    } else if (schemaType.indexOf('boolean') !== -1) {
+      schemaType = 'boolean';
+    } else if (schemaType.indexOf('object') !== -1) {
+      schemaType = 'object';
+    } else if (schemaType.indexOf('array') !== -1) {
+      schemaType = 'array';
+    } else {
+      schemaType = 'null';
+    }
+  }
+  if (schemaType === 'boolean') return 'checkbox';
+  if (schemaType === 'object') {
     if (hasOwn(schema, 'properties')) return 'fieldset';
     return 'textarea';
   }
-  if (schema.type === 'array') {
+  if (schemaType === 'array') {
     if (hasOwn(schema, 'enum')) return 'checkboxes';
     return 'array';
   }
-  if (schema.type === 'null') return 'hidden';
+  if (schemaType === 'null') return 'hidden';
   if (hasOwn(schema, 'enum')) return 'select';
-  if (schema.type === 'number' || schema.type === 'integer') {
+  if (schemaType === 'number' || schemaType === 'integer') {
     if (hasOwn(schema, 'maximum') && hasOwn(schema, 'minimum') &&
-      (schema.type === 'integer' || hasOwn(schema, 'multipleOf'))) return 'range';
-    return schema.type;
+      (schemaType === 'integer' || hasOwn(schema, 'multipleOf'))) return 'range';
+    return schemaType;
   }
-  if (schema.type === 'string') {
+  if (schemaType === 'string') {
     if (hasOwn(schema, 'format')) {
       if (schema.format === 'color') return 'color';
       if (schema.format === 'date') return 'date';
@@ -77,7 +106,7 @@ export function getInputType(schema: any): string {
     }
     return 'text';
   }
-  return schema.type;
+  return 'text';
 }
 
 /**
@@ -133,6 +162,14 @@ export function getFirstValue(values: any[]): any {
  * Creates a new layout by running each element in an existing layout through
  * an iteratee. Recursively maps within array elements 'items' and 'tabs'.
  * The iteratee is invoked with four arguments: (value, index, layout, path)
+ *
+ * THe returned layout may be longer (or shorter) then the source layout.
+ *
+ * If an item from the source layout returns multiple items (as '*' usually will),
+ * this function will keep all returned items in-line with the surrounding items.
+ *
+ * If an item from the source layout causes an error and returns null, it is
+ * simply skipped, and the function will still return all non-null items.
  *
  * @param {any[]} layout - the layout to map
  * @param {(v: any, i?: number, l?: any, p?: string) => any}
@@ -370,6 +407,19 @@ export function forOwnDeep(
       value, fn, rootObject, jsonPointer + '/' + JsonPointer.escape(key), bottomUp
     ));
   }
+  // *** non-lodash implementation ***
+  // if (isArray(object) || isObject(object)) {
+  //   let keys = Object.keys(object);
+  //   if (bottomUp) {
+  //     for (let i = keys.length - 1, l = 0; i >= l; i--) {
+  //       this.forOwnDeep(object[keys[i]], fn, rootObject, jsonPointer + '/' + JsonPointer.escape(keys[i]), bottomUp);
+  //     }
+  //   } else {
+  //     for (let i = 0, l = keys.length; i < l; i++) {
+  //       this.forOwnDeep(object[keys[i]], fn, rootObject, jsonPointer + '/' + JsonPointer.escape(keys[i]), bottomUp);
+  //     }
+  //   }
+  // }
   if (!isRoot && bottomUp) fn(object, currentKey, rootObject, jsonPointer);
   return object;
 }
@@ -408,41 +458,41 @@ export function isInputRequired(schema: any, pointer: string): boolean {
   return false;
 };
 
-export function hasOwn(item: any, property: string): boolean {
-  if (!isObject(item)) return false;
-  return Object.prototype.hasOwnProperty.call(item, property);
-}
-
-export function isEmpty(item: any): boolean {
-  if (!item ) return true;
-  if (isArray(item) && item.length === 0) return true;
-  if (isObject(item) && Object.keys(item).length === 0) return true;
-  return false;
-}
-
-export function isSet(item: any): boolean {
-  return item !== undefined && item !== null;
-}
-
-export function isObject(item: any): boolean {
-  return item !== null && typeof item === 'object' &&
-    Object.prototype.toString.call(item) === '[object Object]';
-}
-
-export function isArray(item: any): boolean {
-  return Array.isArray(item) ||
-    Object.prototype.toString.call(item) === '[object Array]';
-}
-
-export function isBoolean(item: any): boolean {
-  return typeof item === 'boolean' ||
-    Object.prototype.toString.call(item) === '[object Boolean]';
-}
-
-export function isFunction(item: any): boolean {
-  return typeof item === 'function';
-}
-
-export function isString(item: any): boolean {
-  return typeof item === 'string';
-}
+// export function hasOwn(item: any, property: string): boolean {
+//   if (!isObject(item)) return false;
+//   return Object.prototype.hasOwnProperty.call(item, property);
+// }
+//
+// export function isEmpty(item: any): boolean {
+//   if (!item ) return true;
+//   if (isArray(item) && item.length === 0) return true;
+//   if (isObject(item) && Object.keys(item).length === 0) return true;
+//   return false;
+// }
+//
+// export function isSet(item: any): boolean {
+//   return item !== undefined && item !== null;
+// }
+//
+// export function isObject(item: any): boolean {
+//   return item !== null && typeof item === 'object' &&
+//     Object.prototype.toString.call(item) === '[object Object]';
+// }
+//
+// export function isArray(item: any): boolean {
+//   return Array.isArray(item) ||
+//     Object.prototype.toString.call(item) === '[object Array]';
+// }
+//
+// export function isBoolean(item: any): boolean {
+//   return typeof item === 'boolean' ||
+//     Object.prototype.toString.call(item) === '[object Boolean]';
+// }
+//
+// export function isFunction(item: any): boolean {
+//   return typeof item === 'function';
+// }
+//
+// export function isString(item: any): boolean {
+//   return typeof item === 'string';
+// }

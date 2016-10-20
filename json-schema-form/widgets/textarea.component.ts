@@ -15,7 +15,8 @@ import { FormGroup } from '@angular/forms';
       [attr.pattern]="layoutNode?.pattern"
       [attr.placeholder]="layoutNode?.placeholder"
       [attr.readonly]="layoutNode?.readonly ? 'readonly' : null"
-      [attr.value]="layoutNode?.value"></textarea>
+      [attr.value]="layoutNode?.value"
+      [attr.required]="layoutNode?.required"></textarea>
     </div>`,
 })
 export class TextareaComponent {

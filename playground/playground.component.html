@@ -1,20 +1,13 @@
-<div class="navbar navbar-inverse">
-  <div class="navbar-inner" style="border-radius: 0 !important;">
-    <div class="container">
-      <a class="brand" href="#">Angular 2 JSON Schema Form — Playground</a>
-      <!-- <div>
-        <ul class="nav">
-          <li><a href="#">Home</a></li>
-        </ul>
-        <ul class="nav pull-right">
-        </ul>
-      </div> -->
+<div class="navbar navbar-inverse" style="border-radius: 0 !important;">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="/">Angular 2 JSON Schema Form — Playground</a>
+      </div>
     </div>
-  </div>
 </div>
 <div class="container-fluid">
   <div class="row-fluid">
-    <div class="span12">
+    <div class="col-sm-12">
       An Angular 2 <a href="http://json-schema.org/">JSON Schema</a> Form builder, similar to
       <span style="white-space: nowrap;">
         <!-- <a href="http://factory.joshfire.com/">Joshfire's</a> -->
@@ -30,45 +23,45 @@
     </div>
   </div>
   <div class="row-fluid">
-    <div class="span12">
+    <div class="col-sm-12">
       Choose an example below, or create your own, and check the generated form.
     </div>
   </div>
   <div class="row-fluid">
-    <div class="form-group form-inline">
-      <div class="span2">
+    <!-- <div class="form-group"> -->
+      <div class="col-sm-2">
         <label for="exampleSet">Example Set:</label>
       </div>
-      <div class="span8">
-        <select id="exampleSet" (change)="loadSelectedSet($event.target.value)"
-          class="span10">
+      <div class="col-sm-10">
+        <select id="exampleSet" (change)="loadSelectedSet($event.target.value)">
           <option *ngFor="let set of examples.exampleSetList"
             [value]="set" [selected]="selectedSet === set">
             {{examples.exampleSets[set]}}
           </option>
         </select>
       </div>
-    </div>
+      <div class="clearfix visible-sm-block"></div>
+    <!-- </div> -->
   </div>
   <div class="row-fluid">
-    <div class="form-group form-inline">
-      <div class="span2">
+    <!-- <div class="form-group"> -->
+      <div class="col-sm-2">
         <label for="example">Example:</label>
       </div>
-      <div class="span8">
+      <div class="col-sm-10">
         <select id="example"
-          (change)="loadSelectedExample(selectedSet, $event.target.value)"
-          class="span10">
+          (change)="loadSelectedExample(selectedSet, $event.target.value)">
           <option *ngFor="let example of examples.exampleList[selectedSet]"
             [value]="example" [selected]="selectedExample === example">
             {{examples.examples[selectedSet][example]}}
           </option>
         </select>
       </div>
-    </div>
+      <div class="clearfix visible-sm-block"></div>
+    <!-- </div> -->
   </div>
   <div class="row-fluid">
-    <div class="span5">
+    <div class="col-sm-5">
       <h4>JSON Schema and Layout</h4>
       <div ace-editor
         [text]="jsonFormSchema"
@@ -82,7 +75,7 @@
         (loading form specification...)
       </div>
     </div>
-    <div class="span7">
+    <div class="col-sm-7">
       <h4>Generated Form</h4>
       <json-schema-form
         *ngIf="formActive"

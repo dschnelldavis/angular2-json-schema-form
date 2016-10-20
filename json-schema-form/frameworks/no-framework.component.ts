@@ -7,10 +7,12 @@ import { FormGroup } from '@angular/forms';
 @Component({
   selector: 'none-framework',
   template: `
-  <label *ngIf="layoutNode?.key && !layoutNode?.notitle"
-    [class]="layoutNode.labelHtmlClass"
-    [attr.for]="layoutNode?.key">{{layoutNode?.title || layoutNode?.name}}</label>
-  <div #widgetContainer></div>`
+  <div class="schema-form-{{layoutNode?.type}} {{layoutNode?.htmlClass}}">
+    <label *ngIf="layoutNode?.key && !layoutNode?.notitle"
+      class="{{layoutNode.labelHtmlClass}}"
+      [attr.for]="layoutNode?.key">{{layoutNode?.title || layoutNode?.name}}</label>
+    <div #widgetContainer></div>
+  </div>`
 })
 export class NoFrameworkComponent implements AfterContentChecked {
   private controlInitialized: boolean = false;

@@ -4,6 +4,8 @@ import { NoFrameworkComponent } from './no-framework.component';
 // No framework - just adds html <label>
 import { MaterialDesignComponent } from './material-design.component';
 // Uses https://github.com/angular/material2
+// https://www.muicss.com/docs/v1/css-js/forms
+// http://materializecss.com/forms.html
 import { Bootstrap3Component } from './bootstrap3.component';
 // Uses https://github.com/valor-software/ng2-bootstrap
 import { Bootstrap4Component } from './bootstrap4.component';

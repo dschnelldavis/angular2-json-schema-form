@@ -18,9 +18,10 @@ import { FrameworkLibraryService } from './frameworks/framework-library.service'
 import { WidgetLibraryService } from './widgets/widget-library.service';
 import {
   forOwnDeep, getControlType, getControlValidators, getFirstValue, getInputType,
-  getInputOptionValue, hasOwn, isArray, isInputRequired, isObject,
-  listInputOptions, mapLayout, resolveSchemaReference, setObjectInputOptions
+  getInputOptionValue, hasOwn, isArray, isInputRequired, isObject, isSet, listInputOptions,
+  mapLayout, resolveSchemaReference, setObjectInputOptions, toJavaScriptType, toSchemaType
 } from './utilities/utility-functions';
+import { SchemaPrimitiveType } from './validators/validator-functions';
 import { JsonSchemaDraft04 } from './utilities/json-schema-draft-04';
 import { convertJsonSchema3to4 } from './utilities/convert-json-schema';
 import { JsonPointer } from './utilities/jsonpointer';
@@ -63,12 +64,14 @@ import { JsonValidators } from './validators/json-validators';
       *ngIf="formActive"
       [layoutNode]="rootLayout"
       [formGroup]="rootFormGroup"
-      [formOptions]="formOptions">
+      [formOptions]="formOptions"
+      [debug]="debug">
     </root-widget>
-    </form>
-    Internal form data:
-    <pre *ngIf="debug">{{debugOutput}}</pre>
-  `,
+  </form>
+  <div *ngIf="debug">
+    Internal data:
+    <pre>{{debugOutput}}</pre>
+  </div>`,
  })
 export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit, DoCheck, OnChanges, OnInit {
 
@@ -76,7 +79,7 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
   private rootSchema: any = {}; // The JSON Schema
   private rootLayout: any[] = []; // The Form layout
   private rootData: any = {}; // The Data model (e.g. previously submitted data)
-  private formReferences: any = {}; // references for dynamic arrays and schema $refs
+  private schemaReferences: any = {}; // references for schema $refs
   private keyMap: any = {}; // Links schema, layout, formGroup template, and data
   private rootFormGroupTemplate: any = {}; // Template used to create formGroup
   private rootFormGroup: FormGroup; // Angular 2 formGroup, for powering reactive forms
@@ -93,7 +96,7 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
     pristine: { errors: true, success: true },
     validateOnRender: false,
     framework: null,
-    references: {}, // references for dynamic arrays and schema $refs
+    references: {}, // references for dynamic arrays and circular schema $refs
   }; // Global optiona for form
 
   @Input() form: any;
@@ -138,18 +141,18 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
     this.buildFormInputs();
   }
 
-  // TODO: REMOVE debug output
   ngDoCheck() {
-    if (!this.debug) return null;
-    let vars: any[] = [];
-    // vars.push(this.rootFormGroup);
-    // vars.push(this.rootLayout);
-    // vars.push(this.keyMap);
-    // vars.push(this.rootSchema);
-    // vars.push(this.rootFormGroupTemplate);
-    // vars.push(this.formOptions.references);
-    vars.push(this.rootFormGroup.value);
-    this.debugOutput = _.map(vars, thisVar => JSON.stringify(thisVar, null, 2)).join('\n');
+    if (this.debug) {
+      let vars: any[] = [];
+      // vars.push(this.rootFormGroup);
+      vars.push(this.rootLayout);
+      // vars.push(this.keyMap);
+      // vars.push(this.rootSchema);
+      // vars.push(this.rootFormGroupTemplate);
+      // vars.push(this.formOptions.references);
+      // vars.push(this.rootFormGroup.value);
+      this.debugOutput = _.map(vars, thisVar => JSON.stringify(thisVar, null, 2)).join('\n');
+    }
   }
 
   /**
@@ -162,8 +165,10 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
    *
    * - Create 'keyMap' to map the relationships between the schema and layout.
    *
-   * - Create 'formOptions.references' to resolve schema $ref links and to add
-   *   components to circular reference points and arrays in the form.
+   * - Create 'schemaReferences' to resolve schema $ref links.
+   *
+   * - Create 'formOptions.references' to add components to arrays and
+   *   circular $ref points in the form.
    *
    * - Create 'rootFormGroupTemplate', then from it 'rootFormGroup',
    *   the Angular 2 formGroup used to control the reactive form.
@@ -178,6 +183,7 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
       this.rootData = {};
       this.dataLocation = 'data';
       this.keyMap = {};
+      this.schemaReferences = {};
       this.formOptions.references = {};
       this.rootFormGroupTemplate = {};
       this.rootFormGroup = this.formBuilder.group({});
@@ -257,7 +263,7 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
           convertJsonSchema3to4(this.rootSchema);
 
         // Build Angular 2 FormGroup template from schema
-        this.rootFormGroupTemplate = this.buildrootFormGroupTemplate(
+        this.rootFormGroupTemplate = this.buildFormGroupTemplate(
           this.rootSchema, this.formOptions.references, this.keyMap
         );
 
@@ -266,7 +272,7 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
         // TODO: If the schema does not exist,
         // build the Angular 2 FormGroup template from the layout instead
         // this.rootFormGroupTemplate =
-        //   this.buildrootFormGroupTemplateFromLayout(this.rootLayout, this.keyMap);
+        //   this.buildFormGroupTemplateFromLayout(this.rootLayout, this.keyMap);
       }
 
       // Update all layout elements to set values and add validators,
@@ -276,20 +282,36 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
       // (set values and extend arrays)
       this.rootLayout = this.buildLayout(
         this.rootLayout, this.rootSchema, this.rootData,
-        this.formOptions.references, this.keyMap
+        this.schemaReferences, this.formOptions.references, this.keyMap
       );
 
       // Build the real Angular 2 FormGroup from the FormGroup template
-      this.rootFormGroup = <FormGroup>(this.buildrootFormGroup(
+      this.rootFormGroup = <FormGroup>(this.buildFormGroup(
         this.rootFormGroupTemplate
       ));
 
       this.formActive = true;
+console.log(this.formOptions.references);
+      // if (this.rootFormGroup) {
+      //   this.rootFormGroup.valueChanges.subscribe(
+      //     value => this.debugOutput = JSON.stringify(value, null, 2)
+      //   );
+      // }
     }
   }
 
   private submitForm() {
-    this.onSubmit.emit(this.rootFormGroup.value);
+    let formattedData = {};
+    forOwnDeep(this.rootFormGroup.value, (value, key, ignore, pointer) => {
+      let type: SchemaPrimitiveType | SchemaPrimitiveType[] = this.keyMap[pointer].schemaType;
+      if (isSet(value) && (
+        type === 'integer' || type === 'number' || type === 'null' ||
+        type === 'boolean' || type === 'string' || isArray(type)
+      )) {
+        JsonPointer.set(formattedData, pointer, toSchemaType(value, type));
+      }
+    });
+    this.onSubmit.emit(formattedData);
   }
 
   /**
@@ -303,13 +325,15 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
    * @return {any[]} -
    */
   private buildLayout(
-    layout: any[], schema: any, data: any,
+    layout: any[], schema: any, data: any, schemaReferences: any,
     formReferences: any, keyMap: any
   ): any[] {
-    return mapLayout(layout, (layoutItem, index, ignore, path) => {
+    return mapLayout(layout, (layoutItem, index, ignore, pointer) => {
       let newItem: any;
       if (isObject(layoutItem)) {
         newItem = layoutItem;
+      } else if (JsonPointer.isJsonPointer(layoutItem)) {
+        newItem = { 'pointer': layoutItem };
       } else if (_.isString(layoutItem)) {
         newItem = { 'key': layoutItem };
       } else {
@@ -318,22 +342,23 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
         return null;
       }
       let schemaItem = null;
-      if (hasOwn(newItem, 'key')) {
-        if (newItem.key === '*') return this.buildLayoutFromSchema(schema, data, formReferences, keyMap);
+      if (hasOwn(newItem, 'key') || hasOwn(newItem, 'pointer')) {
+        if (newItem.key === '*' || newItem.pointer === '*') {
+          return this.buildLayoutFromSchema(schema, data, schemaReferences, formReferences, keyMap);
+        }
         if (JsonPointer.isJsonPointer(newItem.key)) {
-          newItem.key = JsonPointer.compile(newItem.key);
+          newItem.pointer = JsonPointer.compile(newItem.key);
         } else {
-          newItem.key =
+          newItem.pointer =
             JsonPointer.compile(JsonPointer.parseObjectPath(newItem.key), '-');
         }
-        newItem.name = JsonPointer.toKey(newItem.key);
-        if (hasOwn(keyMap, newItem.key)) {
-          schemaItem = hasOwn(keyMap[newItem.key], 'schemaPath') ?
-            JsonPointer.get(schema, keyMap[newItem.key].schemaPath) :
-            JsonPointer.getSchema(schema, newItem.key);
+        newItem.name = JsonPointer.toKey(newItem.pointer);
+        if (!hasOwn(keyMap, newItem.pointer)) keyMap[newItem.pointer] = {};
+        if (hasOwn(keyMap[newItem.pointer], 'schemaPointer')) {
+          schemaItem = JsonPointer.get(schema, keyMap[newItem.pointer].schemaPointer)
         } else {
-          keyMap[newItem.key] = {};
-          schemaItem = JsonPointer.getSchema(schema, newItem.key);
+          schemaItem = JsonPointer.getSchema(schema, newItem.pointer);
+          keyMap[newItem.pointer] = schemaItem;
         }
         if (schemaItem) {
           // newItem.schema = schemaItem;
@@ -345,7 +370,7 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
             let newValue = getInputOptionValue(option, newItem, schemaItem);
             if (newValue !== null) newItem[option] = newValue;
           });
-          if (isInputRequired(schema, newItem.key)) {
+          if (isInputRequired(schema, newItem.pointer)) {
             this.fieldsRequired = true;
             newItem.required = true;
           }
@@ -353,14 +378,14 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
           // TODO: create item in FormGroup model from layout key
         }
         newItem.widget = this.widgetLibrary.getWidget(newItem.type);
-        keyMap[newItem.key].layoutPath = path;
-        keyMap[newItem.key].layoutType = newItem.type;
-        keyMap[newItem.key].widget = newItem.widget;
+        keyMap[newItem.pointer].layoutPointer = pointer;
+        keyMap[newItem.pointer].inputType = newItem.type;
+        keyMap[newItem.pointer].widget = newItem.widget;
         if (newItem.type === 'array' && hasOwn(newItem, 'items')) {
-          let arrayKey: string = newItem.key + '/';
+          let arrayKey: string = newItem.pointer + '/';
           if (!hasOwn(keyMap, arrayKey)) keyMap[arrayKey] = {};
-          keyMap[arrayKey].layoutPath = path + '/items';
-          keyMap[arrayKey].layoutType = 'layout';
+          keyMap[arrayKey].layoutPointer = pointer + '/items';
+          keyMap[arrayKey].inputType = 'section';
         }
       } else if (hasOwn(newItem, 'type')) {
         newItem.widget = this.widgetLibrary.getWidget(newItem.type);
@@ -373,45 +398,48 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
   /**
    * 'buildLayoutFromSchema' function
    *
-   * @param {schema} schema
-   * @param {number = 0} layoutIndex
-   * @param {schema = schema} rootSchema
-   * @param {string = ''} schemaPath
-   * @param {string = ''} layoutPath
-   * @param {string = ''} dataPath
-   * @return {layout array}
+   * @param {any} schema -
+   * @param {any} data -
+   * @param {any} formReferences -
+   * @param {any} keyMap -
+   * @param {number = 0} layoutIndex -
+   * @param {any = schema} rootSchema -
+   * @param {string = ''} schemaPointer -
+   * @param {string = ''} layoutPointer -
+   * @param {string = ''} dataPointer -
+   * @return {any} -
    */
   private buildLayoutFromSchema(
-    schema: any, data: any, formReferences: any, keyMap: any,
-    layoutIndex: number = 0, rootSchema: any = schema,
-    schemaPath: string = '', layoutPath: string = '', dataPath: string = ''
+    schema: any, data: any, schemaReferences: any, formReferences: any,keyMap: any,
+    layoutIndex: number = 0, rootSchema: any = schema, schemaPointer: string = '',
+    layoutPointer: string = '', dataPointer: string = ''
   ): any {
-    schema = resolveSchemaReference(schema, rootSchema, formReferences);
+    schema = resolveSchemaReference(schema, rootSchema, schemaReferences);
     if (!hasOwn(schema, 'type') && !hasOwn(schema, 'x-schema-form')) return null;
     let newItem: any =
       (hasOwn(schema, 'x-schema-form')) ? schema['x-schema-form'] : {};
-    newItem.key = dataPath;
+    newItem.key = dataPointer;
     newItem.name = JsonPointer.toKey(newItem.key);
     newItem.type = getInputType(schema);
     newItem.widget = this.widgetLibrary.getWidget(newItem.type);
-    if (dataPath !== '') {
+    if (dataPointer !== '') {
       if (!hasOwn(keyMap, newItem.key)) keyMap[newItem.key] = {};
-      keyMap[newItem.key].schemaPath = schemaPath;
-      keyMap[newItem.key].layoutPath = layoutPath;
-      keyMap[newItem.key].layoutType = newItem.type;
+      keyMap[newItem.key].schemaPointer = schemaPointer;
+      keyMap[newItem.key].layoutPointer = layoutPointer;
+      keyMap[newItem.key].inputType = newItem.type;
       keyMap[newItem.key].widget = newItem.widget;
     }
     switch (schema.type) {
       case 'object':
         let newFieldset: any[] = [];
         if (hasOwn(schema, 'properties')) {
-          let index: number = dataPath === '' ? layoutIndex : 0;
+          let index: number = dataPointer === '' ? layoutIndex : 0;
           _.forOwn(schema.properties, (item, key) => {
             let innerItem = this.buildLayoutFromSchema(
-              item, data, formReferences, keyMap, index, rootSchema,
-              schemaPath + '/properties/' + key,
-              layoutPath + '/' + index,
-              dataPath + '/' + key
+              item, data, schemaReferences, formReferences, keyMap, index, rootSchema,
+              schemaPointer + '/properties/' + key,
+              layoutPointer + '/' + index,
+              dataPointer + '/' + key
             );
             if (innerItem) {
               if (isInputRequired(schema, '/' + key)) {
@@ -424,26 +452,55 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
           });
           newItem.items = newFieldset;
         }
-        if (dataPath === '') return newFieldset;
+        if (dataPointer === '') return newFieldset;
         return newItem;
       case 'array':
         if (hasOwn(schema, 'items')) {
+          let additionalItems: any = null;
           if (isArray(schema.items)) {
-            newItem = _.filter(_.map(schema.items, (item, index) =>
+            newItem.items = _.filter(_.map(schema.items, (item, index) =>
               this.buildLayoutFromSchema(
-                item, data, formReferences, keyMap, index, rootSchema,
-                schemaPath + '/items/' + index,
-                layoutPath + '/items/' + index,
-                dataPath + '/' + index
+                item, data, schemaReferences, formReferences,
+                keyMap, index, rootSchema,
+                schemaPointer + '/items/' + index,
+                layoutPointer + '/items/' + index,
+                dataPointer + '/' + index
               )
             ));
+            if (hasOwn(schema, 'additionalItems') && schema.additionalItems !== false) {
+              additionalItems = this.buildLayoutFromSchema(
+                schema.additionalItems, data, schemaReferences, formReferences,
+                keyMap, newItem.length, rootSchema,
+                schemaPointer + '/items/' + newItem.length,
+                layoutPointer + '/items/' + newItem.length,
+                dataPointer + '/' + newItem.length
+              );
+              if (additionalItems) newItem.items.push(additionalItems);
+            }
           } else {
-            newItem = this.buildLayoutFromSchema(
-              schema.items, data, formReferences, keyMap, 0, rootSchema,
-              schemaPath + '/items',
-              layoutPath + '/items',
-              dataPath + '/-'
+            additionalItems = this.buildLayoutFromSchema(
+              schema.items, data, schemaReferences, formReferences,
+              keyMap, 0, rootSchema,
+              schemaPointer + '/items/0',
+              layoutPointer + '/items/0',
+              dataPointer + '/0'
             );
+            newItem.items = [additionalItems];
+          }
+          if (additionalItems) {
+            // TODO: create $ref to newItem
+            formReferences[dataPointer + '/-'] = {
+              'layout': additionalItems,
+              '$refType': 'array'
+            };
+            delete formReferences[dataPointer + '/-']['layout']['key'];
+            delete formReferences[dataPointer + '/-']['layout']['name'];
+            // TODO: push final item with $ref
+            newItem.items.push({
+              'type': '$ref',
+              '$ref': dataPointer + '/-',
+              '$refType': 'array'
+            });
           }
         }
         return newItem;
@@ -453,20 +510,19 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
           let newValue = getInputOptionValue(option, {}, schema);
           if (newValue !== null) newItem[option] = newValue;
         });
-        if (newItem.title === null) newItem.title =
-          JsonPointer.parse(dataPath).pop();
+        if (newItem.title === null) newItem.title = JsonPointer.parse(dataPointer).pop();
         return newItem;
       default:
         return null;
     }
   }
 
-  // private buildrootFormGroupTemplateFromLayout(layout: any[], keyMap: any) {
+  // private buildFormGroupTemplateFromLayout(layout: any[], keyMap: any) {
   //   let newModel: any = {};
   //   _.forEach(layout, (value: any) => {
   //     let thisKey: any = null;
   //     if (value === '*') {
-  //       _.assign(newModel, this.buildrootFormGroupTemplate(this.rootSchema, keyMap));
+  //       _.assign(newModel, this.buildFormGroupTemplate(this.rootSchema, keyMap));
   //     } else if (_.isString(value)) {
   //       thisKey = value;
   //     } else if (hasOwn(value, 'key')) {
@@ -480,17 +536,17 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
   //       }
   //     } else if (hasOwn(value, 'items') && isArray(value.items)) {
   //       newModel = Object.assign({}, newModel,
-  //         this.buildrootFormGroupTemplateFromLayout(value.items, keyMap));
+  //         this.buildFormGroupTemplateFromLayout(value.items, keyMap));
   //     } else if (hasOwn(value, 'tabs') && isArray(value.tabs)) {
   //       newModel = Object.assign({}, newModel,
-  //           this.buildrootFormGroupTemplateFromLayout(value.tabs, keyMap));
+  //           this.buildFormGroupTemplateFromLayout(value.tabs, keyMap));
   //     }
   //   });
   //   return newModel;
   // }
 
   /**
-   * 'buildrootFormGroupTemplate' function
+   * 'buildFormGroupTemplate' function
    *
    * Builds a template for an Angular 2 FormGroup from JSON Schema
    *
@@ -506,21 +562,21 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
    * @param {string = null} controlType
    * @return {any}
    */
-  private buildrootFormGroupTemplate(
+  private buildFormGroupTemplate(
     schema: any, formReferences: any, keyMap: any,
-    rootSchema: any = schema, dataPath: string = '',
-    schemaPath: string = '', templatePath: string = ''
+    rootSchema: any = schema, dataPointer: string = '',
+    schemaPointer: string = '', templatePointer: string = ''
   ): any {
     schema = resolveSchemaReference(schema, rootSchema, formReferences);
     let controlType: 'FormGroup' | 'FormArray' | 'FormControl' =
       getControlType(schema);
-    if (dataPath !== '') {
-      if (!hasOwn(keyMap, dataPath)) keyMap[dataPath] = {};
-      keyMap[dataPath]['schemaPath'] = schemaPath;
-      keyMap[dataPath]['schemaType'] = schema.type;
+    if (dataPointer !== '') {
+      if (!hasOwn(keyMap, dataPointer)) keyMap[dataPointer] = {};
+      keyMap[dataPointer]['schemaPointer'] = schemaPointer;
+      keyMap[dataPointer]['schemaType'] = schema.type;
       if (controlType) {
-        keyMap[dataPath]['templatePath'] = templatePath;
-        keyMap[dataPath]['templateType'] = controlType;
+        keyMap[dataPointer]['templatePointer'] = templatePointer;
+        keyMap[dataPointer]['templateType'] = controlType;
       }
     }
     let validators: any = getControlValidators(schema);
@@ -528,11 +584,11 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
       case 'FormGroup':
         let groupControls: any = {};
         _.forOwn(schema.properties, (item, key) =>
-          groupControls[key] = this.buildrootFormGroupTemplate(
+          groupControls[key] = this.buildFormGroupTemplate(
             item, formReferences, keyMap, rootSchema,
-            dataPath + '/' + key,
-            schemaPath + '/properties/' + key,
-            templatePath + '/controls/' + key
+            dataPointer + '/' + key,
+            schemaPointer + '/properties/' + key,
+            templatePointer + '/controls/' + key
           )
         );
         setObjectInputOptions(schema, groupControls);
@@ -541,19 +597,19 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
         let arrayControls: any[];
         if (isArray(schema.items)) {
           arrayControls = _.map(schema.items,
-            (item, index) => this.buildrootFormGroupTemplate(
+            (item, index) => this.buildFormGroupTemplate(
               item, formReferences, keyMap, rootSchema,
-              dataPath + '/' + index,
-              schemaPath + '/items/' + index,
-              templatePath + '/controls/' + index
+              dataPointer + '/' + index,
+              schemaPointer + '/items/' + index,
+              templatePointer + '/controls/' + index
             )
           );
         } else {
-          arrayControls = [this.buildrootFormGroupTemplate(
+          arrayControls = [this.buildFormGroupTemplate(
             schema.items, formReferences, keyMap, rootSchema,
-            dataPath + '/-',
-            schemaPath + '/items',
-            templatePath + '/controls/-'
+            dataPointer + '/-',
+            schemaPointer + '/items',
+            templatePointer + '/controls/-'
           )];
         }
         return { controlType, 'controls': arrayControls, validators };
@@ -566,37 +622,43 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
   }
 
   /**
-   * 'buildrootFormGroup' function
+   * 'buildFormGroup' function
    *
    * @param {any} template
    * @return {AbstractControl}
    */
-  private buildrootFormGroup(template: any): AbstractControl {
+  private buildFormGroup(template: any): AbstractControl {
+    let validatorFns: ValidatorFn[] = [];
     let validatorFn: ValidatorFn = null;
     if (hasOwn(template, 'validators')) {
-      let validators: ValidatorFn[] = [];
       _.forOwn(template.validators, (parameters, validator) => {
         if (typeof JsonValidators[validator] === 'function') {
-          validators.push(JsonValidators[validator].apply(null, parameters));
+          validatorFns.push(JsonValidators[validator].apply(null, parameters));
         }
       });
-      validatorFn = JsonValidators.compose(validators);
+      if (template.controlType === 'FormGroup' || template.controlType === 'FormArray') {
+        if (validatorFns.length === 1) {
+          validatorFn = validatorFns[0];
+        } else if (validatorFns.length > 1) {
+          validatorFn = JsonValidators.compose(validatorFns);
+        }
+      }
     }
     if (hasOwn(template, 'controlType')) {
       switch (template.controlType) {
         case 'FormGroup':
           let groupControls: {[key: string]: AbstractControl} = {};
           _.forOwn(template.controls, (controls, key) => {
-            let newControl: AbstractControl = this.buildrootFormGroup(controls);
+            let newControl: AbstractControl = this.buildFormGroup(controls);
             if (newControl) groupControls[key] = newControl;
           });
           return new FormGroup(groupControls, validatorFn);
         case 'FormArray':
           return new FormArray(_.filter(_.map(template.controls,
-            controls => this.buildrootFormGroup(controls)
+            controls => this.buildFormGroup(controls)
           )), validatorFn);
         case 'FormControl':
-          return new FormControl(template.controls || null, validatorFn);
+          return new FormControl(template.controls || null, validatorFns);
       }
     }
     return null;

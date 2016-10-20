@@ -6,8 +6,8 @@ import { Injectable } from '@angular/core';
  * Some utilities for using JSON pointers with JSON objects and JSON schemas
  * https://tools.ietf.org/html/rfc6901
  *
- * JSON Pointer Functions: get, getSchema, set, remove, has, dict, walk,
- * escape, unescape, parse, compile, toKey, isJsonPointer, parseObjectPath
+ * JSON Pointer Functions: get, getSchema, getFormGroup, set, remove, has, dict,
+ * walk, escape, unescape, parse, compile, toKey, isJsonPointer, parseObjectPath
  *
  * Utility Functinos: forEach, isObject, isArray, isFunction, isString
  *
@@ -57,19 +57,20 @@ export class JsonPointer {
    *
    * @param {JSON Schema} schema - schema to get value from
    * @param {string | string[]} pointer - JSON pointer (string or array)
-   * @param {boolean = false} returnError - return only true or false for error
-   * @return {schema} - located value (or true or false if returnError = true)
+   * @param {boolean = false} returnObject - return containing object instead
+   * @return {schema} - located value or object
    */
   static getSchema(
-    schema: any, pointer: string | string[], returnError: boolean = false
+    schema: any, pointer: string | string[], returnObject: boolean = false
   ): any {
     let subSchema = schema;
     let pointerArray: any[] = this.parse(pointer);
     if (pointerArray === null) {
       console.error('Unable to get schema - invalid JSON pointer: ' + pointer);
-      return returnError ? false : null;
+      return null;
     }
-    for (let i = 0, l = pointerArray.length; i < l; ++i) {
+    let l = returnObject ? pointerArray.length - 1 : pointerArray.length;
+    for (let i = 0; i < l; ++i) {
       let parentSchema = subSchema;
       let key = pointerArray[i];
       let subSchemaArray = false;
@@ -78,7 +79,7 @@ export class JsonPointer {
         console.error('Unable to find key in schema: ' + key);
         console.error(schema);
         console.error(pointer);
-        return returnError ? false : null;
+        return null;
       }
       if (subSchema['type'] === 'array' && 'items' in subSchema &&
         (!isNaN(key) || key === '-')
@@ -95,15 +96,60 @@ export class JsonPointer {
           subSchema = ('additionalItems' in parentSchema) ?
             parentSchema.additionalItems : {};
         } else if (typeof subSchema !== 'object' || !(key in subSchema)) {
-          console.error('Unable to find key in schema: ' + key);
+          console.error('Unable to find item in schema: ' + key);
           console.error(schema);
           console.error(pointer);
-          return returnError ? false : null;
+          return null;
         }
         subSchema = subSchema[key];
       }
     }
-    return returnError ? true : subSchema;
+    return subSchema;
+  }
+
+  /**
+   * 'getFormGroup' function
+   *
+   * Uses a json pointer for a data object to retrieve a sub-group from
+   * an Angular 2 FormGroup object which creates that data object
+   *
+   * @param {FormGroup} formGroup - Angular 2 FormGroup to get value from
+   * @param {string | string[]} pointer - JSON pointer (string or array)
+   * @param {boolean = false} returnGroup - if true, return group containing control
+   * @return {group} - located value (or true or false if returnError = true)
+   */
+  static getFormGroup(
+    formGroup: any, pointer: string | string[], returnGroup: boolean = false
+  ): any {
+    let subGroup = formGroup;
+    let pointerArray: any[] = this.parse(pointer);
+    if (pointerArray === null) {
+      console.error('Unable to get FormGroup - invalid JSON pointer: ' + pointer);
+      return null;
+    }
+    let l = returnGroup ? pointerArray.length - 1 : pointerArray.length;
+    for (let i = 0; i < l; ++i) {
+      let parentGroup = subGroup.controls;
+      let key = pointerArray[i];
+      if (typeof subGroup !== 'object') {
+        console.error('Unable to find key in FormGroup: ' + key);
+        console.error(formGroup);
+        console.error(pointer);
+        return null;
+      }
+      if (isArray(subGroup) && (key === '-')
+      ) {
+        subGroup = subGroup[subGroup.length - 1];
+      } else if (key in subGroup) {
+        subGroup = subGroup[key];
+      } else {
+        console.error('Unable to find item in FormGroup: ' + key);
+        console.error(formGroup);
+        console.error(pointer);
+        return null;
+      }
+    }
+    return subGroup;
   }
 
   /**

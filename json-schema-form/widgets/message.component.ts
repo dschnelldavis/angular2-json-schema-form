@@ -3,7 +3,9 @@ import { FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'message-widget',
-  template: ``,
+  template: `<span class="help-block"
+    [innerHTML]="layoutNode?.helpvalue || layoutNode?.msg || layoutNode?.message">
+    </span>`,
 })
 export class MessageComponent {
   @Input() formGroup: FormGroup; // Parent Angular 2 FormGroup object

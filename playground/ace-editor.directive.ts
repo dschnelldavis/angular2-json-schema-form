@@ -71,7 +71,7 @@ export class AceEditorDirective {
   }
 
   @Input() set text( text: any ) {
-    if ( text == null ) { text = ''; }
+    if ( !text ) { text = ''; }
 
     if ( this._autoUpdateContent === true ) {
       this.editor.setValue( text );

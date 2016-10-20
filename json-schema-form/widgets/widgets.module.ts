@@ -11,6 +11,7 @@ import { FileComponent } from './file.component';
 import { HiddenComponent } from './hidden.component';
 import { InputComponent } from './input.component';
 import { NoneComponent } from './none.component';
+import { NumberComponent } from './number.component';
 import { MessageComponent } from './message.component';
 import { RadiosComponent } from './radios.component';
 import { RadiosInlineComponent } from './radios-inline.component';
@@ -25,12 +26,13 @@ import { TextareaComponent } from './textarea.component';
 
 import { WidgetLibraryService } from './widget-library.service';
 
-export let componentList = [
+export let componentList: any[] = [
   ArrayComponent, ButtonComponent, CheckboxComponent, CheckboxesComponent,
   FieldsetComponent, FileComponent, HiddenComponent, InputComponent,
-  NoneComponent, MessageComponent, RadiosComponent, RadiosInlineComponent,
-  RootComponent, SectionComponent, SelectComponent, SubmitComponent,
-  TabComponent, TabarrayComponent, TemplateComponent, TextareaComponent
+  NoneComponent, NumberComponent, MessageComponent, RadiosComponent,
+  RadiosInlineComponent, RootComponent, SectionComponent, SelectComponent,
+  SubmitComponent, TabComponent, TabarrayComponent, TemplateComponent,
+  TextareaComponent
 ];
 
 @NgModule({
