@@ -9,47 +9,13 @@ import { JsonValidators } from '../validators/json-validators';
 import {
   isPresent, isBlank, isSet, isNotSet, isEmpty, isString, isNumber,
   isInteger, isBoolean, isFunction, isObject, isArray, getType, isType,
-  toJavaScriptType, toSchemaType, xor, hasOwn, forOwn
+  toJavaScriptType, toSchemaType, xor, hasOwn, forOwn, inArray
 } from '../validators/validator-functions';
 
 export {
   isPresent, isBlank, isSet, isNotSet, isEmpty, isString, isNumber,
   isInteger, isBoolean, isFunction, isObject, isArray, getType, isType,
-  toJavaScriptType, toSchemaType, xor, hasOwn, forOwn
-}
-
-/**
- * 'listInputOptions' function
- *
- * @param {string} inputType -
- * @return {string[]} -
- */
-export function listInputOptions(inputType: string): string[] {
-  let optionsToUpdate: string[] = [
-    'title', 'notitle', 'disabled', 'description', 'validationMessage',
-    'onChange', 'feedback', 'disableSuccessState', 'disableErrorState',
-    'placeholder', 'ngModelOptions', 'readonly', 'copyValueTo', 'condition',
-    'destroyStrategy', 'htmlClass', 'fieldHtmlClass', 'labelHtmlClass', 'enum'
-  ];
-  switch (inputType) {
-    case 'text': case 'textarea': case 'search':
-      return optionsToUpdate.concat(
-        'minLength', 'maxLength', 'pattern', 'format');
-    case 'email': case 'url':
-      return optionsToUpdate.concat('format');
-    case 'date': case 'datetime': case 'datetime-local':
-      return optionsToUpdate.concat('minimum', 'maximum', 'format');
-    case 'number': case 'integer': case 'range':
-      return optionsToUpdate.concat('minimum', 'exclusiveMinimum',
-        'maximum', 'exclusiveMaximum', 'multipleOf');
-    case 'fieldset':
-      return optionsToUpdate.concat(
-        'minProperties', 'maxProperties', 'dependencies');
-    case 'array': case 'checkboxes':
-      return optionsToUpdate.concat('minItems', 'maxItems', 'uniqueItems');
-    default:
-      return optionsToUpdate;
-  }
+  toJavaScriptType, toSchemaType, xor, hasOwn, forOwn, inArray
 }
 
 /**
@@ -61,21 +27,25 @@ export function listInputOptions(inputType: string): string[] {
 export function getInputType(schema: any): string {
   if (
     isObject(schema['x-schema-form']) && isSet(schema['x-schema-form']['type'])
-  ) return schema['x-schema-form']['type'];
+  ) {
+    return schema['x-schema-form']['type'];
+  } else if (hasOwn(schema, 'ui:widget') && isString(schema['ui:widget'])) {
+    return schema['ui:widget']; // react-jsonschema-form compatibility
+  }
   let schemaType = schema.type;
-  if (isArray(schemaType)) { // If multiple types OK, use most permissive
-    if (schemaType.indexOf('string') !== -1) {
-      schemaType = 'string';
-    } else if (schemaType.indexOf('number') !== -1) {
-      schemaType = 'number';
-    } else if (schemaType.indexOf('integer') !== -1) {
-      schemaType = 'integer';
-    } else if (schemaType.indexOf('boolean') !== -1) {
-      schemaType = 'boolean';
-    } else if (schemaType.indexOf('object') !== -1) {
+  if (isArray(schemaType)) { // If multiple types listed, use most inclusive type
+    if (inArray('object', schemaType) && hasOwn(schema, 'properties')) {
       schemaType = 'object';
-    } else if (schemaType.indexOf('array') !== -1) {
+    } else if (inArray('array', schemaType) && hasOwn(schema, 'items')) {
       schemaType = 'array';
+    } else if (inArray('string', schemaType)) {
+      schemaType = 'string';
+    } else if (inArray('number', schemaType)) {
+      schemaType = 'number';
+    } else if (inArray('integer', schemaType)) {
+      schemaType = 'integer';
+    } else if (inArray('boolean', schemaType)) {
+      schemaType = 'boolean';
     } else {
       schemaType = 'null';
     }
@@ -107,37 +77,6 @@ export function getInputType(schema: any): string {
     return 'text';
   }
   return 'text';
-}
-
-/**
- * 'getInputOptionValue' function
- *
- * @param {[type]} valueName
- * @param {[type]} layout
- * @param {[type]} schema
- * @return {[type]}
- */
-export function getInputOptionValue(option: string, layout: any = {}, schema: any = {}): any {
-  // Set any new validators from layout
-  if (hasOwn(layout, option) && isFunction(JsonValidators[option]) && (
-    !hasOwn(schema, option) || (schema[option] !== layout[option] &&
-      !(option.slice(0, 3) === 'min' && schema[option] < layout[option]) &&
-      !(option.slice(0, 3) === 'max' && schema[option] > layout[option])
-    )
-  )) {
-     JsonPointer.set(
-       this.jsonFormGroupTemplate,
-       this.keyMap[layout.key]['templatePath'] + '/validators/' + option,
-       [layout[option]]
-     );
-  }
-  if (isSet(layout[option])) return layout[option];
-  if (
-    isObject(schema['x-schema-form']) && isSet(schema['x-schema-form'][option])
-  ) return schema['x-schema-form'][option];
-  if (isSet(schema[option])) return schema[option];
-  if (option === 'notitle' || option === 'readonly') return false;
-  return null;
 }
 
 /**
@@ -189,7 +128,7 @@ export function mapLayout(
   _.forEach(layout, (item, index) => {
     let realIndex = index + indexPad;
     let newPath = path + '/' + realIndex;
-    let newItem: any = fn(item, realIndex, rootLayout, newPath);
+    let newItem: any = item;
     if (isObject(newItem)) {
       if (isArray(newItem.items)) {
         newItem.items =
@@ -199,6 +138,7 @@ export function mapLayout(
           this.mapLayout(newItem.tabs, fn, rootLayout, newPath + '/tabs');
       }
     }
+    newItem = fn(newItem, realIndex, rootLayout, newPath);
     if (newItem === undefined) {
       indexPad--;
     } else {
@@ -232,13 +172,13 @@ export function resolveSchemaReference(
     schemaPointer = JsonPointer.compile(reference.$ref);
   }
   if (hasOwn(schemaReferences, schemaPointer)) {
-    if (schemaReferences[schemaPointer].isCircular === true && !circularOK) {
+    if (schemaReferences[schemaPointer]['isCircular'] === true && !circularOK) {
       return { '$ref': schemaPointer };
     } else {
-      return schemaReferences[schemaPointer].schema;
+      return schemaReferences[schemaPointer]['schema'];
     }
   }
-  if (schemaPointer === '' || schemaPointer === '/') {
+  if (schemaPointer === '') {
     schemaReferences[''] = { 'isCircular': true }; // 'schema': schema,
     return circularOK ? schema : { '$ref': '' };
   } else if (schemaPointer.slice(0, 4) === 'http') {
@@ -258,31 +198,10 @@ export function resolveSchemaReference(
     } else {
       let targetSchema = item.allOf
         .map(object => this.resolveSchemaReference(object, schema, schemaReferences, circularOK))
-        .reduce(Object.assign, {});
-      // TODO: check for circular references
+        .reduce((v1, v2) => Object.assign(v1, v2), {});
       schemaReferences[schemaPointer] = { 'schema': targetSchema };
       return targetSchema;
     }
-  }
-}
-
-/**
- * 'getControlType' function
- *
- * @param {schema} schema
- * @return {'FormGroup'|'FormArray'|'FormControl'}
- */
-export function getControlType(schema: any): 'FormGroup'|'FormArray'|'FormControl' {
-  if (!hasOwn(schema, 'type')) return null;
-  switch (schema.type) {
-    case 'object':
-      return (hasOwn(schema, 'properties')) ? 'FormGroup' : null;
-    case 'array':
-      return (hasOwn(schema, 'items')) ? 'FormArray' : null;
-    case 'boolean': case 'string': case 'integer': case 'number':
-      return 'FormControl';
-    default:
-      return null;
   }
 }
 
@@ -457,42 +376,3 @@ export function isInputRequired(schema: any, pointer: string): boolean {
   }
   return false;
 };
-
-// export function hasOwn(item: any, property: string): boolean {
-//   if (!isObject(item)) return false;
-//   return Object.prototype.hasOwnProperty.call(item, property);
-// }
-//
-// export function isEmpty(item: any): boolean {
-//   if (!item ) return true;
-//   if (isArray(item) && item.length === 0) return true;
-//   if (isObject(item) && Object.keys(item).length === 0) return true;
-//   return false;
-// }
-//
-// export function isSet(item: any): boolean {
-//   return item !== undefined && item !== null;
-// }
-//
-// export function isObject(item: any): boolean {
-//   return item !== null && typeof item === 'object' &&
-//     Object.prototype.toString.call(item) === '[object Object]';
-// }
-//
-// export function isArray(item: any): boolean {
-//   return Array.isArray(item) ||
-//     Object.prototype.toString.call(item) === '[object Array]';
-// }
-//
-// export function isBoolean(item: any): boolean {
-//   return typeof item === 'boolean' ||
-//     Object.prototype.toString.call(item) === '[object Boolean]';
-// }
-//
-// export function isFunction(item: any): boolean {
-//   return typeof item === 'function';
-// }
-//
-// export function isString(item: any): boolean {
-//   return typeof item === 'string';
-// }

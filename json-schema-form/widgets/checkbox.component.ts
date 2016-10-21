@@ -1,10 +1,12 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+
+import { JsonPointer } from '../utilities/jsonpointer';
 
 @Component({
   selector: 'checkbox-widget',
   template: `
-    <div [formGroup]="formGroup">
+    <div [formGroup]="formControlGroup">
       <input
         [formControlName]="layoutNode?.name"
         type="checkbox"
@@ -15,8 +17,13 @@ import { FormGroup } from '@angular/forms';
         [checked]="!!layoutNode?.value">
     </div>`,
 })
-export class CheckboxComponent {
-  @Input() formGroup: FormGroup; // parent FormGroup
-  @Input() layoutNode: any; // JSON Schema Form layout node
-  @Input() formOptions: any; // Global form defaults and options
+export class CheckboxComponent implements OnInit {
+  private formControlGroup: any;
+  @Input() formGroup: FormGroup;
+  @Input() layoutNode: any;
+  @Input() formOptions: any;
+
+  ngOnInit() {
+    this.formControlGroup = JsonPointer.getFormControl(this.formGroup, this.layoutNode.pointer, true);
+  }
 }

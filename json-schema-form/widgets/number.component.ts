@@ -1,5 +1,7 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+
+import { JsonPointer } from '../utilities/jsonpointer';
 
 @Component({
   selector: 'number-widget',
@@ -9,26 +11,29 @@ import { FormGroup } from '@angular/forms';
         [formControlName]="layoutNode?.name"
         [id]="layoutNode?.name"
         [class]="layoutNode?.fieldHtmlClass"
-        [type]="layoutNode?.type === 'integer' ? 'number' : layoutNode?.type"
+        [type]="layoutNode?.type === 'range' ? 'range' : 'number'"
         [name]="layoutNode?.name"
-        [attr.min]="layoutNode?.min"
-        [attr.max]="layoutNode?.max"
+        [attr.min]="layoutNode?.minimum"
+        [attr.max]="layoutNode?.maximum"
         [attr.step]="step"
         [attr.placeholder]="layoutNode?.placeholder"
         [attr.readonly]="layoutNode?.readonly ? 'readonly' : null"
-        [attr.value]="layoutNode?.value"
         [attr.required]="layoutNode?.required">
     </div>`,
 })
-export class NumberComponent {
+export class NumberComponent implements OnInit {
+  private formControlGroup: any;
+  private step: number | string = 'any';
   @Input() formGroup: FormGroup; // parent FormGroup
   @Input() layoutNode: any; // JSON Schema Form layout node
   @Input() formOptions: any; // Global form defaults and options
 
-  get step() {
-    if (this.layoutNode.multipleof) return this.layoutNode.multipleof;
-    if (this.layoutNode.type === 'integer') return 1;
-    if (this.layoutNode.type === 'number') return 'any';
-    return null;
+  ngOnInit() {
+    this.formControlGroup = JsonPointer.getFormControl(this.formGroup, this.layoutNode.pointer, true);
+    if (this.layoutNode.multipleOf) {
+      this.step = this.layoutNode.multipleOf;
+    } else if (this.layoutNode.type === 'integer') {
+      this.step = 1;
+    }
   }
 }

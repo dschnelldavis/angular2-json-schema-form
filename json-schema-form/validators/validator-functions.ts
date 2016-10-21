@@ -374,7 +374,7 @@ export function toJavaScriptType(
       if (isNumber(value)) return parseFloat(value);
       return null;
     case 'integer':
-      if (isInteger(value), 'strict') return value;
+      if (isInteger(value, 'strict')) return value;
       if (isInteger(value)) return parseInt(value, 10);
       return null;
     case 'boolean':
@@ -543,6 +543,37 @@ export function forOwn(
     }
   }
   return newObject;
+}
+
+/**
+ * 'inArray' function
+ *
+ * Searches an array for an item, or one of a list of items, and returns true
+ * as soon as a match is found, or false if no match.
+ *
+ * If the optional third parameter allIn is set to TRUE, and the item to find
+ * is an array, then the function returns true only if all elements from item
+ * are found in list, and false if any element is not found. If item is not
+ * an array, setting allIn to TRUE has no effect.
+ *
+ * @param {any|any[]} item - the item to search for
+ * @param {any[]} array - the array to search
+ * @param {boolean = false} allIn - if TRUE, all items must be in array
+ * @return {boolean} - true if item(s) in array, false otherwise
+ */
+export function inArray(item: any|any[], array: any[], allIn: boolean = false): boolean {
+  if (isArray(item)) {
+    let inArray: boolean = allIn;
+    for (let i = 0, l = item.length; i < l; i++) {
+      if (xor(array.indexOf(item[i]) !== -1, allIn)) {
+        inArray = !allIn;
+        break;
+      }
+    }
+    return inArray;
+  } else {
+    return array.indexOf(item) !== -1;
+  }
 }
 
 /**

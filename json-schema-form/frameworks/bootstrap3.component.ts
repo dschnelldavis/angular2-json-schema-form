@@ -4,6 +4,8 @@ import {
 } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
+import { JsonPointer } from '../utilities/jsonpointer';
+
 @Component({
   moduleId: module.id,
   selector: 'bootstrap3-framework',
@@ -12,6 +14,7 @@ import { FormGroup } from '@angular/forms';
 export class Bootstrap3Component implements OnInit, AfterContentChecked, OnChanges {
   private controlInitialized: boolean = false;
   private displayWidget: boolean = true;
+  private formControl: any = null;
   private controlView: string;
   private htmlClass: string;
   private labelHtmlClass: string;
@@ -27,27 +30,18 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked, OnChang
     private componentFactory: ComponentFactoryResolver,
   ) { }
 
-  private get control() {
-    if (this.formGroup && this.formGroup.controls && this.formGroup.controls[this.layoutNode.name]) {
-      return this.formGroup.controls[this.layoutNode.name];
-    } else {
-      return null;
-    }
-  }
-
-  private get errorMessage() {
-    if (this.control) {
-      return Object.keys(this.control.errors).map(
-        error => [error, Object.keys(this.control.errors[error]).map(
-          errorParameter => errorParameter + ': ' + this.control.errors[error][errorParameter]
-        ).join(', ')].filter(e => e).join(' - ')
-      ).join('<br>');
-    } else {
-      return null;
-    }
-  }
-
   ngOnInit() {
+    if ('pointer' in this.layoutNode) {
+      let thisControl = JsonPointer.getFormControl(this.formGroup, this.layoutNode.pointer);
+      if (thisControl) this.formControl = thisControl;
+    }
+
+    // if (this.formGroup && this.formGroup.controls && this.formGroup.controls[this.layoutNode.name]) {
+    //   this.formControl = this.formGroup.controls[this.layoutNode.name];
+    // } else {
+    //   this.formControl = this.formGroup.controls;
+    // }
+
     this.htmlClass = this.layoutNode.htmlClass || '';
     this.htmlClass += ' form-group  schema-form-' + this.layoutNode.type;
     if (this.formOptions.formDefaults.htmlClass) {
@@ -65,42 +59,48 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked, OnChang
       this.layoutNode.fieldHtmlClass += ' ' + this.formOptions.formDefaults.fieldHtmlClass;
     }
 
-    switch (this.layoutNode.type) {
+    if ('isArrayItem' in this.layoutNode && this.layoutNode.isArrayItem === true) {
+// console.log('array item');
+      this.controlView = 'array-item';
+    } else {
 
-      case 'array':
-        this.controlView = 'array';
-      break;
+      switch (this.layoutNode.type) {
 
-      case 'fieldset': case 'advancedfieldset': case 'authfieldset':
-        if (this.layoutNode.type === 'advancedfieldset') {
-          this.layoutNode.title = 'Advanced options';
-        } else if (this.layoutNode.type === 'authfieldset') {
-          this.layoutNode.title = 'Authentication settings';
-        }
-        this.controlView = 'fieldset';
-      break;
+        case 'array': case 'array-item': case '$ref':
+          this.controlView = this.layoutNode.type;
+        break;
 
-      case 'help': case 'msg': case 'message':
-        this.controlView = 'minimal';
-      break;
+        case 'fieldset': case 'advancedfieldset': case 'authfieldset':
+          if (this.layoutNode.type === 'advancedfieldset') {
+            this.layoutNode.title = 'Advanced options';
+          } else if (this.layoutNode.type === 'authfieldset') {
+            this.layoutNode.title = 'Authentication settings';
+          }
+          this.controlView = 'minimal';
+        break;
 
-      case 'section': case 'conditional':
-        this.controlView = 'minimal';
-        this.htmlClass += ' schema-form-section';
-      break;
+        case 'help': case 'msg': case 'message':
+          this.controlView = 'minimal';
+        break;
 
-      case 'button': case 'submit':
-        this.controlView = 'minimal';
-        this.layoutNode.fieldHtmlClass += ' btn btn-info';
-      break;
+        case 'section': case 'conditional':
+          this.controlView = 'minimal';
+          this.htmlClass += ' schema-form-section';
+        break;
 
-      case 'checkbox':
-        this.controlView = 'checkbox';
-        this.htmlClass += ' checkbox';
-      break;
+        case 'button': case 'submit':
+          this.controlView = 'minimal';
+          this.layoutNode.fieldHtmlClass += ' btn btn-info';
+        break;
 
-      default:
-        this.layoutNode.fieldHtmlClass += ' form-control';
+        case 'checkbox':
+          this.controlView = 'checkbox';
+          this.htmlClass += ' checkbox';
+        break;
+
+        default:
+          this.layoutNode.fieldHtmlClass += ' form-control';
+      }
     }
   }
 
@@ -110,23 +110,75 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked, OnChang
       this.widgetContainer && !this.widgetContainer.length &&
       this.layoutNode && this.layoutNode.widget
     ) {
-      let addedNode: ComponentRef<any> = this.widgetContainer.createComponent(
-        this.componentFactory.resolveComponentFactory(this.layoutNode.widget)
-      );
-      addedNode.instance.formGroup = this.formGroup;
-      addedNode.instance.layoutNode = this.layoutNode;
-      addedNode.instance.formOptions = this.formOptions;
+      if (this.controlView === 'array') {
+        for (let i = 0, l = this.layoutNode.items.length; i < l; i++) {
+console.log(this.layoutNode.items[i]);
+          if (this.layoutNode.items[i]) {
+            let addedNode: ComponentRef<any> = this.widgetContainer.createComponent(
+              this.componentFactory.resolveComponentFactory(this.formOptions.framework)
+            );
+            addedNode.instance.formGroup = this.formGroup;
+            addedNode.instance.layoutNode = this.layoutNode.items[i];
+            addedNode.instance.layoutNode.isArrayItem = true;
+            addedNode.instance.formOptions = this.formOptions;
+          }
+        }
+      } else if (this.controlView === 'array-item') {
+        let addedNode: ComponentRef<any> = this.widgetContainer.createComponent(
+          this.componentFactory.resolveComponentFactory(this.formOptions.framework)
+        );
+        addedNode.instance.formGroup = this.formGroup;
+        addedNode.instance.layoutNode = this.layoutNode;
+        if (this.layoutNode) {
+          addedNode.instance.layoutNode.isArrayItem = false;
+        }
+        addedNode.instance.formOptions = this.formOptions;
+      } else {
+        let addedNode: ComponentRef<any> = this.widgetContainer.createComponent(
+          this.componentFactory.resolveComponentFactory(this.layoutNode.widget)
+        );
+        addedNode.instance.formGroup = this.formGroup;
+        addedNode.instance.layoutNode = this.layoutNode;
+        addedNode.instance.formOptions = this.formOptions;
+      }
       this.controlInitialized = true;
     }
 
-    if (this.debug && this.formGroup && this.formGroup.controls && this.formGroup.controls[this.layoutNode.name]) {
+    if (
+      this.debug && this.formGroup && this.formGroup.controls &&
+      this.formGroup.controls[this.layoutNode.name]
+    ) {
       let vars: any[] = [];
       // vars.push(this.formGroup.value[this.layoutNode.name]);
-      vars.push(this.formGroup.controls[this.layoutNode.name].errors);
+      vars.push(this.formGroup.controls[this.layoutNode.name]['errors']);
       this.debugOutput = _.map(vars, thisVar => JSON.stringify(thisVar, null, 2)).join('\n');
     }
   }
 
   ngOnChanges() {
+  }
+
+//   private get control() {
+// console.log(this.formGroup.controls);
+// console.log(this.layoutNode.name);
+// console.log(this.layoutNode.pointer);
+// console.log(this.formGroup.controls[this.layoutNode.name]);
+//     if (this.formGroup && this.formGroup.controls && this.formGroup.controls[this.layoutNode.name]) {
+//       return this.formGroup.controls[this.layoutNode.name];
+//     } else {
+//       return null;
+//     }
+//   }
+
+  private get errorMessage() {
+    if (this.formControl) {
+      return Object.keys(this.formControl.errors).map(
+        error => [error, Object.keys(this.formControl.errors[error]).map(
+          errorParameter => errorParameter + ': ' + this.formControl.errors[error][errorParameter]
+        ).join(', ')].filter(e => e).join(' - ')
+      ).join('<br>');
+    } else {
+      return null;
+    }
   }
 }

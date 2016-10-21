@@ -22,14 +22,21 @@ import { forOwnDeep } from '../json-schema-form/utilities/utility-functions';
 })
 export class PlaygroundComponent implements OnInit, AfterViewInit {
   private examples: any = {
-    exampleSetList: ['ng2jsf', 'asf', 'jsf'],
+    exampleSetList: ['ng2jsf', 'rjsf', 'asf', 'jsf'],
     exampleSets: {
       'ng2jsf': 'Angular 2 JSON Schema Form examples',
+      'rjsf': 'React JSON Schema Form compatibility examples',
       'asf': 'Angular Schema Form compatibility examples',
       'jsf': 'JSONForm compatibility examples',
     },
     exampleList: {
       'ng2jsf': [ 'json-schema-draft04', 'json-schema-draft03', ],
+      'rjsf': [
+        'rjsf-simple', 'rjsf-nested', 'rjsf-arrays', 'rjsf-numbers', 'rjsf-widgets',
+        'rjsf-ordering', 'rjsf-references', 'rjsf-errors', 'rjsf-large',
+        'rjsf-date-and-time', 'rjsf-validation', 'rjsf-files'
+        // Note: 'rjsf-custom' not supported
+      ],
       'asf': [
         'asf-simple', 'asf-basic-json-schema-type',
         'asf-bootstrap-grid', 'asf-complex-key-support', 'asf-array',
@@ -56,6 +63,21 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
       'ng2jsf': {
         'json-schema-draft04': 'JSON Meta-Schema - Version 4',
         'json-schema-draft03': 'JSON Meta-Schema - Version3',
+      },
+      'rjsf': {
+        'rjsf-simple': 'Simple',
+        'rjsf-nested': 'Nested',
+        'rjsf-arrays': 'Arrays',
+        'rjsf-numbers': 'Numbers',
+        'rjsf-widgets': 'Widgets',
+        'rjsf-ordering': 'Ordering',
+        'rjsf-references': 'References',
+        'rjsf-custom': 'Custom',
+        'rjsf-errors': 'Errors',
+        'rjsf-large': 'Large',
+        'rjsf-date-and-time': 'Date & Time',
+        'rjsf-validation': 'Validation',
+        'rjsf-files': 'Files',
       },
       'asf': {
         'asf-simple': 'Simple',
@@ -119,7 +141,10 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
   private jsonFormValid: boolean = false;
   private jsonFormErrorMessage: string = 'Loading form...';
   private jsonFormObject: any;
-  private dataObject: any = {};
+  private liveFormData: any = {};
+  private formValidationErrors: any;
+  private formIsValid: any;
+  private submittedFormData: any = {};
   private aceEditorOptions: any = {
     highlightActiveLine: true,
     maxLines: 1000,
@@ -149,11 +174,41 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
   }
 
   onSubmit(data: any) {
-    this.dataObject = data;
+    this.submittedFormData = data;
   }
 
-  get prettyData() {
-    return JSON.stringify(this.dataObject, null, 2);
+  get prettySubmittedFormData() {
+    return JSON.stringify(this.submittedFormData, null, 2);
+  }
+
+  onChanges(data: any) {
+    this.liveFormData = data;
+  }
+
+  get prettyLiveFormData() {
+    return JSON.stringify(this.liveFormData, null, 2);
+  }
+
+  isValid(data: any) {
+    this.formIsValid = data;
+  }
+
+  validationErrors(data: any) {
+    this.formValidationErrors = data;
+  }
+
+  get prettyValidationErrors() {
+    if (!this.formValidationErrors) return null;
+    let prettyValidationErrors = '';
+    for (let i = 0, l = this.formValidationErrors.length; i < l; i++) {
+      let error = this.formValidationErrors[i];
+      if (error.dataPath.length) {
+        prettyValidationErrors += error.dataPath.slice(1) + ' ' + error.message + '\n';
+      } else {
+        prettyValidationErrors += error.message + '\n';
+      }
+    }
+    return prettyValidationErrors;
   }
 
   private resizeAceEditor() {
@@ -190,7 +245,8 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
   private generateForm(newFormString: string) {
     if (!newFormString) { return; }
     this.formActive = false;
-    this.dataObject = {};
+    this.liveFormData = {};
+    this.submittedFormData = {};
 
     // Most examples should be written in pure JSON, but if a schema includes
     // a function, the playground will compile it as Javascript instead

@@ -8,37 +8,43 @@
   <div *ngSwitchCase="'actions'">
   </div> -->
 
-  <div *ngSwitchCase="'array'">
+  <div *ngSwitchCase="'array'"> <!-- array -->
     <div [class]="htmlClass" sf-field-model="sf-new-array" sf-new-array>
       <label class="control-label" *ngIf=layoutNode?.title>{{layoutNode?.title}}</label>
       <ol class="list-group" sf-field-model ui-sortable="layoutNode?.sortOptions">
-        <li class="list-group-item {{layoutNode?.fieldHtmlClass}}"
-          schema-form-array-items *ngFor="let item of layoutNode?.items; let i = index">
-          <button *ngIf="!layoutNode?.readonly && layoutNode?.remove !== null"
-            style="position: relative; z-index: 20;" type="button"
-            class="close pull-right" (click)="deleteFromArray(i)">
-            <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
-          </button>X
-        </li>
+        <div #widgetContainer></div>
       </ol>
-      <div class="clearfix" style="padding: 15px;" ng-model="modelArray" schema-validate="form">
-        <div class="help-block" *ngIf="layoutNode?.description"
-          [innerHTML]="layoutNode?.description"></div>
-        <button *ngIf="!layoutNode?.readonly && layoutNode?.add !== null"
-          class="btn {{layoutNode?.style?.add || 'btn-default'}} pull-right"
-          (click)="appendToArray()" type="button">
-          <i class="glyphicon glyphicon-plus"></i> {{layoutNode?.add || 'Add'}}
-        </button>
-      </div>
+    </div>
+    <div class="clearfix" style="padding: 15px;" ng-model="modelArray" schema-validate="form">
+      <div *ngIf="layoutNode?.description || layoutNode?.help" class="help-block"
+        [innerHTML]="layoutNode?.description || layoutNode?.help"></div>
     </div>
   </div>
 
-  <div *ngSwitchCase="'fieldset'"> <!-- Fieldset, with optional title: 'fieldset' -->
-    <fieldset [disabled]="layoutNode?.readonly" [class]="htmlClass">
-      <legend *ngIf="!layoutNode?.notitle">{{ layoutNode?.title }}</legend>
+  <div *ngSwitchCase="'array-item'"> <!-- array item -->
+    <li class="list-group-item {{layoutNode?.fieldHtmlClass}}" schema-form-array-items>
+      <button *ngIf="!layoutNode?.readonly && layoutNode?.remove !== null && layoutNode?.type !== '$ref'"
+        style="position: relative; z-index: 20;" type="button"
+        class="close pull-right" (click)="deleteFromArray(i)">
+        <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+      </button>
       <div #widgetContainer></div>
-      <div class="help-block" *ngIf="layoutNode?.description"
-        [innerHTML]="layoutNode?.description"></div>
+    </li>
+  </div>
+
+  <div *ngSwitchCase="'$ref'"> <!-- Reference point, for adding new items -->
+    <button class="btn {{layoutNode?.style || 'btn-default'}} pull-right"
+      (click)="addItem(layoutNode?.$ref)" type="button">
+      <i class="glyphicon glyphicon-plus"></i> {{layoutNode?.title || 'New'}}
+    </button>
+  </div>
+
+  <div *ngSwitchCase="'fieldset'"> <!-- Fieldset, with optional title -->
+    <fieldset [disabled]="layoutNode?.readonly" [class]="htmlClass">
+      <legend [class.sr-only]="layoutNode?.notitle">{{ layoutNode?.title }}</legend>
+      <div #widgetContainer></div>
+      <div class="help-block" *ngIf="layoutNode?.description || layoutNode?.help"
+        [innerHTML]="layoutNode?.description || layoutNode?.help"></div>
     </fieldset>
   </div>
 
@@ -49,17 +55,18 @@
     </div>
   </div>
 
-  <div *ngSwitchCase="'checkbox'"> <!-- Single Checkboxes: 'checkbox' controls -->
+  <div *ngSwitchCase="'checkbox'"> <!-- Single Checkboxes -->
     <div [class]="htmlClass"
       [class.has-success]="layoutNode?.disableSuccessState !== true && control?.dirty && !control?.errors"
       [class.has-error]="layoutNode?.disableErrorState !== true && control?.dirty && control?.errors"
       [class.has-feedback]="layoutNode?.feedback !== false && control?.dirty">
-      <label *ngIf="!layoutNode?.notitle" [class]="labelHtmlClass"
-        [attr.for]="layoutNode?.key">
+      <label [class.sr-only]="layoutNode?.notitle" [class]="labelHtmlClass"
+        [attr.for]="layoutNode?.pointer">
         <div #widgetContainer></div> {{layoutNode?.title || layoutNode?.name}}
       </label>
       <p *ngIf="layoutNode?.feedback !== false && control?.dirty && control?.errors" class="help-block" [innerHTML]="errorMessage"></p>
-      <p *ngIf="layoutNode?.description" class="help-block" [innerHTML]="layoutNode?.description"></p>
+      <p *ngIf="layoutNode?.description || layoutNode?.help" class="help-block"
+        [innerHTML]="layoutNode?.description || layoutNode?.help"></p>
     </div>
   </div>
 
@@ -69,8 +76,8 @@
       [class.has-success]="layoutNode?.disableSuccessState !== true && control?.dirty && !control?.errors"
       [class.has-error]="layoutNode?.disableErrorState !== true && control?.dirty && control?.errors"
       [class.has-feedback]="layoutNode?.feedback !== false && control?.dirty">
-      <label *ngIf="!layoutNode?.notitle" [class]="labelHtmlClass"
-        [attr.for]="layoutNode?.key" [innerHTML]="layoutNode?.title || layoutNode?.name"></label>
+      <label [class.sr-only]="layoutNode?.notitle" [class]="labelHtmlClass"
+        [attr.for]="layoutNode?.pointer" [innerHTML]="layoutNode?.title || layoutNode?.name"></label>
       <div [class.input-group]="layoutNode?.fieldAddonLeft || layoutNode?.prepend || layoutNode?.fieldAddonRight || layoutNode?.append">
         <span *ngIf="layoutNode?.fieldAddonLeft || layoutNode?.prepend" class="input-group-addon"
           [innerHTML]="layoutNode?.fieldAddonLeft || layoutNode?.prepend"></span>
@@ -84,8 +91,8 @@
         class="glyphicon glyphicon-remove form-control-feedback"></span>
       <p *ngIf="layoutNode?.feedback !== false && control?.dirty && control?.errors"
         class="help-block" [innerHTML]="errorMessage"></p>
-      <p *ngIf="layoutNode?.description" class="help-block"
-        [innerHTML]="layoutNode?.description"></p>
+      <p *ngIf="layoutNode?.description || layoutNode?.help" class="help-block"
+        [innerHTML]="layoutNode?.description || layoutNode?.help"></p>
     </div>
   </div>
 

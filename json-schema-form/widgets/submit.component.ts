@@ -1,27 +1,36 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+
+import { JsonPointer } from '../utilities/jsonpointer';
 
 @Component({
   selector: 'submit-widget',
   template: `
-    <div [formGroup]="formGroup"
+    <div *ngIf="layoutNode?.pointer" [formGroup]="formControlGroup"
       class="form-group schema-form-submit {{layoutNode?.htmlClass}}">
-      <input *ngIf="!!layoutNode?.key"
+      <input
         [formControlName]="layoutNode?.name"
         [type]="layoutNode?.type"
         class="btn {{ layoutNode?.style || 'btn-primary' }} {{layoutNode?.fieldHtmlClass}}"
         [value]="layoutNode?.title"
         [disabled]="layoutNode?.readonly">
-      <input *ngIf="!layoutNode?.key"
-        [type]="layoutNode?.type"
-        class="btn {{ layoutNode?.style || 'btn-primary' }} {{layoutNode?.fieldHtmlClass}}"
-        [value]="layoutNode?.title"
-        [disabled]="layoutNode?.readonly">
     </div>
+    <input *ngIf="!layoutNode?.pointer"
+      [type]="layoutNode?.type"
+      class="btn {{ layoutNode?.style || 'btn-primary' }} {{layoutNode?.fieldHtmlClass}}"
+      [value]="layoutNode?.title"
+      [disabled]="layoutNode?.readonly">
 `,
 })
-export class SubmitComponent {
-  @Input() formGroup: FormGroup; // parent FormGroup
-  @Input() layoutNode: any; // JSON Schema Form layout node
-  @Input() formOptions: any; // Global form defaults and options
+export class SubmitComponent implements OnInit {
+  private formControlGroup: any;
+  @Input() formGroup: FormGroup;
+  @Input() layoutNode: any;
+  @Input() formOptions: any;
+
+  ngOnInit() {
+    if ('pointer' in this.layoutNode) {
+      this.formControlGroup = JsonPointer.getFormControl(this.formGroup, this.layoutNode.pointer, true);
+    }
+  }
 }

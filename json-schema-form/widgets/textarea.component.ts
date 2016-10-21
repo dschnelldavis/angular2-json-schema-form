@@ -1,10 +1,12 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+
+import { JsonPointer } from '../utilities/jsonpointer';
 
 @Component({
   selector: 'textarea-widget',
   template: `
-    <div [formGroup]="formGroup">
+    <div [formGroup]="formControlGroup">
     <textarea
       [formControlName]="layoutNode?.name"
       [id]="layoutNode?.name"
@@ -19,8 +21,13 @@ import { FormGroup } from '@angular/forms';
       [attr.required]="layoutNode?.required"></textarea>
     </div>`,
 })
-export class TextareaComponent {
-  @Input() formGroup: FormGroup; // Parent Angular 2 FormGroup object
-  @Input() layoutNode: any; // JSON Schema Form layout node
-  @Input() formOptions: any; // Global form defaults and options
+export class TextareaComponent implements OnInit {
+  private formControlGroup: any;
+  @Input() formGroup: FormGroup;
+  @Input() layoutNode: any;
+  @Input() formOptions: any;
+
+  ngOnInit() {
+    this.formControlGroup = JsonPointer.getFormControl(this.formGroup, this.layoutNode.pointer, true);
+  }
 }

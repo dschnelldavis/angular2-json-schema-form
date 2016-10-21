@@ -6,8 +6,9 @@ import { Injectable } from '@angular/core';
  * Some utilities for using JSON pointers with JSON objects and JSON schemas
  * https://tools.ietf.org/html/rfc6901
  *
- * JSON Pointer Functions: get, getSchema, getFormGroup, set, remove, has, dict,
- * walk, escape, unescape, parse, compile, toKey, isJsonPointer, parseObjectPath
+ * JSON Pointer Functions: get, getSchema, getFormControl, set, remove, has, dict,
+ * walk, escape, unescape, parse, compile, toKey, isJsonPointer, isSubPointer,
+ * parseObjectPath
  *
  * Utility Functinos: forEach, isObject, isArray, isFunction, isString
  *
@@ -33,16 +34,18 @@ export class JsonPointer {
     let subObject = object;
     let pointerArray: any[] = this.parse(pointer);
     if (pointerArray === null) {
+      if (returnError) return false;
       console.error('Unable to get object - invalid JSON pointer: ' + pointer);
-      return returnError ? false : null;
+      return null;
     }
     for (let i = 0, l = pointerArray.length; i < l; ++i) {
       let key = pointerArray[i];
       if (typeof subObject !== 'object' || !(key in subObject)) {
+        if (returnError) return false;
         console.error('Unable to find key in object: ' + key);
         console.error(object);
         console.error(pointer);
-        return returnError ? false : null;
+        return null;
       }
       subObject = subObject[key];
     }
@@ -108,37 +111,40 @@ export class JsonPointer {
   }
 
   /**
-   * 'getFormGroup' function
+   * 'getFormControl' function
    *
-   * Uses a json pointer for a data object to retrieve a sub-group from
-   * an Angular 2 FormGroup object which creates that data object
+   * Uses a json pointer for a data object to retrieve a control from
+   * an Angular 2 FormGroup object.
+   *
+   * If the optional third parameter 'returnGroup' is set to TRUE, this function
+   * returns the group containing the control, rather than the control itself.
    *
    * @param {FormGroup} formGroup - Angular 2 FormGroup to get value from
    * @param {string | string[]} pointer - JSON pointer (string or array)
    * @param {boolean = false} returnGroup - if true, return group containing control
    * @return {group} - located value (or true or false if returnError = true)
    */
-  static getFormGroup(
+  static getFormControl(
     formGroup: any, pointer: string | string[], returnGroup: boolean = false
   ): any {
     let subGroup = formGroup;
-    let pointerArray: any[] = this.parse(pointer);
+    let pointerArray: string[] = this.parse(pointer);
     if (pointerArray === null) {
       console.error('Unable to get FormGroup - invalid JSON pointer: ' + pointer);
       return null;
     }
     let l = returnGroup ? pointerArray.length - 1 : pointerArray.length;
     for (let i = 0; i < l; ++i) {
-      let parentGroup = subGroup.controls;
+      subGroup = subGroup.controls;
       let key = pointerArray[i];
-      if (typeof subGroup !== 'object') {
-        console.error('Unable to find key in FormGroup: ' + key);
-        console.error(formGroup);
-        console.error(pointer);
-        return null;
-      }
-      if (isArray(subGroup) && (key === '-')
-      ) {
+      // subGroup = parentGroup[key];
+      // if (typeof subGroup !== 'object') {
+      //   console.error('Unable to find key in FormGroup: ' + key);
+      //   console.error(formGroup);
+      //   console.error(pointer);
+      //   return null;
+      // }
+      if (isArray(subGroup) && (key === '-')) {
         subGroup = subGroup[subGroup.length - 1];
       } else if (key in subGroup) {
         subGroup = subGroup[key];
@@ -368,6 +374,39 @@ export class JsonPointer {
       if (value.charAt(0) === '/') return true;
     }
     return false;
+  }
+
+  /**
+   * 'isSubPointer' function
+   *
+   * Checks whether one JSON Pointer is a subset of another.
+   *
+   * @param {string | string[]} shortPointer -
+   * @param {string | string[]} longPointer -
+   * @return {boolean} - true if shortPointer is a subset of longPointer
+   */
+  static isSubPointer(
+    shortPointer: string | string[], longPointer: string | string[]
+  ): boolean {
+    let shortArray: string[] = (isArray(shortPointer)) ?
+      <string[]>shortPointer : JsonPointer.parse(<string>shortPointer);
+    let longArray: string[] = (isArray(longPointer)) ?
+      <string[]>longPointer : JsonPointer.parse(<string>longPointer);
+    if (!shortArray || !longArray) {
+      console.error('Invalid JSON pointer, not a string or array:');
+      if (!shortArray) console.error(shortPointer);
+      if (!longArray) console.error(longPointer);
+      return null;
+    }
+    if (shortArray.length > longArray.length) return false;
+    let isSubPointer: boolean = true;
+    for (let i = 0, l = shortArray.length; i < l; i++) {
+      if (shortArray[i] !== longArray[i]) {
+        isSubPointer = false;
+        break;
+      }
+    }
+    return isSubPointer;
   }
 
   /**

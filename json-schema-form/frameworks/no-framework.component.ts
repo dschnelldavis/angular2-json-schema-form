@@ -8,9 +8,9 @@ import { FormGroup } from '@angular/forms';
   selector: 'none-framework',
   template: `
   <div class="schema-form-{{layoutNode?.type}} {{layoutNode?.htmlClass}}">
-    <label *ngIf="layoutNode?.key && !layoutNode?.notitle"
+    <label *ngIf="layoutNode?.pointer && !layoutNode?.notitle"
       class="{{layoutNode.labelHtmlClass}}"
-      [attr.for]="layoutNode?.key">{{layoutNode?.title || layoutNode?.name}}</label>
+      [attr.for]="layoutNode?.pointer">{{layoutNode?.title || layoutNode?.name}}</label>
     <div #widgetContainer></div>
   </div>`
 })

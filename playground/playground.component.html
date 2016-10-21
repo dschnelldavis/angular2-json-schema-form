@@ -12,13 +12,17 @@
       <span style="white-space: nowrap;">
         <!-- <a href="http://factory.joshfire.com/">Joshfire's</a> -->
         <!-- http://github.com/joshfire/jsonform/wiki -->
-        <a href="http://ulion.github.io/jsonform/playground/">Jsonform</a> for jQuery
+        <a href="http://ulion.github.io/jsonform/playground/">Jsonform</a>,
+      </span>
+      <span style="white-space: nowrap;">
+        <!-- <a href="https://github.com/mozilla-services/react-jsonschema-form">Mozilla's</a> -->
+        <a href="https://mozilla-services.github.io/react-jsonschema-form/">React JSON Schema Form</a>,
       </span>
       and
       <span style="white-space: nowrap;">
-        <!-- <a  href="https://github.com/json-schema-form">JSON Schema Form's</a> -->
+        <!-- <a href="https://github.com/json-schema-form">JSON Schema Form's</a> -->
         <!-- http://schemaform.io -->
-        <a href="http://schemaform.io/examples/bootstrap-example.html">Angular Schema Form</a> for AngularJs.
+        <a href="http://schemaform.io/examples/bootstrap-example.html">Angular Schema Form</a>.
       </span>
     </div>
   </div>
@@ -76,15 +80,34 @@
       </div>
     </div>
     <div class="col-sm-7">
+
       <h4>Generated Form</h4>
       <json-schema-form
         *ngIf="formActive"
         [form]="jsonFormObject"
+        (onChanges)="onChanges($event)"
         (onSubmit)="onSubmit($event)"
+        (isValid)="isValid($event)"
+        (validationErrors)="validationErrors($event)"
         [debug]="true">
       </json-schema-form>
-      Submitted data:
-      <pre>{{prettyData}}</pre>
+
+      <p>
+        Valid?:
+        <strong *ngIf="formIsValid || prettyValidationErrors"
+          [class.text-success]="formIsValid" [class.text-danger]="!formIsValid">
+          {{formIsValid ? 'Yes' : 'No'}}
+        </strong>
+        <span *ngIf="prettyValidationErrors"> — errors from validationErrors():</span>
+      </p>
+      <pre *ngIf="prettyValidationErrors" class="bg-danger">{{prettyValidationErrors}}</pre>
+
+      Live data — from onChanges():
+      <pre>{{prettyLiveFormData}}</pre>
+
+      Submitted data — from onSubmit():
+      <pre>{{prettySubmittedFormData}}</pre>
+
     </div>
   </div>
 </div>

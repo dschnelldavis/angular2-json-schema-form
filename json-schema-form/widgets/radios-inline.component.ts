@@ -1,12 +1,19 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+
+import { JsonPointer } from '../utilities/jsonpointer';
 
 @Component({
   selector: 'radios-inline-widget',
   template: ``,
 })
-export class RadiosInlineComponent {
-  @Input() formGroup: FormGroup; // Parent Angular 2 FormGroup object
-  @Input() layoutNode: any; // JSON Schema Form layout node
-  @Input() formOptions: any; // Global form defaults and options
+export class RadiosInlineComponent implements OnInit {
+  private formControlGroup: any;
+  @Input() formGroup: FormGroup;
+  @Input() layoutNode: any;
+  @Input() formOptions: any;
+
+  ngOnInit() {
+    this.formControlGroup = JsonPointer.getFormControl(this.formGroup, this.layoutNode.pointer, true);
+  }
 }
