@@ -8,7 +8,8 @@
   <div *ngSwitchCase="'actions'">
   </div> -->
 
-  <div *ngSwitchCase="'array'"> <!-- array -->
+  <!-- array -->
+  <div *ngSwitchCase="'array'">
     <div [class]="htmlClass" sf-field-model="sf-new-array" sf-new-array>
       <label class="control-label" *ngIf=layoutNode?.title>{{layoutNode?.title}}</label>
       <ol class="list-group" sf-field-model ui-sortable="layoutNode?.sortOptions">
@@ -21,7 +22,8 @@
     </div>
   </div>
 
-  <div *ngSwitchCase="'array-item'"> <!-- array item -->
+  <!-- array item -->
+  <div *ngSwitchCase="'array-item'">
     <li class="list-group-item {{layoutNode?.fieldHtmlClass}}" schema-form-array-items>
       <button *ngIf="!layoutNode?.readonly && layoutNode?.remove !== null && layoutNode?.type !== '$ref'"
         style="position: relative; z-index: 20;" type="button"
@@ -32,50 +34,44 @@
     </li>
   </div>
 
-  <div *ngSwitchCase="'$ref'"> <!-- Reference point, for adding new items -->
+  <!-- Reference point, for adding new items -->
+  <div *ngSwitchCase="'$ref'">
     <button class="btn {{layoutNode?.style || 'btn-default'}} pull-right"
       (click)="addItem(layoutNode?.$ref)" type="button">
       <i class="glyphicon glyphicon-plus"></i> {{layoutNode?.title || 'New'}}
     </button>
   </div>
 
-  <div *ngSwitchCase="'fieldset'"> <!-- Fieldset, with optional title -->
-    <fieldset [disabled]="layoutNode?.readonly" [class]="htmlClass">
-      <legend [class.sr-only]="layoutNode?.notitle">{{ layoutNode?.title }}</legend>
-      <div #widgetContainer></div>
-      <div class="help-block" *ngIf="layoutNode?.description || layoutNode?.help"
-        [innerHTML]="layoutNode?.description || layoutNode?.help"></div>
-    </fieldset>
-  </div>
-
-  <!-- Minimal: 'help', 'msg', 'message', 'submit', 'reset', 'button', 'section' -->
-  <div *ngSwitchCase="'minimal'">
-    <div [class]="htmlClass">
-      <div #widgetContainer></div>
-    </div>
-  </div>
-
-  <div *ngSwitchCase="'checkbox'"> <!-- Single Checkboxes -->
+  <!-- Single checkboxes -->
+  <div *ngSwitchCase="'checkbox'">
     <div [class]="htmlClass"
-      [class.has-success]="layoutNode?.disableSuccessState !== true && control?.dirty && !control?.errors"
-      [class.has-error]="layoutNode?.disableErrorState !== true && control?.dirty && control?.errors"
-      [class.has-feedback]="layoutNode?.feedback !== false && control?.dirty">
+      [class.has-success]="layoutNode?.disableSuccessState !== true && formControl?.dirty && !formControl?.errors"
+      [class.has-error]="layoutNode?.disableErrorState !== true && formControl?.dirty && formControl?.errors"
+      [class.has-feedback]="layoutNode?.feedback !== false && formControl?.dirty">
       <label [class.sr-only]="layoutNode?.notitle" [class]="labelHtmlClass"
         [attr.for]="layoutNode?.pointer">
         <div #widgetContainer></div> {{layoutNode?.title || layoutNode?.name}}
       </label>
-      <p *ngIf="layoutNode?.feedback !== false && control?.dirty && control?.errors" class="help-block" [innerHTML]="errorMessage"></p>
+      <p *ngIf="layoutNode?.feedback !== false && formControl?.dirty && formControl?.errors" class="help-block" [innerHTML]="errorMessage"></p>
       <p *ngIf="layoutNode?.description || layoutNode?.help" class="help-block"
         [innerHTML]="layoutNode?.description || layoutNode?.help"></p>
     </div>
   </div>
 
-  <div *ngSwitchDefault> <!-- Default: all other input controls -->
+  <!-- Minimal: control groups, messages, and inputs without labels -->
+  <!-- section, fieldset, help, msg, message, submit, reset, button -->
+  <div *ngSwitchCase="'minimal'">
+    <div #widgetContainer></div>
+  </div>
+
+  <!-- Default: all other input controls -->
+  <!-- input -->
+  <div *ngSwitchDefault>
     <div
       [class]="htmlClass"
-      [class.has-success]="layoutNode?.disableSuccessState !== true && control?.dirty && !control?.errors"
-      [class.has-error]="layoutNode?.disableErrorState !== true && control?.dirty && control?.errors"
-      [class.has-feedback]="layoutNode?.feedback !== false && control?.dirty">
+      [class.has-success]="!layoutNode?.disableSuccessState && formControl?.dirty && !formControl?.errors"
+      [class.has-error]="!layoutNode?.disableErrorState && formControl?.dirty && formControl?.errors"
+      [class.has-feedback]="layoutNode?.feedback !== false && formControl?.dirty">
       <label [class.sr-only]="layoutNode?.notitle" [class]="labelHtmlClass"
         [attr.for]="layoutNode?.pointer" [innerHTML]="layoutNode?.title || layoutNode?.name"></label>
       <div [class.input-group]="layoutNode?.fieldAddonLeft || layoutNode?.prepend || layoutNode?.fieldAddonRight || layoutNode?.append">
@@ -85,11 +81,11 @@
         <span *ngIf="layoutNode?.fieldAddonRight || layoutNode?.append" class="input-group-addon"
           [innerHTML]="layoutNode?.fieldAddonRight || layoutNode?.append"></span>
       </div>
-      <span *ngIf="layoutNode?.feedback !== false && control?.dirty && !control?.errors"
+      <span *ngIf="layoutNode?.feedback !== false && formControl?.dirty && !formControl?.errors"
         class="glyphicon glyphicon-ok form-control-feedback"></span>
-      <span *ngIf="layoutNode?.feedback !== false && control?.dirty && control?.errors"
+      <span *ngIf="layoutNode?.feedback !== false && formControl?.dirty && formControl?.errors"
         class="glyphicon glyphicon-remove form-control-feedback"></span>
-      <p *ngIf="layoutNode?.feedback !== false && control?.dirty && control?.errors"
+      <p *ngIf="layoutNode?.feedback !== false && formControl?.dirty && formControl?.errors"
         class="help-block" [innerHTML]="errorMessage"></p>
       <p *ngIf="layoutNode?.description || layoutNode?.help" class="help-block"
         [innerHTML]="layoutNode?.description || layoutNode?.help"></p>

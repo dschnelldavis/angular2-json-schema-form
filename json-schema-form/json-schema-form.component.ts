@@ -20,7 +20,7 @@ import {
   forOwnDeep, getControlValidators, getFirstValue, getInputType, hasOwn,
   inArray, isArray, isBlank, isEmpty, isFunction, isInputRequired, isNumber,
   isObject, isPresent, isSet, isString, mapLayout, resolveSchemaReference,
-  setObjectInputOptions, toJavaScriptType, toSchemaType
+  setObjectInputOptions, toJavaScriptType, toSchemaType, toTitleCase
 } from './utilities/utility-functions';
 import { SchemaPrimitiveType } from './validators/validator-functions';
 import { convertJsonSchema3to4 } from './utilities/convert-json-schema';
@@ -201,7 +201,12 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
       if (!isEmpty(this.rootSchema)) {
 
         // Allow for JSON schema shorthand (JSON Form style)
-        if (!hasOwn(this.rootSchema, 'type') ||
+        if (!hasOwn(this.rootSchema, 'type') &&
+          hasOwn(this.rootSchema, 'properties') &&
+          isObject(this.rootSchema.properties)
+        ) {
+          this.rootSchema.type = 'object';
+        } else if (!hasOwn(this.rootSchema, 'type') ||
           this.rootSchema.type !== 'object' ||
           !hasOwn(this.rootSchema, 'properties')
         ) {
@@ -215,27 +220,21 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
         // Initialize ajv (Another JSON Schema Validator)
         this.validateFormData = this.ajv.compile(this.rootSchema);
 
-        // Resolve $ref links in Schema
+        // Resolve any $ref links in Schema
         forOwnDeep(this.rootSchema, (value, key, ignore, pointer) => {
           if (hasOwn(value, '$ref') && isString(value['$ref'])) {
-            let newReference: string = value['$ref'];
+            let newReference: string = JsonPointer.compile(value['$ref']);
             let isCircular = JsonPointer.isSubPointer(newReference, pointer);
-            if (!isCircular || !hasOwn(this.schemaReferences, newReference) ||
-              this.schemaReferences[newReference]['isCircular'] !== true
-            ) {
-              let newSchema: any = resolveSchemaReference(
+            if (!hasOwn(this.schemaReferences, newReference) && newReference !== '') {
+              this.schemaReferences[newReference] = resolveSchemaReference(
                 newReference, this.rootSchema, this.schemaReferences
               );
-              if (newSchema && !hasOwn(newSchema, '$ref')) {
-                if (isCircular) {
-                  this.schemaReferences[newReference]['isCircular'] = true;
-                } else {
-                  delete value['$ref'];
-                  JsonPointer.set(
-                    this.rootSchema, pointer, Object.assign({}, newSchema, value)
-                  );
-                }
-              }
+            }
+            if (!isCircular) {
+              delete value['$ref'];
+              JsonPointer.set(this.rootSchema, pointer, Object.assign(
+                {}, this.schemaReferences[newReference], value
+              ));
             }
           }
         }, this.rootSchema, '', true);
@@ -280,14 +279,18 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
       // Use first available input:
       // 1. data - recommended
       // 2. model - Angular Schema Form style
-      // 3. form.data - Single input / JSON Form style
-      // 4. formData - React JSON Schema Form style
-      // 5. form.formData - For easier testing of React JSON Schema Forms
-      // 6. (none) no data - use schema and layout defaults to initialize form
+      // 3. form.value - JSON Form style
+      // 4. form.data - Single input style
+      // 5. formData - React JSON Schema Form style
+      // 6. form.formData - For easier testing of React JSON Schema Forms
+      // 7. (none) no data - use schema and layout defaults to initialize form
       if (isObject(this.data)) {
         this.rootData = this.data;
       } else if (isObject(this.model)) {
         this.rootData = this.model;
+      } else if (isObject(this.form) &&
+        isObject(this.form.value)) {
+        this.rootData = this.form.value;
       } else if (isObject(this.form) &&
         isObject(this.form.data)) {
         this.rootData = this.form.data;
@@ -355,6 +358,7 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
       // vars.push(this.fieldMap);
       // vars.push(this.rootFormGroupTemplate);
       // vars.push(this.rootLayout);
+      vars.push(this.schemaReferences);
       vars.push(this.rootSchema);
       // vars.push(this.rootData);
       // vars.push(this.rootFormGroup);
@@ -890,25 +894,28 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
    * 'formatFormData' function
    *
    * @param {any} formData - Angular 2 FormGroup data object
+   * @param {boolean = false} fixErrors - if TRUE, tries to fix data
    * @return {any} - formatted data object
    */
-  private formatFormData(formData: any): any {
+  private formatFormData(formData: any, fixErrors: boolean = false): any {
     let formattedData = {};
     forOwnDeep(formData, (value, key, ignore, pointer) => {
-      let schemaType: SchemaPrimitiveType | SchemaPrimitiveType[] =
-        this.fieldMap[pointer]['schemaType'];
-      if (isSet(value) &&
-        inArray(schemaType, ['string', 'integer', 'number', 'boolean', 'null'])
-      ) {
-        // let newValue = toSchemaType(value, schemaType);
-        let newValue = toJavaScriptType(value, <SchemaPrimitiveType>schemaType);
-        if (isPresent(newValue)) JsonPointer.set(formattedData, pointer, newValue);
+      if (hasOwn(this.fieldMap, pointer) && hasOwn(this.fieldMap[pointer], 'schemaType')) {
+        let schemaType: SchemaPrimitiveType | SchemaPrimitiveType[] =
+          this.fieldMap[pointer]['schemaType'];
+        if (isSet(value) &&
+          inArray(schemaType, ['string', 'integer', 'number', 'boolean', 'null'])
+        ) {
+          let newValue = fixErrors ? toSchemaType(value, schemaType) :
+            toJavaScriptType(value, <SchemaPrimitiveType>schemaType);
+          if (isPresent(newValue)) JsonPointer.set(formattedData, pointer, newValue);
+        }
       }
     });
     return formattedData;
   }
 
   private submitForm() {
-    this.onSubmit.emit(this.formatFormData(this.rootFormGroup.value));
+    this.onSubmit.emit(this.formatFormData(this.rootFormGroup.value, true));
   }
 }

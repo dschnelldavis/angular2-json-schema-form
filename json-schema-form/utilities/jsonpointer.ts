@@ -42,9 +42,9 @@ export class JsonPointer {
       let key = pointerArray[i];
       if (typeof subObject !== 'object' || !(key in subObject)) {
         if (returnError) return false;
-        console.error('Unable to find key in object: ' + key);
-        console.error(object);
+        console.error('Unable to find "' + key + '" key in object.');
         console.error(pointer);
+        console.error(object);
         return null;
       }
       subObject = subObject[key];
@@ -79,7 +79,7 @@ export class JsonPointer {
       let subSchemaArray = false;
       let subSchemaObject = false;
       if (typeof subSchema !== 'object') {
-        console.error('Unable to find key in schema: ' + key);
+        console.error('Unable to find "' + key + '" key in schema.');
         console.error(schema);
         console.error(pointer);
         return null;
@@ -99,7 +99,7 @@ export class JsonPointer {
           subSchema = ('additionalItems' in parentSchema) ?
             parentSchema.additionalItems : {};
         } else if (typeof subSchema !== 'object' || !(key in subSchema)) {
-          console.error('Unable to find item in schema: ' + key);
+          console.error('Unable to find "' + key + '" item in schema.');
           console.error(schema);
           console.error(pointer);
           return null;
@@ -139,7 +139,7 @@ export class JsonPointer {
       let key = pointerArray[i];
       // subGroup = parentGroup[key];
       // if (typeof subGroup !== 'object') {
-      //   console.error('Unable to find key in FormGroup: ' + key);
+      //   console.error('Unable to find "' + key + '" key in FormGroup.');
       //   console.error(formGroup);
       //   console.error(pointer);
       //   return null;
@@ -149,7 +149,7 @@ export class JsonPointer {
       } else if (key in subGroup) {
         subGroup = subGroup[key];
       } else {
-        console.error('Unable to find item in FormGroup: ' + key);
+        console.error('Unable to find "' + key + '" item in FormGroup.');
         console.error(formGroup);
         console.error(pointer);
         return null;

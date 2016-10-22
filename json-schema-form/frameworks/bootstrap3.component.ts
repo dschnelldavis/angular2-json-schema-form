@@ -35,7 +35,7 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked, OnChang
       let thisControl = JsonPointer.getFormControl(this.formGroup, this.layoutNode.pointer);
       if (thisControl) this.formControl = thisControl;
     }
-
+// console.log(this.formControl);
     // if (this.formGroup && this.formGroup.controls && this.formGroup.controls[this.layoutNode.name]) {
     //   this.formControl = this.formGroup.controls[this.layoutNode.name];
     // } else {
@@ -112,7 +112,7 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked, OnChang
     ) {
       if (this.controlView === 'array') {
         for (let i = 0, l = this.layoutNode.items.length; i < l; i++) {
-console.log(this.layoutNode.items[i]);
+// console.log(this.layoutNode.items[i]);
           if (this.layoutNode.items[i]) {
             let addedNode: ComponentRef<any> = this.widgetContainer.createComponent(
               this.componentFactory.resolveComponentFactory(this.formOptions.framework)

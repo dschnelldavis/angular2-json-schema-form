@@ -6,10 +6,10 @@ import { JsonPointer } from '../utilities/jsonpointer';
 @Component({
   selector: 'number-widget',
   template: `
-    <div [formGroup]="formGroup">
+    <div *ngIf="layoutNode?.pointer" [formGroup]="formControlGroup">
       <input
         [formControlName]="layoutNode?.name"
-        [id]="layoutNode?.name"
+        [id]="layoutNode?.pointer"
         [class]="layoutNode?.fieldHtmlClass"
         [type]="layoutNode?.type === 'range' ? 'range' : 'number'"
         [name]="layoutNode?.name"
@@ -19,21 +19,30 @@ import { JsonPointer } from '../utilities/jsonpointer';
         [attr.placeholder]="layoutNode?.placeholder"
         [attr.readonly]="layoutNode?.readonly ? 'readonly' : null"
         [attr.required]="layoutNode?.required">
-    </div>`,
+    </div>
+    <input *ngIf="!layoutNode?.pointer"
+      [id]="layoutNode?.pointer"
+      [class]="layoutNode?.fieldHtmlClass"
+      [type]="layoutNode?.type === 'range' ? 'range' : 'number'"
+      [name]="layoutNode?.name"
+      [attr.min]="layoutNode?.minimum"
+      [attr.max]="layoutNode?.maximum"
+      [attr.step]="step"
+      [attr.placeholder]="layoutNode?.placeholder"
+      [attr.readonly]="layoutNode?.readonly ? 'readonly' : null"
+      [attr.required]="layoutNode?.required">`,
 })
 export class NumberComponent implements OnInit {
   private formControlGroup: any;
-  private step: number | string = 'any';
+  private step: string;
   @Input() formGroup: FormGroup; // parent FormGroup
   @Input() layoutNode: any; // JSON Schema Form layout node
   @Input() formOptions: any; // Global form defaults and options
 
   ngOnInit() {
     this.formControlGroup = JsonPointer.getFormControl(this.formGroup, this.layoutNode.pointer, true);
-    if (this.layoutNode.multipleOf) {
-      this.step = this.layoutNode.multipleOf;
-    } else if (this.layoutNode.type === 'integer') {
-      this.step = 1;
-    }
+console.log(this.formControlGroup);
+    this.step = this.layoutNode.multipleOf ||
+      (this.layoutNode.type === 'integer' ? '1' : 'any');
   }
 }

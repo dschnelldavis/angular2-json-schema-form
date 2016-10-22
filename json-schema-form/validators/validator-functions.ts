@@ -343,11 +343,15 @@ export function isType(value: PrimitiveValue, type: SchemaPrimitiveType): boolea
  *
  * Converts an input (probably string) value to a JavaScript primitive type -
  * 'string', 'number', 'boolean', or 'null' - before storing in a JSON object.
- * If the JSON Schema type 'integer' is specified, it verifies the input
- * is an integer value and returns it as a JaveScript number.
  *
  * Does not coerce values (other than null), and only converts the types
  * of values that would otherwise be valid.
+ *
+ * If the optional third parameter 'checkIntegers' is TRUE, and the
+ * JSON Schema type 'integer' is specified, it verifies the input
+ * is an integer value and, if it is, returns it as a JaveScript number.
+ * If 'checkIntegers' is FALSE, or not set, the type 'integer' is treated
+ * exactly the same as 'number', and allows decimals.
  *
  * Examples:
  * toJavaScriptType('10', 'number') = 10
@@ -358,12 +362,14 @@ export function isType(value: PrimitiveValue, type: SchemaPrimitiveType): boolea
  *
  * @param {PrimitiveValue} value - value to convert
  * @param {SchemaPrimitiveType} type - type to convert to
+ * @param {boolean = false} checkIntegers - if FALSE, treat integers as numbers
  * @return {boolean}
  */
 export function toJavaScriptType(
-  value: any, type: SchemaPrimitiveType
+  value: any, type: SchemaPrimitiveType, checkIntegers: boolean = false
 ): PrimitiveValue {
   if (isBlank(value)) return null;
+  if (type === 'integer' && !checkIntegers) type = 'number';
   switch (type) {
     case 'string':
       if (isString(value)) return value;

@@ -154,11 +154,10 @@ export function mapLayout(
  *
  * @param {object | string} reference
  * @param {object} schema
- * @param {boolean = false} circularOK
  * @return {object}
  */
 export function resolveSchemaReference(
-  reference: any, schema: any, schemaReferences: any, circularOK: boolean = false
+  reference: any, schema: any, schemaReferences: any
 ): any {
   let schemaPointer: string;
   if (typeof reference === 'string') {
@@ -171,37 +170,32 @@ export function resolveSchemaReference(
     }
     schemaPointer = JsonPointer.compile(reference.$ref);
   }
-  if (hasOwn(schemaReferences, schemaPointer)) {
-    if (schemaReferences[schemaPointer]['isCircular'] === true && !circularOK) {
-      return { '$ref': schemaPointer };
-    } else {
-      return schemaReferences[schemaPointer]['schema'];
-    }
-  }
   if (schemaPointer === '') {
-    schemaReferences[''] = { 'isCircular': true }; // 'schema': schema,
-    return circularOK ? schema : { '$ref': '' };
+    return schema;
+  } else if (hasOwn(schemaReferences, schemaPointer)) {
+    return schemaReferences[schemaPointer];
   } else if (schemaPointer.slice(0, 4) === 'http') {
     // Download remote schema
      this.http.get(schemaPointer).subscribe(response => {
       // TODO: check for circular references
       // TODO: test and adjust to allow for for async response
-      schemaReferences[schemaPointer] = { 'schema': response.json() };
+      schemaReferences[schemaPointer] = response.json();
       return schemaReferences[schemaPointer];
      });
   } else {
-    let item = JsonPointer.get(schema, schemaPointer);
-    if (!isObject(item) || Object.keys(item).length !== 1 ||
-      !('allOf' in item) || !isArray(item.allOf)) {
-      schemaReferences[schemaPointer] = { 'schema': item };
-      return item;
+    let newSchema = JsonPointer.get(schema, schemaPointer);
+    if (
+      isObject(newSchema) && Object.keys(newSchema).length === 1 &&
+      ('allOf' in newSchema) && isArray(newSchema.allOf)
+    ) {
+      let combinedSchema = newSchema.allOf
+        .map(object => this.resolveSchemaReference(object, schema, schemaReferences))
+        .reduce((schema1, schema2) => Object.assign(schema1, schema2), {});
+      schemaReferences[schemaPointer] = combinedSchema;
     } else {
-      let targetSchema = item.allOf
-        .map(object => this.resolveSchemaReference(object, schema, schemaReferences, circularOK))
-        .reduce((v1, v2) => Object.assign(v1, v2), {});
-      schemaReferences[schemaPointer] = { 'schema': targetSchema };
-      return targetSchema;
+      schemaReferences[schemaPointer] = newSchema;
     }
+    return schemaReferences[schemaPointer];
   }
 }
 
@@ -244,16 +238,16 @@ export function getControlValidators(schema: any) {
       break;
       case 'number': case 'integer':
         _.forEach(['Minimum', 'Maximum'], (Limit) => {
-          let limit = Limit.toLowerCase();
           let eLimit = 'exclusive' + Limit;
+          let limit = Limit.toLowerCase();
           if (hasOwn(schema, limit)) {
             let exclusive = hasOwn(schema, eLimit) && schema[eLimit] === true;
             validators[limit] = [schema[limit], exclusive];
           }
         });
-        if (hasOwn(schema, 'multipleOf')) {
-          validators['multipleOf'] = [schema.multipleOf];
-        }
+        _.forEach(['multipleOf', 'type'], (prop) => {
+          if (hasOwn(schema, prop)) validators[prop] = [schema[prop]];
+        });
       break;
       case 'object':
         _.forEach(['minProperties', 'maxProperties', 'dependencies'], (prop) => {
@@ -375,4 +369,63 @@ export function isInputRequired(schema: any, pointer: string): boolean {
     if (isArray(requiredList)) return requiredList.indexOf(keyName) !== -1;
   }
   return false;
+};
+
+/**
+ * 'toTitleCase'
+ *
+ * Intelligently converts an input string to Title Case.
+ *
+ * Accepts an optional second parameter with an alternate list of
+ * words and abbreviations to force into a particular case.
+ *
+ * This function is derived from prior work by John Gruber and David Gouch:
+ * http://daringfireball.net/2008/08/title_case_update
+ * https://github.com/gouch/to-title-case
+ *
+ * @param  {string} input -
+ * @param  {string | string[]} forceWords? -
+ * @return {string} -
+ */
+export function toTitleCase(input: string, forceWords?: string | string[]): string {
+  let forceArray: string[] = ['a', 'an', 'and', 'as', 'at', 'but', 'by', 'en', 'for', 'if',
+    'in', 'nor', 'of', 'on', 'or', 'per', 'the', 'to', 'v', 'v.', 'vs', 'vs.', 'via'];
+  if (typeof forceWords === 'string') forceWords = forceWords.split('|');
+  if (Array.isArray(forceWords)) forceArray = forceArray.concat(forceWords);
+  let forceArrayLower: string[] = forceArray.map(w => w.toLowerCase());
+  let noInitialCase: boolean =
+    input === input.toUpperCase() || input === input.toLowerCase();
+  let prevLastChar: string = '';
+  input = input.trim();
+  return input.replace(/[A-Za-z0-9\u00C0-\u00FF]+[^\s-]*/g, (word, idx) => {
+    if (!noInitialCase && word.slice(1).search(/[A-Z]|\../) > -1) {
+      return word;
+    } else {
+      let newWord: string;
+      let forceWord: string = forceArray[forceArrayLower.indexOf(word.toLowerCase())];
+      if (!forceWord) {
+        if (noInitialCase) {
+          if (word.slice(1).search(/\../) > -1) {
+            newWord = word.toLowerCase();
+          } else {
+            newWord = word[0].toUpperCase() + word.slice(1).toLowerCase();
+          }
+        } else {
+          newWord = word[0].toUpperCase() + word.slice(1);
+        }
+      } else if (
+        forceWord === forceWord.toLowerCase() && (
+          idx === 0 || idx + word.length === input.length ||
+          prevLastChar === ':' || input[idx - 1].search(/[^\s-]/) > -1 ||
+          (input[idx - 1] !== '-' && input[idx + word.length] === '-')
+        )
+      ) {
+        newWord = forceWord[0].toUpperCase() + forceWord.slice(1);
+      } else {
+        newWord = forceWord;
+      }
+      prevLastChar = word.slice(-1);
+      return newWord;
+    }
+  });
 };
