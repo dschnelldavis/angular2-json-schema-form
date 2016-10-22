@@ -25,7 +25,7 @@
   <!-- array item -->
   <div *ngSwitchCase="'array-item'">
     <li class="list-group-item {{layoutNode?.fieldHtmlClass}}" schema-form-array-items>
-      <button *ngIf="!layoutNode?.readonly && layoutNode?.remove !== null && layoutNode?.type !== '$ref'"
+      <button *ngIf="!layoutNode?.readonly && layoutNode?.remove && layoutNode?.type !== '$ref'"
         style="position: relative; z-index: 20;" type="button"
         class="close pull-right" (click)="deleteFromArray(i)">
         <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
@@ -45,8 +45,8 @@
   <!-- Single checkboxes -->
   <div *ngSwitchCase="'checkbox'">
     <div [class]="htmlClass"
-      [class.has-success]="layoutNode?.disableSuccessState !== true && formControl?.dirty && !formControl?.errors"
-      [class.has-error]="layoutNode?.disableErrorState !== true && formControl?.dirty && formControl?.errors"
+      [class.has-success]="!layoutNode?.disableSuccessState && formControl?.dirty && !formControl?.errors"
+      [class.has-error]="!layoutNode?.disableErrorState && formControl?.dirty && formControl?.errors"
       [class.has-feedback]="layoutNode?.feedback !== false && formControl?.dirty">
       <label [class.sr-only]="layoutNode?.notitle" [class]="labelHtmlClass"
         [attr.for]="layoutNode?.pointer">
@@ -61,6 +61,9 @@
   <!-- Minimal: control groups, messages, and inputs without labels -->
   <!-- section, fieldset, help, msg, message, submit, reset, button -->
   <div *ngSwitchCase="'minimal'">
+    <p *ngIf="layoutNode?.type === 'submit' && formOptions?.fieldsRequired">
+      <strong class="text-danger">*</strong> = required fields
+    </p>
     <div #widgetContainer></div>
   </div>
 
@@ -74,6 +77,7 @@
       [class.has-feedback]="layoutNode?.feedback !== false && formControl?.dirty">
       <label [class.sr-only]="layoutNode?.notitle" [class]="labelHtmlClass"
         [attr.for]="layoutNode?.pointer" [innerHTML]="layoutNode?.title || layoutNode?.name"></label>
+        <strong *ngIf="layoutNode?.required" class="text-danger">*</strong>
       <div [class.input-group]="layoutNode?.fieldAddonLeft || layoutNode?.prepend || layoutNode?.fieldAddonRight || layoutNode?.append">
         <span *ngIf="layoutNode?.fieldAddonLeft || layoutNode?.prepend" class="input-group-addon"
           [innerHTML]="layoutNode?.fieldAddonLeft || layoutNode?.prepend"></span>
@@ -87,14 +91,14 @@
         class="glyphicon glyphicon-remove form-control-feedback"></span>
       <p *ngIf="layoutNode?.feedback !== false && formControl?.dirty && formControl?.errors"
         class="help-block" [innerHTML]="errorMessage"></p>
-      <p *ngIf="layoutNode?.description || layoutNode?.help" class="help-block"
-        [innerHTML]="layoutNode?.description || layoutNode?.help"></p>
+      <p *ngIf="layoutNode?.description" class="help-block" [innerHTML]="layoutNode?.description"></p>
+      <p *ngIf="layoutNode?.help" class="help-block" [innerHTML]="layoutNode?.help"></p>
     </div>
   </div>
 
 </div>
 
-<div *ngIf="debug">
+<div *ngIf="debug && debugOutput">
   debug:
   <pre *ngIf="debug">{{debugOutput}}</pre>
 </div>

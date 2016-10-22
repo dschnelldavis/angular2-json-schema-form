@@ -1,6 +1,6 @@
 import {
   Component, ComponentFactoryResolver, ComponentRef, Input, OnInit,
-  AfterContentChecked, OnChanges, ViewChild, ViewContainerRef
+  AfterContentChecked, ViewChild, ViewContainerRef
 } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
@@ -11,7 +11,7 @@ import { JsonPointer } from '../utilities/jsonpointer';
   selector: 'bootstrap3-framework',
   templateUrl: 'bootstrap3.component.html',
 })
-export class Bootstrap3Component implements OnInit, AfterContentChecked, OnChanges {
+export class Bootstrap3Component implements OnInit, AfterContentChecked {
   private controlInitialized: boolean = false;
   private displayWidget: boolean = true;
   private formControl: any = null;
@@ -19,6 +19,7 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked, OnChang
   private htmlClass: string;
   private labelHtmlClass: string;
   private debugOutput: any = '';
+  private errorMessage = '';
   @Input() layoutNode: any; // JSON Schema Form layout node
   @Input() formGroup: FormGroup; // Angular 2 FormGroup object
   @Input() formOptions: any; // Global form defaults and options
@@ -35,12 +36,6 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked, OnChang
       let thisControl = JsonPointer.getFormControl(this.formGroup, this.layoutNode.pointer);
       if (thisControl) this.formControl = thisControl;
     }
-// console.log(this.formControl);
-    // if (this.formGroup && this.formGroup.controls && this.formGroup.controls[this.layoutNode.name]) {
-    //   this.formControl = this.formGroup.controls[this.layoutNode.name];
-    // } else {
-    //   this.formControl = this.formGroup.controls;
-    // }
 
     this.htmlClass = this.layoutNode.htmlClass || '';
     this.htmlClass += ' form-group  schema-form-' + this.layoutNode.type;
@@ -142,6 +137,21 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked, OnChang
         addedNode.instance.formOptions = this.formOptions;
       }
       this.controlInitialized = true;
+
+      if (this.formControl) {
+        this.formControl.statusChanges.subscribe(value => {
+          if (value === 'INVALID' && this.formControl.errors) {
+            this.errorMessage = Object.keys(this.formControl.errors).map(
+                error => [error, Object.keys(this.formControl.errors[error]).map(
+                  errorParameter => errorParameter + ': ' +
+                    this.formControl.errors[error][errorParameter]
+                ).join(', ')].filter(e => e).join(' - ')
+              ).join('<br>');
+          } else {
+            this.errorMessage = null;
+          }
+        });
+      }
     }
 
     if (
@@ -152,33 +162,6 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked, OnChang
       // vars.push(this.formGroup.value[this.layoutNode.name]);
       vars.push(this.formGroup.controls[this.layoutNode.name]['errors']);
       this.debugOutput = _.map(vars, thisVar => JSON.stringify(thisVar, null, 2)).join('\n');
-    }
-  }
-
-  ngOnChanges() {
-  }
-
-//   private get control() {
-// console.log(this.formGroup.controls);
-// console.log(this.layoutNode.name);
-// console.log(this.layoutNode.pointer);
-// console.log(this.formGroup.controls[this.layoutNode.name]);
-//     if (this.formGroup && this.formGroup.controls && this.formGroup.controls[this.layoutNode.name]) {
-//       return this.formGroup.controls[this.layoutNode.name];
-//     } else {
-//       return null;
-//     }
-//   }
-
-  private get errorMessage() {
-    if (this.formControl) {
-      return Object.keys(this.formControl.errors).map(
-        error => [error, Object.keys(this.formControl.errors[error]).map(
-          errorParameter => errorParameter + ': ' + this.formControl.errors[error][errorParameter]
-        ).join(', ')].filter(e => e).join(' - ')
-      ).join('<br>');
-    } else {
-      return null;
     }
   }
 }

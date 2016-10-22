@@ -205,6 +205,7 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
 
   get prettyValidationErrors() {
     if (!this.formValidationErrors) return null;
+    // return JSON.stringify(this.formValidationErrors, null, 2);
     let prettyValidationErrors = '';
     for (let i = 0, l = this.formValidationErrors.length; i < l; i++) {
       let error = this.formValidationErrors[i];

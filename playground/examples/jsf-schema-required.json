@@ -59,15 +59,10 @@
               "type": "string"
             }
           },
-          "required": [
-            "steet",
-            "city"
-          ]
+          "required": [ "street", "city" ]
         }
       },
-      "required": [
-        "name"
-      ]
+      "required": [ "name" ]
     }
   }
 }
