@@ -89,7 +89,7 @@
         (onSubmit)="onSubmit($event)"
         (isValid)="isValid($event)"
         (validationErrors)="validationErrors($event)"
-        [debug]="true">
+        [debug]="false">
       </json-schema-form>
 
       <p>
@@ -98,15 +98,22 @@
           [class.text-success]="formIsValid" [class.text-danger]="!formIsValid">
           {{formIsValid ? 'Yes' : 'No'}}
         </strong>
-        <span *ngIf="prettyValidationErrors"> — errors from validationErrors():</span>
+        <span *ngIf="prettyValidationErrors">
+          — errors from validationErrors():
+        </span>
       </p>
-      <pre *ngIf="prettyValidationErrors" class="bg-danger">{{prettyValidationErrors}}</pre>
+
+      <pre *ngIf="prettyValidationErrors" class="bg-danger"
+        >{{prettyValidationErrors}}</pre>
 
       Live data — from onChanges():
-      <pre>{{prettyLiveFormData}}</pre>
+      <pre [class.bg-danger]="prettyValidationErrors"
+        [class.bg-success]="!prettyValidationErrors && prettyLiveFormData !== '{}'"
+        >{{prettyLiveFormData}}</pre>
 
       Submitted data — from onSubmit():
-      <pre>{{prettySubmittedFormData}}</pre>
+      <pre [class.bg-success]="prettySubmittedFormData !== '{}'"
+        >{{prettySubmittedFormData}}</pre>
 
     </div>
   </div>
