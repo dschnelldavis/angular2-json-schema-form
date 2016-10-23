@@ -28,6 +28,6 @@ export class TextareaComponent implements OnInit {
   @Input() formOptions: any;
 
   ngOnInit() {
-    this.formControlGroup = JsonPointer.getFormControl(this.formGroup, this.layoutNode.pointer, true);
+    this.formControlGroup = JsonPointer.getFromFormGroup(this.formGroup, this.layoutNode.pointer, true);
   }
 }

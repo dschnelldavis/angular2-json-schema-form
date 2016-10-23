@@ -1,16 +1,20 @@
 import { Injectable } from '@angular/core';
+// TODO: Add ability to download remote schema
+// import { Http } from '@angular/http';
+// import { Observable } from 'rxjs/Observable';
+// import 'rxjs/add/operator/map';
 
 /**
  * 'JsonPointer' class
  *
- * Some utilities for using JSON pointers with JSON objects and JSON schemas
+ * Some utilities for using JSON Pointers with JSON objects and JSON schemas
  * https://tools.ietf.org/html/rfc6901
  *
- * JSON Pointer Functions: get, getSchema, getFormControl, set, remove, has, dict,
- * walk, escape, unescape, parse, compile, toKey, isJsonPointer, isSubPointer,
- * parseObjectPath
+ * JSON Pointer Functions: get, getFirst, getFromSchema, getFromFormGroup,
+ * getSchemaReference, set, remove, has, dict, walk, escape, unescape,
+ * parse, compile, toKey, isJsonPointer, isSubPointer, parseObjectPath
  *
- * Utility Functinos: forEach, isObject, isArray, isFunction, isString
+ * Utility Functinos: forEach, isObject, isArray
  *
  * Based on manuelstofer's json-pointer utilities
  * https://github.com/manuelstofer/json-pointer
@@ -26,7 +30,7 @@ export class JsonPointer {
    * Uses a JSON Pointer to retrieve a value from an object
    *
    * @param {object} object - object to get value from
-   * @param {Pointer} pointer - JSON pointer (string or array)
+   * @param {Pointer} pointer - JSON Pointer (string or array)
    * @param {boolean = false} returnError - return only true or false for error
    * @return {object} - located value (or true or false if returnError = true)
    */
@@ -35,12 +39,14 @@ export class JsonPointer {
     let pointerArray: any[] = this.parse(pointer);
     if (pointerArray === null) {
       if (returnError) return false;
-      console.error('Unable to get object - invalid JSON pointer: ' + pointer);
+      console.error('Unable to get object - invalid JSON Pointer: ' + pointer);
       return null;
     }
     for (let i = 0, l = pointerArray.length; i < l; ++i) {
-      let key = pointerArray[i];
-      if (typeof subObject !== 'object' || !(key in subObject)) {
+      let key: string | number = pointerArray[i];
+      if (key === '-' && isArray(subObject) && subObject.length) {
+        key = subObject.length - 1;
+      } else if (typeof subObject !== 'object' || !(key in subObject)) {
         if (returnError) return false;
         console.error('Unable to find "' + key + '" key in object.');
         console.error(pointer);
@@ -72,23 +78,23 @@ export class JsonPointer {
   }
 
   /**
-   * 'getSchema' function
+   * 'getFromSchema' function
    *
-   * Uses a json pointer for a data object to retrieve a sub-schema from
+   * Uses a JSON Pointer for a data object to retrieve a sub-schema from
    * a JSON Schema which describes that data object
    *
    * @param {JSON Schema} schema - schema to get value from
-   * @param {Pointer} pointer - JSON pointer (string or array)
+   * @param {Pointer} pointer - JSON Pointer (string or array)
    * @param {boolean = false} returnObject - return containing object instead
    * @return {schema} - located value or object
    */
-  static getSchema(
+  static getFromSchema(
     schema: any, pointer: Pointer, returnObject: boolean = false
   ): any {
     let subSchema = schema;
     let pointerArray: any[] = this.parse(pointer);
     if (pointerArray === null) {
-      console.error('Unable to get schema - invalid JSON pointer: ' + pointer);
+      console.error('Unable to get schema - invalid JSON Pointer: ' + pointer);
       return null;
     }
     let l = returnObject ? pointerArray.length - 1 : pointerArray.length;
@@ -130,26 +136,26 @@ export class JsonPointer {
   }
 
   /**
-   * 'getFormControl' function
+   * 'getFromFormGroup' function
    *
-   * Uses a json pointer for a data object to retrieve a control from
+   * Uses a JSON Pointer for a data object to retrieve a control from
    * an Angular 2 FormGroup object.
    *
    * If the optional third parameter 'returnGroup' is set to TRUE, this function
    * returns the group containing the control, rather than the control itself.
    *
    * @param {FormGroup} formGroup - Angular 2 FormGroup to get value from
-   * @param {Pointer} pointer - JSON pointer (string or array)
+   * @param {Pointer} pointer - JSON Pointer (string or array)
    * @param {boolean = false} returnGroup - if true, return group containing control
    * @return {group} - located value (or true or false if returnError = true)
    */
-  static getFormControl(
+  static getFromFormGroup(
     formGroup: any, pointer: Pointer, returnGroup: boolean = false
   ): any {
     let subGroup = formGroup;
     let pointerArray: string[] = this.parse(pointer);
     if (pointerArray === null) {
-      console.error('Unable to get FormGroup - invalid JSON pointer: ' + pointer);
+      console.error('Unable to get FormGroup - invalid JSON Pointer: ' + pointer);
       return null;
     }
     let l = returnGroup ? pointerArray.length - 1 : pointerArray.length;
@@ -178,19 +184,70 @@ export class JsonPointer {
   }
 
   /**
+   * 'resolveSchemaReference' function
+   *
+   * @param {object | string} reference - JSON Pointer, or '$ref' object
+   * @param {object} schema - the schema containing the reference
+   * @param {object} referenceLibrary - optional library of resolved refernces
+   * @return {object} - the refernced schema sub-section
+   */
+  static getSchemaReference(
+    schema: any, reference: any, referenceLibrary: any = null
+  ): any {
+    let schemaPointer: string;
+    let newSchema: any;
+    if (typeof reference === 'string') {
+      schemaPointer = JsonPointer.compile(reference);
+    } else {
+      if (!isObject(reference) || Object.keys(reference).length !== 1 ||
+        !('$ref' in reference) || typeof reference.$ref !== 'string'
+      ) {
+        return reference;
+      }
+      schemaPointer = JsonPointer.compile(reference.$ref);
+    }
+    if (schemaPointer === '') {
+      return schema;
+    } else if (referenceLibrary && referenceLibrary.hasOwnProperty(schemaPointer)) {
+      return referenceLibrary[schemaPointer];
+    // TODO: Add ability to download remote schema, if necessary
+    // } else if (schemaPointer.slice(0, 4) === 'http') {
+    //    http.get(schemaPointer).subscribe(response => {
+    //     // TODO: check for circular references
+    //     // TODO: test and adjust to allow for for async response
+    //     if (referenceLibrary) referenceLibrary[schemaPointer] = response.json();
+    //     return response.json();
+    //    });
+    } else {
+      newSchema = JsonPointer.get(schema, schemaPointer);
+      // If newSchema is just an allOf array, combine array elements
+      // TODO: Check and fix duplicate elements with different values
+      if (isObject(newSchema) && Object.keys(newSchema).length === 1 &&
+        ('allOf' in newSchema) && isArray(newSchema.allOf)
+      ) {
+        newSchema = newSchema.allOf
+          .map(object => JsonPointer.getSchemaReference(schema, object, referenceLibrary))
+          .reduce((schema1, schema2) => Object.assign(schema1, schema2), {});
+      }
+      if (referenceLibrary) referenceLibrary[schemaPointer] = newSchema;
+      return newSchema;
+    }
+  }
+
+  /**
    * 'set' function
    *
-   * Uses a json pointer to set a value on an object
+   * Uses a JSON Pointer to set a value on an object
    *
    * @param {object} object - object to set value in
-   * @param {Pointer} pointer - JSON pointer (string or array)
+   * @param {Pointer} pointer - JSON Pointer (string or array)
    * @param {any} value
    */
   static set(object: any, pointer: Pointer, value: any): any {
     let subObject: any = object;
     let pointerArray: string[] = this.parse(pointer);
     if (pointerArray === null) {
-      console.error('Unable to set - invalid JSON pointer: ' + pointer);
+      console.error('Unable to set - invalid JSON Pointer: ' + pointer);
       return null;
     }
     for (let i = 0, l = pointerArray.length - 1; i < l; ++i) {
@@ -210,16 +267,16 @@ export class JsonPointer {
   /**
    * 'remove' function
    *
-   * Uses a json pointer to remove an attribute from an object
+   * Uses a JSON Pointer to remove an attribute from an object
    *
    * @param {object} object - object to delete attribute from
-   * @param {Pointer} pointer - JSON pointer (string or array)
+   * @param {Pointer} pointer - JSON Pointer (string or array)
    * @return {object}
    */
   static remove(object: any, pointer: Pointer): any {
     let pointerArray: any[] = this.parse(pointer);
     if (pointerArray === null) {
-      console.error('Unable to remove - invalid JSON pointer: ' + pointer);
+      console.error('Unable to remove - invalid JSON Pointer: ' + pointer);
       return null;
     }
     let lastKey = pointerArray[pointerArray.length - 1];
@@ -230,10 +287,10 @@ export class JsonPointer {
   /**
    * 'has' function
    *
-   * Tests if an object has a value for a json pointer
+   * Tests if an object has a value at the location specified by a JSON Pointer
    *
    * @param {object} object - object to chek for value
-   * @param {Pointer} pointer - JSON pointer (string or array)
+   * @param {Pointer} pointer - JSON Pointer (string or array)
    * @return {boolean}
    */
   static has(object: any, pointer: Pointer): boolean {
@@ -259,8 +316,8 @@ export class JsonPointer {
    *
    * Iterates over an object or array, recursively iterating over any
    * sub-objects or sub-arrays, and calls an iterator function on each
-   * value which is not an object or array (so all strings, numbers,
-   * booleans, and nulls).
+   * primitive value (so all strings, numbers, booleans, and nulls,
+   * but not objects or arrays).
    *
    * Iterator: function (value, pointer) => any
    *
@@ -309,11 +366,11 @@ export class JsonPointer {
   /**
    * 'parse' function
    *
-   * Converts a string json pointer into a array of keys
+   * Converts a string JSON Pointer into a array of keys
    * (if input is already an an array of keys, it is returned unchanged)
    *
-   * @param {Pointer} pointer - JSON pointer (string or array)
-   * @return {string[]} - JSON pointer array of keys
+   * @param {Pointer} pointer - JSON Pointer (string or array)
+   * @return {string[]} - JSON Pointer array of keys
    */
   static parse(pointer: Pointer): string[] {
     if (isArray(pointer)) return <string[]>pointer;
@@ -321,12 +378,12 @@ export class JsonPointer {
       if ((<string>pointer).charAt(0) === '#') pointer = pointer.slice(1);
       if (<string>pointer === '') return [];
       if ((<string>pointer).charAt(0) !== '/') {
-        console.error('Invalid JSON pointer, does not start with "/": ' + pointer);
+        console.error('Invalid JSON Pointer, does not start with "/": ' + pointer);
         return null;
       }
       return (<string>pointer).slice(1).split('/').map(this.unescape);
     }
-    console.error('Invalid JSON pointer, not a string or array:');
+    console.error('Invalid JSON Pointer, not a string or array:');
     console.error(pointer);
     return null;
   }
@@ -334,13 +391,13 @@ export class JsonPointer {
   /**
    * 'compile' function
    *
-   * Converts an array of keys into a json pointer string
+   * Converts an array of keys into a JSON Pointer string
    * (if input is already a string, it is normalized and returned)
    *
    * The optional second parameter is a default which will replace any empty keys.
    *
-   * @param {Pointer} keyArray - JSON pointer (string or array)
-   * @returns {string} - JSON pointer string
+   * @param {Pointer} keyArray - JSON Pointer (string or array)
+   * @returns {string} - JSON Pointer string
    */
   static compile(keyArray: Pointer, defaultValue: string | number = ''): string {
     if (isArray(keyArray)) {
@@ -352,12 +409,12 @@ export class JsonPointer {
     if (typeof keyArray === 'string') {
       if (keyArray.charAt(0) === '#') keyArray = keyArray.slice(1);
       if (keyArray.length && keyArray.charAt(0) !== '/') {
-        console.error('Invalid JSON pointer, does not start with "/": ' + keyArray);
+        console.error('Invalid JSON Pointer, does not start with "/": ' + keyArray);
         return null;
       }
       return keyArray;
     }
-    console.error('Invalid JSON pointer, not a string or array:');
+    console.error('Invalid JSON Pointer, not a string or array:');
     console.error(keyArray);
     return null;
   }
@@ -365,9 +422,9 @@ export class JsonPointer {
   /**
    * 'toKey' function
    *
-   * Extracts name of the final from a JSON pointer.
+   * Extracts name of the final from a JSON Pointer.
    *
-   * @param {Pointer} pointer - JSON pointer (string or array)
+   * @param {Pointer} pointer - JSON Pointer (string or array)
    * @returns {string} - the extracted key
    */
   static toKey(pointer: Pointer): string {
@@ -412,7 +469,7 @@ export class JsonPointer {
     let longArray: string[] = (isArray(longPointer)) ?
       <string[]>longPointer : JsonPointer.parse(<string>longPointer);
     if (!shortArray || !longArray) {
-      console.error('Invalid JSON pointer, not a string or array:');
+      console.error('Invalid JSON Pointer, not a string or array:');
       if (!shortArray) console.error(shortPointer);
       if (!longArray) console.error(longPointer);
       return null;
@@ -431,8 +488,8 @@ export class JsonPointer {
   /**
    * 'parseObjectPath' function
    *
-   * Parses a JavaScript object path into an array of keys, which can then be
-   * submitted to compile() to convert into a JSON Pointer.
+   * Parses a JavaScript object path into an array of keys, which
+   * can then be passed to compile() to convert into a JSON Pointer.
    *
    * Based on mike-marcacci's objectpath parse function:
    * https://github.com/mike-marcacci/objectpath
@@ -494,14 +551,15 @@ export class JsonPointer {
  *
  * Iterates over all items in the first level of an object or array
  * and calls an iterator funciton on each item.
- * Does not iterate over items in sub-objects or sub-arrays.
+ *
+ * Does NOT recursively iterate over items in sub-objects or sub-arrays.
  *
  * Based on manuelstofer's foreach function:
  * https://github.com/manuelstofer/foreach
  *
- * @param {Object|Array} col - the collection object or array to iterate over
+ * @param {Object|Array} col - collection: the object or array to iterate over
  * @param {function} fn - the iterator funciton to call on each item
- * @param {any} ctx - the context in which to call the iterator function
+ * @param {any = null} ctx - an optional context in which to call the iterator function
  * @return {void}
  */
 export function forEach(
@@ -521,7 +579,7 @@ export function forEach(
     }
   } else if (isObject(col)) {
     for (let key in col) {
-      if (col.hasOwnProperty.call(key)) {
+      if (col.hasOwnProperty(key)) {
         fn.call(ctx, col[key], key, col);
       }
     }

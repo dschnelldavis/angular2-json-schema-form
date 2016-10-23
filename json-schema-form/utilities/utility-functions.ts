@@ -1,22 +1,27 @@
 import {
   AbstractControl, FormArray, FormControl, FormGroup, ValidatorFn
 } from '@angular/forms';
+import { Http } from '@angular/http';
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/map';
 
 import * as _ from 'lodash';
 
-import { JsonPointer } from './jsonpointer';
-import { JsonValidators } from './json-validators';
 import {
   isPresent, isBlank, isSet, isNotSet, isEmpty, isString, isNumber,
   isInteger, isBoolean, isFunction, isObject, isArray, getType, isType,
-  toJavaScriptType, toSchemaType, xor, hasOwn, forOwn, inArray
+  toJavaScriptType, toSchemaType, xor, hasOwn, forOwn, inArray,
+  SchemaPrimitiveType
 } from './validator-functions';
+import { JsonPointer } from './jsonpointer';
 
-export {
-  isPresent, isBlank, isSet, isNotSet, isEmpty, isString, isNumber,
-  isInteger, isBoolean, isFunction, isObject, isArray, getType, isType,
-  toJavaScriptType, toSchemaType, xor, hasOwn, forOwn, inArray
-}
+/**
+ * Utility function library:
+ *
+ * getInputType, mapLayout, isInputRequired, buildTitleMap, formatFormData
+ *
+ * forOwnDeep, toTitleCase
+ */
 
 /**
  * 'getInputType' function
@@ -121,10 +126,10 @@ export function mapLayout(
     if (isObject(newItem)) {
       if (isArray(newItem.items)) {
         newItem.items =
-          this.mapLayout(newItem.items, fn, rootLayout, newPath + '/items');
+          mapLayout(newItem.items, fn, rootLayout, newPath + '/items');
       } else if (isArray(newItem.tabs)) {
         newItem.tabs =
-          this.mapLayout(newItem.tabs, fn, rootLayout, newPath + '/tabs');
+          mapLayout(newItem.tabs, fn, rootLayout, newPath + '/tabs');
       }
     }
     newItem = fn(newItem, realIndex, rootLayout, newPath);
@@ -137,122 +142,6 @@ export function mapLayout(
   });
   return newLayout;
 };
-
-/**
- * 'resolveSchemaReference' function
- *
- * @param {object | string} reference
- * @param {object} schema
- * @return {object}
- */
-export function resolveSchemaReference(
-  reference: any, schema: any, schemaReferences: any
-): any {
-  let schemaPointer: string;
-  if (typeof reference === 'string') {
-    schemaPointer = JsonPointer.compile(reference);
-  } else {
-    if (!isObject(reference) || Object.keys(reference).length !== 1 ||
-      !('$ref' in reference) || typeof reference.$ref !== 'string'
-    ) {
-      return reference;
-    }
-    schemaPointer = JsonPointer.compile(reference.$ref);
-  }
-  if (schemaPointer === '') {
-    return schema;
-  } else if (hasOwn(schemaReferences, schemaPointer)) {
-    return schemaReferences[schemaPointer];
-  } else if (schemaPointer.slice(0, 4) === 'http') {
-    // Download remote schema
-     this.http.get(schemaPointer).subscribe(response => {
-      // TODO: check for circular references
-      // TODO: test and adjust to allow for for async response
-      schemaReferences[schemaPointer] = response.json();
-      return schemaReferences[schemaPointer];
-     });
-  } else {
-    let newSchema = JsonPointer.get(schema, schemaPointer);
-    if (
-      isObject(newSchema) && Object.keys(newSchema).length === 1 &&
-      ('allOf' in newSchema) && isArray(newSchema.allOf)
-    ) {
-      let combinedSchema = newSchema.allOf
-        .map(object => this.resolveSchemaReference(object, schema, schemaReferences))
-        .reduce((schema1, schema2) => Object.assign(schema1, schema2), {});
-      schemaReferences[schemaPointer] = combinedSchema;
-    } else {
-      schemaReferences[schemaPointer] = newSchema;
-    }
-    return schemaReferences[schemaPointer];
-  }
-}
-
-/**
- * 'setObjectInputOptions' function
- *
- * @param {schema} schema - JSON Schema
- * @param {object} formControlTemplate - Form Control Template object
- * @return {boolean} true if any fields have been set to required, otherwise false
- */
-export function setObjectInputOptions(schema: any, formControlTemplate: any): boolean {
-  let fieldsRequired = false;
-  if (hasOwn(schema, 'required') && !_.isEmpty(schema.required)) {
-    fieldsRequired = true;
-    let requiredArray = isArray(schema.required) ?
-      schema.required : [schema.required];
-    _.forEach(requiredArray,
-      key => JsonPointer.set(formControlTemplate, '/' + key + '/validators/required', [])
-    );
-  }
-  return fieldsRequired;
-  // TODO: Add support for patternProperties
-  // https://spacetelescope.github.io/understanding-json-schema/reference/object.html#pattern-properties
-}
-
-/**
- * 'getControlValidators' function
- *
- * @param {schema} schema
- * @return {validators}
- */
-export function getControlValidators(schema: any) {
-  let validators: any = {};
-  if (hasOwn(schema, 'type')) {
-    switch (schema.type) {
-      case 'string':
-        _.forEach(['pattern', 'format', 'minLength', 'maxLength'], (prop) => {
-          if (hasOwn(schema, prop)) validators[prop] = [schema[prop]];
-        });
-      break;
-      case 'number': case 'integer':
-        _.forEach(['Minimum', 'Maximum'], (Limit) => {
-          let eLimit = 'exclusive' + Limit;
-          let limit = Limit.toLowerCase();
-          if (hasOwn(schema, limit)) {
-            let exclusive = hasOwn(schema, eLimit) && schema[eLimit] === true;
-            validators[limit] = [schema[limit], exclusive];
-          }
-        });
-        _.forEach(['multipleOf', 'type'], (prop) => {
-          if (hasOwn(schema, prop)) validators[prop] = [schema[prop]];
-        });
-      break;
-      case 'object':
-        _.forEach(['minProperties', 'maxProperties', 'dependencies'], (prop) => {
-          if (hasOwn(schema, prop)) validators[prop] = [schema[prop]];
-        });
-      break;
-      case 'array':
-        _.forEach(['minItems', 'maxItems', 'uniqueItems'], (prop) => {
-          if (hasOwn(schema, prop)) validators[prop] = [schema[prop]];
-        });
-      break;
-    }
-  }
-  if (hasOwn(schema, 'enum')) validators['enum'] = [schema.enum];
-  return validators;
-}
 
 /**
  * 'forOwnDeep' function
@@ -301,7 +190,7 @@ export function forOwnDeep(
   if (!isRoot && !bottomUp) fn(object, currentKey, rootObject, jsonPointer);
   if (isArray(object) || isObject(object)) {
     let keys: string[] = Object.keys(object);
-    let recurse: Function = (key) => this.forOwnDeep(object[key],
+    let recurse: Function = (key) => forOwnDeep(object[key],
       fn, rootObject, jsonPointer + '/' + JsonPointer.escape(key), bottomUp);
     if (bottomUp) {
       for (let i = keys.length - 1, l = 0; i >= l; i--) recurse(keys[i]);
@@ -335,9 +224,9 @@ export function isInputRequired(schema: any, pointer: string): boolean {
       let listPointerArray: string[] = dataPointerArray.slice(0, -1);
       if (listPointerArray[listPointerArray.length - 1] === '-') {
         listPointerArray = listPointerArray.slice(0, -1);
-        requiredList = JsonPointer.getSchema(schema, listPointerArray)['items']['required'];
+        requiredList = JsonPointer.getFromSchema(schema, listPointerArray)['items']['required'];
       } else {
-        requiredList = JsonPointer.getSchema(schema, listPointerArray)['required'];
+        requiredList = JsonPointer.getFromSchema(schema, listPointerArray)['required'];
       }
     } else {
       requiredList = schema['required'];
@@ -356,7 +245,7 @@ export function isInputRequired(schema: any, pointer: string): boolean {
  * @return { { name: any, value: any}[] }
  */
 export function buildTitleMap(
-  titleMap: any, enumList: any, fieldRequired: boolean = false
+  titleMap: any, enumList: any, fieldRequired: boolean = true
 ): { name: any, value: any}[] {
   let newTitleMap: { name: any, value: any}[] = [];
   let hasEmptyValue: boolean = false;
@@ -365,7 +254,7 @@ export function buildTitleMap(
       if (enumList) {
         for (let i = 0, l = titleMap.length; i < l; i++) {
           let value: any = titleMap[i].value;
-          if (enumList.indexOf(value) > -1) {
+          if (enumList.indexOf(value) !== -1) {
             let name: any = titleMap[i].name;
             newTitleMap.push({ name, value });
             if (!value) hasEmptyValue = true;
@@ -408,7 +297,43 @@ export function buildTitleMap(
 }
 
 /**
- * 'toTitleCase'
+ * 'formatFormData' function
+ *
+ * @param {any} formData - Angular 2 FormGroup data object
+ * @param {any} fieldMap - map of correct data types for each field
+ * @param {boolean = false} fixErrors - if TRUE, tries to fix data
+ * @return {any} - formatted data object
+ */
+export function formatFormData(formData: any, fieldMap: any, fixErrors: boolean = false): any {
+  let formattedData = {};
+  forOwnDeep(formData, (value, key, ignore, pointer) => {
+    let genericPointer: string;
+    if (hasOwn(fieldMap, pointer)) {
+      genericPointer = pointer;
+    } else { // TODO: Fix to allow for integer object keys
+      genericPointer = JsonPointer.compile(
+        JsonPointer.parse(pointer).map(k => (isInteger(k)) ? '-' : k)
+      );
+    }
+    if (hasOwn(fieldMap, genericPointer) &&
+      hasOwn(fieldMap[genericPointer], 'schemaType')
+    ) {
+      let schemaType: SchemaPrimitiveType | SchemaPrimitiveType[] =
+        fieldMap[genericPointer]['schemaType'];
+      if (isSet(value) &&
+        inArray(schemaType, ['string', 'integer', 'number', 'boolean', 'null'])
+      ) {
+        let newValue = fixErrors ? toSchemaType(value, schemaType) :
+          toJavaScriptType(value, <SchemaPrimitiveType>schemaType);
+        if (isPresent(newValue)) JsonPointer.set(formattedData, pointer, newValue);
+      }
+    }
+  });
+  return formattedData;
+}
+
+/**
+ * 'toTitleCase' function
  *
  * Intelligently converts an input string to Title Case.
  *
@@ -434,14 +359,14 @@ export function toTitleCase(input: string, forceWords?: string | string[]): stri
   let prevLastChar: string = '';
   input = input.trim();
   return input.replace(/[A-Za-z0-9\u00C0-\u00FF]+[^\s-]*/g, (word, idx) => {
-    if (!noInitialCase && word.slice(1).search(/[A-Z]|\../) > -1) {
+    if (!noInitialCase && word.slice(1).search(/[A-Z]|\../) !== -1) {
       return word;
     } else {
       let newWord: string;
       let forceWord: string = forceArray[forceArrayLower.indexOf(word.toLowerCase())];
       if (!forceWord) {
         if (noInitialCase) {
-          if (word.slice(1).search(/\../) > -1) {
+          if (word.slice(1).search(/\../) !== -1) {
             newWord = word.toLowerCase();
           } else {
             newWord = word[0].toUpperCase() + word.slice(1).toLowerCase();
@@ -452,7 +377,7 @@ export function toTitleCase(input: string, forceWords?: string | string[]): stri
       } else if (
         forceWord === forceWord.toLowerCase() && (
           idx === 0 || idx + word.length === input.length ||
-          prevLastChar === ':' || input[idx - 1].search(/[^\s-]/) > -1 ||
+          prevLastChar === ':' || input[idx - 1].search(/[^\s-]/) !== -1 ||
           (input[idx - 1] !== '-' && input[idx + word.length] === '-')
         )
       ) {

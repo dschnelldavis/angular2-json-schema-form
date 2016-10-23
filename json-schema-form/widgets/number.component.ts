@@ -39,7 +39,7 @@ export class NumberComponent implements OnInit {
   @Input() formOptions: any; // Global form defaults and options
 
   ngOnInit() {
-    this.formControlGroup = JsonPointer.getFormControl(this.formGroup, this.layoutNode.pointer, true);
+    this.formControlGroup = JsonPointer.getFromFormGroup(this.formGroup, this.layoutNode.pointer, true);
     this.step = this.layoutNode.multipleOf ||
       (this.layoutNode.type === 'integer' ? '1' : 'any');
   }

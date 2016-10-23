@@ -25,8 +25,8 @@ import { toPromise } from 'rxjs/operator/toPromise';
  *
  * Note: 'IValidatorFn' is short for 'invertable validator function',
  *   which is a validator functions that accepts an optional second
- *   argument which, if passed a TRUE value, causes the validator to
- *   perform the opposite of its original finction.
+ *   argument which, if set to TRUE, causes the validator to perform
+ *   the opposite of its original finction.
  */
 
 export type SchemaPrimitiveType =
@@ -505,7 +505,7 @@ export function toSchemaType(
  *
  * @param {any} value1 - first value to check
  * @param {any} value2 - second value to check
- * @return {boolean} - true if exatly one in put is truthy, false if not
+ * @return {boolean} - true if exactly one input value is truthy, false if not
  */
 export function xor(value1: any, value2: any): boolean {
   return (!!value1 && !value2) || (!value1 && !!value2);
@@ -530,8 +530,8 @@ export function hasOwn(object: PlainObject, property: string): boolean {
  *
  * Iterates through an object and calls a function on each key and value.
  * The function is called with three arguments: (value, key, object).
- * Returns a new object with the same keys as the original, but with the values
- * returned by the function.
+ * Returns a new object with the same keys as the original object,
+ * but with the values returned by the function.
  *
  * @param {object} object - the object to iterate through
  * @param {(v: string, k: any) => any} fn - the function to call
@@ -559,8 +559,8 @@ export function forOwn(
  *
  * If the optional third parameter allIn is set to TRUE, and the item to find
  * is an array, then the function returns true only if all elements from item
- * are found in list, and false if any element is not found. If item is not
- * an array, setting allIn to TRUE has no effect.
+ * are found in the list, and false if any element is not found. If the item to
+ * find is not an array, setting allIn to TRUE has no effect.
  *
  * @param {any|any[]} item - the item to search for
  * @param {any[]} array - the array to search

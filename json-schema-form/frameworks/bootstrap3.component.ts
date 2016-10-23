@@ -33,7 +33,7 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked {
 
   ngOnInit() {
     if ('pointer' in this.layoutNode) {
-      let thisControl = JsonPointer.getFormControl(this.formGroup, this.layoutNode.pointer);
+      let thisControl = JsonPointer.getFromFormGroup(this.formGroup, this.layoutNode.pointer);
       if (thisControl) this.formControl = thisControl;
     }
 
@@ -86,6 +86,9 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked {
         break;
         case 'checkboxes':
           this.layoutNode.htmlClass += ' checkbox';
+        break;
+        case 'checkboxes-inline':
+          this.layoutNode.labelHtmlClass += ' checkbox-inline';
         break;
         case 'radiobuttons':
           this.htmlClass += ' btn-group';

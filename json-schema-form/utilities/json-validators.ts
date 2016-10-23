@@ -42,8 +42,7 @@ import {
  * (Validators originally included with Angular 2 are maked with (*).)
  *
  * NOTE: The dependencies validator is not complete.
- * NOTE: The enum validator currently only works with primitive values
- *   (text, numbers, booleans). It does not yet work with objects or arrays.
+ * NOTE: The enum validator does not yet work with objects.
  *
  * Validator transformation functions:
  *   composeAnyOf, composeOneOf, composeAllOf, composeNot
@@ -83,7 +82,7 @@ export class JsonValidators {
    * For formArray arrays:     minItems, maxItems, uniqueItems
    *
    * TODO: finish dependencies validator
-   * TODO: update enum to work with formGroup objects and formArray arrays
+   * TODO: update enum to work with formGroup objects
    */
 
   /**
@@ -163,36 +162,42 @@ export class JsonValidators {
    * match number, boolean, and null enum values.
    * (toJavaScriptType() can be used later to convert these string values.)
    *
-   * TODO: modify to work with objects and arrays
+   * TODO: modify to work with objects
    *
-   * @param {PrimitiveValue[]} enumList - array of acceptable values
+   * @param {any[]} enumList - array of acceptable values
    * @return {IValidatorFn}
    */
-  static enum(enumList: PrimitiveValue[]): IValidatorFn {
+  static enum(enumList: any[]): IValidatorFn {
     return (control: AbstractControl, invert: boolean = false): PlainObject => {
       if (isEmpty(control.value)) return null;
-      let isValid: boolean = false;
-      let actualValue: PrimitiveValue = control.value;
-      for (let i = 0, l = enumList.length; i < l; i++) {
-        let enumValue: PrimitiveValue = enumList[i];
-        if (actualValue === enumValue) {
-          isValid = true; break;
-        } else if (
-          isNumber(enumValue) &&
-          parseFloat(<string>actualValue) === parseFloat(<string>enumValue)
-        ) {
-          isValid = true; break;
-        } else if (
-          isBoolean(enumValue, 'strict') &&
-          toJavaScriptType(actualValue, 'boolean') === enumValue
-        ) {
-          isValid = true; break;
-        } else if (enumValue === null && isNotSet(actualValue)) {
-          isValid = true; break;
+      let isValid: boolean = true;
+      let actualValues: any | any[] = (isArray(control.value)) ?
+        control.value : [control.value];
+      for (let i1 = 0, l1 = actualValues.length; i1 < l1; i1++) {
+        let actualValue: any = actualValues[i1];
+        let itemIsValid: boolean = false;
+        for (let i2 = 0, l2 = enumList.length; i2 < l2; i2++) {
+          let enumValue: any = enumList[i2];
+          if (actualValue === enumValue) {
+            itemIsValid = true; break;
+          } else if (
+            isNumber(enumValue) &&
+            parseFloat(<string>actualValue) === parseFloat(<string>enumValue)
+          ) {
+            itemIsValid = true; break;
+          } else if (
+            isBoolean(enumValue, 'strict') &&
+            toJavaScriptType(actualValue, 'boolean') === enumValue
+          ) {
+            itemIsValid = true; break;
+          } else if (enumValue === null && isNotSet(actualValue)) {
+            itemIsValid = true; break;
+          }
         }
+        if (!itemIsValid) { isValid = false; break; }
       }
       return xor(isValid, invert) ?
-        null : { 'enum': { 'enum': enumList, actualValue } };
+        null : { 'enum': { 'enum': enumList, 'actualValue': control.value } };
     };
   }
 
@@ -272,7 +277,7 @@ export class JsonValidators {
    * This validator currently checks the following formsts:
    * 'date-time'|'email'|'hostname'|'ipv4'|'ipv6'|'uri'
    *
-   * TODO: add 'regex' format
+   * TODO: add 'regex' and 'color' formats
    *
    * @param {'date-time'|'email'|'hostname'|'ipv4'|'ipv6'|'uri'} format - format to check
    * @return {IValidatorFn}

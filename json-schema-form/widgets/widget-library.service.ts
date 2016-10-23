@@ -71,6 +71,7 @@ export class WidgetLibraryService {
 
   // HTML form control widget sets
     'checkboxes': CheckboxesComponent, // grouped list of checkboxes
+    'checkboxes-inline': CheckboxesComponent, // checkboxes in one line
     'radios': RadiosComponent, // grouped list of radio buttons
     'radios-inline': RadiosInlineComponent, // radio buttons in one line
     'radiobuttons': RadiosInlineComponent, // radio buttons with bootstrap buttons

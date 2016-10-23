@@ -46,8 +46,7 @@ export class RadiosComponent implements OnInit {
 
   ngOnInit() {
     this.formControlGroup =
-      JsonPointer.getFormControl(this.formGroup, this.layoutNode.pointer, true);
-    this.titleMap =
-      buildTitleMap(this.layoutNode.titleMap, this.layoutNode.enum, true);
+      JsonPointer.getFromFormGroup(this.formGroup, this.layoutNode.pointer, true);
+    this.titleMap = buildTitleMap(this.layoutNode.titleMap, this.layoutNode.enum);
   }
 }
