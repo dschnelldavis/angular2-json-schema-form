@@ -15,22 +15,22 @@ import { Injectable } from '@angular/core';
  * Based on manuelstofer's json-pointer utilities
  * https://github.com/manuelstofer/json-pointer
  */
+export type Pointer = string | string[];
+
 @Injectable()
 export class JsonPointer {
 
   /**
    * 'get' function
    *
-   * Uses a json pointer to retrieve a value from an object
+   * Uses a JSON Pointer to retrieve a value from an object
    *
    * @param {object} object - object to get value from
-   * @param {string | string[]} pointer - JSON pointer (string or array)
+   * @param {Pointer} pointer - JSON pointer (string or array)
    * @param {boolean = false} returnError - return only true or false for error
    * @return {object} - located value (or true or false if returnError = true)
    */
-  static get(
-    object: any, pointer: string | string[], returnError: boolean = false
-  ): any {
+  static get(object: any, pointer: Pointer, returnError: boolean = false): any {
     let subObject = object;
     let pointerArray: any[] = this.parse(pointer);
     if (pointerArray === null) {
@@ -53,18 +53,37 @@ export class JsonPointer {
   }
 
   /**
+   * 'getFirst' function
+   *
+   * Takes an array of JSON Pointers and objects, and returns the value
+   * from the first pointer to find a value in its object.
+   *
+   * @param {[object, pointer][]} items - array of objects and pointers to check
+   * @return {any} - first set value
+   */
+  static getFirst(items: [any, Pointer][], defaultValue: any = null): any {
+    if (!isArray(items)) return null;
+    for (let i = 0, l = items.length; i < l; i++) {
+      if (isArray(items[i]) && JsonPointer.has(items[i][0], items[i][1])) {
+        return JsonPointer.get(items[i][0], items[i][1]);
+      }
+    }
+    return defaultValue;
+  }
+
+  /**
    * 'getSchema' function
    *
    * Uses a json pointer for a data object to retrieve a sub-schema from
    * a JSON Schema which describes that data object
    *
    * @param {JSON Schema} schema - schema to get value from
-   * @param {string | string[]} pointer - JSON pointer (string or array)
+   * @param {Pointer} pointer - JSON pointer (string or array)
    * @param {boolean = false} returnObject - return containing object instead
    * @return {schema} - located value or object
    */
   static getSchema(
-    schema: any, pointer: string | string[], returnObject: boolean = false
+    schema: any, pointer: Pointer, returnObject: boolean = false
   ): any {
     let subSchema = schema;
     let pointerArray: any[] = this.parse(pointer);
@@ -120,12 +139,12 @@ export class JsonPointer {
    * returns the group containing the control, rather than the control itself.
    *
    * @param {FormGroup} formGroup - Angular 2 FormGroup to get value from
-   * @param {string | string[]} pointer - JSON pointer (string or array)
+   * @param {Pointer} pointer - JSON pointer (string or array)
    * @param {boolean = false} returnGroup - if true, return group containing control
    * @return {group} - located value (or true or false if returnError = true)
    */
   static getFormControl(
-    formGroup: any, pointer: string | string[], returnGroup: boolean = false
+    formGroup: any, pointer: Pointer, returnGroup: boolean = false
   ): any {
     let subGroup = formGroup;
     let pointerArray: string[] = this.parse(pointer);
@@ -164,10 +183,10 @@ export class JsonPointer {
    * Uses a json pointer to set a value on an object
    *
    * @param {object} object - object to set value in
-   * @param {string | string[]} pointer - JSON pointer (string or array)
+   * @param {Pointer} pointer - JSON pointer (string or array)
    * @param {any} value
    */
-  static set(object: any, pointer: string | string[], value: any): any {
+  static set(object: any, pointer: Pointer, value: any): any {
     let subObject: any = object;
     let pointerArray: string[] = this.parse(pointer);
     if (pointerArray === null) {
@@ -194,10 +213,10 @@ export class JsonPointer {
    * Uses a json pointer to remove an attribute from an object
    *
    * @param {object} object - object to delete attribute from
-   * @param {string | string[]} pointer - JSON pointer (string or array)
+   * @param {Pointer} pointer - JSON pointer (string or array)
    * @return {object}
    */
-  static remove(object: any, pointer: string | string[]): any {
+  static remove(object: any, pointer: Pointer): any {
     let pointerArray: any[] = this.parse(pointer);
     if (pointerArray === null) {
       console.error('Unable to remove - invalid JSON pointer: ' + pointer);
@@ -214,10 +233,10 @@ export class JsonPointer {
    * Tests if an object has a value for a json pointer
    *
    * @param {object} object - object to chek for value
-   * @param {string | string[]} pointer - JSON pointer (string or array)
+   * @param {Pointer} pointer - JSON pointer (string or array)
    * @return {boolean}
    */
-  static has(object: any, pointer: string | string[]): boolean {
+  static has(object: any, pointer: Pointer): boolean {
     return this.get(object, pointer, true);
   }
 
@@ -293,10 +312,10 @@ export class JsonPointer {
    * Converts a string json pointer into a array of keys
    * (if input is already an an array of keys, it is returned unchanged)
    *
-   * @param {string | string[]} pointer - JSON pointer (string or array)
+   * @param {Pointer} pointer - JSON pointer (string or array)
    * @return {string[]} - JSON pointer array of keys
    */
-  static parse(pointer: string | string[]): string[] {
+  static parse(pointer: Pointer): string[] {
     if (isArray(pointer)) return <string[]>pointer;
     if (typeof pointer === 'string') {
       if ((<string>pointer).charAt(0) === '#') pointer = pointer.slice(1);
@@ -320,10 +339,10 @@ export class JsonPointer {
    *
    * The optional second parameter is a default which will replace any empty keys.
    *
-   * @param {string | string[]} keyArray - JSON pointer (string or array)
+   * @param {Pointer} keyArray - JSON pointer (string or array)
    * @returns {string} - JSON pointer string
    */
-  static compile(keyArray: string | string[], defaultValue: string | number = ''): string {
+  static compile(keyArray: Pointer, defaultValue: string | number = ''): string {
     if (isArray(keyArray)) {
       if ((<string[]>keyArray).length === 0) return '';
       return '/' + (<string[]>keyArray).map(
@@ -348,10 +367,10 @@ export class JsonPointer {
    *
    * Extracts name of the final from a JSON pointer.
    *
-   * @param {string | string[]} pointer - JSON pointer (string or array)
+   * @param {Pointer} pointer - JSON pointer (string or array)
    * @returns {string} - the extracted key
    */
-  static toKey(pointer: string | string[]): string {
+  static toKey(pointer: Pointer): string {
     let pointerArray = JsonPointer.parse(pointer);
     if (pointerArray === null) return null;
     if (!pointerArray.length) return '';
@@ -381,12 +400,12 @@ export class JsonPointer {
    *
    * Checks whether one JSON Pointer is a subset of another.
    *
-   * @param {string | string[]} shortPointer -
-   * @param {string | string[]} longPointer -
+   * @param {Pointer} shortPointer -
+   * @param {Pointer} longPointer -
    * @return {boolean} - true if shortPointer is a subset of longPointer
    */
   static isSubPointer(
-    shortPointer: string | string[], longPointer: string | string[]
+    shortPointer: Pointer, longPointer: Pointer
   ): boolean {
     let shortArray: string[] = (isArray(shortPointer)) ?
       <string[]>shortPointer : JsonPointer.parse(<string>shortPointer);
@@ -421,7 +440,7 @@ export class JsonPointer {
    * @param {string} objectPath - the object path to parse
    * @return {string[]} - the resulting array of keys
    */
-  static parseObjectPath(objectPath: string | string[]): string[] {
+  static parseObjectPath(objectPath: Pointer): string[] {
     if (isArray(objectPath)) return <string[]>objectPath;
     if (typeof objectPath === 'string') {
       let index: number = 0;

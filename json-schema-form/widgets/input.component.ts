@@ -21,7 +21,6 @@ import { JsonPointer } from '../utilities/jsonpointer';
         [attr.required]="layoutNode?.required">
     </div>
     <input *ngIf="!layoutNode?.pointer"
-      [id]="layoutNode?.pointer"
       [class]="layoutNode?.fieldHtmlClass"
       [type]="layoutNode?.type"
       [name]="layoutNode?.name"

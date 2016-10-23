@@ -21,7 +21,6 @@ import { JsonPointer } from '../utilities/jsonpointer';
         [attr.required]="layoutNode?.required">
     </div>
     <input *ngIf="!layoutNode?.pointer"
-      [id]="layoutNode?.pointer"
       [class]="layoutNode?.fieldHtmlClass"
       [type]="layoutNode?.type === 'range' ? 'range' : 'number'"
       [name]="layoutNode?.name"
@@ -41,7 +40,6 @@ export class NumberComponent implements OnInit {
 
   ngOnInit() {
     this.formControlGroup = JsonPointer.getFormControl(this.formGroup, this.layoutNode.pointer, true);
-console.log(this.formControlGroup);
     this.step = this.layoutNode.multipleOf ||
       (this.layoutNode.type === 'integer' ? '1' : 'any');
   }

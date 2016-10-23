@@ -55,16 +55,12 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked {
     }
 
     if ('isArrayItem' in this.layoutNode && this.layoutNode.isArrayItem === true) {
-// console.log('array item');
       this.controlView = 'array-item';
     } else {
-
       switch (this.layoutNode.type) {
-
         case 'array': case 'array-item': case '$ref':
           this.controlView = this.layoutNode.type;
         break;
-
         case 'fieldset': case 'advancedfieldset': case 'authfieldset':
           if (this.layoutNode.type === 'advancedfieldset') {
             this.layoutNode.title = 'Advanced options';
@@ -73,26 +69,35 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked {
           }
           this.controlView = 'minimal';
         break;
-
         case 'help': case 'msg': case 'message':
           this.controlView = 'minimal';
         break;
-
         case 'section': case 'conditional':
           this.controlView = 'minimal';
           this.htmlClass += ' schema-form-section';
         break;
-
         case 'button': case 'submit':
           this.controlView = 'minimal';
           this.layoutNode.fieldHtmlClass += ' btn btn-info';
         break;
-
         case 'checkbox':
           this.controlView = 'checkbox';
           this.htmlClass += ' checkbox';
         break;
-
+        case 'checkboxes':
+          this.layoutNode.htmlClass += ' checkbox';
+        break;
+        case 'radiobuttons':
+          this.htmlClass += ' btn-group';
+          this.layoutNode.labelHtmlClass += ' btn btn-default';
+          this.layoutNode.fieldHtmlClass += ' sr-only';
+        break;
+        case 'radio': case 'radios':
+          this.layoutNode.htmlClass += ' radio';
+        break;
+        case 'radios-inline':
+          this.layoutNode.labelHtmlClass += ' radio-inline';
+        break;
         default:
           this.layoutNode.fieldHtmlClass += ' form-control';
       }
@@ -105,9 +110,8 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked {
       this.widgetContainer && !this.widgetContainer.length &&
       this.layoutNode && this.layoutNode.widget
     ) {
-      if (this.controlView === 'array') {
+      if (this.controlView === 'array' && 'items' in this.layoutNode) {
         for (let i = 0, l = this.layoutNode.items.length; i < l; i++) {
-// console.log(this.layoutNode.items[i]);
           if (this.layoutNode.items[i]) {
             let addedNode: ComponentRef<any> = this.widgetContainer.createComponent(
               this.componentFactory.resolveComponentFactory(this.formOptions.framework)

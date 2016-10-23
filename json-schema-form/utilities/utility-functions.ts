@@ -5,12 +5,12 @@ import {
 import * as _ from 'lodash';
 
 import { JsonPointer } from './jsonpointer';
-import { JsonValidators } from '../validators/json-validators';
+import { JsonValidators } from './json-validators';
 import {
   isPresent, isBlank, isSet, isNotSet, isEmpty, isString, isNumber,
   isInteger, isBoolean, isFunction, isObject, isArray, getType, isType,
   toJavaScriptType, toSchemaType, xor, hasOwn, forOwn, inArray
-} from '../validators/validator-functions';
+} from './validator-functions';
 
 export {
   isPresent, isBlank, isSet, isNotSet, isEmpty, isString, isNumber,
@@ -56,7 +56,12 @@ export function getInputType(schema: any): string {
     return 'textarea';
   }
   if (schemaType === 'array') {
-    if (hasOwn(schema, 'enum')) return 'checkboxes';
+    let itemsObject = JsonPointer.getFirst([
+      [schema, '/items'],
+      [schema, '/additionalItems']
+    ]);
+    if (!itemsObject) return null;
+    if (hasOwn(itemsObject, 'enum')) return 'checkboxes';
     return 'array';
   }
   if (schemaType === 'null') return 'hidden';
@@ -77,22 +82,6 @@ export function getInputType(schema: any): string {
     return 'text';
   }
   return 'text';
-}
-
-/**
- * 'getFirstValue' function
- *
- * Searches an array and returns the first value that is not undefined or null
- *
- * @param {any[]} values - array of values to check
- * @return {any} - first set value
- */
-export function getFirstValue(values: any[]): any {
-  if (!isArray(values)) return null;
-  for (let i = 0, l = values.length; i < l; i++) {
-    if (isSet(values[i])) return values[i];
-  }
-  return null;
 }
 
 /**
@@ -273,9 +262,9 @@ export function getControlValidators(schema: any) {
  *
  * Similar to the Lodash _.forOwn and _.forEach functions, except:
  *
- * - This function also iterates over sub-objects and arrays
- * (using _.forOwn and _.forEach), after calling the iteratee function on the
- * containing object or array itself (except for the root object or array).
+ * - This function also iterates over sub-objects and arrays after calling
+ * the iteratee function on the containing object or array itself
+ * (except for the root object or array).
  *
  * - The iteratee function is invoked with four arguments (instead of three):
  * (value, key/index, rootObject, jsonPointer), where rootObject is the root
@@ -286,10 +275,10 @@ export function getControlValidators(schema: any) {
  * - This function can also optionally be called directly on a sub-object by
  * including optional parameterss to specify the initial root object and JSON pointer.
  *
- * - A fifth optional boolean parameter of TRUE may be added to reverse direction,
- * which causes the iterator function to be called on sub-objects and arrays
- * (using _.forOwnRight and _.forEachRight) before being called on the
- * containing object or array itself (still excluding the root object or array).
+ * - A fifth optional boolean parameter of TRUE may also be added to reverse
+ * direction, which causes the iterator function to be called on sub-objects
+ * and arrays, in reverse order, before being called on the containing object
+ * or array itself (still excluding the root object or array).
  *
  * @param {object} object - the initial object or array
  * @param {(v: any, k?: string, o?: any, p?: any) => any} function - iteratee function
@@ -310,29 +299,16 @@ export function forOwnDeep(
   let currentKey = JsonPointer.parse(jsonPointer).pop();
   let forFn = null;
   if (!isRoot && !bottomUp) fn(object, currentKey, rootObject, jsonPointer);
-  if (isArray(object)) {
-    forFn = bottomUp ? _.forEachRight : _.forEach;
-  } else if (isObject(object)) {
-    forFn = bottomUp ? _.forOwnRight : _.forOwn;
+  if (isArray(object) || isObject(object)) {
+    let keys: string[] = Object.keys(object);
+    let recurse: Function = (key) => this.forOwnDeep(object[key],
+      fn, rootObject, jsonPointer + '/' + JsonPointer.escape(key), bottomUp);
+    if (bottomUp) {
+      for (let i = keys.length - 1, l = 0; i >= l; i--) recurse(keys[i]);
+    } else {
+      for (let i = 0, l = keys.length; i < l; i++) recurse(keys[i]);
+    }
   }
-  if (typeof forFn === 'function') {
-    forFn(object, (value, key) => this.forOwnDeep(
-      value, fn, rootObject, jsonPointer + '/' + JsonPointer.escape(key), bottomUp
-    ));
-  }
-  // *** non-lodash implementation ***
-  // if (isArray(object) || isObject(object)) {
-  //   let keys = Object.keys(object);
-  //   if (bottomUp) {
-  //     for (let i = keys.length - 1, l = 0; i >= l; i--) {
-  //       this.forOwnDeep(object[keys[i]], fn, rootObject, jsonPointer + '/' + JsonPointer.escape(keys[i]), bottomUp);
-  //     }
-  //   } else {
-  //     for (let i = 0, l = keys.length; i < l; i++) {
-  //       this.forOwnDeep(object[keys[i]], fn, rootObject, jsonPointer + '/' + JsonPointer.escape(keys[i]), bottomUp);
-  //     }
-  //   }
-  // }
   if (!isRoot && bottomUp) fn(object, currentKey, rootObject, jsonPointer);
   return object;
 }
@@ -372,6 +348,66 @@ export function isInputRequired(schema: any, pointer: string): boolean {
 };
 
 /**
+ * 'buildTitleMap' function
+ *
+ * @param {any} titleMap -
+ * @param {any} enumList -
+ * @param {boolean = false} fieldRequired -
+ * @return { { name: any, value: any}[] }
+ */
+export function buildTitleMap(
+  titleMap: any, enumList: any, fieldRequired: boolean = false
+): { name: any, value: any}[] {
+  let newTitleMap: { name: any, value: any}[] = [];
+  let hasEmptyValue: boolean = false;
+  if (titleMap) {
+    if (isArray(titleMap)) {
+      if (enumList) {
+        for (let i = 0, l = titleMap.length; i < l; i++) {
+          let value: any = titleMap[i].value;
+          if (enumList.indexOf(value) > -1) {
+            let name: any = titleMap[i].name;
+            newTitleMap.push({ name, value });
+            if (!value) hasEmptyValue = true;
+          }
+        }
+      } else {
+        newTitleMap = titleMap;
+        if (!fieldRequired) hasEmptyValue = !!newTitleMap.filter(i => !i.value).length;
+      }
+    } else if (enumList) {
+      for (let i = 0, l = enumList.length; i < l; i++) {
+        let value: any = enumList[i];
+        if (titleMap.hasOwnProperty(value)) {
+          let name: any = titleMap[value];
+          newTitleMap.push({ name, value });
+          if (!value) hasEmptyValue = true;
+        }
+      }
+    } else {
+      for (let name in titleMap) {
+        if (titleMap.hasOwnProperty(name)) {
+          let value: any = titleMap[name];
+          newTitleMap.push({ name, value });
+          if (!value) hasEmptyValue = true;
+        }
+      }
+    }
+  } else if (enumList) {
+    for (let i = 0, l = enumList.length; i < l; i++) {
+      let name: any = enumList[i];
+      let value: any = enumList[i];
+      newTitleMap.push({ name, value});
+      if (!value) hasEmptyValue = true;
+    }
+  }
+  if (!fieldRequired && !hasEmptyValue) {
+    newTitleMap.unshift({ name: '', value: '' });
+  }
+  return newTitleMap;
+}
+
+/**
  * 'toTitleCase'
  *
  * Intelligently converts an input string to Title Case.
@@ -379,7 +415,7 @@ export function isInputRequired(schema: any, pointer: string): boolean {
  * Accepts an optional second parameter with an alternate list of
  * words and abbreviations to force into a particular case.
  *
- * This function is derived from prior work by John Gruber and David Gouch:
+ * This function is built on prior work by John Gruber and David Gouch:
  * http://daringfireball.net/2008/08/title_case_update
  * https://github.com/gouch/to-title-case
  *

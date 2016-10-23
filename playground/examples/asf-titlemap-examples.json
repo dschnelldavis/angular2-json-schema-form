@@ -5,20 +5,12 @@
       "select": {
         "title": "Select without titleMap",
         "type": "string",
-        "enum": [
-          "a",
-          "b",
-          "c"
-        ]
+        "enum": [ "a", "b", "c" ]
       },
       "select2": {
         "title": "Select with titleMap (old style)",
         "type": "string",
-        "enum": [
-          "a",
-          "b",
-          "c"
-        ]
+        "enum": [ "a", "b", "c" ]
       },
       "noenum": {
         "type": "string",
@@ -29,37 +21,22 @@
         "type": "array",
         "items": {
           "type": "string",
-          "enum": [
-            "a",
-            "b",
-            "c"
-          ]
+          "enum": [ "a", "b", "c" ]
         }
       },
       "array2": {
         "title": "Array with titleMap",
         "type": "array",
-        "default": [
-          "b",
-          "c"
-        ],
+        "default": [ "b", "c" ],
         "items": {
           "type": "string",
-          "enum": [
-            "a",
-            "b",
-            "c"
-          ]
+          "enum": [ "a", "b", "c" ]
         }
       },
       "radios": {
         "title": "Basic radio button example",
         "type": "string",
-        "enum": [
-          "a",
-          "b",
-          "c"
-        ]
+        "enum": [ "a", "b", "c" ]
       },
       "radiobuttons": {
         "title": "Radio buttons used to switch a boolean",
@@ -73,28 +50,15 @@
     {
       "key": "select2",
       "type": "select",
-      "titleMap": {
-        "a": "A",
-        "b": "B",
-        "c": "C"
-      }
+      "titleMap": { "a": "A", "b": "B", "c": "C" }
     },
     {
       "key": "noenum",
       "type": "select",
       "titleMap": [
-        {
-          "value": "a",
-          "name": "A"
-        },
-        {
-          "value": "b",
-          "name": "B"
-        },
-        {
-          "value": "c",
-          "name": "C"
-        }
+        { "value": "a", "name": "A" },
+        { "value": "b", "name": "B" },
+        { "value": "c", "name": "C" }
       ]
     },
     "array",
@@ -102,50 +66,26 @@
       "key": "array2",
       "type": "checkboxes",
       "titleMap": [
-        {
-          "value": "a",
-          "name": "A"
-        },
-        {
-          "value": "b",
-          "name": "B"
-        },
-        {
-          "value": "c",
-          "name": "C"
-        }
+        { "value": "a", "name": "A" },
+        { "value": "b", "name": "B" },
+        { "value": "c", "name": "C" }
       ]
     },
     {
       "key": "radios",
       "type": "radios",
       "titleMap": [
-        {
-          "value": "c",
-          "name": "C"
-        },
-        {
-          "value": "b",
-          "name": "B"
-        },
-        {
-          "value": "a",
-          "name": "A"
-        }
+        { "value": "c", "name": "C" },
+        { "value": "b", "name": "B" },
+        { "value": "a", "name": "A" }
       ]
     },
     {
       "key": "radiobuttons",
       "type": "radiobuttons",
       "titleMap": [
-        {
-          "value": false,
-          "name": "No way"
-        },
-        {
-          "value": true,
-          "name": "OK"
-        }
+        { "value": false, "name": "No way" },
+        { "value": true, "name": "OK" }
       ]
     }
   ]
