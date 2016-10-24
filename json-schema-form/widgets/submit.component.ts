@@ -30,7 +30,8 @@ export class SubmitComponent implements OnInit {
 
   ngOnInit() {
     if ('pointer' in this.layoutNode) {
-      this.formControlGroup = JsonPointer.getFromFormGroup(this.formGroup, this.layoutNode.pointer, true);
+      this.formControlGroup =
+        JsonPointer.getFromFormGroup(this.formGroup, this.layoutNode.pointer, true);
     }
   }
 }

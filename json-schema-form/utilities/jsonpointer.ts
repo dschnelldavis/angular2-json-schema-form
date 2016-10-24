@@ -160,18 +160,13 @@ export class JsonPointer {
     }
     let l = returnGroup ? pointerArray.length - 1 : pointerArray.length;
     for (let i = 0; i < l; ++i) {
-      subGroup = subGroup.controls;
       let key = pointerArray[i];
-      // subGroup = parentGroup[key];
-      // if (typeof subGroup !== 'object') {
-      //   console.error('Unable to find "' + key + '" key in FormGroup.');
-      //   console.error(formGroup);
-      //   console.error(pointer);
-      //   return null;
-      // }
+      if (subGroup.hasOwnProperty('controls')) {
+        subGroup = subGroup.controls;
+      }
       if (isArray(subGroup) && (key === '-')) {
         subGroup = subGroup[subGroup.length - 1];
-      } else if (key in subGroup) {
+      } else if (subGroup.hasOwnProperty(key)) {
         subGroup = subGroup[key];
       } else {
         console.error('Unable to find "' + key + '" item in FormGroup.');

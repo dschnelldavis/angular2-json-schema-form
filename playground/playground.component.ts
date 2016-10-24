@@ -22,7 +22,7 @@ import { forOwnDeep } from '../json-schema-form/utilities/utility-functions';
 })
 export class PlaygroundComponent implements OnInit, AfterViewInit {
   private examples: any = {
-    exampleSetList: ['ng2jsf', 'rjsf', 'asf', 'jsf'],
+    exampleSetList: [ 'ng2jsf', 'jsf', 'rjsf', 'asf' ],
     exampleSets: {
       'ng2jsf': 'Angular 2 JSON Schema Form examples',
       'rjsf': 'React JSON Schema Form compatibility examples',
@@ -280,7 +280,8 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
         // If entered content is not valid JSON or JavaScript, show error
         this.jsonFormValid = false;
         this.jsonFormErrorMessage =
-          'Entered content is not yet a valid JSON Form object.\n' +
+          'Entered content is not currently a valid JSON Form object.\n' +
+          'As soon as it is, you will see your form here. So keep typing. :-)\n\n' +
           'JavaScript parser returned:\n\n' + jsonError;
         return;
       }

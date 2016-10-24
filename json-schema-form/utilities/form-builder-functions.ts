@@ -8,15 +8,303 @@ import 'rxjs/add/operator/map';
 
 import * as _ from 'lodash';
 
-import { hasOwn, isArray, isBlank } from './validator-functions';
 import { JsonPointer } from './jsonpointer';
 import { JsonValidators } from './json-validators';
+import {
+  getInputType, getControlValidators, isInputRequired,
+  mapLayout, setRequiredFields, updateInputOptions
+} from './utility-functions';
+import {
+  hasOwn, inArray, isArray, isBlank, isEmpty, isFunction,
+  isNumber, isObject, isPresent, isSet, isString
+} from './validator-functions';
 
 /**
  * Form builder function library:
  *
- * buildFormGroupTemplate, buildFormGroup, getControlValidators, setRequiredFields
+ * buildLayout, buildLayoutFromSchema, buildFormGroupTemplate, buildFormGroup
  */
+
+/**
+ * 'buildLayout' function
+ *
+ * @param {any[]} layout            [description]
+ * @param {any} schema            [description]
+ * @param {any} data              [description]
+ * @param {any} formOptions       [description]
+ * @param {any} fieldMap          [description]
+ * @param {any} schemaRefLibrary  [description]
+ * @param {any} layoutRefLibrary  [description]
+ * @param {any} widgetLibrary     [description]
+ * @param {any} formGroupTemplate [description]
+ * @return {any[]}                   [description]
+ */
+export function buildLayout(
+  layout: any[], schema: any, data: any, formOptions: any,
+  fieldMap: any, schemaRefLibrary: any, layoutRefLibrary: any,
+  widgetLibrary: any, formGroupTemplate: any
+): any[] {
+  let hasSubmitButton = formOptions.noSubmit;
+  return mapLayout(layout, (layoutItem, index, ignore, layoutPointer) => {
+    let newItem: any = {};
+    if (formOptions.setSchemaDefaults) {
+      Object.assign(newItem, _.cloneDeep(formOptions.formDefaults));
+    }
+    if (isObject(layoutItem)) {
+      Object.assign(newItem, layoutItem);
+    } else if (JsonPointer.isJsonPointer(layoutItem)) {
+      newItem.pointer = layoutItem;
+    } else if (isString(layoutItem)) {
+      newItem.key = layoutItem;
+    } else {
+      console.error('Form layout element not recognized:');
+      console.error(layoutItem);
+      return null;
+    }
+    let itemSchema: any = null;
+    let schemaDefaultValue: any = null;
+    if (hasOwn(newItem, 'key') || hasOwn(newItem, 'pointer')) {
+      if (newItem.key === '*' || newItem.pointer === '*') {
+        return buildLayoutFromSchema(
+          schema, data, formOptions, fieldMap, schemaRefLibrary,
+          layoutRefLibrary, widgetLibrary, formGroupTemplate
+        );
+      }
+      if (JsonPointer.isJsonPointer(newItem.key)) {
+        newItem.pointer = JsonPointer.compile(newItem.key);
+      } else {
+        newItem.pointer =
+          JsonPointer.compile(JsonPointer.parseObjectPath(newItem.key), '-');
+      }
+      newItem.name = JsonPointer.toKey(newItem.pointer);
+      if (!hasOwn(fieldMap, newItem.pointer)) fieldMap[newItem.pointer] = {};
+      if (hasOwn(fieldMap[newItem.pointer], 'schemaPointer')) {
+        itemSchema = JsonPointer.get(schema, fieldMap[newItem.pointer]['schemaPointer']);
+      } else {
+        itemSchema = JsonPointer.getFromSchema(schema, newItem.pointer);
+        // TODO: add schemaPointer to fieldMap
+        // fieldMap[newItem.pointer]['schemaPointer'] = ;
+      }
+      if (itemSchema) {
+        // newItem.schema = itemSchema;
+        if (!hasOwn(newItem, 'type')) {
+          newItem.type = getInputType(itemSchema);
+        }
+        if (!hasOwn(newItem, 'dataType')) {
+          newItem.dataType = itemSchema.type;
+        }
+        updateInputOptions(newItem, itemSchema, data,
+            formOptions.formDefaults, fieldMap, formGroupTemplate);
+        if (newItem.type === 'checkboxes' && hasOwn(itemSchema, 'items')) {
+          updateInputOptions(newItem, itemSchema.items, data,
+              formOptions.formDefaults, fieldMap, formGroupTemplate);
+        }
+        if (!newItem.title && !isNumber(newItem.name)) {
+          newItem.title = newItem.name.charAt(0).toUpperCase() + newItem.name.slice(1);
+        }
+        if (isInputRequired(schema, newItem.pointer)) {
+          formOptions.fieldsRequired = true;
+          newItem.required = true;
+        }
+        schemaDefaultValue = itemSchema.default;
+      } else {
+        // TODO: create item in FormGroup model from layout key
+      }
+      newItem.widget = widgetLibrary.getWidget(newItem.type);
+      fieldMap[newItem.pointer]['inputType'] = newItem.type;
+      fieldMap[newItem.pointer]['widget'] = newItem.widget;
+      if (newItem.type === 'array' && hasOwn(newItem, 'items')) {
+        let arrayPointer: string = newItem.pointer + '/-';
+        if (!hasOwn(fieldMap, arrayPointer)) fieldMap[arrayPointer] = {};
+        fieldMap[arrayPointer]['inputType'] = 'section';
+        let arrayItemGroup = [];
+        let length: number = arrayPointer.length;
+        let itemPointer: string = newItem.pointer + '/0';
+        for (let i = newItem.items.length - 1, l = 0; i >= l; i--) {
+          let subItem = newItem.items[i];
+          if (subItem.pointer.slice(0, length) === arrayPointer) {
+            subItem.pointer = itemPointer + subItem.pointer.slice(length);
+            arrayItemGroup.unshift(newItem.items.pop());
+          }
+        }
+        if (arrayItemGroup.length) {
+          let newItemFieldset: any = {
+            'type': 'fieldset',
+            'pointer': itemPointer,
+            'items': arrayItemGroup,
+            'widget': widgetLibrary.getWidget('fieldset')
+          };
+          newItem.items.push(newItemFieldset);
+          let newItemRef: any = {
+            'type': '$ref', '$ref': arrayPointer, '$refType': 'array'
+          };
+          if (hasOwn(newItem, 'add') && isString(newItem.add)) {
+            newItemRef.title = newItem.add;
+            delete newItem.add;
+          };
+          if (hasOwn(newItem, 'style') && hasOwn(newItem.style, 'add')) {
+            newItemRef.style = newItem.style.add;
+            delete newItem.style.add;
+            if (isEmpty(newItem.style)) delete newItem.style;
+          };
+          newItem.items.push(newItemRef);
+          layoutRefLibrary[arrayPointer] = {
+            'layout': newItemFieldset, '$refType': 'array'
+          };
+        }
+      }
+    } else if (hasOwn(newItem, 'type')) {
+      newItem.widget = widgetLibrary.getWidget(newItem.type);
+    }
+    return newItem;
+  });
+}
+
+/**
+ * 'buildLayoutFromSchema' function
+ *
+ * @param {any} schema            [description]
+ * @param {any} data              [description]
+ * @param {any} formOptions       [description]
+ * @param {any} fieldMap          [description]
+ * @param {any} schemaRefLibrary  [description]
+ * @param {any} layoutRefLibrary  [description]
+ * @param {any} widgetLibrary     [description]
+ * @param {any} formGroupTemplate [description]
+ * @param {number = 0} layoutIndex   [description]
+ * @param {any = schema} masterSchema  [description]
+ * @param {string = ''} layoutPointer [description]
+ * @param {string = ''} schemaPointer [description]
+ * @param {string = ''} dataPointer   [description]
+ * @return {any}
+ */
+export function buildLayoutFromSchema(
+  schema: any, data: any, formOptions: any, fieldMap: any,
+  schemaRefLibrary: any, layoutRefLibrary: any, widgetLibrary: any,
+  formGroupTemplate: any, layoutIndex: number = 0, masterSchema: any = schema,
+  layoutPointer: string = '', schemaPointer: string = '', dataPointer: string = ''
+): any {
+  if (!hasOwn(schema, 'type') && !hasOwn(schema, 'x-schema-form')) return null;
+  let newItem: any = {};
+  if (formOptions.setSchemaDefaults) {
+    Object.assign(newItem, _.cloneDeep(formOptions.formDefaults));
+  }
+  if (hasOwn(schema, 'x-schema-form')) {
+    Object.assign(newItem, schema['x-schema-form']);
+  }
+  newItem.pointer = dataPointer;
+  newItem.name = JsonPointer.toKey(newItem.pointer);
+  newItem.type = getInputType(schema);
+  newItem.dataType = schema.type;
+  newItem.widget = widgetLibrary.getWidget(newItem.type);
+  if (dataPointer !== '') {
+    if (!hasOwn(fieldMap, newItem.pointer)) fieldMap[newItem.pointer] = {};
+    fieldMap[newItem.pointer]['schemaPointer'] = schemaPointer;
+    fieldMap[newItem.pointer]['inputType'] = newItem.type;
+    fieldMap[newItem.pointer]['widget'] = newItem.widget;
+  }
+  updateInputOptions(newItem, schema, data,
+      formOptions.formDefaults, fieldMap, formGroupTemplate);
+  if (!newItem.title && !isNumber(newItem.name)) {
+    newItem.title = newItem.name.charAt(0).toUpperCase() + newItem.name.slice(1);
+  }
+  switch (newItem.type) {
+    case 'fieldset':
+      let newFieldset: any[] = [];
+      let index: number = dataPointer === '' ? layoutIndex : 0;
+      let newKeys: string[];
+      let subObject: string = 'properties';
+      if (hasOwn(schema, 'properties')) {
+        if (hasOwn(schema.properties, 'ui:order')) {
+          newKeys = schema['properties']['ui:order'];
+        } else {
+          newKeys = Object.keys(schema['properties']);
+        }
+      } else if (hasOwn(schema, 'additionalProperties')) {
+        subObject = 'additionalProperties';
+        newKeys = Object.keys(schema['additionalProperties']);
+      }
+      for (let i = 0, l = newKeys.length; i < l; i++) {
+        let key = newKeys[i];
+        if (hasOwn(schema[subObject], key)) {
+          let item = schema[subObject][key];
+          let innerItem = buildLayoutFromSchema(
+            item, data, formOptions, fieldMap,
+            schemaRefLibrary, layoutRefLibrary, widgetLibrary,
+            formGroupTemplate, index, masterSchema,
+            layoutPointer + '/' + index,
+            schemaPointer + '/properties/' + key,
+            dataPointer + '/' + key
+          );
+          if (innerItem) {
+            if (isInputRequired(schema, '/' + key)) {
+              formOptions.fieldsRequired = true;
+              innerItem.required = true;
+            }
+            newFieldset.push(innerItem);
+            index++;
+          }
+        }
+      }
+      if (dataPointer === '') {
+        newItem = newFieldset;
+      } else {
+        newItem.items = newFieldset;
+      }
+    break;
+    case 'array':
+      let additionalItems: any = null;
+      if (isArray(schema.items)) {
+        newItem.items = _.filter(_.map(schema.items, (item, index) =>
+          buildLayoutFromSchema(
+            item, data, formOptions, fieldMap,
+            schemaRefLibrary, layoutRefLibrary, widgetLibrary,
+            formGroupTemplate, index, masterSchema,
+            layoutPointer + '/items/' + index,
+            schemaPointer + '/items/' + index,
+            dataPointer + '/' + index
+          )
+        ));
+        if (hasOwn(schema, 'additionalItems') && schema.additionalItems !== false) {
+          additionalItems = buildLayoutFromSchema(
+            schema.additionalItems, data, formOptions, fieldMap,
+            schemaRefLibrary, layoutRefLibrary, widgetLibrary,
+            formGroupTemplate, newItem.length, masterSchema,
+            layoutPointer + '/items/' + newItem.length,
+            schemaPointer + '/items/' + newItem.length,
+            dataPointer + '/' + newItem.length
+          );
+          if (additionalItems) newItem.items.push(additionalItems);
+        }
+      } else {
+        additionalItems = buildLayoutFromSchema(
+          schema.items, data, formOptions, fieldMap,
+          schemaRefLibrary, layoutRefLibrary, widgetLibrary,
+          formGroupTemplate, 0, masterSchema,
+          layoutPointer + '/items/-',
+          schemaPointer + '/items/-',
+          dataPointer + '/-'
+        );
+        newItem.items = [additionalItems];
+      }
+
+      // If addable items, save to layoutRefLibrary to enable adding later
+      if (additionalItems) {
+        layoutRefLibrary[dataPointer + '/-'] = {
+          'layout': additionalItems, '$refType': 'array'
+        };
+        delete layoutRefLibrary[dataPointer + '/-']['layout']['key'];
+        delete layoutRefLibrary[dataPointer + '/-']['layout']['name'];
+
+        // add $ref item to layout to create 'add' button
+        newItem.items.push({
+          'type': '$ref', '$ref': dataPointer + '/-', '$refType': 'array'
+        });
+      }
+    break;
+  }
+  return newItem;
+}
 
 /**
  * 'buildFormGroupTemplate' function
@@ -26,14 +314,14 @@ import { JsonValidators } from './json-validators';
  * TODO: add support for pattern properties
  * https://spacetelescope.github.io/understanding-json-schema/reference/object.html
  *
- * @param {any} schema -
- * @param {any} formReferences -
- * @param {any} fieldMap -
- * @param {any = schema} rootSchema - Optional
- * @param {string = ''} dataPointer - Optional
- * @param {string = ''} schemaPointer - Optional
- * @param {string = ''} templatePointer - Optional
- * @return {any} - the FormGroup Template
+ * @param {any} schema         [description]
+ * @param {any} formReferences [description]
+ * @param {any} fieldMap       [description]
+ * @param {any = schema} rootSchema      [description]
+ * @param {string = ''} dataPointer     [description]
+ * @param {string = ''} schemaPointer   [description]
+ * @param {string = ''} templatePointer [description]
+ * @return {any}
  */
 export function buildFormGroupTemplate(
   schema: any, formReferences: any, fieldMap: any,
@@ -105,9 +393,9 @@ export function buildFormGroupTemplate(
  * 'buildFormGroup' function
  *
  * @param {any} template -
- * @param {any} defaultValue -
+ * @param {any = null} defaultValue -
  * @return {AbstractControl}
- */
+*/
 export function buildFormGroup(template: any, defaultValue: any = null): AbstractControl {
   let validatorFns: ValidatorFn[] = [];
   let validatorFn: ValidatorFn = null;
@@ -166,70 +454,4 @@ export function buildFormGroup(template: any, defaultValue: any = null): Abstrac
     }
   }
   return null;
-}
-
-/**
- * 'getControlValidators' function
- *
- * @param {schema} schema
- * @return {validators}
- */
-export function getControlValidators(schema: any) {
-  let validators: any = {};
-  if (hasOwn(schema, 'type')) {
-    switch (schema.type) {
-      case 'string':
-        _.forEach(['pattern', 'format', 'minLength', 'maxLength'], (prop) => {
-          if (hasOwn(schema, prop)) validators[prop] = [schema[prop]];
-        });
-      break;
-      case 'number': case 'integer':
-        _.forEach(['Minimum', 'Maximum'], (Limit) => {
-          let eLimit = 'exclusive' + Limit;
-          let limit = Limit.toLowerCase();
-          if (hasOwn(schema, limit)) {
-            let exclusive = hasOwn(schema, eLimit) && schema[eLimit] === true;
-            validators[limit] = [schema[limit], exclusive];
-          }
-        });
-        _.forEach(['multipleOf', 'type'], (prop) => {
-          if (hasOwn(schema, prop)) validators[prop] = [schema[prop]];
-        });
-      break;
-      case 'object':
-        _.forEach(['minProperties', 'maxProperties', 'dependencies'], (prop) => {
-          if (hasOwn(schema, prop)) validators[prop] = [schema[prop]];
-        });
-      break;
-      case 'array':
-        _.forEach(['minItems', 'maxItems', 'uniqueItems'], (prop) => {
-          if (hasOwn(schema, prop)) validators[prop] = [schema[prop]];
-        });
-      break;
-    }
-  }
-  if (hasOwn(schema, 'enum')) validators['enum'] = [schema['enum']];
-  return validators;
-}
-
-/**
- * 'setRequiredFields' function
- *
- * @param {schema} schema - JSON Schema
- * @param {object} formControlTemplate - Form Control Template object
- * @return {boolean} - true if any fields have been set to required, false if not
- */
-export function setRequiredFields(schema: any, formControlTemplate: any): boolean {
-  let fieldsRequired = false;
-  if (hasOwn(schema, 'required') && !_.isEmpty(schema.required)) {
-    fieldsRequired = true;
-    let requiredArray = isArray(schema.required) ? schema.required : [schema.required];
-    _.forEach(requiredArray,
-      key => JsonPointer.set(formControlTemplate, '/' + key + '/validators/required', [])
-    );
-  }
-  return fieldsRequired;
-
-  // TODO: Add support for patternProperties
-  // https://spacetelescope.github.io/understanding-json-schema/reference/object.html#pattern-properties
 }

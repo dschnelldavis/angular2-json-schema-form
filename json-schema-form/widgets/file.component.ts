@@ -14,6 +14,9 @@ export class FileComponent implements OnInit {
   @Input() formOptions: any;
 
   ngOnInit() {
-    this.formControlGroup = JsonPointer.getFromFormGroup(this.formGroup, this.layoutNode.pointer, true);
+    if ('pointer' in this.layoutNode) {
+      this.formControlGroup =
+        JsonPointer.getFromFormGroup(this.formGroup, this.layoutNode.pointer, true);
+    }
   }
 }

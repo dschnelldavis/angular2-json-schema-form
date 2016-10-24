@@ -25,7 +25,7 @@
   <!-- array item -->
   <div *ngSwitchCase="'array-item'">
     <li class="list-group-item {{layoutNode?.fieldHtmlClass}}" schema-form-array-items>
-      <button *ngIf="!layoutNode?.readonly && layoutNode?.remove && layoutNode?.type !== '$ref'"
+      <button *ngIf="!layoutNode?.readonly && layoutNode?.remove !== false && layoutNode?.type !== '$ref'"
         style="position: relative; z-index: 20;" type="button"
         class="close pull-right" (click)="deleteFromArray(i)">
         <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>

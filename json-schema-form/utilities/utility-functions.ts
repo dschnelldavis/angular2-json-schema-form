@@ -7,21 +7,172 @@ import 'rxjs/add/operator/map';
 
 import * as _ from 'lodash';
 
+import { JsonPointer } from './jsonpointer';
+import { JsonValidators } from './json-validators';
 import {
   isPresent, isBlank, isSet, isNotSet, isEmpty, isString, isNumber,
   isInteger, isBoolean, isFunction, isObject, isArray, getType, isType,
   toJavaScriptType, toSchemaType, xor, hasOwn, forOwn, inArray,
   SchemaPrimitiveType
 } from './validator-functions';
-import { JsonPointer } from './jsonpointer';
 
 /**
  * Utility function library:
  *
- * getInputType, mapLayout, isInputRequired, buildTitleMap, formatFormData
+ * forEach, forOwnDeep, toTitleCase
  *
- * forOwnDeep, toTitleCase
+ * getInputType, mapLayout, isInputRequired, buildTitleMap, formatFormData,
+ * updateInputOptions, getControlValidators, setRequiredFields
  */
+
+/**
+ * 'forEach' function
+ *
+ * Iterates over all items in the first level of an object or array
+ * and calls an iterator funciton on each item.
+ *
+ * Does NOT recursively iterate over items in sub-objects or sub-arrays.
+ *
+ * Based on manuelstofer's foreach function:
+ * https://github.com/manuelstofer/foreach
+ *
+ * @param {Object|Array} col - collection: the object or array to iterate over
+ * @param {function} fn - the iterator funciton to call on each item
+ * @param {any = null} ctx - an optional context in which to call the iterator function
+ * @return {void}
+ */
+export function forEach(
+  col: any, fn: (v: any, k: string | number, c?: any) => any, ctx: any = null
+): void {
+  if (typeof fn !== 'function') {
+    console.error('Iterator must be a function'); return;
+  } else if (!isObject(col) && !isArray(col)) {
+    console.error('Collection must be an object or array'); return;
+  }
+  if (isArray(col)) {
+    for (let i = 0, l = col.length; i < l; i++) fn.call(ctx, col[i], i, col);
+  } else if (isObject(col)) {
+    for (let k in col) if (col.hasOwnProperty(k)) fn.call(ctx, col[k], k, col);
+  }
+}
+
+/**
+ * 'forOwnDeep' function
+ *
+ * Iterates over own enumerable properties of an object or items in an array
+ * and invokes an iteratee function for each key/value or index/value pair.
+ *
+ * Similar to the Lodash _.forOwn and _.forEach functions, except:
+ *
+ * - This function also iterates over sub-objects and arrays after calling
+ * the iteratee function on the containing object or array itself
+ * (except for the root object or array).
+ *
+ * - The iteratee function is invoked with four arguments (instead of three):
+ * (value, key/index, rootObject, jsonPointer), where rootObject is the root
+ * object submitted (not necesarily the sub-object directly containing the
+ * key/value or index/value), and jsonPointer is a JSON pointer indicating the
+ * location of the key/value or index/value within the root object.
+ *
+ * - This function can also optionally be called directly on a sub-object by
+ * including optional parameterss to specify the initial root object and JSON pointer.
+ *
+ * - A fifth optional boolean parameter of TRUE may also be added to reverse
+ * direction, which causes the iterator function to be called on sub-objects
+ * and arrays, in reverse order, before being called on the containing object
+ * or array itself (still excluding the root object or array).
+ *
+ * @param {object} object - the initial object or array
+ * @param {(v: any, k?: string, o?: any, p?: any) => any} function - iteratee function
+ * @param {object = object} rootObject - optional, root object or array
+ * @param {string = ''} jsonPointer - optional, JSON Pointer to object within rootObject
+ * @param {boolean = false} bottomUp - optional, set to TRUE to reverse direction
+ * @return {object} - the object or array
+ */
+export function forOwnDeep(
+  object: any,
+  fn: (value: any, key?: string, object?: any, jsonPointer?: string) => any,
+  rootObject: any = null,
+  jsonPointer: string = '',
+  bottomUp: boolean = false
+): any {
+  let isRoot: boolean = !rootObject;
+  if (isRoot) { rootObject = object; }
+  let currentKey = JsonPointer.parse(jsonPointer).pop();
+  let forFn = null;
+  if (!isRoot && !bottomUp) fn(object, currentKey, rootObject, jsonPointer);
+  if (isArray(object) || isObject(object)) {
+    let keys: string[] = Object.keys(object);
+    let recurse: Function = (key) => forOwnDeep(object[key],
+      fn, rootObject, jsonPointer + '/' + JsonPointer.escape(key), bottomUp);
+    if (bottomUp) {
+      for (let i = keys.length - 1, l = 0; i >= l; i--) recurse(keys[i]);
+    } else {
+      for (let i = 0, l = keys.length; i < l; i++) recurse(keys[i]);
+    }
+  }
+  if (!isRoot && bottomUp) fn(object, currentKey, rootObject, jsonPointer);
+  return object;
+}
+
+/**
+ * 'toTitleCase' function
+ *
+ * Intelligently converts an input string to Title Case.
+ *
+ * Accepts an optional second parameter with an alternate list of
+ * words and abbreviations to force into a particular case.
+ *
+ * This function is built on prior work by John Gruber and David Gouch:
+ * http://daringfireball.net/2008/08/title_case_update
+ * https://github.com/gouch/to-title-case
+ *
+ * @param  {string} input -
+ * @param  {string | string[]} forceWords? -
+ * @return {string} -
+ */
+export function toTitleCase(input: string, forceWords?: string | string[]): string {
+  let forceArray: string[] = ['a', 'an', 'and', 'as', 'at', 'but', 'by', 'en', 'for', 'if',
+    'in', 'nor', 'of', 'on', 'or', 'per', 'the', 'to', 'v', 'v.', 'vs', 'vs.', 'via'];
+  if (typeof forceWords === 'string') forceWords = forceWords.split('|');
+  if (Array.isArray(forceWords)) forceArray = forceArray.concat(forceWords);
+  let forceArrayLower: string[] = forceArray.map(w => w.toLowerCase());
+  let noInitialCase: boolean =
+    input === input.toUpperCase() || input === input.toLowerCase();
+  let prevLastChar: string = '';
+  input = input.trim();
+  return input.replace(/[A-Za-z0-9\u00C0-\u00FF]+[^\s-]*/g, (word, idx) => {
+    if (!noInitialCase && word.slice(1).search(/[A-Z]|\../) !== -1) {
+      return word;
+    } else {
+      let newWord: string;
+      let forceWord: string = forceArray[forceArrayLower.indexOf(word.toLowerCase())];
+      if (!forceWord) {
+        if (noInitialCase) {
+          if (word.slice(1).search(/\../) !== -1) {
+            newWord = word.toLowerCase();
+          } else {
+            newWord = word[0].toUpperCase() + word.slice(1).toLowerCase();
+          }
+        } else {
+          newWord = word[0].toUpperCase() + word.slice(1);
+        }
+      } else if (
+        forceWord === forceWord.toLowerCase() && (
+          idx === 0 || idx + word.length === input.length ||
+          prevLastChar === ':' || input[idx - 1].search(/[^\s-]/) !== -1 ||
+          (input[idx - 1] !== '-' && input[idx + word.length] === '-')
+        )
+      ) {
+        newWord = forceWord[0].toUpperCase() + forceWord.slice(1);
+      } else {
+        newWord = forceWord;
+      }
+      prevLastChar = word.slice(-1);
+      return newWord;
+    }
+  });
+};
 
 /**
  * 'getInputType' function
@@ -144,65 +295,6 @@ export function mapLayout(
 };
 
 /**
- * 'forOwnDeep' function
- *
- * Iterates over own enumerable properties of an object or items in an array
- * and invokes an iteratee function for each key/value or index/value pair.
- *
- * Similar to the Lodash _.forOwn and _.forEach functions, except:
- *
- * - This function also iterates over sub-objects and arrays after calling
- * the iteratee function on the containing object or array itself
- * (except for the root object or array).
- *
- * - The iteratee function is invoked with four arguments (instead of three):
- * (value, key/index, rootObject, jsonPointer), where rootObject is the root
- * object submitted (not necesarily the sub-object directly containing the
- * key/value or index/value), and jsonPointer is a JSON pointer indicating the
- * location of the key/value or index/value within the root object.
- *
- * - This function can also optionally be called directly on a sub-object by
- * including optional parameterss to specify the initial root object and JSON pointer.
- *
- * - A fifth optional boolean parameter of TRUE may also be added to reverse
- * direction, which causes the iterator function to be called on sub-objects
- * and arrays, in reverse order, before being called on the containing object
- * or array itself (still excluding the root object or array).
- *
- * @param {object} object - the initial object or array
- * @param {(v: any, k?: string, o?: any, p?: any) => any} function - iteratee function
- * @param {object = object} rootObject - optional, root object or array
- * @param {string = ''} jsonPointer - optional, JSON Pointer to object within rootObject
- * @param {boolean = false} bottomUp - optional, set to TRUE to reverse direction
- * @return {object} - the object or array
- */
-export function forOwnDeep(
-  object: any,
-  fn: (value: any, key?: string, object?: any, jsonPointer?: string) => any,
-  rootObject: any = null,
-  jsonPointer: string = '',
-  bottomUp: boolean = false
-): any {
-  let isRoot: boolean = !rootObject;
-  if (isRoot) { rootObject = object; }
-  let currentKey = JsonPointer.parse(jsonPointer).pop();
-  let forFn = null;
-  if (!isRoot && !bottomUp) fn(object, currentKey, rootObject, jsonPointer);
-  if (isArray(object) || isObject(object)) {
-    let keys: string[] = Object.keys(object);
-    let recurse: Function = (key) => forOwnDeep(object[key],
-      fn, rootObject, jsonPointer + '/' + JsonPointer.escape(key), bottomUp);
-    if (bottomUp) {
-      for (let i = keys.length - 1, l = 0; i >= l; i--) recurse(keys[i]);
-    } else {
-      for (let i = 0, l = keys.length; i < l; i++) recurse(keys[i]);
-    }
-  }
-  if (!isRoot && bottomUp) fn(object, currentKey, rootObject, jsonPointer);
-  return object;
-}
-
-/**
  * 'isInputRequired' function
  *
  * Checks a JSON Schema to see if an item is required
@@ -308,15 +400,15 @@ export function formatFormData(formData: any, fieldMap: any, fixErrors: boolean 
   let formattedData = {};
   forOwnDeep(formData, (value, key, ignore, pointer) => {
     let genericPointer: string;
-    if (hasOwn(fieldMap, pointer)) {
+    if (fieldMap.hasOwnProperty(pointer) && fieldMap[pointer].hasOwnProperty('schemaType')) {
       genericPointer = pointer;
     } else { // TODO: Fix to allow for integer object keys
       genericPointer = JsonPointer.compile(
         JsonPointer.parse(pointer).map(k => (isInteger(k)) ? '-' : k)
       );
     }
-    if (hasOwn(fieldMap, genericPointer) &&
-      hasOwn(fieldMap[genericPointer], 'schemaType')
+    if (fieldMap.hasOwnProperty(genericPointer) &&
+      fieldMap[genericPointer].hasOwnProperty('schemaType')
     ) {
       let schemaType: SchemaPrimitiveType | SchemaPrimitiveType[] =
         fieldMap[genericPointer]['schemaType'];
@@ -333,60 +425,171 @@ export function formatFormData(formData: any, fieldMap: any, fixErrors: boolean 
 }
 
 /**
- * 'toTitleCase' function
+ * 'updateInputOptions' function
  *
- * Intelligently converts an input string to Title Case.
- *
- * Accepts an optional second parameter with an alternate list of
- * words and abbreviations to force into a particular case.
- *
- * This function is built on prior work by John Gruber and David Gouch:
- * http://daringfireball.net/2008/08/title_case_update
- * https://github.com/gouch/to-title-case
- *
- * @param  {string} input -
- * @param  {string | string[]} forceWords? -
- * @return {string} -
+ * @param {any} layout
+ * @param {any} schema
+ * @return {void}
  */
-export function toTitleCase(input: string, forceWords?: string | string[]): string {
-  let forceArray: string[] = ['a', 'an', 'and', 'as', 'at', 'but', 'by', 'en', 'for', 'if',
-    'in', 'nor', 'of', 'on', 'or', 'per', 'the', 'to', 'v', 'v.', 'vs', 'vs.', 'via'];
-  if (typeof forceWords === 'string') forceWords = forceWords.split('|');
-  if (Array.isArray(forceWords)) forceArray = forceArray.concat(forceWords);
-  let forceArrayLower: string[] = forceArray.map(w => w.toLowerCase());
-  let noInitialCase: boolean =
-    input === input.toUpperCase() || input === input.toLowerCase();
-  let prevLastChar: string = '';
-  input = input.trim();
-  return input.replace(/[A-Za-z0-9\u00C0-\u00FF]+[^\s-]*/g, (word, idx) => {
-    if (!noInitialCase && word.slice(1).search(/[A-Z]|\../) !== -1) {
-      return word;
-    } else {
-      let newWord: string;
-      let forceWord: string = forceArray[forceArrayLower.indexOf(word.toLowerCase())];
-      if (!forceWord) {
-        if (noInitialCase) {
-          if (word.slice(1).search(/\../) !== -1) {
-            newWord = word.toLowerCase();
-          } else {
-            newWord = word[0].toUpperCase() + word.slice(1).toLowerCase();
-          }
-        } else {
-          newWord = word[0].toUpperCase() + word.slice(1);
-        }
-      } else if (
-        forceWord === forceWord.toLowerCase() && (
-          idx === 0 || idx + word.length === input.length ||
-          prevLastChar === ':' || input[idx - 1].search(/[^\s-]/) !== -1 ||
-          (input[idx - 1] !== '-' && input[idx + word.length] === '-')
-        )
-      ) {
-        newWord = forceWord[0].toUpperCase() + forceWord.slice(1);
+export function updateInputOptions(
+  layout: any, schema: any, data: any,
+  formDefaults: any, fieldMap: any, formGroupTemplate: any
+) {
+  let type: string[] = (isPresent(layout.type) && isArray(layout.type)) ?
+    <string[]>layout.type : [<string>layout.type];
+  let optionsToUpdate: string[] = [
+    'title', 'notitle', 'disabled', 'description', 'validationMessage',
+    'onChange', 'feedback', 'disableSuccessState', 'disableErrorState',
+    'placeholder', 'ngModelOptions', 'readonly', 'copyValueTo', 'condition',
+    'destroyStrategy', 'htmlClass', 'fieldHtmlClass', 'labelHtmlClass', 'enum',
+    'ui:rootFieldId', 'ui:help', 'ui:disabled', 'ui:readonly', 'ui:placeholder',
+    'ui:autofocus', 'ui:options', // 'ui:order', 'classNames', 'label',
+    // 'errors', 'help', 'hidden', 'required', 'displayLabel',
+  ];
+  if (inArray(['text', 'textarea', 'search'], type) || isBlank(type)) {
+    optionsToUpdate = optionsToUpdate.concat('minLength', 'maxLength', 'pattern');
+  }
+  if (inArray(['text', 'textarea', 'search', 'email', 'url', 'date', 'datetime',
+    'date-time', 'datetime-local'], type) || isBlank(type)) {
+    optionsToUpdate = optionsToUpdate.concat('format');
+  }
+  if (inArray(['date', 'datetime', 'date-time', 'datetime-local',
+    'number', 'integer', 'range'], type) || isBlank(type)) {
+    optionsToUpdate = optionsToUpdate.concat('minimum', 'maximum');
+  }
+  if (inArray(['number', 'integer', 'range'], type) || isBlank(type)) {
+    optionsToUpdate = optionsToUpdate
+      .concat('exclusiveMinimum', 'exclusiveMaximum', 'multipleOf');
+  }
+  if (inArray('fieldset', type) || isBlank(type)) {
+    optionsToUpdate = optionsToUpdate
+      .concat('minProperties', 'maxProperties', 'dependencies');
+  }
+  if (inArray(['array', 'checkboxes'], type) || isBlank(type)) {
+    optionsToUpdate = optionsToUpdate
+      .concat('minItems', 'maxItems', 'uniqueItems');
+  }
+  _.forEach(optionsToUpdate, option => {
+
+    // If a new validator is needed in template, set it
+    if (hasOwn(layout, option) && isFunction(JsonValidators[option]) && (
+      !hasOwn(schema, option) || (schema[option] !== layout[option] &&
+        !(option.slice(0, 3) === 'min' && schema[option] < layout[option]) &&
+        !(option.slice(0, 3) === 'max' && schema[option] > layout[option])
+      )
+    )) {
+      let validatorPointer =
+        fieldMap[layout.pointer]['templatePointer'] + '/validators/' + option;
+       JsonPointer.set(formGroupTemplate, validatorPointer, [layout[option]]);
+    }
+
+    // Check for option value, and set in layout
+    let newValue: any = JsonPointer.getFirst([
+      [ layout, [option] ],
+      [ schema['x-schema-form'], [option] ],
+      [ schema, [option]],
+      [ formDefaults, [option] ]
+    ]);
+    if (isPresent(newValue)) {
+      if (option.slice(0, 3) === 'ui:') {
+        layout[option.slice(3)] = newValue;
       } else {
-        newWord = forceWord;
+        layout[option] = newValue;
       }
-      prevLastChar = word.slice(-1);
-      return newWord;
     }
   });
-};
+
+  // If schema type is integer, enforce by setting multipleOf = 1
+  if (inArray(schema.type, ['integer']) && !hasOwn(layout, 'multipleOf')) {
+    layout.multipleOf = 1;
+
+  // If schema type is array, set controlTemplate in layout
+  // TODO: fix to set controlTemplate for all layout $ref links instead
+  } else if (schema.type === 'array') {
+    layout.controlTemplate = JsonPointer.get(formGroupTemplate,
+      fieldMap[layout.pointer]['templatePointer'] + '/controls/-');
+  }
+
+  // Check for initial or default field value, and set in both layout and template
+  if (layout.pointer) {
+    let newValue: any = JsonPointer.getFirst([
+      [ data, layout.pointer ],
+      [ layout, '/value' ],
+      [ layout, '/default' ],
+      [ schema, '/default' ]
+    ]);
+    if (isSet(newValue) &&
+      fieldMap[layout.pointer].hasOwnProperty('templatePointer')
+    ) {
+      layout.value = newValue;
+      let valuePointer = fieldMap[layout.pointer]['templatePointer'] + '/value';
+      JsonPointer.set(formGroupTemplate, valuePointer, newValue);
+    }
+  }
+}
+
+/**
+ * 'getControlValidators' function
+ *
+ * @param {schema} schema
+ * @return {validators}
+ */
+export function getControlValidators(schema: any) {
+  let validators: any = {};
+  if (hasOwn(schema, 'type')) {
+    switch (schema.type) {
+      case 'string':
+        _.forEach(['pattern', 'format', 'minLength', 'maxLength'], (prop) => {
+          if (hasOwn(schema, prop)) validators[prop] = [schema[prop]];
+        });
+      break;
+      case 'number': case 'integer':
+        _.forEach(['Minimum', 'Maximum'], (Limit) => {
+          let eLimit = 'exclusive' + Limit;
+          let limit = Limit.toLowerCase();
+          if (hasOwn(schema, limit)) {
+            let exclusive = hasOwn(schema, eLimit) && schema[eLimit] === true;
+            validators[limit] = [schema[limit], exclusive];
+          }
+        });
+        _.forEach(['multipleOf', 'type'], (prop) => {
+          if (hasOwn(schema, prop)) validators[prop] = [schema[prop]];
+        });
+      break;
+      case 'object':
+        _.forEach(['minProperties', 'maxProperties', 'dependencies'], (prop) => {
+          if (hasOwn(schema, prop)) validators[prop] = [schema[prop]];
+        });
+      break;
+      case 'array':
+        _.forEach(['minItems', 'maxItems', 'uniqueItems'], (prop) => {
+          if (hasOwn(schema, prop)) validators[prop] = [schema[prop]];
+        });
+      break;
+    }
+  }
+  if (hasOwn(schema, 'enum')) validators['enum'] = [schema['enum']];
+  return validators;
+}
+
+/**
+ * 'setRequiredFields' function
+ *
+ * @param {schema} schema - JSON Schema
+ * @param {object} formControlTemplate - Form Control Template object
+ * @return {boolean} - true if any fields have been set to required, false if not
+ */
+export function setRequiredFields(schema: any, formControlTemplate: any): boolean {
+  let fieldsRequired = false;
+  if (hasOwn(schema, 'required') && !_.isEmpty(schema.required)) {
+    fieldsRequired = true;
+    let requiredArray = isArray(schema.required) ? schema.required : [schema.required];
+    _.forEach(requiredArray,
+      key => JsonPointer.set(formControlTemplate, '/' + key + '/validators/required', [])
+    );
+  }
+  return fieldsRequired;
+
+  // TODO: Add support for patternProperties
+  // https://spacetelescope.github.io/understanding-json-schema/reference/object.html#pattern-properties
+}

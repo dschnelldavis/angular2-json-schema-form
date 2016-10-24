@@ -24,6 +24,7 @@ import { JsonPointer } from '../utilities/jsonpointer';
       [class]="layoutNode?.fieldHtmlClass"
       [type]="layoutNode?.type"
       [name]="layoutNode?.name"
+      [attr.value]="layoutNode?.value"
       [attr.minlength]="layoutNode?.minLength || layoutNode?.minlength"
       [attr.maxlength]="layoutNode?.maxLength || layoutNode?.maxlength"
       [attr.pattern]="layoutNode?.pattern"
@@ -38,6 +39,9 @@ export class InputComponent implements OnInit {
   @Input() formOptions: any;
 
   ngOnInit() {
-    this.formControlGroup = JsonPointer.getFromFormGroup(this.formGroup, this.layoutNode.pointer, true);
+    if ('pointer' in this.layoutNode) {
+      this.formControlGroup =
+        JsonPointer.getFromFormGroup(this.formGroup, this.layoutNode.pointer, true);
+    }
   }
 }

@@ -8,12 +8,12 @@ import { toPromise } from 'rxjs/operator/toPromise';
  *   _executeValidators, _executeAsyncValidators, _mergeObjects, _mergeErrors
  *
  * Individual value checking:
- *   isPresent, isBlank, isSet, isNotSet, isEmpty
+ *   isPresent, isBlank, isSet, isNotSet, isEmpty, isNotEmpty
  *
  * Individual type checking:
  *   isString, isNumber, isInteger, isBoolean, isFunction, isObject, isArray
  *
- * Multiple type checking:
+ * Multiple type checking and fixing:
  *   getType, isType, toJavaScriptType, toSchemaType
  *
  * Other utilities:
@@ -202,6 +202,20 @@ export function isEmpty(value: any): boolean {
   if (getType(value) === 'array') return !value.length;
   if (getType(value) === 'object') return !Object.keys(value).length;
   return value === undefined || value === null || value === '';
+}
+
+/**
+ * 'isNotEmpty' utility function
+ *
+ * Similar to isSet, but also returns true for non-empty arrays and objects.
+ *
+ * @param {any} object - the value to check
+ * @return {boolean} - true if undefined, null, or '', otherwise false
+ */
+export function isNotEmpty(value: any): boolean {
+  if (getType(value) === 'array') return !!value.length;
+  if (getType(value) === 'object') return !!Object.keys(value).length;
+  return value !== undefined && value !== null && value !== '';
 }
 
 /**
