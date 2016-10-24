@@ -20,9 +20,9 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked {
   private labelHtmlClass: string;
   private debugOutput: any = '';
   private errorMessage = '';
-  @Input() layoutNode: any; // JSON Schema Form layout node
-  @Input() formGroup: FormGroup; // Angular 2 FormGroup object
-  @Input() formOptions: any; // Global form defaults and options
+  @Input() layoutNode: any;
+  @Input() formGroup: FormGroup;
+  @Input() formOptions: any;
   @Input() debug: boolean;
   @ViewChild('widgetContainer', { read: ViewContainerRef })
     private widgetContainer: ViewContainerRef;
@@ -54,36 +54,53 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked {
       this.layoutNode.fieldHtmlClass += ' ' + this.formOptions.formDefaults.fieldHtmlClass;
     }
 
-    if ('isArrayItem' in this.layoutNode && this.layoutNode.isArrayItem === true) {
+    if (this.layoutNode.type !== '$ref' &&
+      'isArrayItem' in this.layoutNode && this.layoutNode.isArrayItem
+    ) {
       this.controlView = 'array-item';
     } else {
       switch (this.layoutNode.type) {
-        case 'array': case 'array-item': case '$ref':
+
+        // controlView = layoutNode.type
+        case 'array': case 'array-item':
           this.controlView = this.layoutNode.type;
         break;
-        case 'fieldset': case 'advancedfieldset': case 'authfieldset':
-          if (this.layoutNode.type === 'advancedfieldset') {
-            this.layoutNode.title = 'Advanced options';
-          } else if (this.layoutNode.type === 'authfieldset') {
-            this.layoutNode.title = 'Authentication settings';
-          }
+
+        // controlView = minimal
+        case 'fieldset': case 'help': case 'msg': case 'message':
           this.controlView = 'minimal';
         break;
-        case 'help': case 'msg': case 'message':
+        case 'button': case 'submit':
           this.controlView = 'minimal';
+          this.layoutNode.fieldHtmlClass += ' btn ' +
+            (this.layoutNode.style || 'btn-info');
+        break;
+        case '$ref':
+          this.controlView = 'minimal';
+          this.layoutNode.fieldHtmlClass += ' btn pull-right ' +
+            (this.layoutNode.style || 'btn-default');
+          this.layoutNode.icon = 'glyphicon glyphicon-plus';
+        break;
+        case 'advancedfieldset':
+          this.controlView = 'minimal';
+          this.layoutNode.title = 'Advanced options';
+        break;
+        case 'authfieldset':
+          this.controlView = 'minimal';
+          this.layoutNode.title = 'Authentication settings';
         break;
         case 'section': case 'conditional':
           this.controlView = 'minimal';
           this.htmlClass += ' schema-form-section';
         break;
-        case 'button': case 'submit':
-          this.controlView = 'minimal';
-          this.layoutNode.fieldHtmlClass += ' btn btn-info';
-        break;
+
+        // controlView = checkbox
         case 'checkbox':
           this.controlView = 'checkbox';
           this.htmlClass += ' checkbox';
         break;
+
+        // controlView = default
         case 'checkboxes':
           this.layoutNode.htmlClass += ' checkbox';
         break;
@@ -167,7 +184,7 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked {
     ) {
       let vars: any[] = [];
       // vars.push(this.formGroup.value[this.layoutNode.name]);
-      vars.push(this.formGroup.controls[this.layoutNode.name]['errors']);
+      // vars.push(this.formGroup.controls[this.layoutNode.name]['errors']);
       this.debugOutput = _.map(vars, thisVar => JSON.stringify(thisVar, null, 2)).join('\n');
     }
   }

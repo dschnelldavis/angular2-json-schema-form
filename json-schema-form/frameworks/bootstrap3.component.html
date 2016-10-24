@@ -1,20 +1,14 @@
 <div [ngSwitch]="controlView">
-  <!-- <div *ngSwitchCase="'tabarray'">
-  </div>
-  <div *ngSwitchCase="'tabs'">
-  </div>
-  <div *ngSwitchCase="'fieldset'">
-  </div>
-  <div *ngSwitchCase="'actions'">
-  </div> -->
 
   <!-- array -->
   <div *ngSwitchCase="'array'">
     <div [class]="htmlClass" sf-field-model="sf-new-array" sf-new-array>
       <label class="control-label" *ngIf=layoutNode?.title>{{layoutNode?.title}}</label>
-      <ol class="list-group" sf-field-model ui-sortable="layoutNode?.sortOptions">
+      <!-- <ol class="list-group" sf-field-model ui-sortable="layoutNode?.sortOptions"> -->
+
         <div #widgetContainer></div>
-      </ol>
+
+      <!-- </ol> -->
     </div>
     <div class="clearfix" style="padding: 15px;" ng-model="modelArray" schema-validate="form">
       <div *ngIf="layoutNode?.description || layoutNode?.help" class="help-block"
@@ -30,17 +24,19 @@
         class="close pull-right" (click)="deleteFromArray(i)">
         <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
       </button>
+
       <div #widgetContainer></div>
+
     </li>
   </div>
 
   <!-- Reference point, for adding new items -->
-  <div *ngSwitchCase="'$ref'">
+  <!-- <div *ngSwitchCase="'$ref'">
     <button class="btn {{layoutNode?.style || 'btn-default'}} pull-right"
       (click)="addItem(layoutNode?.$ref)" type="button">
-      <i class="glyphicon glyphicon-plus"></i> {{layoutNode?.title || 'New'}}
+      <i class="glyphicon glyphicon-plus"></i> {{'Add ' + (layoutNode?.title || '')}}
     </button>
-  </div>
+  </div> -->
 
   <!-- Single checkboxes -->
   <div *ngSwitchCase="'checkbox'">
@@ -50,7 +46,9 @@
       [class.has-feedback]="layoutNode?.feedback !== false && formControl?.dirty">
       <label [class.sr-only]="layoutNode?.notitle" [class]="labelHtmlClass"
         [attr.for]="layoutNode?.pointer">
+
         <div #widgetContainer></div> {{layoutNode?.title || layoutNode?.name}}
+
       </label>
       <p *ngIf="layoutNode?.feedback !== false && formControl?.dirty && formControl?.errors" class="help-block" [innerHTML]="errorMessage"></p>
       <p *ngIf="layoutNode?.description || layoutNode?.help" class="help-block"
@@ -58,47 +56,48 @@
     </div>
   </div>
 
-  <!-- Minimal: control groups, messages, and inputs without labels -->
+  <!-- Minimal: control groups, messages, and inputs that never have labels or feedback -->
   <!-- section, fieldset, help, msg, message, submit, reset, button -->
   <div *ngSwitchCase="'minimal'">
     <p *ngIf="layoutNode?.type === 'submit' && formOptions?.fieldsRequired">
       <strong class="text-danger">*</strong> = required fields
     </p>
+
     <div #widgetContainer></div>
+
   </div>
 
   <!-- Default: all other input controls -->
   <!-- input -->
   <div *ngSwitchDefault>
-    <div
-      [class]="htmlClass"
+    <div [class]="htmlClass"
       [class.has-success]="!layoutNode?.disableSuccessState && formControl?.dirty && !formControl?.errors"
       [class.has-error]="!layoutNode?.disableErrorState && formControl?.dirty && formControl?.errors"
       [class.has-feedback]="layoutNode?.feedback !== false && formControl?.dirty">
       <label [class.sr-only]="layoutNode?.notitle" [class]="labelHtmlClass"
         [attr.for]="layoutNode?.pointer" [innerHTML]="layoutNode?.title || layoutNode?.name"></label>
-        <strong *ngIf="layoutNode?.required" class="text-danger">*</strong>
-      <div [class.input-group]="layoutNode?.fieldAddonLeft || layoutNode?.prepend || layoutNode?.fieldAddonRight || layoutNode?.append">
-        <span *ngIf="layoutNode?.fieldAddonLeft || layoutNode?.prepend" class="input-group-addon"
+      <strong *ngIf="layoutNode?.required" class="text-danger">*</strong>
+      <div [class.input-group]="layoutNode?.fieldAddonLeft || layoutNode?.prepend ||
+        layoutNode?.fieldAddonRight || layoutNode?.append">
+        <span class="input-group-addon"
           [innerHTML]="layoutNode?.fieldAddonLeft || layoutNode?.prepend"></span>
+
         <div #widgetContainer></div>
-        <span *ngIf="layoutNode?.fieldAddonRight || layoutNode?.append" class="input-group-addon"
+
+        <span class="input-group-addon"
           [innerHTML]="layoutNode?.fieldAddonRight || layoutNode?.append"></span>
       </div>
-      <span *ngIf="layoutNode?.feedback !== false && formControl?.dirty && !formControl?.errors"
-        class="glyphicon glyphicon-ok form-control-feedback"></span>
-      <span *ngIf="layoutNode?.feedback !== false && formControl?.dirty && formControl?.errors"
-        class="glyphicon glyphicon-remove form-control-feedback"></span>
-      <p *ngIf="layoutNode?.feedback !== false && formControl?.dirty && formControl?.errors"
+      <span *ngIf="layoutNode?.feedback !== false && formControl?.dirty &&
+        !formControl?.errors" class="glyphicon glyphicon-ok form-control-feedback"></span>
+      <span *ngIf="layoutNode?.feedback !== false && formControl?.dirty &&
+        formControl?.errors" class="glyphicon glyphicon-remove form-control-feedback"></span>
+      <p *ngIf="layoutNode?.feedback !== false && formControl?.dirty"
         class="help-block" [innerHTML]="errorMessage"></p>
-      <p *ngIf="layoutNode?.description" class="help-block" [innerHTML]="layoutNode?.description"></p>
-      <p *ngIf="layoutNode?.help" class="help-block" [innerHTML]="layoutNode?.help"></p>
+      <p class="help-block" [innerHTML]="layoutNode?.description"></p>
+      <p class="help-block" [innerHTML]="layoutNode?.help"></p>
     </div>
   </div>
 
 </div>
 
-<div *ngIf="debug && debugOutput">
-  debug:
-  <pre *ngIf="debug">{{debugOutput}}</pre>
-</div>
+<div *ngIf="debug && debugOutput">debug: <pre *ngIf="debug">{{debugOutput}}</pre></div>

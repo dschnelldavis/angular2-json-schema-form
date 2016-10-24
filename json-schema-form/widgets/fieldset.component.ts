@@ -11,10 +11,9 @@ import { FormGroup } from '@angular/forms';
       <legend [class.sr-only]="layoutNode?.notitle">{{layoutNode?.title}}</legend>
       <div class="help-block" *ngIf="!!layoutNode?.description">{{layoutNode?.description}}</div>
       <div #widgetContainer></div>
-    </fieldset>
-  `,
+    </fieldset>`,
 })
-export class FieldsetComponent implements OnInit, AfterContentChecked {
+export class FieldsetComponent implements AfterContentChecked {
   private controlInitialized: boolean = false;
   @Input() layoutNode: any; // JSON Schema Form layout array
   @Input() formGroup: FormGroup; // Angular 2 FormGroup object

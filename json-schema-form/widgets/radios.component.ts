@@ -1,8 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
-import { JsonPointer } from '../utilities/jsonpointer';
-import { buildTitleMap } from '../utilities/utility-functions';
+import { buildTitleMap, JsonPointer } from '../utilities/index';
 
 @Component({
   selector: 'radios-widget',

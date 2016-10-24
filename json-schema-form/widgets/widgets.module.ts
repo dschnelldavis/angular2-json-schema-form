@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { ReactiveFormsModule }  from '@angular/forms';
 
+import { AddReferenceComponent } from './add-reference.component';
 import { ArrayComponent } from './array.component';
 import { ButtonComponent } from './button.component';
 import { CheckboxComponent } from './checkbox.component';
@@ -26,13 +27,13 @@ import { TextareaComponent } from './textarea.component';
 
 import { WidgetLibraryService } from './widget-library.service';
 
-export let componentList: any[] = [
-  ArrayComponent, ButtonComponent, CheckboxComponent, CheckboxesComponent,
-  FieldsetComponent, FileComponent, HiddenComponent, InputComponent,
-  NoneComponent, NumberComponent, MessageComponent, RadiosComponent,
-  RadiosInlineComponent, RootComponent, SectionComponent, SelectComponent,
-  SubmitComponent, TabComponent, TabarrayComponent, TemplateComponent,
-  TextareaComponent
+let componentList: any[] = [
+  AddReferenceComponent, ArrayComponent, ButtonComponent, CheckboxComponent,
+  CheckboxesComponent, FieldsetComponent, FileComponent, HiddenComponent,
+  InputComponent, NoneComponent, NumberComponent, MessageComponent,
+  RadiosComponent, RadiosInlineComponent, RootComponent, SectionComponent,
+  SelectComponent, SubmitComponent, TabComponent, TabarrayComponent,
+  TemplateComponent, TextareaComponent
 ];
 
 @NgModule({

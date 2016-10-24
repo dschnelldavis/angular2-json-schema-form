@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
-import { JsonPointer } from '../utilities/jsonpointer';
+import { JsonPointer } from '../utilities/index';
 
 @Component({
   selector: 'input-widget',

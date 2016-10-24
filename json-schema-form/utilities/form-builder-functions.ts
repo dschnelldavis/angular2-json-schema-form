@@ -22,22 +22,28 @@ import {
 /**
  * Form builder function library:
  *
- * buildLayout, buildLayoutFromSchema, buildFormGroupTemplate, buildFormGroup
+ * buildLayout: Build complete layout from input layout
+ * buildLayoutFromSchema: Build complete layout from schema
+ * buildFormGroupTemplate: Build FormGroupTemplate from schema
+ * buildFormGroup: Build FormGroup from FormGroupTemplate
+ *
+ * Under construction:
+ * buildFormGroupTemplateFromLayout: Build FormGroupTemplate from layout
  */
 
 /**
  * 'buildLayout' function
  *
- * @param {any[]} layout            [description]
- * @param {any} schema            [description]
- * @param {any} data              [description]
- * @param {any} formOptions       [description]
- * @param {any} fieldMap          [description]
- * @param {any} schemaRefLibrary  [description]
- * @param {any} layoutRefLibrary  [description]
- * @param {any} widgetLibrary     [description]
- * @param {any} formGroupTemplate [description]
- * @return {any[]}                   [description]
+ * @param {any[]} layout
+ * @param {any} schema
+ * @param {any} data
+ * @param {any} formOptions
+ * @param {any} fieldMap
+ * @param {any} schemaRefLibrary
+ * @param {any} layoutRefLibrary
+ * @param {any} widgetLibrary
+ * @param {any} formGroupTemplate
+ * @return {any[]}
  */
 export function buildLayout(
   layout: any[], schema: any, data: any, formOptions: any,
@@ -117,6 +123,8 @@ export function buildLayout(
         let arrayPointer: string = newItem.pointer + '/-';
         if (!hasOwn(fieldMap, arrayPointer)) fieldMap[arrayPointer] = {};
         fieldMap[arrayPointer]['inputType'] = 'section';
+
+        // Fix insufficiently nested array item groups
         let arrayItemGroup = [];
         let length: number = arrayPointer.length;
         let itemPointer: string = newItem.pointer + '/0';
@@ -124,34 +132,41 @@ export function buildLayout(
           let subItem = newItem.items[i];
           if (subItem.pointer.slice(0, length) === arrayPointer) {
             subItem.pointer = itemPointer + subItem.pointer.slice(length);
-            arrayItemGroup.unshift(newItem.items.pop());
+            arrayItemGroup.unshift(newItem.items.splice(i, 1));
+          } else {
+            subItem.isArrayItem = true;
           }
         }
         if (arrayItemGroup.length) {
-          let newItemFieldset: any = {
+          newItem.items.push({
             'type': 'fieldset',
+            'isArrayItem': true,
             'pointer': itemPointer,
             'items': arrayItemGroup,
             'widget': widgetLibrary.getWidget('fieldset')
-          };
-          newItem.items.push(newItemFieldset);
-          let newItemRef: any = {
-            'type': '$ref', '$ref': arrayPointer, '$refType': 'array'
-          };
-          if (hasOwn(newItem, 'add') && isString(newItem.add)) {
-            newItemRef.title = newItem.add;
-            delete newItem.add;
-          };
-          if (hasOwn(newItem, 'style') && hasOwn(newItem.style, 'add')) {
-            newItemRef.style = newItem.style.add;
-            delete newItem.style.add;
-            if (isEmpty(newItem.style)) delete newItem.style;
-          };
-          newItem.items.push(newItemRef);
-          layoutRefLibrary[arrayPointer] = {
-            'layout': newItemFieldset, '$refType': 'array'
-          };
+          });
         }
+
+        // TODO: check schema, maxItems to verify adding new items is OK,
+        // and additionalItems for whether there is a different schema for new items
+        layoutRefLibrary[arrayPointer] = newItem.items[newItem.items.length - 1];
+        let newItemRef: any = {
+          'type': '$ref',
+          'isArrayItem': true,
+          '$ref': arrayPointer,
+          '$refType': 'array',
+          'title': newItem.add || ('Add ' + (newItem.title || 'item')),
+          'widget': widgetLibrary.getWidget('$ref')
+        };
+        if (hasOwn(newItem, 'style') &&
+          hasOwn(newItem.style, 'add') && isString(newItem.style.add)
+        ) {
+          newItemRef.style = newItem.style.add;
+          delete newItem.style.add;
+          if (isEmpty(newItem.style)) delete newItem.style;
+        }
+        newItem.items.push(newItemRef);
+
       }
     } else if (hasOwn(newItem, 'type')) {
       newItem.widget = widgetLibrary.getWidget(newItem.type);
@@ -163,26 +178,27 @@ export function buildLayout(
 /**
  * 'buildLayoutFromSchema' function
  *
- * @param {any} schema            [description]
- * @param {any} data              [description]
- * @param {any} formOptions       [description]
- * @param {any} fieldMap          [description]
- * @param {any} schemaRefLibrary  [description]
- * @param {any} layoutRefLibrary  [description]
- * @param {any} widgetLibrary     [description]
- * @param {any} formGroupTemplate [description]
- * @param {number = 0} layoutIndex   [description]
- * @param {any = schema} masterSchema  [description]
- * @param {string = ''} layoutPointer [description]
- * @param {string = ''} schemaPointer [description]
- * @param {string = ''} dataPointer   [description]
+ * @param {any} schema
+ * @param {any} data
+ * @param {any} formOptions
+ * @param {any} fieldMap
+ * @param {any} schemaRefLibrary
+ * @param {any} layoutRefLibrary
+ * @param {any} widgetLibrary
+ * @param {any} formGroupTemplate
+ * @param {number = 0} layoutIndex
+ * @param {any = schema} masterSchema
+ * @param {string = ''} layoutPointer
+ * @param {string = ''} schemaPointer
+ * @param {string = ''} dataPointer
  * @return {any}
  */
 export function buildLayoutFromSchema(
   schema: any, data: any, formOptions: any, fieldMap: any,
   schemaRefLibrary: any, layoutRefLibrary: any, widgetLibrary: any,
   formGroupTemplate: any, layoutIndex: number = 0, masterSchema: any = schema,
-  layoutPointer: string = '', schemaPointer: string = '', dataPointer: string = ''
+  layoutPointer: string = '', schemaPointer: string = '',
+  dataPointer: string = '', isArrayItem: boolean = false
 ): any {
   if (!hasOwn(schema, 'type') && !hasOwn(schema, 'x-schema-form')) return null;
   let newItem: any = {};
@@ -196,6 +212,7 @@ export function buildLayoutFromSchema(
   newItem.name = JsonPointer.toKey(newItem.pointer);
   newItem.type = getInputType(schema);
   newItem.dataType = schema.type;
+  if (isArrayItem) newItem.isArrayItem = true;
   newItem.widget = widgetLibrary.getWidget(newItem.type);
   if (dataPointer !== '') {
     if (!hasOwn(fieldMap, newItem.pointer)) fieldMap[newItem.pointer] = {};
@@ -208,6 +225,7 @@ export function buildLayoutFromSchema(
   if (!newItem.title && !isNumber(newItem.name)) {
     newItem.title = newItem.name.charAt(0).toUpperCase() + newItem.name.slice(1);
   }
+  // TODO: check for unresolved circular references and add $ref items to layout
   switch (newItem.type) {
     case 'fieldset':
       let newFieldset: any[] = [];
@@ -262,7 +280,8 @@ export function buildLayoutFromSchema(
             formGroupTemplate, index, masterSchema,
             layoutPointer + '/items/' + index,
             schemaPointer + '/items/' + index,
-            dataPointer + '/' + index
+            dataPointer + '/' + index,
+            true
           )
         ));
         if (hasOwn(schema, 'additionalItems') && schema.additionalItems !== false) {
@@ -272,7 +291,8 @@ export function buildLayoutFromSchema(
             formGroupTemplate, newItem.length, masterSchema,
             layoutPointer + '/items/' + newItem.length,
             schemaPointer + '/items/' + newItem.length,
-            dataPointer + '/' + newItem.length
+            dataPointer + '/' + newItem.length,
+            true
           );
           if (additionalItems) newItem.items.push(additionalItems);
         }
@@ -283,22 +303,24 @@ export function buildLayoutFromSchema(
           formGroupTemplate, 0, masterSchema,
           layoutPointer + '/items/-',
           schemaPointer + '/items/-',
-          dataPointer + '/-'
+          dataPointer + '/-',
+          true
         );
         newItem.items = [additionalItems];
       }
 
-      // If addable items, save to layoutRefLibrary to enable adding later
+      // If addable items, save to layoutRefLibrary, and add $ref item to layout
       if (additionalItems) {
-        layoutRefLibrary[dataPointer + '/-'] = {
-          'layout': additionalItems, '$refType': 'array'
-        };
-        delete layoutRefLibrary[dataPointer + '/-']['layout']['key'];
-        delete layoutRefLibrary[dataPointer + '/-']['layout']['name'];
-
-        // add $ref item to layout to create 'add' button
+        layoutRefLibrary[dataPointer + '/-'] = additionalItems;
+        delete layoutRefLibrary[dataPointer + '/-']['key'];
+        delete layoutRefLibrary[dataPointer + '/-']['name'];
         newItem.items.push({
-          'type': '$ref', '$ref': dataPointer + '/-', '$refType': 'array'
+          'type': '$ref',
+          'isArrayItem': true,
+          '$ref': dataPointer + '/-',
+          '$refType': 'array',
+          'title': 'Add ' + (additionalItems.title || 'item'),
+          'widget': widgetLibrary.getWidget('$ref')
         });
       }
     break;
@@ -314,14 +336,14 @@ export function buildLayoutFromSchema(
  * TODO: add support for pattern properties
  * https://spacetelescope.github.io/understanding-json-schema/reference/object.html
  *
- * @param {any} schema         [description]
- * @param {any} formReferences [description]
- * @param {any} fieldMap       [description]
- * @param {any = schema} rootSchema      [description]
- * @param {string = ''} dataPointer     [description]
- * @param {string = ''} schemaPointer   [description]
- * @param {string = ''} templatePointer [description]
- * @return {any}
+ * @param {any} schema
+ * @param {any} formReferences
+ * @param {any} fieldMap
+ * @param {any = schema} rootSchema
+ * @param {string = ''} dataPointer
+ * @param {string = ''} schemaPointer
+ * @param {string = ''} templatePointer
+ * @return {any} - FormGroupTemplate
  */
 export function buildFormGroupTemplate(
   schema: any, formReferences: any, fieldMap: any,
@@ -388,6 +410,50 @@ export function buildFormGroupTemplate(
       return null;
   }
 }
+
+// /**
+//  * 'buildFormGroupTemplateFromLayout' function
+//  *
+//  * @param {any[]} layout
+//  * @param {any} formReferences
+//  * @param {any} fieldMap
+//  * @param {any = layout} rootLayout
+//  * @param {string = ''} dataPointer
+//  * @param {string = ''} layoutPointer
+//  * @param {string = ''} templatePointer
+//  * @return {any} - FormGroupTemplate
+//  */
+// export function buildFormGroupTemplateFromLayout(
+//   layout: any[], formReferences: any, fieldMap: any,
+//   rootLayout: any = layout, dataPointer: string = '',
+//   layoutPointer: string = '', templatePointer: string = '',
+// ) {
+//   let newModel: any = {};
+//   _.forEach(layout, (value: any) => {
+//     let thisKey: any = null;
+//     if (value === '*') {
+//       _.assign(newModel, this.buildFormGroupTemplate(this.rootSchema, fieldMap));
+//     } else if (_.isString(value)) {
+//       thisKey = value;
+//     } else if (hasOwn(value, 'key')) {
+//       thisKey = value.key;
+//     }
+//     if (thisKey) {
+//       if (thisKey.slice(-2) === '[]') {
+//         _.set(newModel, thisKey.slice(0, -2), null);
+//       } else {
+//         _.set(newModel, thisKey, null);
+//       }
+//     } else if (hasOwn(value, 'items') && isArray(value.items)) {
+//       newModel = Object.assign({}, newModel,
+//         this.buildFormGroupTemplateFromLayout(value.items, fieldMap));
+//     } else if (hasOwn(value, 'tabs') && isArray(value.tabs)) {
+//       newModel = Object.assign({}, newModel,
+//           this.buildFormGroupTemplateFromLayout(value.tabs, fieldMap));
+//     }
+//   });
+//   return newModel;
+// }
 
 /**
  * 'buildFormGroup' function
