@@ -13,9 +13,9 @@ import { JsonPointer } from '../utilities/index';
     <button
       [class]="layoutNode?.fieldHtmlClass"
       [disabled]="layoutNode?.readonly"
-      (click)="addReferencedItem()">
-      <span *ngIf="layoutNode?.icon" class="{{layoutNode?.icon}}"></span>
-      {{layoutNode?.title}}
+      (click)="addItem($event)">
+      <span *ngIf="layoutNode?.icon" [class]="layoutNode?.icon"></span>
+      <span *ngIf="layoutNode?.title" [innerHTML]="layoutNode?.title"></span>
     </button>`,
 })
 export class AddReferenceComponent {
@@ -31,7 +31,11 @@ export class AddReferenceComponent {
     private componentFactory: ComponentFactoryResolver,
   ) {}
 
-  private addReferencedItem() {
+  ngOnInit() { }
 
+  private addItem(event) {
+    event.preventDefault();
+console.log(event);
+console.log(this.layoutNode);
   }
 }

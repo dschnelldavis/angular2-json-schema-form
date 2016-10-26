@@ -1,103 +1,76 @@
-<div [ngSwitch]="controlView">
-
-  <!-- array -->
-  <div *ngSwitchCase="'array'">
-    <div [class]="htmlClass" sf-field-model="sf-new-array" sf-new-array>
-      <label class="control-label" *ngIf=layoutNode?.title>{{layoutNode?.title}}</label>
-      <!-- <ol class="list-group" sf-field-model ui-sortable="layoutNode?.sortOptions"> -->
-
-        <div #widgetContainer></div>
-
-      <!-- </ol> -->
-    </div>
-    <div class="clearfix" style="padding: 15px;" ng-model="modelArray" schema-validate="form">
-      <div *ngIf="layoutNode?.description || layoutNode?.help" class="help-block"
-        [innerHTML]="layoutNode?.description || layoutNode?.help"></div>
-    </div>
+<div [class]="htmlClass"
+  [class.list-group]="layoutNode?.type === 'array'"
+  [class.list-group-item]="layoutNode?.isArrayItem && layoutNode?.type !== '$ref'"
+  [class.has-success]="!layoutNode?.disableSuccessState && formControl?.dirty && !formControl?.errors"
+  [class.has-error]="!layoutNode?.disableErrorState && formControl?.dirty && formControl?.errors"
+  [class.has-feedback]="layoutNode?.feedback !== false && formControl?.dirty">
+  <button *ngIf="layoutNode?.isArrayItem && layoutNode?.type !== '$ref' &&
+    !layoutNode?.readonly && layoutNode?.remove !== false"
+    style="position: relative; z-index: 20;" type="button"
+    class="close pull-right" (click)="deleteFromArray()">
+    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+  </button>
+  <div *ngIf="messageLocation === 'top'">
+    <p *ngIf="!layoutNode?.disableErrorState && layoutNode?.feedback !== false && formControl?.dirty && errorMessage"
+      [innerHTML]="errorMessage" class="help-block"></p>
+    <span *ngIf="layoutNode?.feedback !== false && formControl?.dirty"
+      [innerHTML]="formControl?.errors ? '(error)' : '(success)'" class="sr-only"></span>
+    <p *ngIf="layoutNode?.description"
+      [innerHTML]="layoutNode?.description" class="help-block"></p>
+    <p *ngIf="layoutNode?.help"
+      [innerHTML]="layoutNode?.help" class="help-block"></p>
   </div>
 
-  <!-- array item -->
-  <div *ngSwitchCase="'array-item'">
-    <li class="list-group-item {{layoutNode?.fieldHtmlClass}}" schema-form-array-items>
-      <button *ngIf="!layoutNode?.readonly && layoutNode?.remove !== false && layoutNode?.type !== '$ref'"
-        style="position: relative; z-index: 20;" type="button"
-        class="close pull-right" (click)="deleteFromArray(i)">
-        <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
-      </button>
+  <div [ngSwitch]="controlView">
 
-      <div #widgetContainer></div>
-
-    </li>
-  </div>
-
-  <!-- Reference point, for adding new items -->
-  <!-- <div *ngSwitchCase="'$ref'">
-    <button class="btn {{layoutNode?.style || 'btn-default'}} pull-right"
-      (click)="addItem(layoutNode?.$ref)" type="button">
-      <i class="glyphicon glyphicon-plus"></i> {{'Add ' + (layoutNode?.title || '')}}
-    </button>
-  </div> -->
-
-  <!-- Single checkboxes -->
-  <div *ngSwitchCase="'checkbox'">
-    <div [class]="htmlClass"
-      [class.has-success]="!layoutNode?.disableSuccessState && formControl?.dirty && !formControl?.errors"
-      [class.has-error]="!layoutNode?.disableErrorState && formControl?.dirty && formControl?.errors"
-      [class.has-feedback]="layoutNode?.feedback !== false && formControl?.dirty">
+    <!-- Single checkboxes -->
+    <div *ngSwitchCase="'checkbox'">
       <label [class.sr-only]="layoutNode?.notitle" [class]="labelHtmlClass"
         [attr.for]="layoutNode?.pointer">
-
-        <div #widgetContainer></div> {{layoutNode?.title || layoutNode?.name}}
-
+        <div #widgetContainer></div> <span [innerHTML]="title"></span>
       </label>
-      <p *ngIf="layoutNode?.feedback !== false && formControl?.dirty && formControl?.errors" class="help-block" [innerHTML]="errorMessage"></p>
-      <p *ngIf="layoutNode?.description || layoutNode?.help" class="help-block"
-        [innerHTML]="layoutNode?.description || layoutNode?.help"></p>
     </div>
-  </div>
 
-  <!-- Minimal: control groups, messages, and inputs that never have labels or feedback -->
-  <!-- section, fieldset, help, msg, message, submit, reset, button -->
-  <div *ngSwitchCase="'minimal'">
-    <p *ngIf="layoutNode?.type === 'submit' && formOptions?.fieldsRequired">
-      <strong class="text-danger">*</strong> = required fields
-    </p>
-
-    <div #widgetContainer></div>
-
-  </div>
-
-  <!-- Default: all other input controls -->
-  <!-- input -->
-  <div *ngSwitchDefault>
-    <div [class]="htmlClass"
-      [class.has-success]="!layoutNode?.disableSuccessState && formControl?.dirty && !formControl?.errors"
-      [class.has-error]="!layoutNode?.disableErrorState && formControl?.dirty && formControl?.errors"
-      [class.has-feedback]="layoutNode?.feedback !== false && formControl?.dirty">
-      <label [class.sr-only]="layoutNode?.notitle" [class]="labelHtmlClass"
-        [attr.for]="layoutNode?.pointer" [innerHTML]="layoutNode?.title || layoutNode?.name"></label>
+    <!-- Default: All other controls -->
+    <div *ngSwitchDefault>
+      <label *ngIf="title" [innerHTML]="title" [attr.for]="layoutNode?.pointer"
+        [class.sr-only]="layoutNode?.notitle" [class]="labelHtmlClass"></label>
       <strong *ngIf="layoutNode?.required" class="text-danger">*</strong>
+      <p *ngIf="layoutNode?.type === 'submit' && formOptions?.fieldsRequired">
+        <strong class="text-danger">*</strong> = required fields
+      </p>
       <div [class.input-group]="layoutNode?.fieldAddonLeft || layoutNode?.prepend ||
         layoutNode?.fieldAddonRight || layoutNode?.append">
-        <span class="input-group-addon"
-          [innerHTML]="layoutNode?.fieldAddonLeft || layoutNode?.prepend"></span>
+        <span *ngIf="layoutNode?.fieldAddonLeft || layoutNode?.prepend"
+          [innerHTML]="layoutNode?.fieldAddonLeft || layoutNode?.prepend"
+          class="input-group-addon"></span>
 
         <div #widgetContainer></div>
 
-        <span class="input-group-addon"
-          [innerHTML]="layoutNode?.fieldAddonRight || layoutNode?.append"></span>
+        <span *ngIf="layoutNode?.fieldAddonRight || layoutNode?.append"
+          [innerHTML]="layoutNode?.fieldAddonRight || layoutNode?.append"
+          class="input-group-addon"></span>
       </div>
-      <span *ngIf="layoutNode?.feedback !== false && formControl?.dirty &&
-        !formControl?.errors" class="glyphicon glyphicon-ok form-control-feedback"></span>
-      <span *ngIf="layoutNode?.feedback !== false && formControl?.dirty &&
-        formControl?.errors" class="glyphicon glyphicon-remove form-control-feedback"></span>
-      <p *ngIf="layoutNode?.feedback !== false && formControl?.dirty"
-        class="help-block" [innerHTML]="errorMessage"></p>
-      <p class="help-block" [innerHTML]="layoutNode?.description"></p>
-      <p class="help-block" [innerHTML]="layoutNode?.help"></p>
     </div>
+
   </div>
 
+  <div *ngIf="messageLocation === 'bottom'">
+    <!-- <span *ngIf="layoutNode?.feedback !== false && formControl?.dirty"
+      [class.glyphicon-ok]="!layoutNode?.disableSuccessState && !formControl?.errors"
+      [class.glyphicon-remove]="!layoutNode?.disableErrorState && formControl?.errors"
+      class="glyphicon form-control-feedback" aria-hidden="true"></span>
+    <span *ngIf="layoutNode?.feedback !== false && formControl?.dirty"
+      [id]="layoutNode?.pointer + 'Status'" class="sr-only">
+      {{formControl?.errors ? '(error)' : '(success)'}} </span> -->
+    <p *ngIf="!layoutNode?.disableErrorState && layoutNode?.feedback !== false && formControl?.dirty && errorMessage"
+      [innerHTML]="errorMessage" class="help-block"></p>
+      <span id="inputSuccess2Status" class="sr-only">(success)</span>
+    <p *ngIf="layoutNode?.description"
+      [innerHTML]="layoutNode?.description" class="help-block"></p>
+    <p *ngIf="layoutNode?.help"
+      [innerHTML]="layoutNode?.help" class="help-block"></p>
+  </div>
 </div>
 
 <div *ngIf="debug && debugOutput">debug: <pre *ngIf="debug">{{debugOutput}}</pre></div>

@@ -1,11 +1,6 @@
 import { Injectable } from '@angular/core';
-// TODO: Add ability to download remote schema
-// import { Http } from '@angular/http';
-// import { Observable } from 'rxjs/Observable';
-// import 'rxjs/add/operator/map';
 
-import { forEach } from './utility-functions';
-import { isObject, isArray } from './validator-functions';
+import { forEach, isObject, isArray } from './index';
 
 /**
  * 'JsonPointer' class
@@ -13,9 +8,8 @@ import { isObject, isArray } from './validator-functions';
  * Some utilities for using JSON Pointers with JSON objects and JSON schemas
  * https://tools.ietf.org/html/rfc6901
  *
- * JSON Pointer Functions: get, getFirst, getFromSchema, getFromFormGroup,
- * getSchemaReference, set, remove, has, dict, walk, escape, unescape,
- * parse, compile, toKey, isJsonPointer, isSubPointer, parseObjectPath
+ * JSON Pointer Functions: get, getFirst, set, remove, has, dict, walk, escape,
+ * unescape, parse, compile, toKey, isJsonPointer, isSubPointer, parseObjectPath
  *
  * Based on manuelstofer's json-pointer utilities
  * https://github.com/manuelstofer/json-pointer
@@ -32,31 +26,37 @@ export class JsonPointer {
    *
    * @param {object} object - Object to get value from
    * @param {Pointer} pointer - JSON Pointer (string or array)
-   * @param {boolean = false} returnError - Return only true or false for error
-   * @return {object} - Located value (or true or false if returnError = true)
+   * @param {boolean = false} getBoolean - Return only true or false?
+   * @param {boolean = true} errors - Show error if not found?
+   * @return {object} - Located value (or true or false if getBoolean = true)
    */
-  static get(object: any, pointer: Pointer, returnError: boolean = false): any {
+  static get(
+    object: any, pointer: Pointer, getBoolean: boolean = false, errors: boolean = false
+  ): any {
     let subObject = object;
     let pointerArray: any[] = this.parse(pointer);
     if (pointerArray === null) {
-      if (returnError) return false;
-      console.error('Unable to get object - invalid JSON Pointer: ' + pointer);
-      return null;
+      if (errors) console.error('Unable to get object - invalid JSON Pointer: ' + pointer);
+      return getBoolean ? false : null;
     }
     for (let i = 0, l = pointerArray.length; i < l; ++i) {
       let key: string | number = pointerArray[i];
-      if (key === '-' && isArray(subObject) && subObject.length) {
+      if (!isObject(subObject) && !isArray(subObject)) {
+        if (errors) console.error('Pointer does not match structure of object.');
+        if (errors) console.error(pointer);
+        if (errors) console.error(object);
+        return getBoolean ? false : null;
+      } else if (key === '-' && isArray(subObject) && subObject.length) {
         key = subObject.length - 1;
-      } else if (typeof subObject !== 'object' || !(key in subObject)) {
-        if (returnError) return false;
-        console.error('Unable to find "' + key + '" key in object.');
-        console.error(pointer);
-        console.error(object);
-        return null;
+      } else if (!subObject.hasOwnProperty(key)) {
+        if (errors) console.error('Unable to find "' + key + '" key in object.');
+        if (errors) console.error(pointer);
+        if (errors) console.error(object);
+        return getBoolean ? false : null;
       }
       subObject = subObject[key];
     }
-    return returnError ? true : subObject;
+    return getBoolean ? true : subObject;
   }
 
   /**
@@ -72,166 +72,17 @@ export class JsonPointer {
   static getFirst(items: [any, Pointer][], defaultValue: any = null): any {
     if (!isArray(items)) return null;
     for (let i = 0, l = items.length; i < l; i++) {
-      if (isArray(items[i]) && this.has(items[i][0], items[i][1])) {
-        return this.get(items[i][0], items[i][1]);
+      if (isArray(items[i]) && items[i].length === 2) {
+        let value: any = this.get(items[i][0], items[i][1]);
+        if (value) return value;
+      } else {
+        console.error(
+          'Error: getFirst input not in correct format.\n' +
+          'Should be: [ [ object1, pointer1 ], [ object 2, pointer2 ], etc... ]'
+        );
       }
     }
     return defaultValue;
-  }
-
-  /**
-   * 'getFromSchema' function
-   *
-   * Uses a JSON Pointer for a data object to retrieve a sub-schema from
-   * a JSON Schema which describes that data object
-   *
-   * @param {JSON Schema} schema - schema to get value from
-   * @param {Pointer} pointer - JSON Pointer (string or array)
-   * @param {boolean = false} returnObject - return containing object instead
-   * @return {schema} - located value or object
-   */
-  static getFromSchema(
-    schema: any, pointer: Pointer, returnObject: boolean = false
-  ): any {
-    let subSchema = schema;
-    let pointerArray: any[] = this.parse(pointer);
-    if (pointerArray === null) {
-      console.error('Unable to get schema - invalid JSON Pointer: ' + pointer);
-      return null;
-    }
-    let l = returnObject ? pointerArray.length - 1 : pointerArray.length;
-    for (let i = 0; i < l; ++i) {
-      let parentSchema = subSchema;
-      let key = pointerArray[i];
-      let subSchemaArray = false;
-      let subSchemaObject = false;
-      if (typeof subSchema !== 'object') {
-        console.error('Unable to find "' + key + '" key in schema.');
-        console.error(schema);
-        console.error(pointer);
-        return null;
-      }
-      if (subSchema['type'] === 'array' && 'items' in subSchema &&
-        (!isNaN(key) || key === '-')
-      ) {
-        subSchema = subSchema['items'];
-        subSchemaArray = true;
-      }
-      if (subSchema['type'] === 'object' && 'properties' in subSchema) {
-        subSchema = subSchema['properties'];
-        subSchemaObject = true;
-      }
-      if (!subSchemaArray || !subSchemaObject) {
-        if (subSchemaArray && key === '-') {
-          subSchema = ('additionalItems' in parentSchema) ?
-            parentSchema.additionalItems : {};
-        } else if (typeof subSchema !== 'object' || !(key in subSchema)) {
-          console.error('Unable to find "' + key + '" item in schema.');
-          console.error(schema);
-          console.error(pointer);
-          return null;
-        }
-        subSchema = subSchema[key];
-      }
-    }
-    return subSchema;
-  }
-
-  /**
-   * 'getFromFormGroup' function
-   *
-   * Uses a JSON Pointer for a data object to retrieve a control from
-   * an Angular 2 FormGroup object.
-   *
-   * If the optional third parameter 'returnGroup' is set to TRUE, this function
-   * returns the group containing the control, rather than the control itself.
-   *
-   * @param {FormGroup} formGroup - Angular 2 FormGroup to get value from
-   * @param {Pointer} pointer - JSON Pointer (string or array)
-   * @param {boolean = false} returnGroup - If true, return group containing control
-   * @return {group} - Located value (or true or false, if returnError = true)
-   */
-  static getFromFormGroup(
-    formGroup: any, pointer: Pointer, returnGroup: boolean = false
-  ): any {
-    let subGroup = formGroup;
-    let pointerArray: string[] = this.parse(pointer);
-    if (pointerArray === null) {
-      console.error('Unable to get FormGroup - invalid JSON Pointer: ' + pointer);
-      return null;
-    }
-    let l = returnGroup ? pointerArray.length - 1 : pointerArray.length;
-    for (let i = 0; i < l; ++i) {
-      let key = pointerArray[i];
-      if (subGroup.hasOwnProperty('controls')) {
-        subGroup = subGroup.controls;
-      }
-      if (isArray(subGroup) && (key === '-')) {
-        subGroup = subGroup[subGroup.length - 1];
-      } else if (subGroup.hasOwnProperty(key)) {
-        subGroup = subGroup[key];
-      } else {
-        console.error('Unable to find "' + key + '" item in FormGroup.');
-        console.error(formGroup);
-        console.error(pointer);
-        return null;
-      }
-    }
-    return subGroup;
-  }
-
-  /**
-   * 'resolveSchemaReference' function
-   *
-   * @param {object | string} reference - JSON Pointer, or '$ref' object
-   * @param {object} schema - The schema containing the reference
-   * @param {object} referenceLibrary - Optional library of resolved refernces
-   * @return {object} - The refernced schema sub-section
-   */
-  static getSchemaReference(
-    schema: any, reference: any, referenceLibrary: any = null
-  ): any {
-    let schemaPointer: string;
-    let newSchema: any;
-    if (typeof reference === 'string') {
-      schemaPointer = this.compile(reference);
-    } else {
-      if (!isObject(reference) || Object.keys(reference).length !== 1 ||
-        !('$ref' in reference) || typeof reference.$ref !== 'string'
-      ) {
-        return reference;
-      }
-      schemaPointer = this.compile(reference.$ref);
-    }
-    if (schemaPointer === '') {
-      return schema;
-    } else if (referenceLibrary && referenceLibrary.hasOwnProperty(schemaPointer)) {
-      return referenceLibrary[schemaPointer];
-
-    // TODO: Add ability to download remote schema, if necessary
-    // } else if (schemaPointer.slice(0, 4) === 'http') {
-    //    http.get(schemaPointer).subscribe(response => {
-    //     // TODO: check for circular references
-    //     // TODO: test and adjust to allow for for async response
-    //     if (referenceLibrary) referenceLibrary[schemaPointer] = response.json();
-    //     return response.json();
-    //    });
-
-    } else {
-      newSchema = this.get(schema, schemaPointer);
-
-      // If newSchema is just an allOf array, combine array elements
-      // TODO: Check and fix duplicate elements with different values
-      if (isObject(newSchema) && Object.keys(newSchema).length === 1 &&
-        ('allOf' in newSchema) && isArray(newSchema.allOf)
-      ) {
-        newSchema = newSchema.allOf
-          .map(object => this.getSchemaReference(schema, object, referenceLibrary))
-          .reduce((schema1, schema2) => Object.assign(schema1, schema2), {});
-      }
-      if (referenceLibrary) referenceLibrary[schemaPointer] = newSchema;
-      return newSchema;
-    }
   }
 
   /**
@@ -253,7 +104,7 @@ export class JsonPointer {
     for (let i = 0, l = pointerArray.length - 1; i < l; ++i) {
       let key: string = pointerArray[i];
       if (key === '-' && isArray(subObject)) key = subObject.length;
-      if (!(key in subObject)) {
+      if (!(subObject.hasOwnProperty(key))) {
         subObject[key] = (pointerArray[i + 1].match(/^(\d+|-)$/)) ? [] : {};
       }
       subObject = subObject[key];
@@ -267,7 +118,7 @@ export class JsonPointer {
   /**
    * 'remove' function
    *
-   * Uses a JSON Pointer to remove an attribute from an object
+   * Uses a JSON Pointer to remove a key and its attribute from an object
    *
    * @param {object} object - object to delete attribute from
    * @param {Pointer} pointer - JSON Pointer (string or array)
@@ -498,51 +349,54 @@ export class JsonPointer {
    * @param {string} objectPath - the object path to parse
    * @return {string[]} - the resulting array of keys
    */
-  static parseObjectPath(objectPath: Pointer): string[] {
+  static parseObjectPath(objectPath: string | string[]): string[] {
     if (isArray(objectPath)) return <string[]>objectPath;
-    if (typeof objectPath === 'string') {
-      let index: number = 0;
-      let parts: string[] = [];
-      while (index < objectPath.length) {
-        let nextDot: number = objectPath.indexOf('.', index);
-        let nextOpenBracket: number = objectPath.indexOf('[', index);
-        if (nextDot === -1 && nextOpenBracket === -1) { // last item
-          parts.push(objectPath.slice(index));
-          index = objectPath.length;
-        } else if (
-          nextDot !== -1 && (nextDot < nextOpenBracket || nextOpenBracket === -1)
-        ) { // dots
-          parts.push(objectPath.slice(index, nextDot));
-          index = nextDot + 1;
-        } else { // brackets
-          if (nextOpenBracket > index) {
-            parts.push(objectPath.slice(index, nextOpenBracket));
-            index = nextOpenBracket;
-          }
-          let quote: string = objectPath.charAt(nextOpenBracket + 1);
-          if (quote !== '"' && quote !== "'") {
-            let nextCloseBracket: number = objectPath.indexOf(']', nextOpenBracket);
-            if (nextCloseBracket === -1) nextCloseBracket = objectPath.length;
-            parts.push(objectPath.slice(index + 1, nextCloseBracket));
-            index = nextCloseBracket + 1;
-          } else {
-            let nextCloseBracket: number = objectPath.indexOf(quote + ']', nextOpenBracket);
-            while (nextCloseBracket !== -1 &&
-              objectPath.charAt(nextCloseBracket - 1) === '\\'
-            ) {
-              nextCloseBracket = objectPath.indexOf(quote + ']', nextCloseBracket + 2);
-            }
-            if (nextCloseBracket === -1) nextCloseBracket = objectPath.length;
-            parts.push(objectPath.slice(index + 2, nextCloseBracket)
-            .replace(new RegExp('\\' + quote, 'g'), quote));
-            index = nextCloseBracket + 2;
-          }
-          if (objectPath.charAt(index) === '.') index++;
-        }
-      }
-      return parts;
+    if (typeof objectPath !== 'string') {
+      console.error('parseObjectPath can only parse string paths.');
+      return null;
     }
-    console.error('parseObjectPath can only parse string paths.');
-    return null;
+    let index: number = 0;
+    let parts: string[] = [];
+    while (index < objectPath.length) {
+      let nextDot: number = objectPath.indexOf('.', index);
+      let nextOpenBracket: number = objectPath.indexOf('[', index);
+      if (nextDot === -1 && nextOpenBracket === -1) { // last item
+        parts.push(objectPath.slice(index));
+        index = objectPath.length;
+      } else if (
+        nextDot !== -1 && (nextDot < nextOpenBracket || nextOpenBracket === -1)
+      ) { // dot notation
+        parts.push(objectPath.slice(index, nextDot));
+        index = nextDot + 1;
+      } else { // bracket notation
+        if (nextOpenBracket > index) {
+          parts.push(objectPath.slice(index, nextOpenBracket));
+          index = nextOpenBracket;
+        }
+        let quote: string = objectPath.charAt(nextOpenBracket + 1);
+        if (quote === '"' || quote === "'") { // enclosing quotes
+          let nextCloseBracket: number = objectPath.indexOf(quote + ']', nextOpenBracket);
+          while (nextCloseBracket !== -1 &&
+            objectPath.charAt(nextCloseBracket - 1) === '\\'
+          ) {
+            nextCloseBracket = objectPath.indexOf(quote + ']', nextCloseBracket + 2);
+          }
+          if (nextCloseBracket === -1) nextCloseBracket = objectPath.length;
+          parts.push(
+            objectPath
+              .slice(index + 2, nextCloseBracket)
+              .replace(new RegExp('\\' + quote, 'g'), quote)
+          );
+          index = nextCloseBracket + 2;
+        } else { // no enclosing quotes
+          let nextCloseBracket: number = objectPath.indexOf(']', nextOpenBracket);
+          if (nextCloseBracket === -1) nextCloseBracket = objectPath.length;
+          parts.push(objectPath.slice(index + 1, nextCloseBracket));
+          index = nextCloseBracket + 1;
+        }
+        if (objectPath.charAt(index) === '.') index++;
+      }
+    }
+    return parts;
   }
 }

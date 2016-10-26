@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
-import { JsonPointer } from '../utilities/index';
+import { getControl } from '../utilities/index';
 
 @Component({
   selector: 'button-widget',
@@ -13,7 +13,8 @@ import { JsonPointer } from '../utilities/index';
         [formControlName]="layoutNode?.name"
         class="btn {{ layoutNode?.style || 'btn-default' }}"
         [type]="layoutNode?.type"
-        [disabled]="layoutNode?.readonly">
+        [disabled]="layoutNode?.readonly"
+        [attr.aria-describedby]="layoutNode?.pointer + 'Status'">
         <span *ngIf="layoutNode?.icon" class="{{layoutNode?.icon}}"></span>
         {{layoutNode?.title || layoutNode?.name}}
       </button>
@@ -21,7 +22,8 @@ import { JsonPointer } from '../utilities/index';
     <button *ngIf="!layoutNode?.pointer"
       class="btn {{ layoutNode?.style || 'btn-default' }}"
       [type]="layoutNode?.type"
-      [disabled]="layoutNode?.readonly">
+      [disabled]="layoutNode?.readonly"
+      [attr.aria-describedby]="layoutNode?.pointer + 'Status'">
       <span *ngIf="layoutNode?.icon" class="{{layoutNode?.icon}}"></span>
       {{layoutNode?.title || layoutNode?.name}}
     </button>`,
@@ -33,9 +35,8 @@ export class ButtonComponent implements OnInit {
   @Input() formOptions: any;
 
   ngOnInit() {
-    if ('pointer' in this.layoutNode) {
-      this.formControlGroup =
-        JsonPointer.getFromFormGroup(this.formGroup, this.layoutNode.pointer, true);
+    if (this.layoutNode.hasOwnProperty('pointer')) {
+      this.formControlGroup = getControl(this.formGroup, this.layoutNode.pointer, true);
     }
   }
 }

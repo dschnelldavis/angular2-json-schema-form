@@ -4,7 +4,7 @@ import {
 } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
-import { JsonPointer } from '../utilities/jsonpointer';
+import { getControl, isNumber } from '../utilities/index';
 
 @Component({
   moduleId: module.id,
@@ -16,10 +16,12 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked {
   private displayWidget: boolean = true;
   private formControl: any = null;
   private controlView: string;
+  private messageLocation: string = 'bottom';
   private htmlClass: string;
   private labelHtmlClass: string;
-  private debugOutput: any = '';
+  private title: string;
   private errorMessage = '';
+  private debugOutput: any = '';
   @Input() layoutNode: any;
   @Input() formGroup: FormGroup;
   @Input() formOptions: any;
@@ -32,10 +34,12 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked {
   ) { }
 
   ngOnInit() {
-    if ('pointer' in this.layoutNode) {
-      let thisControl = JsonPointer.getFromFormGroup(this.formGroup, this.layoutNode.pointer);
+    if (this.layoutNode.hasOwnProperty('pointer')) {
+      let thisControl = getControl(this.formGroup, this.layoutNode.pointer);
       if (thisControl) this.formControl = thisControl;
     }
+
+    this.title = this.setTitle(this.layoutNode.type);
 
     this.htmlClass = this.layoutNode.htmlClass || '';
     this.htmlClass += ' form-group  schema-form-' + this.layoutNode.type;
@@ -54,73 +58,46 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked {
       this.layoutNode.fieldHtmlClass += ' ' + this.formOptions.formDefaults.fieldHtmlClass;
     }
 
-    if (this.layoutNode.type !== '$ref' &&
-      'isArrayItem' in this.layoutNode && this.layoutNode.isArrayItem
-    ) {
-      this.controlView = 'array-item';
-    } else {
-      switch (this.layoutNode.type) {
-
-        // controlView = layoutNode.type
-        case 'array': case 'array-item':
-          this.controlView = this.layoutNode.type;
-        break;
-
-        // controlView = minimal
-        case 'fieldset': case 'help': case 'msg': case 'message':
-          this.controlView = 'minimal';
-        break;
-        case 'button': case 'submit':
-          this.controlView = 'minimal';
-          this.layoutNode.fieldHtmlClass += ' btn ' +
-            (this.layoutNode.style || 'btn-info');
-        break;
-        case '$ref':
-          this.controlView = 'minimal';
-          this.layoutNode.fieldHtmlClass += ' btn pull-right ' +
-            (this.layoutNode.style || 'btn-default');
-          this.layoutNode.icon = 'glyphicon glyphicon-plus';
-        break;
-        case 'advancedfieldset':
-          this.controlView = 'minimal';
-          this.layoutNode.title = 'Advanced options';
-        break;
-        case 'authfieldset':
-          this.controlView = 'minimal';
-          this.layoutNode.title = 'Authentication settings';
-        break;
-        case 'section': case 'conditional':
-          this.controlView = 'minimal';
-          this.htmlClass += ' schema-form-section';
-        break;
-
-        // controlView = checkbox
-        case 'checkbox':
-          this.controlView = 'checkbox';
-          this.htmlClass += ' checkbox';
-        break;
-
-        // controlView = default
-        case 'checkboxes':
-          this.layoutNode.htmlClass += ' checkbox';
-        break;
-        case 'checkboxes-inline':
-          this.layoutNode.labelHtmlClass += ' checkbox-inline';
-        break;
-        case 'radiobuttons':
-          this.htmlClass += ' btn-group';
-          this.layoutNode.labelHtmlClass += ' btn btn-default';
-          this.layoutNode.fieldHtmlClass += ' sr-only';
-        break;
-        case 'radio': case 'radios':
-          this.layoutNode.htmlClass += ' radio';
-        break;
-        case 'radios-inline':
-          this.layoutNode.labelHtmlClass += ' radio-inline';
-        break;
-        default:
-          this.layoutNode.fieldHtmlClass += ' form-control';
-      }
+    // Set miscelaneous styles and settings for each control type
+    switch (this.layoutNode.type) {
+      case 'checkbox':
+        this.controlView = 'checkbox';
+        this.htmlClass += ' checkbox';
+      break;
+      case 'button': case 'submit':
+        this.layoutNode.fieldHtmlClass += ' btn ' +
+          (this.layoutNode.style || 'btn-info');
+      break;
+      case '$ref':
+        this.layoutNode.fieldHtmlClass += ' btn pull-right ' +
+          (this.layoutNode.style || 'btn-default');
+        this.layoutNode.icon = 'glyphicon glyphicon-plus';
+      break;
+      case 'array': case 'fieldset': case 'section': case 'conditional':
+        this.messageLocation = 'top';
+      break;
+      case 'help': case 'msg': case 'message':
+        this.displayWidget = false;
+      break;
+      case 'checkboxes':
+        this.layoutNode.htmlClass += ' checkbox';
+      break;
+      case 'checkboxes-inline':
+        this.layoutNode.labelHtmlClass += ' checkbox-inline';
+      break;
+      case 'radiobuttons':
+        this.htmlClass += ' btn-group';
+        this.layoutNode.labelHtmlClass += ' btn btn-default';
+        this.layoutNode.fieldHtmlClass += ' sr-only';
+      break;
+      case 'radio': case 'radios':
+        this.layoutNode.htmlClass += ' radio';
+      break;
+      case 'radios-inline':
+        this.layoutNode.labelHtmlClass += ' radio-inline';
+      break;
+      default:
+        this.layoutNode.fieldHtmlClass += ' form-control';
     }
   }
 
@@ -130,36 +107,14 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked {
       this.widgetContainer && !this.widgetContainer.length &&
       this.layoutNode && this.layoutNode.widget
     ) {
-      if (this.controlView === 'array' && 'items' in this.layoutNode) {
-        for (let i = 0, l = this.layoutNode.items.length; i < l; i++) {
-          if (this.layoutNode.items[i]) {
-            let addedNode: ComponentRef<any> = this.widgetContainer.createComponent(
-              this.componentFactory.resolveComponentFactory(this.formOptions.framework)
-            );
-            addedNode.instance.formGroup = this.formGroup;
-            addedNode.instance.layoutNode = this.layoutNode.items[i];
-            addedNode.instance.layoutNode.isArrayItem = true;
-            addedNode.instance.formOptions = this.formOptions;
-          }
-        }
-      } else if (this.controlView === 'array-item') {
-        let addedNode: ComponentRef<any> = this.widgetContainer.createComponent(
-          this.componentFactory.resolveComponentFactory(this.formOptions.framework)
-        );
-        addedNode.instance.formGroup = this.formGroup;
-        addedNode.instance.layoutNode = this.layoutNode;
-        if (this.layoutNode) {
-          addedNode.instance.layoutNode.isArrayItem = false;
-        }
-        addedNode.instance.formOptions = this.formOptions;
-      } else {
-        let addedNode: ComponentRef<any> = this.widgetContainer.createComponent(
-          this.componentFactory.resolveComponentFactory(this.layoutNode.widget)
-        );
-        addedNode.instance.formGroup = this.formGroup;
-        addedNode.instance.layoutNode = this.layoutNode;
-        addedNode.instance.formOptions = this.formOptions;
-      }
+      let addedNode: ComponentRef<any> = this.widgetContainer.createComponent(
+        this.componentFactory.resolveComponentFactory(this.layoutNode.widget)
+      );
+      addedNode.instance.formGroup = this.formGroup;
+      addedNode.instance.layoutNode = this.layoutNode;
+      addedNode.instance.formOptions = this.formOptions;
+      addedNode.instance.debug = this.debug;
+
       this.controlInitialized = true;
 
       if (this.formControl) {
@@ -186,6 +141,21 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked {
       // vars.push(this.formGroup.value[this.layoutNode.name]);
       // vars.push(this.formGroup.controls[this.layoutNode.name]['errors']);
       this.debugOutput = _.map(vars, thisVar => JSON.stringify(thisVar, null, 2)).join('\n');
+    }
+  }
+
+  private setTitle(type: string): string {
+    switch (this.layoutNode.type) {
+      case 'array': case 'fieldset': case 'help': case 'msg': case 'message':
+      case 'section': case 'conditional': case 'button': case 'submit': case '$ref':
+        return null;
+      case 'advancedfieldset':
+        return 'Advanced options';
+      case 'authfieldset':
+        return 'Authentication settings';
+      default:
+        return this.layoutNode.title ||
+          (!isNumber(this.layoutNode.name) ? this.layoutNode.name : null);
     }
   }
 }

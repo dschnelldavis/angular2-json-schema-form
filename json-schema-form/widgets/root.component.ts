@@ -24,7 +24,7 @@ export class RootComponent implements OnChanges {
 
   ngOnChanges() {
     this.layoutArray =
-      (Array.isArray(this.layoutNode)) ? this.layoutNode : [this.layoutNode];
+      Array.isArray(this.layoutNode) ? this.layoutNode : [this.layoutNode];
     this.rootWidget.clear();
     for (let i = 0, l = this.layoutArray.length; i < l; i++) {
       let addedNode: ComponentRef<any> = this.rootWidget.createComponent(
@@ -33,7 +33,7 @@ export class RootComponent implements OnChanges {
       addedNode.instance.formGroup = this.formGroup;
       addedNode.instance.layoutNode = this.layoutArray[i];
       addedNode.instance.formOptions = this.formOptions;
-      // addedNode.instance.debug = this.debug || false;
+      addedNode.instance.debug = this.debug || false;
     }
   }
 }

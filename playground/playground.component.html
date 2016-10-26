@@ -30,19 +30,21 @@
       Choose an example below, or create your own, and check the generated form.
     </div>
   </div>
-
+<div class="form-group">
   <div class="row">
     <div class="col-sm-2">
       <label for="exampleSet">Example Set:</label>
     </div>
-    <div class="col-sm-10">
-      <select id="exampleSet" (change)="loadSelectedSet($event.target.value)">
+    <div class="col-sm-6">
+      <select id="exampleSet" class="form-control"
+        (change)="loadSelectedSet($event.target.value)">
         <option *ngFor="let set of examples.exampleSetList"
           [value]="set" [selected]="selectedSet === set">
           {{examples.exampleSets[set]}}
         </option>
       </select>
     </div>
+    <div class="col-sm-4"></div>
     <div class="clearfix visible-sm-block"></div>
   </div>
 
@@ -50,8 +52,8 @@
     <div class="col-sm-2">
       <label for="example">Example:</label>
     </div>
-    <div class="col-sm-10">
-      <select id="example"
+    <div class="col-sm-6">
+      <select id="example" class="form-control"
         (change)="loadSelectedExample(selectedSet, $event.target.value)">
         <option *ngFor="let example of examples.exampleList[selectedSet]"
           [value]="example" [selected]="selectedExample === example">
@@ -59,9 +61,10 @@
         </option>
       </select>
     </div>
+    <div class="col-sm-4"></div>
     <div class="clearfix visible-sm-block"></div>
   </div>
-
+</div>
   <div class="row">
     <div class="col-sm-5">
       <h4>JSON Schema and Layout</h4>

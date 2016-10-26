@@ -1,6 +1,8 @@
 import { AbstractControl } from '@angular/forms';
 import { toPromise } from 'rxjs/operator/toPromise';
 
+import { inArray, xor, hasOwn, forOwn } from './index';
+
 /**
  * Validator utility function library:
  *
@@ -11,13 +13,10 @@ import { toPromise } from 'rxjs/operator/toPromise';
  *   isPresent, isBlank, isSet, isNotSet, isEmpty, isNotEmpty
  *
  * Individual type checking:
- *   isString, isNumber, isInteger, isBoolean, isFunction, isObject, isArray
+ *   isString, isNumber, isInteger, isBoolean, isFunction, isObject, isArray, isPromise
  *
  * Multiple type checking and fixing:
- *   getType, isType, toJavaScriptType, toSchemaType
- *
- * Other utilities:
- *   xor, hasOwn, forOwn, isPromise, _convertToPromise
+ *   getType, isType, isPrimitive, toJavaScriptType, toSchemaType, _convertToPromise
  *
  * Typescript types and interfaces:
  *   SchemaPrimitiveType, SchemaType, JavaScriptPrimitiveType, JavaScriptType,
@@ -353,6 +352,20 @@ export function isType(value: PrimitiveValue, type: SchemaPrimitiveType): boolea
 }
 
 /**
+ * 'isPrimitive' function
+ *
+ * Checks wether an input value is a JavaScript primitive type:
+ * string, number, boolean, or null.
+ *
+ * @param {any} value - value to check
+ * @return {boolean}
+ */
+export function isPrimitive(value: any): boolean {
+  return (isString(value) || isNumber(value) ||
+    isBoolean(value, 'strict') || value === null);
+}
+
+/**
  * 'toJavaScriptType' function
  *
  * Converts an input (probably string) value to a JavaScript primitive type -
@@ -509,90 +522,6 @@ export function toSchemaType(
     ) && (<SchemaPrimitiveType[]>types).indexOf('null') === -1
   ) {
     return 0; // If null not allowed, return 0 for non-convertable values
-  }
-}
-
-/**
- * 'xor' utility function - exclusive or
- *
- * Returns true if exactly one of two values is truthy.
- *
- * @param {any} value1 - first value to check
- * @param {any} value2 - second value to check
- * @return {boolean} - true if exactly one input value is truthy, false if not
- */
-export function xor(value1: any, value2: any): boolean {
-  return (!!value1 && !value2) || (!value1 && !!value2);
-}
-
-/**
- * 'hasOwn' utility function
- *
- * Checks whether an object has a particular property.
- *
- * @param {any} object - the object to check
- * @param {string} property - the property to look for
- * @return {boolean} - true if object has property, false if not
- */
-export function hasOwn(object: PlainObject, property: string): boolean {
-  if (!isObject(object)) return false;
-  return object.hasOwnProperty(property);
-}
-
-/**
- * 'forOwn' utility function
- *
- * Iterates through an object and calls a function on each key and value.
- * The function is called with three arguments: (value, key, object).
- * Returns a new object with the same keys as the original object,
- * but with the values returned by the function.
- *
- * @param {object} object - the object to iterate through
- * @param {(v: string, k: any) => any} fn - the function to call
- * @return {PlainObject} - the resulting object
- */
-export function forOwn(
-  object: PlainObject, fn: (v: any, k: string, o: PlainObject) => any
-): PlainObject {
-  if (getType(object) !== 'object') return null;
-  if (isEmpty(object)) return {};
-  let newObject = {};
-  for (let field in object) {
-    if (object.hasOwnProperty(field)) {
-      newObject[field] = fn(object[field], field, object);
-    }
-  }
-  return newObject;
-}
-
-/**
- * 'inArray' function
- *
- * Searches an array for an item, or one of a list of items, and returns true
- * as soon as a match is found, or false if no match.
- *
- * If the optional third parameter allIn is set to TRUE, and the item to find
- * is an array, then the function returns true only if all elements from item
- * are found in the list, and false if any element is not found. If the item to
- * find is not an array, setting allIn to TRUE has no effect.
- *
- * @param {any|any[]} item - the item to search for
- * @param {any[]} array - the array to search
- * @param {boolean = false} allIn - if TRUE, all items must be in array
- * @return {boolean} - true if item(s) in array, false otherwise
- */
-export function inArray(item: any|any[], array: any[], allIn: boolean = false): boolean {
-  if (isArray(item)) {
-    let inArray: boolean = allIn;
-    for (let i = 0, l = item.length; i < l; i++) {
-      if (xor(array.indexOf(item[i]) !== -1, allIn)) {
-        inArray = !allIn;
-        break;
-      }
-    }
-    return inArray;
-  } else {
-    return array.indexOf(item) !== -1;
   }
 }
 

@@ -1,12 +1,12 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
-import { buildTitleMap, JsonPointer } from '../utilities/index';
+import { buildTitleMap, getControl } from '../utilities/index';
 
 @Component({
   selector: 'radios-inline-widget',
   template: `
-    <div *ngIf="layoutNode?.pointer" [formGroup]="formControlGroup">
+    <div *ngIf="bindControl" [formGroup]="formControlGroup">
       <label *ngFor="let item of titleMap"
         [attr.for]="layoutNode?.pointer + '/' + item?.value"
         [class]="layoutNode?.labelHtmlClass"
@@ -22,7 +22,7 @@ import { buildTitleMap, JsonPointer } from '../utilities/index';
         <span [innerHTML]="item?.name"></span>
       </label>
     </div>
-    <div *ngIf="!layoutNode?.pointer">
+    <div *ngIf="!bindControl">
       <label *ngFor="let item of titleMap"
         [attr.for]="item?.value"
         [class]="layoutNode?.labelHtmlClass"
@@ -39,15 +39,25 @@ import { buildTitleMap, JsonPointer } from '../utilities/index';
 })
 export class RadiosInlineComponent implements OnInit {
   private formControlGroup: any;
+  private bindControl: boolean = false;
   private titleMap: any[] = [];
   @Input() formGroup: FormGroup;
   @Input() layoutNode: any;
   @Input() formOptions: any;
 
   ngOnInit() {
-    if ('pointer' in this.layoutNode) {
-      this.formControlGroup =
-        JsonPointer.getFromFormGroup(this.formGroup, this.layoutNode.pointer, true);
+    if (this.layoutNode.hasOwnProperty('pointer')) {
+      this.formControlGroup = getControl(this.formGroup, this.layoutNode.pointer, true);
+      if (this.formControlGroup &&
+        this.formControlGroup.controls.hasOwnProperty(this.layoutNode.name)
+      ) {
+        this.bindControl = true;
+      } else {
+        console.error(
+          'Warning: control "' + this.layoutNode.pointer +
+          '" is not bound to the Angular 2 FormGroup.'
+        );
+      }
     }
     this.titleMap = buildTitleMap(this.layoutNode.titleMap, this.layoutNode.enum);
   }

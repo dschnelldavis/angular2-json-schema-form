@@ -1,13 +1,11 @@
 import { AbstractControl } from '@angular/forms';
 
 import {
-  _executeValidators, _executeAsyncValidators, _mergeObjects, _mergeErrors,
-  isEmpty, isPresent, isBlank, isSet, isNotSet,
-  isString, isNumber, isInteger, isBoolean, isObject, isArray, getType, isType,
-  toJavaScriptType, toSchemaType, xor, forOwn, isPromise, _convertToPromise,
-  SchemaPrimitiveType, PrimitiveValue, PlainObject,
-  IValidatorFn, AsyncIValidatorFn
-} from './validator-functions';
+  _convertToPromise, _executeValidators, _executeAsyncValidators, _mergeObjects,
+  _mergeErrors, forOwn, isEmpty, isPresent, isBlank, isSet, isNotSet, isString,
+  isNumber, isBoolean, isObject, isArray, getType, isType, toJavaScriptType,
+  xor, SchemaPrimitiveType, PlainObject, IValidatorFn, AsyncIValidatorFn,
+} from './index';
 
 /**
  * 'JsonValidators' module

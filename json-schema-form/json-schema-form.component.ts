@@ -17,19 +17,10 @@ import * as _ from 'lodash';
 import { FrameworkLibraryService } from './frameworks/framework-library.service';
 import { WidgetLibraryService } from './widgets/widget-library.service';
 import {
-  buildLayout, buildFormGroupTemplate, buildFormGroup
-} from './utilities/form-builder-functions';
-import {
-  forOwnDeep, formatFormData, getInputType, isInputRequired, mapLayout, toTitleCase
-} from './utilities/utility-functions';
-import {
-  hasOwn, inArray, isArray, isBlank, isEmpty, isFunction, isInteger,
-  isNumber, isObject, isPresent, isSet, isString,
-  toJavaScriptType, toSchemaType, SchemaPrimitiveType,
-} from './utilities/validator-functions';
-import { convertJsonSchema3to4 } from './utilities/convert-json-schema';
-import { JsonPointer } from './utilities/jsonpointer';
-import { JsonValidators } from './utilities/json-validators';
+  buildFormGroup, buildFormGroupTemplate, buildLayout, convertJsonSchema3to4,
+  formatFormData, forOwnDeep, getSchemaReference, hasOwn, isArray, isEmpty,
+  isObject, isString, JsonPointer
+} from './utilities/index';
 
 /**
  * @module 'JsonSchemaFormComponent' - Angular 2 JSON Schema Form
@@ -225,7 +216,7 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
             let newReference: string = JsonPointer.compile(value['$ref']);
             let isCircular = JsonPointer.isSubPointer(newReference, pointer);
             if (!hasOwn(this.schemaRefLibrary, newReference) && newReference !== '') {
-              this.schemaRefLibrary[newReference] = JsonPointer.getSchemaReference(
+              this.schemaRefLibrary[newReference] = getSchemaReference(
                 this.masterSchema, newReference, this.schemaRefLibrary
               );
             }
@@ -307,7 +298,8 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
 
         // Build the Angular 2 FormGroup template from the schema
         this.formGroupTemplate = buildFormGroupTemplate(
-          this.masterSchema, this.formOptions.layoutRefLibrary, this.fieldMap
+          this.masterSchema, this.schemaRefLibrary,
+          this.fieldMap, this.initialData
         );
       } else {
 
@@ -332,7 +324,7 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
       this.masterFormGroup = <FormGroup>(buildFormGroup(this.formGroupTemplate));
 
       if (this.masterFormGroup) {
-console.log(this.masterFormGroup);
+
         // Activate the *ngIf in the template to render form
         this.formActive = true;
 
@@ -369,14 +361,14 @@ console.log(this.masterFormGroup);
     if (this.debug) {
       let vars: any[] = [];
       // vars.push(this.masterSchema);
-      // vars.push(this.formGroupTemplate);
       // vars.push(this.fieldMap);
-      // vars.push(this.masterLayout);
+      vars.push(this.formGroupTemplate);
+      vars.push(this.masterLayout);
       // vars.push(this.schemaRefLibrary);
       // vars.push(this.initialData);
       // vars.push(this.masterFormGroup);
       // vars.push(this.masterFormGroup.value);
-      vars.push(this.formOptions.layoutRefLibrary);
+      // vars.push(this.formOptions.layoutRefLibrary);
       this.debugOutput = _.map(vars, thisVar => JSON.stringify(thisVar, null, 2)).join('\n');
     }
   }

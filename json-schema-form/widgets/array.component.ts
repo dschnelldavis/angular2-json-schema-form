@@ -1,22 +1,24 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-
-import { JsonPointer } from '../utilities/index';
 
 @Component({
   selector: 'array-widget',
-  template: ``,
+  template: `
+    <fieldset [disabled]="layoutNode?.readonly" [class]="layoutNode?.htmlClass">
+      <legend *ngIf="layoutNode?.title" [class.sr-only]="layoutNode?.notitle"
+        [innerHTML]="layoutNode?.title"></legend>
+      <div *ngFor="let item of layoutNode?.items; let i = index; trackBy: item.path">
+        <root-widget
+          [layoutNode]="item"
+          [formGroup]="formGroup"
+          [formOptions]="formOptions"
+          [debug]="debug"></root-widget>
+      </div>
+    </fieldset>`,
 })
-export class ArrayComponent implements OnInit {
-  private formControlGroup: any;
-  @Input() formGroup: FormGroup;
+export class ArrayComponent {
   @Input() layoutNode: any;
+  @Input() formGroup: FormGroup;
   @Input() formOptions: any;
-
-  ngOnInit() {
-    if ('pointer' in this.layoutNode) {
-      this.formControlGroup =
-        JsonPointer.getFromFormGroup(this.formGroup, this.layoutNode.pointer, true);
-    }
-  }
+  @Input() debug: boolean;
 }

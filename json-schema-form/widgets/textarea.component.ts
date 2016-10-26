@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
-import { JsonPointer } from '../utilities/index';
+import { getControl } from '../utilities/index';
 
 @Component({
   selector: 'textarea-widget',
@@ -28,9 +28,8 @@ export class TextareaComponent implements OnInit {
   @Input() formOptions: any;
 
   ngOnInit() {
-    if ('pointer' in this.layoutNode) {
-      this.formControlGroup =
-        JsonPointer.getFromFormGroup(this.formGroup, this.layoutNode.pointer, true);
+    if (this.layoutNode.hasOwnProperty('pointer')) {
+      this.formControlGroup = getControl(this.formGroup, this.layoutNode.pointer, true);
     }
   }
 }

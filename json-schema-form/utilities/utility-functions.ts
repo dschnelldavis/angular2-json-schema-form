@@ -7,22 +7,17 @@ import 'rxjs/add/operator/map';
 
 import * as _ from 'lodash';
 
-import { JsonPointer } from './jsonpointer';
-import { JsonValidators } from './json-validators';
 import {
-  isPresent, isBlank, isSet, isNotSet, isEmpty, isString, isNumber,
-  isInteger, isBoolean, isFunction, isObject, isArray, getType, isType,
-  toJavaScriptType, toSchemaType, xor, hasOwn, forOwn, inArray,
-  SchemaPrimitiveType
-} from './validator-functions';
+  isPresent, isBlank, isSet, isEmpty, isString,
+  isInteger, isFunction, isObject, isArray, getType,
+  JsonPointer, JsonValidators, toJavaScriptType, toSchemaType,
+  JavaScriptType, PlainObject, SchemaPrimitiveType, SchemaType,
+} from './index';
 
 /**
  * Utility function library:
  *
- * forEach, forOwnDeep, toTitleCase
- *
- * getInputType, mapLayout, isInputRequired, buildTitleMap, formatFormData,
- * updateInputOptions, getControlValidators, setRequiredFields
+ * forEach, forOwn, forOwnDeep, hasOwn, inArray, toTitleCase, xor
  */
 
 /**
@@ -89,22 +84,18 @@ export function forEach(
  * @param {boolean = false} bottomUp - optional, set to TRUE to reverse direction
  * @return {object} - the object or array
  */
-export function forOwnDeep(
-  object: any,
+export function forOwnDeep( object: any,
   fn: (value: any, key?: string, object?: any, jsonPointer?: string) => any,
-  rootObject: any = null,
-  jsonPointer: string = '',
-  bottomUp: boolean = false
+  rootObject: any = null, jsonPointer: string = '', bottomUp: boolean = false
 ): any {
   let isRoot: boolean = !rootObject;
   if (isRoot) { rootObject = object; }
   let currentKey = JsonPointer.parse(jsonPointer).pop();
-  let forFn = null;
   if (!isRoot && !bottomUp) fn(object, currentKey, rootObject, jsonPointer);
   if (isArray(object) || isObject(object)) {
-    let keys: string[] = Object.keys(object);
-    let recurse: Function = (key) => forOwnDeep(object[key],
-      fn, rootObject, jsonPointer + '/' + JsonPointer.escape(key), bottomUp);
+    let keys: string[] = Object.keys(object).filter(key => object.hasOwnProperty(key));
+    let recurse: Function = key => forOwnDeep(object[key], fn,
+      rootObject, jsonPointer + '/' + JsonPointer.escape(key), bottomUp);
     if (bottomUp) {
       for (let i = keys.length - 1, l = 0; i >= l; i--) recurse(keys[i]);
     } else {
@@ -113,6 +104,90 @@ export function forOwnDeep(
   }
   if (!isRoot && bottomUp) fn(object, currentKey, rootObject, jsonPointer);
   return object;
+}
+
+/**
+ * 'inArray' function
+ *
+ * Searches an array for an item, or one of a list of items, and returns true
+ * as soon as a match is found, or false if no match.
+ *
+ * If the optional third parameter allIn is set to TRUE, and the item to find
+ * is an array, then the function returns true only if all elements from item
+ * are found in the list, and false if any element is not found. If the item to
+ * find is not an array, setting allIn to TRUE has no effect.
+ *
+ * @param {any|any[]} item - the item to search for
+ * @param {any[]} array - the array to search
+ * @param {boolean = false} allIn - if TRUE, all items must be in array
+ * @return {boolean} - true if item(s) in array, false otherwise
+ */
+export function inArray(item: any|any[], array: any[], allIn: boolean = false): boolean {
+  if (isArray(item)) {
+    let inArray: boolean = allIn;
+    for (let i = 0, l = item.length; i < l; i++) {
+      if (xor(array.indexOf(item[i]) !== -1, allIn)) {
+        inArray = !allIn;
+        break;
+      }
+    }
+    return inArray;
+  } else {
+    return array.indexOf(item) !== -1;
+  }
+}
+
+/**
+ * 'xor' utility function - exclusive or
+ *
+ * Returns true if exactly one of two values is truthy.
+ *
+ * @param {any} value1 - first value to check
+ * @param {any} value2 - second value to check
+ * @return {boolean} - true if exactly one input value is truthy, false if not
+ */
+export function xor(value1: any, value2: any): boolean {
+  return (!!value1 && !value2) || (!value1 && !!value2);
+}
+
+/**
+ * 'hasOwn' utility function
+ *
+ * Checks whether an object has a particular property.
+ *
+ * @param {any} object - the object to check
+ * @param {string} property - the property to look for
+ * @return {boolean} - true if object has property, false if not
+ */
+export function hasOwn(object: PlainObject, property: string): boolean {
+  if (!isObject(object)) return false;
+  return object.hasOwnProperty(property);
+}
+
+/**
+ * 'forOwn' utility function
+ *
+ * Iterates through an object and calls a function on each key and value.
+ * The function is called with three arguments: (value, key, object).
+ * Returns a new object with the same keys as the original object,
+ * but with the values returned by the function.
+ *
+ * @param {object} object - the object to iterate through
+ * @param {(v: string, k: any) => any} fn - the function to call
+ * @return {PlainObject} - the resulting object
+ */
+export function forOwn(
+  object: PlainObject, fn: (v: any, k: string, o: PlainObject) => any
+): PlainObject {
+  if (getType(object) !== 'object') return null;
+  if (isEmpty(object)) return {};
+  let newObject = {};
+  for (let field in object) {
+    if (object.hasOwnProperty(field)) {
+      newObject[field] = fn(object[field], field, object);
+    }
+  }
+  return newObject;
 }
 
 /**
@@ -173,423 +248,3 @@ export function toTitleCase(input: string, forceWords?: string | string[]): stri
     }
   });
 };
-
-/**
- * 'getInputType' function
- *
- * @param {any} schema
- * @return {string}
- */
-export function getInputType(schema: any): string {
-  if (
-    isObject(schema['x-schema-form']) && isSet(schema['x-schema-form']['type'])
-  ) {
-    return schema['x-schema-form']['type'];
-  } else if (hasOwn(schema, 'ui:widget') && isString(schema['ui:widget'])) {
-    return schema['ui:widget']; // react-jsonschema-form compatibility
-  }
-  let schemaType = schema.type;
-  if (isArray(schemaType)) { // If multiple types listed, use most inclusive type
-    if (inArray('object', schemaType) && hasOwn(schema, 'properties')) {
-      schemaType = 'object';
-    } else if (inArray('array', schemaType) && hasOwn(schema, 'items')) {
-      schemaType = 'array';
-    } else if (inArray('string', schemaType)) {
-      schemaType = 'string';
-    } else if (inArray('number', schemaType)) {
-      schemaType = 'number';
-    } else if (inArray('integer', schemaType)) {
-      schemaType = 'integer';
-    } else if (inArray('boolean', schemaType)) {
-      schemaType = 'boolean';
-    } else {
-      schemaType = 'null';
-    }
-  }
-  if (schemaType === 'boolean') return 'checkbox';
-  if (schemaType === 'object') {
-    if (hasOwn(schema, 'properties')) return 'fieldset';
-    return 'textarea';
-  }
-  if (schemaType === 'array') {
-    let itemsObject = JsonPointer.getFirst([
-      [schema, '/items'],
-      [schema, '/additionalItems']
-    ]);
-    if (!itemsObject) return null;
-    if (hasOwn(itemsObject, 'enum')) return 'checkboxes';
-    return 'array';
-  }
-  if (schemaType === 'null') return 'hidden';
-  if (hasOwn(schema, 'enum')) return 'select';
-  if (schemaType === 'number' || schemaType === 'integer') {
-    if (hasOwn(schema, 'maximum') && hasOwn(schema, 'minimum') &&
-      (schemaType === 'integer' || hasOwn(schema, 'multipleOf'))) return 'range';
-    return schemaType;
-  }
-  if (schemaType === 'string') {
-    if (hasOwn(schema, 'format')) {
-      if (schema.format === 'color') return 'color';
-      if (schema.format === 'date') return 'date';
-      if (schema.format === 'date-time') return 'datetime-local';
-      if (schema.format === 'email') return 'email';
-      if (schema.format === 'uri') return 'url';
-    }
-    return 'text';
-  }
-  return 'text';
-}
-
-/**
- * 'mapLayout' function
- *
- * Creates a new layout by running each element in an existing layout through
- * an iteratee. Recursively maps within array elements 'items' and 'tabs'.
- * The iteratee is invoked with four arguments: (value, index, layout, path)
- *
- * THe returned layout may be longer (or shorter) then the source layout.
- *
- * If an item from the source layout returns multiple items (as '*' usually will),
- * this function will keep all returned items in-line with the surrounding items.
- *
- * If an item from the source layout causes an error and returns null, it is
- * simply skipped, and the function will still return all non-null items.
- *
- * @param {any[]} layout - the layout to map
- * @param {(v: any, i?: number, l?: any, p?: string) => any}
- *   function - the funciton to invoke on each element
- * @param {any[] = layout} rootLayout - the root layout, which conatins layout
- * @param {any = ''} path - the path to layout, inside rootLayout
- * @return {[type]}
- */
-export function mapLayout(
-  layout: any[],
-  fn: (v: any, i?: number, l?: any, p?: string) => any,
-  rootLayout: any[] = layout,
-  path: string = ''
-): any[] {
-  let newLayout: any[] = [];
-  let indexPad = 0;
-  _.forEach(layout, (item, index) => {
-    let realIndex = index + indexPad;
-    let newPath = path + '/' + realIndex;
-    let newItem: any = item;
-    if (isObject(newItem)) {
-      if (isArray(newItem.items)) {
-        newItem.items =
-          mapLayout(newItem.items, fn, rootLayout, newPath + '/items');
-      } else if (isArray(newItem.tabs)) {
-        newItem.tabs =
-          mapLayout(newItem.tabs, fn, rootLayout, newPath + '/tabs');
-      }
-    }
-    newItem = fn(newItem, realIndex, rootLayout, newPath);
-    if (newItem === undefined) {
-      indexPad--;
-    } else {
-      if (isArray(newItem)) indexPad += newItem.length - 1;
-      newLayout = newLayout.concat(newItem);
-    }
-  });
-  return newLayout;
-};
-
-/**
- * 'isInputRequired' function
- *
- * Checks a JSON Schema to see if an item is required
- *
- * @param {schema} schema - the schema to check
- * @param {string} key - the key of the item to check
- * @return {boolean} - true if the item is required, false if not
- */
-export function isInputRequired(schema: any, pointer: string): boolean {
-  if (!isObject(schema)) {
-    console.error('Schema must be an object.');
-    return false;
-  }
-  let dataPointerArray: string[] = JsonPointer.parse(pointer);
-  if (isArray(dataPointerArray) && dataPointerArray.length) {
-    let keyName: string = dataPointerArray[dataPointerArray.length - 1];
-    let requiredList: any;
-    if (dataPointerArray.length > 1) {
-      let listPointerArray: string[] = dataPointerArray.slice(0, -1);
-      if (listPointerArray[listPointerArray.length - 1] === '-') {
-        listPointerArray = listPointerArray.slice(0, -1);
-        requiredList = JsonPointer.getFromSchema(schema, listPointerArray)['items']['required'];
-      } else {
-        requiredList = JsonPointer.getFromSchema(schema, listPointerArray)['required'];
-      }
-    } else {
-      requiredList = schema['required'];
-    }
-    if (isArray(requiredList)) return requiredList.indexOf(keyName) !== -1;
-  }
-  return false;
-};
-
-/**
- * 'buildTitleMap' function
- *
- * @param {any} titleMap -
- * @param {any} enumList -
- * @param {boolean = false} fieldRequired -
- * @return { { name: any, value: any}[] }
- */
-export function buildTitleMap(
-  titleMap: any, enumList: any, fieldRequired: boolean = true
-): { name: any, value: any}[] {
-  let newTitleMap: { name: any, value: any}[] = [];
-  let hasEmptyValue: boolean = false;
-  if (titleMap) {
-    if (isArray(titleMap)) {
-      if (enumList) {
-        for (let i = 0, l = titleMap.length; i < l; i++) {
-          let value: any = titleMap[i].value;
-          if (enumList.indexOf(value) !== -1) {
-            let name: any = titleMap[i].name;
-            newTitleMap.push({ name, value });
-            if (!value) hasEmptyValue = true;
-          }
-        }
-      } else {
-        newTitleMap = titleMap;
-        if (!fieldRequired) hasEmptyValue = !!newTitleMap.filter(i => !i.value).length;
-      }
-    } else if (enumList) {
-      for (let i = 0, l = enumList.length; i < l; i++) {
-        let value: any = enumList[i];
-        if (titleMap.hasOwnProperty(value)) {
-          let name: any = titleMap[value];
-          newTitleMap.push({ name, value });
-          if (!value) hasEmptyValue = true;
-        }
-      }
-    } else {
-      for (let name in titleMap) {
-        if (titleMap.hasOwnProperty(name)) {
-          let value: any = titleMap[name];
-          newTitleMap.push({ name, value });
-          if (!value) hasEmptyValue = true;
-        }
-      }
-    }
-  } else if (enumList) {
-    for (let i = 0, l = enumList.length; i < l; i++) {
-      let name: any = enumList[i];
-      let value: any = enumList[i];
-      newTitleMap.push({ name, value});
-      if (!value) hasEmptyValue = true;
-    }
-  }
-  if (!fieldRequired && !hasEmptyValue) {
-    newTitleMap.unshift({ name: '', value: '' });
-  }
-  return newTitleMap;
-}
-
-/**
- * 'formatFormData' function
- *
- * @param {any} formData - Angular 2 FormGroup data object
- * @param {any} fieldMap - map of correct data types for each field
- * @param {boolean = false} fixErrors - if TRUE, tries to fix data
- * @return {any} - formatted data object
- */
-export function formatFormData(formData: any, fieldMap: any, fixErrors: boolean = false): any {
-  let formattedData = {};
-  forOwnDeep(formData, (value, key, ignore, pointer) => {
-    let genericPointer: string;
-    if (fieldMap.hasOwnProperty(pointer) && fieldMap[pointer].hasOwnProperty('schemaType')) {
-      genericPointer = pointer;
-    } else { // TODO: Fix to allow for integer object keys
-      genericPointer = JsonPointer.compile(
-        JsonPointer.parse(pointer).map(k => (isInteger(k)) ? '-' : k)
-      );
-    }
-    if (fieldMap.hasOwnProperty(genericPointer) &&
-      fieldMap[genericPointer].hasOwnProperty('schemaType')
-    ) {
-      let schemaType: SchemaPrimitiveType | SchemaPrimitiveType[] =
-        fieldMap[genericPointer]['schemaType'];
-      if (isSet(value) &&
-        inArray(schemaType, ['string', 'integer', 'number', 'boolean', 'null'])
-      ) {
-        let newValue = fixErrors ? toSchemaType(value, schemaType) :
-          toJavaScriptType(value, <SchemaPrimitiveType>schemaType);
-        if (isPresent(newValue)) JsonPointer.set(formattedData, pointer, newValue);
-      }
-    }
-  });
-  return formattedData;
-}
-
-/**
- * 'updateInputOptions' function
- *
- * @param {any} layout
- * @param {any} schema
- * @return {void}
- */
-export function updateInputOptions(
-  layout: any, schema: any, data: any,
-  formDefaults: any, fieldMap: any, formGroupTemplate: any
-) {
-  let type: string[] = (isPresent(layout.type) && isArray(layout.type)) ?
-    <string[]>layout.type : [<string>layout.type];
-  let optionsToUpdate: string[] = [
-    'title', 'notitle', 'disabled', 'description', 'validationMessage',
-    'onChange', 'feedback', 'disableSuccessState', 'disableErrorState',
-    'placeholder', 'ngModelOptions', 'readonly', 'copyValueTo', 'condition',
-    'destroyStrategy', 'htmlClass', 'fieldHtmlClass', 'labelHtmlClass', 'enum',
-    'ui:rootFieldId', 'ui:help', 'ui:disabled', 'ui:readonly', 'ui:placeholder',
-    'ui:autofocus', 'ui:options', // 'ui:order', 'classNames', 'label',
-    // 'errors', 'help', 'hidden', 'required', 'displayLabel',
-  ];
-  if (inArray(['text', 'textarea', 'search'], type) || isBlank(type)) {
-    optionsToUpdate = optionsToUpdate.concat('minLength', 'maxLength', 'pattern');
-  }
-  if (inArray(['text', 'textarea', 'search', 'email', 'url', 'date', 'datetime',
-    'date-time', 'datetime-local'], type) || isBlank(type)) {
-    optionsToUpdate = optionsToUpdate.concat('format');
-  }
-  if (inArray(['date', 'datetime', 'date-time', 'datetime-local',
-    'number', 'integer', 'range'], type) || isBlank(type)) {
-    optionsToUpdate = optionsToUpdate.concat('minimum', 'maximum');
-  }
-  if (inArray(['number', 'integer', 'range'], type) || isBlank(type)) {
-    optionsToUpdate = optionsToUpdate
-      .concat('exclusiveMinimum', 'exclusiveMaximum', 'multipleOf');
-  }
-  if (inArray('fieldset', type) || isBlank(type)) {
-    optionsToUpdate = optionsToUpdate
-      .concat('minProperties', 'maxProperties', 'dependencies');
-  }
-  if (inArray(['array', 'checkboxes'], type) || isBlank(type)) {
-    optionsToUpdate = optionsToUpdate
-      .concat('minItems', 'maxItems', 'uniqueItems');
-  }
-  _.forEach(optionsToUpdate, option => {
-
-    // If a new validator is needed in template, set it
-    if (hasOwn(layout, option) && isFunction(JsonValidators[option]) && (
-      !hasOwn(schema, option) || (schema[option] !== layout[option] &&
-        !(option.slice(0, 3) === 'min' && schema[option] < layout[option]) &&
-        !(option.slice(0, 3) === 'max' && schema[option] > layout[option])
-      )
-    )) {
-      let validatorPointer =
-        fieldMap[layout.pointer]['templatePointer'] + '/validators/' + option;
-       JsonPointer.set(formGroupTemplate, validatorPointer, [layout[option]]);
-    }
-
-    // Check for option value, and set in layout
-    let newValue: any = JsonPointer.getFirst([
-      [ layout, [option] ],
-      [ schema['x-schema-form'], [option] ],
-      [ schema, [option]],
-      [ formDefaults, [option] ]
-    ]);
-    if (isPresent(newValue)) {
-      if (option.slice(0, 3) === 'ui:') {
-        layout[option.slice(3)] = newValue;
-      } else {
-        layout[option] = newValue;
-      }
-    }
-  });
-
-  // If schema type is integer, enforce by setting multipleOf = 1
-  if (inArray(schema.type, ['integer']) && !hasOwn(layout, 'multipleOf')) {
-    layout.multipleOf = 1;
-
-  // If schema type is array, set controlTemplate in layout
-  // TODO: fix to set controlTemplate for all layout $ref links instead
-  } else if (schema.type === 'array') {
-    layout.controlTemplate = JsonPointer.get(formGroupTemplate,
-      fieldMap[layout.pointer]['templatePointer'] + '/controls/-');
-  }
-
-  // Check for initial or default field value, and set in both layout and template
-  if (layout.pointer) {
-    let newValue: any = JsonPointer.getFirst([
-      [ data, layout.pointer ],
-      [ layout, '/value' ],
-      [ layout, '/default' ],
-      [ schema, '/default' ]
-    ]);
-    if (isSet(newValue) &&
-      fieldMap[layout.pointer].hasOwnProperty('templatePointer')
-    ) {
-      layout.value = newValue;
-      let valuePointer = fieldMap[layout.pointer]['templatePointer'] + '/value';
-      JsonPointer.set(formGroupTemplate, valuePointer, newValue);
-    }
-  }
-}
-
-/**
- * 'getControlValidators' function
- *
- * @param {schema} schema
- * @return {validators}
- */
-export function getControlValidators(schema: any) {
-  let validators: any = {};
-  if (hasOwn(schema, 'type')) {
-    switch (schema.type) {
-      case 'string':
-        _.forEach(['pattern', 'format', 'minLength', 'maxLength'], (prop) => {
-          if (hasOwn(schema, prop)) validators[prop] = [schema[prop]];
-        });
-      break;
-      case 'number': case 'integer':
-        _.forEach(['Minimum', 'Maximum'], (Limit) => {
-          let eLimit = 'exclusive' + Limit;
-          let limit = Limit.toLowerCase();
-          if (hasOwn(schema, limit)) {
-            let exclusive = hasOwn(schema, eLimit) && schema[eLimit] === true;
-            validators[limit] = [schema[limit], exclusive];
-          }
-        });
-        _.forEach(['multipleOf', 'type'], (prop) => {
-          if (hasOwn(schema, prop)) validators[prop] = [schema[prop]];
-        });
-      break;
-      case 'object':
-        _.forEach(['minProperties', 'maxProperties', 'dependencies'], (prop) => {
-          if (hasOwn(schema, prop)) validators[prop] = [schema[prop]];
-        });
-      break;
-      case 'array':
-        _.forEach(['minItems', 'maxItems', 'uniqueItems'], (prop) => {
-          if (hasOwn(schema, prop)) validators[prop] = [schema[prop]];
-        });
-      break;
-    }
-  }
-  if (hasOwn(schema, 'enum')) validators['enum'] = [schema['enum']];
-  return validators;
-}
-
-/**
- * 'setRequiredFields' function
- *
- * @param {schema} schema - JSON Schema
- * @param {object} formControlTemplate - Form Control Template object
- * @return {boolean} - true if any fields have been set to required, false if not
- */
-export function setRequiredFields(schema: any, formControlTemplate: any): boolean {
-  let fieldsRequired = false;
-  if (hasOwn(schema, 'required') && !_.isEmpty(schema.required)) {
-    fieldsRequired = true;
-    let requiredArray = isArray(schema.required) ? schema.required : [schema.required];
-    _.forEach(requiredArray,
-      key => JsonPointer.set(formControlTemplate, '/' + key + '/validators/required', [])
-    );
-  }
-  return fieldsRequired;
-
-  // TODO: Add support for patternProperties
-  // https://spacetelescope.github.io/understanding-json-schema/reference/object.html#pattern-properties
-}

@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormArray, FormGroup } from '@angular/forms';
 
-import { buildFormGroup, buildTitleMap, JsonPointer } from '../utilities/index';
+import { buildFormGroup, buildTitleMap, getControl } from '../utilities/index';
 
 @Component({
   selector: 'checkboxes-widget',
@@ -20,7 +20,7 @@ import { buildFormGroup, buildTitleMap, JsonPointer } from '../utilities/index';
             [value]="item?.value"
             [attr.readonly]="layoutNode?.readonly ? 'readonly' : null"
             [attr.required]="layoutNode?.required"
-            [checked]="item.checked">
+            [checked]="item?.checked">
           <span [innerHTML]="item?.name"></span>
         </label>
       </div>
@@ -36,7 +36,7 @@ import { buildFormGroup, buildTitleMap, JsonPointer } from '../utilities/index';
               [value]="item?.value"
               [attr.readonly]="layoutNode?.readonly ? 'readonly' : null"
               [attr.required]="layoutNode?.required"
-              [checked]="item.checked">
+              [checked]="item?.checked">
             <span [innerHTML]="item?.name"></span>
           </label>
         </div>
@@ -45,6 +45,7 @@ import { buildFormGroup, buildTitleMap, JsonPointer } from '../utilities/index';
 })
 export class CheckboxesComponent implements OnInit {
   private formControlGroup: any;
+  private bindControl: boolean = false;
   private formArray: FormArray;
   private dataMap: any[] = [];
   @Input() formGroup: FormGroup;
@@ -52,27 +53,32 @@ export class CheckboxesComponent implements OnInit {
   @Input() formOptions: any;
 
   ngOnInit() {
-    if (this.layoutNode.pointer) {
-      this.formControlGroup =
-        JsonPointer.getFromFormGroup(this.formGroup, this.layoutNode.pointer, true);
-      this.formArray = this.formControlGroup.controls[this.layoutNode.name];
-      this.dataMap = buildTitleMap(this.layoutNode.titleMap, this.layoutNode.enum);
-      for (let i = 0, l = this.dataMap.length; i < l; i++) {
-        if (this.layoutNode.value) {
-          if (Array.isArray(this.layoutNode.value)) {
-            this.dataMap[i].checked = this.layoutNode.value.indexOf(this.dataMap[i].value) !== -1;
+    if (this.layoutNode.hasOwnProperty('pointer')) {
+      this.formControlGroup = getControl(this.formGroup, this.layoutNode.pointer, true);
+      if (this.formControlGroup &&
+        this.formControlGroup.controls.hasOwnProperty(this.layoutNode.name)
+      ) {
+        this.bindControl = true;
+        this.formArray = this.formControlGroup.controls[this.layoutNode.name];
+        this.dataMap = buildTitleMap(this.layoutNode.titleMap, this.layoutNode.enum);
+        for (let i = 0, l = this.dataMap.length; i < l; i++) {
+          if (this.formArray.value.length) {
+            this.dataMap[i].checked = this.formArray.value.indexOf(this.dataMap[i].value) !== -1;
           } else {
-            this.dataMap[i].checked = this.layoutNode.value === this.dataMap[i].value;
+            this.dataMap[i].checked = false;
           }
-        } else {
-          this.dataMap[i].checked = false;
         }
+      } else {
+        console.error(
+          'Warning: control "' + this.layoutNode.pointer +
+          '" is not bound to the Angular 2 FormGroup.'
+        );
       }
     }
   }
 
   onClick(event) {
-    if (this.layoutNode.pointer) {
+    if (this.bindControl) {
       while (this.formArray.value.length) this.formArray.removeAt(0);
       for (let i = 0, l = this.dataMap.length; i < l; i++) {
         if (event.target.value === this.dataMap[i].value) {

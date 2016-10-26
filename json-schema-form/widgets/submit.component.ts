@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
-import { JsonPointer } from '../utilities/index';
+import { getControl } from '../utilities/index';
 
 @Component({
   selector: 'submit-widget',
@@ -13,13 +13,15 @@ import { JsonPointer } from '../utilities/index';
         [type]="layoutNode?.type"
         class="btn {{ layoutNode?.style || 'btn-primary' }} {{layoutNode?.fieldHtmlClass}}"
         [value]="layoutNode?.title"
-        [disabled]="layoutNode?.readonly">
+        [disabled]="layoutNode?.readonly"
+        [attr.aria-describedby]="layoutNode?.pointer + 'Status'">
     </div>
     <input *ngIf="!layoutNode?.pointer"
       [type]="layoutNode?.type"
       class="btn {{ layoutNode?.style || 'btn-primary' }} {{layoutNode?.fieldHtmlClass}}"
       [value]="layoutNode?.title"
-      [disabled]="layoutNode?.readonly">
+      [disabled]="layoutNode?.readonly"
+      [attr.aria-describedby]="layoutNode?.pointer + 'Status'">
 `,
 })
 export class SubmitComponent implements OnInit {
@@ -29,9 +31,8 @@ export class SubmitComponent implements OnInit {
   @Input() formOptions: any;
 
   ngOnInit() {
-    if ('pointer' in this.layoutNode) {
-      this.formControlGroup =
-        JsonPointer.getFromFormGroup(this.formGroup, this.layoutNode.pointer, true);
+    if (this.layoutNode.hasOwnProperty('pointer')) {
+      this.formControlGroup = getControl(this.formGroup, this.layoutNode.pointer, true);
     }
   }
 }
