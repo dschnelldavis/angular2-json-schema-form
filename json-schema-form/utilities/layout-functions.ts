@@ -293,11 +293,8 @@ export function buildLayoutFromSchema(
       let newKeys: string[];
       let subObject: string = 'properties';
       if (hasOwn(schema, 'properties')) {
-        if (hasOwn(schema.properties, 'ui:order')) {
-          newKeys = schema['properties']['ui:order'];
-        } else {
-          newKeys = Object.keys(schema['properties']);
-        }
+        newKeys = hasOwn(schema.properties, 'ui:order') ?
+          schema['properties']['ui:order'] : Object.keys(schema['properties']);
       } else if (hasOwn(schema, 'additionalProperties')) {
         subObject = 'additionalProperties';
         newKeys = Object.keys(schema['additionalProperties']);
@@ -370,7 +367,7 @@ export function buildLayoutFromSchema(
                 schema.additionalItems, data, formOptions, fieldMap,
                 schemaRefLibrary, layoutRefLibrary, widgetLibrary,
                 formGroupTemplate, i, rootSchema,
-                newItem.layoutPointer + '/items/',
+                newItem.layoutPointer + '/items/-',
                 schemaPointer + '/items/' + i,
                 dataPointer + '/' + i,
                 true, 'list', i >= minItems

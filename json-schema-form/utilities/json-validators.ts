@@ -177,10 +177,7 @@ export class JsonValidators {
           let enumValue: any = enumList[i2];
           if (actualValue === enumValue) {
             itemIsValid = true; break;
-          } else if (
-            isNumber(enumValue) &&
-            parseFloat(<string>actualValue) === parseFloat(<string>enumValue)
-          ) {
+          } else if (isNumber(enumValue) && +actualValue === +enumValue) {
             itemIsValid = true; break;
           } else if (
             isBoolean(enumValue, 'strict') &&

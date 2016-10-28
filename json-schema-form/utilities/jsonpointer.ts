@@ -8,8 +8,9 @@ import { forEach, isObject, isArray } from './index';
  * Some utilities for using JSON Pointers with JSON objects and JSON schemas
  * https://tools.ietf.org/html/rfc6901
  *
- * JSON Pointer Functions: get, getFirst, set, remove, has, dict, walk, escape,
- * unescape, parse, compile, toKey, isJsonPointer, isSubPointer, parseObjectPath
+ * JSON Pointer Functions: get, getFirst, set, insert, remove, has, dict, walk,
+ * escape, unescape, parse, compile, toKey, isJsonPointer, isSubPointer,
+ * parseObjectPath
  *
  * Based on manuelstofer's json-pointer utilities
  * https://github.com/manuelstofer/json-pointer
@@ -89,13 +90,20 @@ export class JsonPointer {
    *
    * Uses a JSON Pointer to set a value on an object
    *
+   * If the optional fourth parameter is TRUE and the inner-most container
+   * is an array, the function will insert the value as a new item at the
+   * specified location in the array, rather than overwriting the existing value
+   *
    * @param {object} object - object to set value in
    * @param {Pointer} pointer - JSON Pointer (string or array)
-   * @param {any} value
+   * @param {any} value - value to set
+   * @return {object}
    */
-  static set(object: any, pointer: Pointer, value: any): any {
+  static set(
+    object: any, pointer: Pointer, value: any, insert: boolean = false
+  ): any {
+    const keyArray: string[] = this.parse(pointer);
     let subObject: any = object;
-    let keyArray: string[] = this.parse(pointer);
     if (keyArray === null) {
       console.error('Unable to set - invalid JSON Pointer: ' + pointer);
       return null;
@@ -109,10 +117,28 @@ export class JsonPointer {
       subObject = subObject[key];
     }
     let lastKey: string = keyArray[keyArray.length - 1];
-    if (lastKey === '-' && isArray(subObject)) lastKey = subObject.length;
-    subObject[lastKey] = value;
+    if (insert && isArray(subObject) && !isNaN(+lastKey)) {
+      subObject = subObject.splice(lastKey, 0, value);
+    } else {
+      if (lastKey === '-' && isArray(subObject)) lastKey = subObject.length;
+      subObject[lastKey] = value;
+    }
     return object;
   }
+
+  /**
+   * 'insert' function
+   *
+   * Uses a JSON Pointer to insert a new item at a specific point in an array
+   *
+   * @param {object} object - object to insert value in
+   * @param {Pointer} pointer - JSON Pointer (string or array)
+   * @param {any} value - value to insert
+   * @return {object}
+   */
+   static insert(object: any, pointer: Pointer, value: any): any {
+     this.set(object, pointer, value, true);
+   }
 
   /**
    * 'remove' function
@@ -129,8 +155,8 @@ export class JsonPointer {
       console.error('Unable to remove - invalid JSON Pointer: ' + pointer);
       return null;
     }
-    let lastKey = keyArray[keyArray.length - 1];
-    delete this.get(object, keyArray.slice(0, -1))[lastKey];
+    let lastKey = keyArray.pop();
+    delete this.get(object, keyArray)[lastKey];
     return object;
   }
 

@@ -4,12 +4,17 @@ import {
 } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
-import { getControl, isNumber, JsonPointer, toIndexedPointer } from '../utilities/index';
+import {
+  getControl, isNumber, JsonPointer, toIndexedPointer
+} from '../utilities/index';
 
 @Component({
   moduleId: module.id,
   selector: 'bootstrap3-framework',
   templateUrl: 'bootstrap3.component.html',
+  styles: [`
+    .list-group-item .form-control-feedback { top: 40; }
+    `],
 })
 export class Bootstrap3Component implements OnInit, AfterContentChecked {
   private controlInitialized: boolean = false;
@@ -37,7 +42,7 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked {
 
   ngOnInit() {
     if (this.layoutNode) {
-      this.innerNode = this.layoutNode;
+      this.innerNode = Object.assign({}, this.layoutNode);
 
       if (this.layoutNode.hasOwnProperty('pointer')) {
         let thisControl = getControl(this.formGroup, this.layoutNode.pointer);
@@ -82,12 +87,8 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked {
       this.layoutNode.fieldAddonLeft =
         this.layoutNode.fieldAddonLeft || this.layoutNode.prepend;
 
-      this.layoutNode.showAddonLeft = !!this.layoutNode.fieldAddonLeft;
-
       this.layoutNode.fieldAddonRight =
         this.layoutNode.fieldAddonRight || this.layoutNode.append;
-
-      this.layoutNode.showAddonRight = !!this.layoutNode.fieldAddonRight;
 
       // Set miscelaneous styles and settings for each control type
       switch (this.layoutNode.type) {
@@ -112,6 +113,7 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked {
           this.innerNode.icon = 'glyphicon glyphicon-plus';
         break;
         case 'array': case 'fieldset': case 'section': case 'conditional':
+          this.innerNode.isRemovable = false;
           this.messageLocation = 'top';
           if (this.layoutNode.title && this.layoutNode.required) {
             this.innerNode.title += ' <strong class="text-danger">*</strong>';
@@ -200,14 +202,13 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked {
     }
   }
 
-  private removeItem(index) {
-//     let formArray = getControl(this.formGroup, this.layoutNode.pointer, true);
-//     // formArray.removeAt(index);
-// console.log(this.layoutNode);
-// console.log(formArray);
-//   let indexedPointer = toIndexedPointer(this.layoutNode.layoutPointer, this.index);
-// console.log(indexedPointer);
-// console.log(this.formOptions.masterLayout);
-// console.log(JsonPointer.get(this.formOptions.masterLayout, indexedPointer));
+  private removeItem() {
+console.log(this.index);
+    let formArray = getControl(this.formGroup, this.layoutNode.pointer, true);
+    formArray.removeAt(this.index[this.index.length - 1]);
+    let indexedPointer = toIndexedPointer(this.layoutNode.layoutPointer, this.index);
+console.log(this.formOptions.masterLayout);
+console.log(indexedPointer);
+    JsonPointer.remove(this.formOptions.masterLayout, indexedPointer);
   }
 }

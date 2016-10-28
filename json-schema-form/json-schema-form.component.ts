@@ -328,13 +328,13 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
       );
 
       // Make entire form layout available to all controls
-      // this.formOptions.masterLayout = this.masterLayout;
+      this.formOptions.masterLayout = this.masterLayout;
 
       // Build the real Angular 2 FormGroup from the FormGroup template
       this.masterFormGroup = <FormGroup>(buildFormGroup(this.formGroupTemplate));
 
       if (this.masterFormGroup) {
-
+console.log(this.masterFormGroup);
         // Activate the *ngIf in the template to render form
         this.formActive = true;
 

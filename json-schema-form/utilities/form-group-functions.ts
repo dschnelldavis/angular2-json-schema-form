@@ -49,9 +49,9 @@ import {
  * @return {any} - FormGroupTemplate
  */
 export function buildFormGroupTemplate(
-  schema: any, schemaRefLibrary: any, fieldMap: any, defaultValues: any = null,
-  rootSchema: any = schema, dataPointer: string = '',
-  schemaPointer: string = '', templatePointer: any = ''
+  schema: any, schemaRefLibrary: any, fieldMap: any,
+  defaultValues: any = null, rootSchema: any = schema,
+  dataPointer: string = '', schemaPointer: string = '', templatePointer: any = ''
 ): any {
   let controlType: 'FormGroup' | 'FormArray' | 'FormControl';
   if (schema.type === 'object' && hasOwn(schema, 'properties')) {

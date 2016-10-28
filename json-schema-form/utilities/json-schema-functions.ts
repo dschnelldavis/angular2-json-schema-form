@@ -265,7 +265,8 @@ export function updateInputOptions(
   layout: any, schema: any, data: any, formDefaults: any,
   fieldMap: any, schemaRefLibrary: any, formGroupTemplate: any
 ) {
-  let type: string[] = (isPresent(layout.type) && isArray(layout.type)) ?
+  let type: string[] = [];
+  if (isPresent(layout.type)) type = isArray(layout.type) ?
     <string[]>layout.type : [<string>layout.type];
   let optionsToUpdate: string[] = [
     'title', 'notitle', 'disabled', 'description', 'validationMessage',
