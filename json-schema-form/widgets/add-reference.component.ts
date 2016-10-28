@@ -23,6 +23,7 @@ export class AddReferenceComponent {
   @Input() formGroup: FormGroup;
   @Input() layoutNode: any;
   @Input() formOptions: any;
+  @Input() index: number[];
   @Input() debug: boolean;
   @ViewChild('widgetContainer', { read: ViewContainerRef })
     private widgetContainer: ViewContainerRef;
@@ -31,10 +32,13 @@ export class AddReferenceComponent {
     private componentFactory: ComponentFactoryResolver,
   ) {}
 
-  ngOnInit() { }
+  ngOnInit() {
+
+  }
 
   private addItem(event) {
     event.preventDefault();
+console.log(this.index);
 console.log(event);
 console.log(this.layoutNode);
   }

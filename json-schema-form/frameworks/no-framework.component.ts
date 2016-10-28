@@ -16,9 +16,9 @@ import { FormGroup } from '@angular/forms';
 })
 export class NoFrameworkComponent implements AfterContentChecked {
   private controlInitialized: boolean = false;
-  @Input() layoutNode: any; // JSON Schema Form layout node
-  @Input() formGroup: FormGroup; // Angular 2 FormGroup object
-  @Input() options: any; // Global form defaults and options
+  @Input() layoutNode: any;
+  @Input() formGroup: FormGroup;
+  @Input() options: any;
   @ViewChild('widgetContainer', { read: ViewContainerRef })
     private widgetContainer: ViewContainerRef;
 
@@ -34,9 +34,9 @@ export class NoFrameworkComponent implements AfterContentChecked {
       let addedNode: ComponentRef<any> = this.widgetContainer.createComponent(
         this.componentFactory.resolveComponentFactory(this.layoutNode.widget)
       );
-      addedNode.instance.formGroup = this.formGroup;
-      addedNode.instance.layoutNode = this.layoutNode;
-      addedNode.instance.options = this.options;
+      for (let input of ['formGroup', 'layoutNode', 'formOptions', 'index', 'debug']) {
+        addedNode.instance[input] = this[input];
+      }
     }
     this.controlInitialized = true;
   }

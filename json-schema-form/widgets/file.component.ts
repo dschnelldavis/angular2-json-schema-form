@@ -12,6 +12,8 @@ export class FileComponent implements OnInit {
   @Input() formGroup: FormGroup;
   @Input() layoutNode: any;
   @Input() formOptions: any;
+  @Input() index: number[];
+  @Input() debug: boolean;
 
   ngOnInit() {
     if (this.layoutNode.hasOwnProperty('pointer')) {

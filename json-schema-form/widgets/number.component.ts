@@ -6,6 +6,9 @@ import { getControl } from '../utilities/index';
 @Component({
   selector: 'number-widget',
   template: `
+    <label *ngIf="layoutNode?.title" [attr.for]="layoutNode?.pointer"
+      [class]="layoutNode?.labelHtmlClass" [class.sr-only]="layoutNode?.notitle"
+      [innerHTML]="layoutNode?.title"></label>
     <div *ngIf="bindControl" [formGroup]="formControlGroup">
       <input
         [formControlName]="layoutNode?.name"
@@ -27,7 +30,7 @@ import { getControl } from '../utilities/index';
       [class]="layoutNode?.fieldHtmlClass"
       [type]="layoutNode?.type === 'range' ? 'range' : 'text'"
       [name]="layoutNode?.name"
-      [attr.value]="layoutNode?.value"
+      [value]="layoutNode?.value"
       [attr.min]="layoutNode?.minimum"
       [attr.max]="layoutNode?.maximum"
       [attr.step]="step"
@@ -48,6 +51,8 @@ export class NumberComponent implements OnInit {
   @Input() formGroup: FormGroup;
   @Input() layoutNode: any;
   @Input() formOptions: any;
+  @Input() index: number[];
+  @Input() debug: boolean;
 
   ngOnInit() {
     if (this.layoutNode.hasOwnProperty('pointer')) {

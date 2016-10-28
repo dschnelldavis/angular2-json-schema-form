@@ -9,10 +9,10 @@ import 'rxjs/add/operator/map';
 import * as _ from 'lodash';
 
 import {
-  forOwnDeep, hasOwn, inArray, isPresent, isBlank, isSet,
-  isEmpty, isString, isInteger, isFunction, isObject, isArray, getType,
-  JsonPointer, JsonValidators, toJavaScriptType, toSchemaType,
-  JavaScriptType, PlainObject, Pointer, SchemaPrimitiveType, SchemaType,
+  buildFormGroupTemplate, forOwnDeep, hasOwn, inArray, isPresent, isBlank,
+  isSet, isEmpty, isString, isInteger, isFunction, isObject, isArray, getType,
+  JsonPointer, JsonValidators, toJavaScriptType, toSchemaType, JavaScriptType,
+  PlainObject, Pointer, SchemaPrimitiveType, SchemaType,
 } from './index';
 
 /**
@@ -39,11 +39,11 @@ import {
  *
  * @param {JSON Schema} schema - schema to get value from
  * @param {Pointer} dataPointer - JSON Pointer (string or array)
- * @param {boolean = false} returnObject - return containing object instead
+ * @param {boolean = false} returnContainer - return containing object instead
  * @return {schema} - located value or object
  */
 export function getFromSchema(
-  schema: any, dataPointer: Pointer, returnObject: boolean = false
+  schema: any, dataPointer: Pointer, returnContainer: boolean = false
 ): any {
   let subSchema = schema;
   let dataPointerArray: any[] = JsonPointer.parse(dataPointer);
@@ -51,7 +51,8 @@ export function getFromSchema(
     console.error('Unable to get schema - invalid JSON Pointer: ' + dataPointer);
     return null;
   }
-  let l = returnObject ? dataPointerArray.length - 1 : dataPointerArray.length;
+  let l = dataPointerArray.length;
+  if (returnContainer) l--;
   for (let i = 0; i < l; ++i) {
     let parentSchema = subSchema;
     let key = dataPointerArray[i];
@@ -98,7 +99,7 @@ export function getFromSchema(
  * @return {object} - The refernced schema sub-section
  */
 export function getSchemaReference(
-  schema: any, reference: any, referenceLibrary: any = null
+  schema: any, reference: any, schemaRefLibrary: any = null
 ): any {
   let schemaPointer: string;
   let newSchema: any;
@@ -114,15 +115,15 @@ export function getSchemaReference(
   }
   if (schemaPointer === '') {
     return schema;
-  } else if (referenceLibrary && referenceLibrary.hasOwnProperty(schemaPointer)) {
-    return referenceLibrary[schemaPointer];
+  } else if (schemaRefLibrary && schemaRefLibrary.hasOwnProperty(schemaPointer)) {
+    return schemaRefLibrary[schemaPointer];
 
   // TODO: Add ability to download remote schema, if necessary
   // } else if (schemaPointer.slice(0, 4) === 'http') {
   //    http.get(schemaPointer).subscribe(response => {
   //     // TODO: check for circular references
   //     // TODO: test and adjust to allow for for async response
-  //     if (referenceLibrary) referenceLibrary[schemaPointer] = response.json();
+  //     if (schemaRefLibrary) schemaRefLibrary[schemaPointer] = response.json();
   //     return response.json();
   //    });
 
@@ -135,10 +136,10 @@ export function getSchemaReference(
       (newSchema.hasOwnProperty('allOf')) && isArray(newSchema.allOf)
     ) {
       newSchema = newSchema.allOf
-        .map(object => getSchemaReference(schema, object, referenceLibrary))
+        .map(object => getSchemaReference(schema, object, schemaRefLibrary))
         .reduce((schema1, schema2) => Object.assign(schema1, schema2), {});
     }
-    if (referenceLibrary) referenceLibrary[schemaPointer] = newSchema;
+    if (schemaRefLibrary) schemaRefLibrary[schemaPointer] = newSchema;
     return newSchema;
   }
 }
@@ -150,12 +151,20 @@ export function getSchemaReference(
  * @return {string}
  */
 export function getInputType(schema: any): string {
-  if (
-    isObject(schema['x-schema-form']) && isSet(schema['x-schema-form']['type'])
-  ) {
+  if (JsonPointer.has(schema, '/x-schema-form/type')) {// Angular Schema Form compatibility
     return schema['x-schema-form']['type'];
-  } else if (hasOwn(schema, 'ui:widget') && isString(schema['ui:widget'])) {
-    return schema['ui:widget']; // react-jsonschema-form compatibility
+  }
+  if (hasOwn(schema, 'ui:widget')) { // React Jsonschema Form compatibility
+    if (isString(schema['ui:widget'])) return schema['ui:widget'];
+    if (hasOwn(schema['ui:widget'], 'component')) {
+      if (schema['ui:widget']['component'] === 'checkboxes' &&
+        JsonPointer.get(schema, '/ui:widget/component/options/inline') === true
+      ) {
+        return 'checkboxes-inline';
+      } else {
+        return schema['ui:widget']['component'];
+      }
+    }
   }
   let schemaType = schema.type;
   if (isArray(schemaType)) { // If multiple types listed, use most inclusive type
@@ -178,7 +187,9 @@ export function getInputType(schema: any): string {
   if (schemaType === 'boolean') return 'checkbox';
   if (schemaType === 'object') {
     if (hasOwn(schema, 'properties')) return 'fieldset';
-    return 'textarea';
+    if (hasOwn(schema, '$ref') ||
+      JsonPointer.has(schema, '/additionalProperties/$ref')) return '$ref';
+    return null; // return 'textarea';
   }
   if (schemaType === 'array') {
     let itemsObject = JsonPointer.getFirst([
@@ -206,6 +217,7 @@ export function getInputType(schema: any): string {
     }
     return 'text';
   }
+  if (hasOwn(schema, '$ref')) return '$ref';
   return 'text';
 }
 
@@ -223,17 +235,16 @@ export function isInputRequired(schema: any, pointer: string): boolean {
     console.error('Schema must be an object.');
     return false;
   }
-  let dataPointerArray: string[] = JsonPointer.parse(pointer);
-  if (isArray(dataPointerArray) && dataPointerArray.length) {
-    let keyName: string = dataPointerArray[dataPointerArray.length - 1];
-    let requiredList: any;
-    if (dataPointerArray.length > 1) {
-      let listPointerArray: string[] = dataPointerArray.slice(0, -1);
+  let listPointerArray: string[] = JsonPointer.parse(pointer);
+  if (isArray(listPointerArray) && listPointerArray.length) {
+    let keyName: string = listPointerArray.pop();
+    let requiredList: string[];
+    if (listPointerArray.length) {
       if (listPointerArray[listPointerArray.length - 1] === '-') {
-        listPointerArray = listPointerArray.slice(0, -1);
-        requiredList = getFromSchema(schema, listPointerArray)['items']['required'];
+        requiredList = JsonPointer.get(schema,
+          listPointerArray.slice(-1).concat(['items', 'required']));
       } else {
-        requiredList = getFromSchema(schema, listPointerArray)['required'];
+        requiredList = JsonPointer.get(schema, listPointerArray.concat('required'));
       }
     } else {
       requiredList = schema['required'];
@@ -251,8 +262,8 @@ export function isInputRequired(schema: any, pointer: string): boolean {
  * @return {void}
  */
 export function updateInputOptions(
-  layout: any, schema: any, data: any,
-  formDefaults: any, fieldMap: any, formGroupTemplate: any
+  layout: any, schema: any, data: any, formDefaults: any,
+  fieldMap: any, schemaRefLibrary: any, formGroupTemplate: any
 ) {
   let type: string[] = (isPresent(layout.type) && isArray(layout.type)) ?
     <string[]>layout.type : [<string>layout.type];
@@ -261,9 +272,9 @@ export function updateInputOptions(
     'onChange', 'feedback', 'disableSuccessState', 'disableErrorState',
     'placeholder', 'ngModelOptions', 'readonly', 'copyValueTo', 'condition',
     'destroyStrategy', 'htmlClass', 'fieldHtmlClass', 'labelHtmlClass', 'enum',
-    'ui:rootFieldId', 'ui:help', 'ui:disabled', 'ui:readonly', 'ui:placeholder',
-    'ui:autofocus', 'ui:options', // 'ui:order', 'classNames', 'label',
-    // 'errors', 'help', 'hidden', 'required', 'displayLabel',
+    'enumNames', 'options', 'ui:rootFieldId', 'ui:help', 'ui:disabled',
+    'ui:readonly', 'ui:placeholder', 'ui:autofocus', 'ui:options', 'classNames',
+    'label', 'errors', 'help', 'hidden', 'required', 'displayLabel'
   ];
   if (inArray(['text', 'textarea', 'search'], type) || isBlank(type)) {
     optionsToUpdate = optionsToUpdate.concat('minLength', 'maxLength', 'pattern');
@@ -323,6 +334,13 @@ export function updateInputOptions(
     }
   });
 
+  // For React Jsonschema Form compatibility
+  if (JsonPointer.has(schema, '/ui:widget/options')) {
+    _.forOwn(JsonPointer.get(schema, '/ui:widget/options'), (value, option) => {
+      if (!hasOwn(layout, option)) layout[option] = value;
+    });
+  }
+
   let templatePointer = (fieldMap.hasOwnProperty(layout.pointer) &&
     fieldMap[layout.pointer].hasOwnProperty('templatePointer')) ?
     fieldMap[layout.pointer]['templatePointer'] : null;
@@ -332,15 +350,39 @@ export function updateInputOptions(
     layout.multipleOf = 1;
 
   // If schema type is array, save controlTemplate in layout
-  // TODO: fix to set controlTemplate for all layout $ref links instead
   } else if (templatePointer && schema.type === 'array') {
-    layout.controlTemplate = _.cloneDeep(
-      JsonPointer.get(formGroupTemplate, templatePointer + '/controls/-')
+    if (JsonPointer.has(schema, '/items/$ref')) {
+      layout.controlTemplate = buildFormGroupTemplate(
+        getSchemaReference(schema, schema.items.$ref, schemaRefLibrary),
+        schemaRefLibrary, fieldMap
+      );
+    } else {
+      layout.controlTemplate = _.cloneDeep(
+        JsonPointer.get(formGroupTemplate, templatePointer + '/controls/-')
+      );
+    }
+    if (JsonPointer.has(layout, '/controlTemplate/value')) delete layout.controlTemplate.value;
+
+  // If schema is an object with a $ref link, save controlTemplate in layout
+  } else if (hasOwn(schema, '$ref')) {
+    layout.controlTemplate = buildFormGroupTemplate(
+      getSchemaReference(schema, schema.$ref, schemaRefLibrary),
+      schemaRefLibrary, fieldMap
     );
-    if (isPresent(layout.controlTemplate.value)) delete layout.controlTemplate.value;
+  } else if (JsonPointer.has(schema, '/additionalProperties/$ref')) {
+    layout.controlTemplate = buildFormGroupTemplate(
+      getSchemaReference(schema, schema.additionalProperties.$ref, schemaRefLibrary),
+      schemaRefLibrary, fieldMap
+    );
   }
 
-  // If layout field value set, and no input data, update template value
+// console.log(layout.pointer);
+// console.log(schemaRefLibrary[layout.pointer]);
+// console.log(JsonPointer.get(formGroupTemplate, templatePointer + '/controls/-'));
+
+
+
+  // If field value is set in layout, and no input data, update template value
   if (templatePointer && schema.type !== 'array' && schema.type !== 'object') {
     let layoutValue: any = JsonPointer.getFirst([
       [ data, layout.pointer ],

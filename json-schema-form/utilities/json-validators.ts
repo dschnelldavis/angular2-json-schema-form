@@ -140,8 +140,7 @@ export class JsonValidators {
       let typeArray: SchemaPrimitiveType[] = isArray(type) ?
         <SchemaPrimitiveType[]>type : [<SchemaPrimitiveType>type];
       let isValid: boolean = false;
-      for (let i = 0, l = typeArray.length; i < l; i++) {
-        let typeValue: SchemaPrimitiveType = typeArray[i];
+      for (let typeValue of typeArray) {
         if (isType(actualValue, typeValue) === true) {
           isValid = true; break;
         }
@@ -406,12 +405,7 @@ export class JsonValidators {
   static minProperties(minProperties: number): IValidatorFn {
     return (control: AbstractControl, invert: boolean = false): PlainObject => {
       if (isEmpty(control.value)) return null;
-      let actualProperties: number = 0;
-      if (isObject(control.value)) {
-        for (let key in control.value) {
-          if (control.value.hasOwnProperty(key)) actualProperties++;
-        }
-      }
+      let actualProperties: number = Object.keys(control.value).length || 0;
       let isValid: boolean = actualProperties >= minProperties;
       return xor(isValid, invert) ?
         null : { 'minProperties': { minProperties, actualProperties } };
@@ -432,12 +426,7 @@ export class JsonValidators {
    */
   static maxProperties(maxProperties: number): IValidatorFn {
     return (control: AbstractControl, invert: boolean = false): PlainObject => {
-      let actualProperties: number = 0;
-      if (isObject(control.value)) {
-        for (let key in control.value) {
-          if (control.value.hasOwnProperty(key)) actualProperties++;
-        }
-      }
+      let actualProperties: number = Object.keys(control.value).length || 0;
       let isValid: boolean = actualProperties <= maxProperties;
       return xor(isValid, invert) ?
         null : { 'maxProperties': { maxProperties, actualProperties } };
@@ -473,8 +462,7 @@ export class JsonValidators {
             properties = dependencies[requiringField]['properties'] || {};
           }
           // Validate property dependencies
-          for (let i = 0, l = requiredFields.length; i < l; i++) {
-            let requiredField: string = requiredFields[i];
+          for (let requiredField of requiredFields) {
             if (xor(isNotSet(control.value[requiredField]), invert)) {
               requiringFieldErrors[requiredField] = { 'required': true };
             }
@@ -558,8 +546,8 @@ export class JsonValidators {
       let sorted: any[] = control.value.slice().sort();
       let duplicateItems = [];
       for (let i = 1, l = sorted.length; i < l; i++) {
-        if (
-          sorted[i - 1] === sorted[i] && duplicateItems.indexOf(sorted[i]) !== -1
+        if (sorted[i - 1] === sorted[i] &&
+          duplicateItems.indexOf(sorted[i]) !== -1
         ) {
           duplicateItems.push(sorted[i]);
         }

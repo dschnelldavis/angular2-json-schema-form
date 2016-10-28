@@ -6,6 +6,9 @@ import { buildTitleMap, getControl } from '../utilities/index';
 @Component({
   selector: 'radios-inline-widget',
   template: `
+    <label *ngIf="layoutNode?.title" [attr.for]="layoutNode?.pointer"
+      [class]="layoutNode?.labelHtmlClass" [class.sr-only]="layoutNode?.notitle"
+      [innerHTML]="layoutNode?.title"></label>
     <div *ngIf="bindControl" [formGroup]="formControlGroup">
       <label *ngFor="let item of titleMap"
         [attr.for]="layoutNode?.pointer + '/' + item?.value"
@@ -44,6 +47,8 @@ export class RadiosInlineComponent implements OnInit {
   @Input() formGroup: FormGroup;
   @Input() layoutNode: any;
   @Input() formOptions: any;
+  @Input() index: number[];
+  @Input() debug: boolean;
 
   ngOnInit() {
     if (this.layoutNode.hasOwnProperty('pointer')) {

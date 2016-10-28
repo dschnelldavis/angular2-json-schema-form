@@ -34,13 +34,12 @@ export class JsonPointer {
     object: any, pointer: Pointer, getBoolean: boolean = false, errors: boolean = false
   ): any {
     let subObject = object;
-    let pointerArray: any[] = this.parse(pointer);
-    if (pointerArray === null) {
+    let keyArray: any[] = this.parse(pointer);
+    if (keyArray === null) {
       if (errors) console.error('Unable to get object - invalid JSON Pointer: ' + pointer);
       return getBoolean ? false : null;
     }
-    for (let i = 0, l = pointerArray.length; i < l; ++i) {
-      let key: string | number = pointerArray[i];
+    for (let key of keyArray) {
       if (!isObject(subObject) && !isArray(subObject)) {
         if (errors) console.error('Pointer does not match structure of object.');
         if (errors) console.error(pointer);
@@ -71,9 +70,9 @@ export class JsonPointer {
    */
   static getFirst(items: [any, Pointer][], defaultValue: any = null): any {
     if (!isArray(items)) return null;
-    for (let i = 0, l = items.length; i < l; i++) {
-      if (isArray(items[i]) && items[i].length === 2) {
-        let value: any = this.get(items[i][0], items[i][1]);
+    for (let item of items) {
+      if (isArray(item) && item.length === 2) {
+        let value: any = this.get(item[0], item[1]);
         if (value) return value;
       } else {
         console.error(
@@ -96,20 +95,20 @@ export class JsonPointer {
    */
   static set(object: any, pointer: Pointer, value: any): any {
     let subObject: any = object;
-    let pointerArray: string[] = this.parse(pointer);
-    if (pointerArray === null) {
+    let keyArray: string[] = this.parse(pointer);
+    if (keyArray === null) {
       console.error('Unable to set - invalid JSON Pointer: ' + pointer);
       return null;
     }
-    for (let i = 0, l = pointerArray.length - 1; i < l; ++i) {
-      let key: string = pointerArray[i];
+    for (let i = 0, l = keyArray.length - 1; i < l; ++i) {
+      let key: string = keyArray[i];
       if (key === '-' && isArray(subObject)) key = subObject.length;
       if (!(subObject.hasOwnProperty(key))) {
-        subObject[key] = (pointerArray[i + 1].match(/^(\d+|-)$/)) ? [] : {};
+        subObject[key] = (keyArray[i + 1].match(/^(\d+|-)$/)) ? [] : {};
       }
       subObject = subObject[key];
     }
-    let lastKey: string = pointerArray[pointerArray.length - 1];
+    let lastKey: string = keyArray[keyArray.length - 1];
     if (lastKey === '-' && isArray(subObject)) lastKey = subObject.length;
     subObject[lastKey] = value;
     return object;
@@ -125,13 +124,13 @@ export class JsonPointer {
    * @return {object}
    */
   static remove(object: any, pointer: Pointer): any {
-    let pointerArray: any[] = this.parse(pointer);
-    if (pointerArray === null) {
+    let keyArray: any[] = this.parse(pointer);
+    if (keyArray === null) {
       console.error('Unable to remove - invalid JSON Pointer: ' + pointer);
       return null;
     }
-    let lastKey = pointerArray[pointerArray.length - 1];
-    delete this.get(object, pointerArray.slice(0, -1))[lastKey];
+    let lastKey = keyArray[keyArray.length - 1];
+    delete this.get(object, keyArray.slice(0, -1))[lastKey];
     return object;
   }
 
@@ -230,9 +229,9 @@ export class JsonPointer {
       console.error(pointer);
       return null;
     }
-    if ((<string>pointer).charAt(0) === '#') pointer = pointer.slice(1);
+    if ((<string>pointer)[0] === '#') pointer = pointer.slice(1);
     if (<string>pointer === '') return [];
-    if ((<string>pointer).charAt(0) !== '/') {
+    if ((<string>pointer)[0] !== '/') {
       console.error('Invalid JSON Pointer, does not start with "/": ' + pointer);
       return null;
     }
@@ -262,8 +261,8 @@ export class JsonPointer {
       console.error(keyArray);
       return null;
     }
-    if (keyArray.charAt(0) === '#') keyArray = keyArray.slice(1);
-    if (keyArray.length && keyArray.charAt(0) !== '/') {
+    if (keyArray[0] === '#') keyArray = keyArray.slice(1);
+    if (keyArray.length && keyArray[0] !== '/') {
       console.error('Invalid JSON Pointer, does not start with "/": ' + keyArray);
       return null;
     }
@@ -279,10 +278,10 @@ export class JsonPointer {
    * @returns {string} - the extracted key
    */
   static toKey(pointer: Pointer): string {
-    let pointerArray = this.parse(pointer);
-    if (pointerArray === null) return null;
-    if (!pointerArray.length) return '';
-    return pointerArray[pointerArray.length - 1];
+    let keyArray = this.parse(pointer);
+    if (keyArray === null) return null;
+    if (!keyArray.length) return '';
+    return keyArray[keyArray.length - 1];
   }
 
   /**
@@ -298,8 +297,8 @@ export class JsonPointer {
   static isJsonPointer(value: any): boolean {
     if (typeof value === 'string') {
       if (value === '') return true;
-      if (value.charAt(0) === '#') value = value.slice(1);
-      if (value.charAt(0) === '/') return true;
+      if (value[0] === '#') value = value.slice(1);
+      if (value[0] === '/') return true;
     }
     return false;
   }
@@ -328,7 +327,7 @@ export class JsonPointer {
     }
     if (shortArray.length > longArray.length) return false;
     let isSubPointer: boolean = true;
-    for (let i = 0, l = shortArray.length; i < l; i++) {
+    for (let i of Object.keys(shortArray)) {
       if (shortArray[i] !== longArray[i]) {
         isSubPointer = false;
         break;

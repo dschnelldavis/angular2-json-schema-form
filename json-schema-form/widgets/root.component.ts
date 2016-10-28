@@ -1,39 +1,58 @@
 import {
-  Component, ComponentFactoryResolver, ComponentRef, Input,
-  OnChanges, ViewChild, ViewContainerRef
+  Component, ComponentFactoryResolver, ComponentRef, Input, OnChanges,
+  OnInit, ViewChild, ViewContainerRef
 } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 @Component({
   moduleId: module.id,
   selector: 'root-widget',
-  template: `<div #rootWidget></div>`,
+  template: `<div #widgetContainer></div>`,
 })
-export class RootComponent implements OnChanges {
+export class RootComponent implements OnChanges, OnInit {
   private layoutArray: any[];
-  @Input() layoutNode: any; // JSON Schema Form layout array
-  @Input() formGroup: FormGroup; // Angular 2 FormGroup object
-  @Input() formOptions: any; // Global form defaults and options
+  @Input() layoutNode: any;
+  @Input() formGroup: FormGroup;
+  @Input() formOptions: any;
+  @Input() index: number[];
   @Input() debug: boolean;
-  @ViewChild('rootWidget', { read: ViewContainerRef })
-    private rootWidget: ViewContainerRef;
+  @Input() isFirstRoot: boolean;
+  @ViewChild('widgetContainer', { read: ViewContainerRef })
+    private widgetContainer: ViewContainerRef;
 
   constructor(
     private componentFactory: ComponentFactoryResolver,
   ) { }
 
+  ngOnInit() {
+    this.updateFormLayout();
+  }
+
   ngOnChanges() {
-    this.layoutArray =
-      Array.isArray(this.layoutNode) ? this.layoutNode : [this.layoutNode];
-    this.rootWidget.clear();
-    for (let i = 0, l = this.layoutArray.length; i < l; i++) {
-      let addedNode: ComponentRef<any> = this.rootWidget.createComponent(
+    if (this.isFirstRoot) this.updateFormLayout();
+  }
+
+  private updateFormLayout() {
+    this.widgetContainer.clear();
+    if (Array.isArray(this.layoutNode)) {
+      let currentIndex = this.index || [];
+      for (let i of Object.keys(this.layoutNode).map(k => parseInt(k, 10))) {
+        let addedNode: ComponentRef<any> = this.widgetContainer.createComponent(
+          this.componentFactory.resolveComponentFactory(this.formOptions.framework)
+        );
+        addedNode.instance.layoutNode = this.layoutNode[i];
+        addedNode.instance.index = currentIndex.concat(i);
+        for (let input of ['formGroup', 'formOptions', 'debug']) {
+          addedNode.instance[input] = this[input];
+        }
+      }
+    } else {
+      let addedNode: ComponentRef<any> = this.widgetContainer.createComponent(
         this.componentFactory.resolveComponentFactory(this.formOptions.framework)
       );
-      addedNode.instance.formGroup = this.formGroup;
-      addedNode.instance.layoutNode = this.layoutArray[i];
-      addedNode.instance.formOptions = this.formOptions;
-      addedNode.instance.debug = this.debug || false;
+      for (let input of ['layoutNode', 'formGroup', 'formOptions', 'index', 'debug']) {
+        addedNode.instance[input] = this[input];
+      }
     }
   }
 }

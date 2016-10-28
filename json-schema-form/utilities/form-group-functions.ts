@@ -12,7 +12,7 @@ import {
   forOwnDeep, getInputType, getControlValidators, hasOwn, inArray, isArray,
   isBlank, isEmpty, isInputRequired, isInteger, isNumber, isObject, isPresent,
   isPrimitive, isSet, isString, JsonPointer, JsonValidators, mapLayout,
-  toJavaScriptType, toSchemaType, updateInputOptions, Pointer, SchemaPrimitiveType,
+  toJavaScriptType, toSchemaType, Pointer, SchemaPrimitiveType,
 } from './index';
 
 /**
@@ -136,7 +136,7 @@ export function buildFormGroupTemplate(
           defaultValues = schema.items.default;
         }
         if (isArray(defaultValues) && defaultValues.length) {
-          for (let i = 0, l = defaultValues.length; i < l; i++) {
+          for (let i of Object.keys(defaultValues)) {
             let newTemplate = buildFormGroupTemplate(
               schema.items, schemaRefLibrary, fieldMap,
               defaultValues[i], rootSchema,
@@ -147,7 +147,10 @@ export function buildFormGroupTemplate(
             controls.push(newTemplate);
           }
         }
-        if (controls.length < Math.max(minItems, 1)) {
+        let initialItems = Math.max(
+          minItems, (JsonPointer.has(schema, '/items/$ref') ? 0 : 1)
+        );
+        if (controls.length < initialItems) {
           for (let i = controls.length, l = Math.max(minItems, 1); i < l; i++) {
             controls.push(buildFormGroupTemplate(
               schema.items, schemaRefLibrary, fieldMap,
@@ -170,7 +173,10 @@ export function buildFormGroupTemplate(
       }
       return { controlType, controls, validators };
     case 'FormControl':
-      let value: any = (isPrimitive(defaultValues)) ? defaultValues : null;
+      let value: { value: any, disabled: boolean } = {
+        value: (isPrimitive(defaultValues)) ? defaultValues : null,
+        disabled: schema['disabled'] || schema['ui:disabled'] || false
+      };
       return { controlType, value, validators };
     default:
       return null;
@@ -345,7 +351,8 @@ export function getControl(
     console.error('Unable to get FormGroup - invalid JSON Pointer: ' + pointer);
     return null;
   }
-  let l = returnGroup ? pointerArray.length - 1 : pointerArray.length;
+  let l = pointerArray.length;
+  if (returnGroup) l--;
   for (let i = 0; i < l; ++i) {
     let key = pointerArray[i];
     if (subGroup.hasOwnProperty('controls')) {

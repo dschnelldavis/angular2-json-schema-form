@@ -44,10 +44,8 @@ export function forEach(
   } else if (!isObject(col) && !isArray(col)) {
     console.error('Collection must be an object or array'); return;
   }
-  if (isArray(col)) {
-    for (let i = 0, l = col.length; i < l; i++) fn.call(ctx, col[i], i, col);
-  } else if (isObject(col)) {
-    for (let k in col) if (col.hasOwnProperty(k)) fn.call(ctx, col[k], k, col);
+  if (typeof col === 'object') {
+    for (let k of Object.keys(col)) fn.call(ctx, col[k], k, col);
   }
 }
 
@@ -72,10 +70,10 @@ export function forEach(
  * - This function can also optionally be called directly on a sub-object by
  * including optional parameterss to specify the initial root object and JSON pointer.
  *
- * - A fifth optional boolean parameter of TRUE may also be added to reverse
- * direction, which causes the iterator function to be called on sub-objects
- * and arrays, in reverse order, before being called on the containing object
- * or array itself (still excluding the root object or array).
+ * - A fifth optional boolean parameter of TRUE may also be added, which causes
+ * the iterator function to be called on sub-objects and arrays before being
+ * called on the containing object or array itself. (Excluding the root
+ * object or array).
  *
  * @param {object} object - the initial object or array
  * @param {(v: any, k?: string, o?: any, p?: any) => any} function - iteratee function
@@ -93,14 +91,10 @@ export function forOwnDeep( object: any,
   let currentKey = JsonPointer.parse(jsonPointer).pop();
   if (!isRoot && !bottomUp) fn(object, currentKey, rootObject, jsonPointer);
   if (isArray(object) || isObject(object)) {
-    let keys: string[] = Object.keys(object).filter(key => object.hasOwnProperty(key));
-    let recurse: Function = key => forOwnDeep(object[key], fn,
-      rootObject, jsonPointer + '/' + JsonPointer.escape(key), bottomUp);
-    if (bottomUp) {
-      for (let i = keys.length - 1, l = 0; i >= l; i--) recurse(keys[i]);
-    } else {
-      for (let i = 0, l = keys.length; i < l; i++) recurse(keys[i]);
-    }
+    for (let key of Object.keys(object)) {
+      forOwnDeep(object[key], fn, rootObject,
+        jsonPointer + '/' + JsonPointer.escape(key), bottomUp);
+    };
   }
   if (!isRoot && bottomUp) fn(object, currentKey, rootObject, jsonPointer);
   return object;
@@ -125,8 +119,8 @@ export function forOwnDeep( object: any,
 export function inArray(item: any|any[], array: any[], allIn: boolean = false): boolean {
   if (isArray(item)) {
     let inArray: boolean = allIn;
-    for (let i = 0, l = item.length; i < l; i++) {
-      if (xor(array.indexOf(item[i]) !== -1, allIn)) {
+    for (let subItem of item) {
+      if (xor(array.indexOf(subItem) !== -1, allIn)) {
         inArray = !allIn;
         break;
       }

@@ -6,6 +6,9 @@ import { buildTitleMap, getControl } from '../utilities/index';
 @Component({
   selector: 'select-widget',
   template: `
+    <label *ngIf="layoutNode?.title" [attr.for]="layoutNode?.pointer"
+      [class]="layoutNode?.labelHtmlClass" [class.sr-only]="layoutNode?.notitle"
+      [innerHTML]="layoutNode?.title"></label>
     <div *ngIf="bindControl" [formGroup]="formControlGroup">
       <select
         [formControlName]="layoutNode?.name"
@@ -34,6 +37,8 @@ export class SelectComponent implements OnInit {
   @Input() formGroup: FormGroup;
   @Input() layoutNode: any;
   @Input() formOptions: any;
+  @Input() index: number[];
+  @Input() debug: boolean;
 
   ngOnInit() {
     if (this.layoutNode.hasOwnProperty('pointer')) {
@@ -49,7 +54,7 @@ export class SelectComponent implements OnInit {
         );
       }
     }
-    this.titleMap = buildTitleMap(this.layoutNode.titleMap,
+    this.titleMap = buildTitleMap(this.layoutNode.titleMap || this.layoutNode.enumNames,
       this.layoutNode.enum, !!this.layoutNode.required);
   }
 }

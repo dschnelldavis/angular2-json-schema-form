@@ -6,6 +6,9 @@ import { buildTitleMap, getControl } from '../utilities/index';
 @Component({
   selector: 'radios-widget',
   template: `
+    <label *ngIf="layoutNode?.title" [attr.for]="layoutNode?.pointer"
+      [class]="layoutNode?.labelHtmlClass" [class.sr-only]="layoutNode?.notitle"
+      [innerHTML]="layoutNode?.title"></label>
     <div *ngIf="bindControl" [formGroup]="formControlGroup">
       <div *ngFor="let item of titleMap" [class]="layoutNode?.htmlClass">
         <label [attr.for]="layoutNode?.pointer + '/' + item?.value"
@@ -43,6 +46,8 @@ export class RadiosComponent implements OnInit {
   @Input() formGroup: FormGroup;
   @Input() layoutNode: any;
   @Input() formOptions: any;
+  @Input() index: number[];
+  @Input() debug: boolean;
 
   ngOnInit() {
     this.formControlGroup = getControl(this.formGroup, this.layoutNode.pointer, true);

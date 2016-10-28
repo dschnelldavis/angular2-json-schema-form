@@ -6,6 +6,8 @@ import { buildFormGroup, buildTitleMap, getControl } from '../utilities/index';
 @Component({
   selector: 'checkboxes-widget',
   template: `
+    <label *ngIf="layoutNode?.title" [class]="layoutNode?.labelHtmlClass"
+      [class.sr-only]="layoutNode?.notitle" [innerHTML]="layoutNode?.title"></label>
     <div [ngSwitch]="layoutNode?.type">
       <div *ngSwitchCase="'checkboxes-inline'"> <!-- checkboxes-inline template -->
         <label *ngFor="let item of dataMap"
@@ -51,6 +53,8 @@ export class CheckboxesComponent implements OnInit {
   @Input() formGroup: FormGroup;
   @Input() layoutNode: any;
   @Input() formOptions: any;
+  @Input() index: number[];
+  @Input() debug: boolean;
 
   ngOnInit() {
     if (this.layoutNode.hasOwnProperty('pointer')) {
@@ -61,12 +65,9 @@ export class CheckboxesComponent implements OnInit {
         this.bindControl = true;
         this.formArray = this.formControlGroup.controls[this.layoutNode.name];
         this.dataMap = buildTitleMap(this.layoutNode.titleMap, this.layoutNode.enum);
-        for (let i = 0, l = this.dataMap.length; i < l; i++) {
-          if (this.formArray.value.length) {
-            this.dataMap[i].checked = this.formArray.value.indexOf(this.dataMap[i].value) !== -1;
-          } else {
-            this.dataMap[i].checked = false;
-          }
+        for (let mapItem of this.dataMap) {
+          mapItem.checked = this.formArray.value.length ?
+            this.formArray.value.indexOf(mapItem.value) !== -1 : false;
         }
       } else {
         console.error(
@@ -80,12 +81,12 @@ export class CheckboxesComponent implements OnInit {
   onClick(event) {
     if (this.bindControl) {
       while (this.formArray.value.length) this.formArray.removeAt(0);
-      for (let i = 0, l = this.dataMap.length; i < l; i++) {
-        if (event.target.value === this.dataMap[i].value) {
-          this.dataMap[i].checked = event.target.checked;
+      for (let mapItem of this.dataMap) {
+        if (event.target.value === mapItem.value) {
+          mapItem.checked = event.target.checked;
         }
-        if (this.dataMap[i].checked) {
-          this.layoutNode.controlTemplate.value = this.dataMap[i].value;
+        if (mapItem.checked) {
+          this.layoutNode.controlTemplate.value = mapItem.value;
           this.formArray.push(buildFormGroup(this.layoutNode.controlTemplate));
         }
       }

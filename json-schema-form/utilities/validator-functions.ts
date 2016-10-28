@@ -111,7 +111,7 @@ export function _mergeObjects(...object: PlainObject[]): PlainObject {
     });
   }
   return mergedObject;
-} //
+}
 
 /**
  * '_mergeErrors' utility function
@@ -388,38 +388,33 @@ export function isPrimitive(value: any): boolean {
  * toJavaScriptType(10.5, 'integer') = null // 10.5 is still not an integer
  *
  * @param {PrimitiveValue} value - value to convert
- * @param {SchemaPrimitiveType} type - type to convert to
+ * @param {SchemaPrimitiveType | SchemaPrimitiveType[]} type(s) - type to convert to
  * @param {boolean = false} checkIntegers - if FALSE, treat integers as numbers
  * @return {boolean}
  */
 export function toJavaScriptType(
-  value: any, type: SchemaPrimitiveType, checkIntegers: boolean = false
+  value: any,
+  type: SchemaPrimitiveType | SchemaPrimitiveType[],
+  checkIntegers: boolean = false
 ): PrimitiveValue {
   if (isBlank(value)) return null;
-  if (type === 'integer' && !checkIntegers) type = 'number';
-  switch (type) {
-    case 'string':
-      if (isString(value)) return value;
-      if (typeof value.toString === 'function') return value.toString;
-      return null;
-    case 'number':
-      if (isNumber(value, 'strict')) return value;
-      if (isNumber(value)) return parseFloat(value);
-      return null;
-    case 'integer':
-      if (isInteger(value, 'strict')) return value;
-      if (isInteger(value)) return parseInt(value, 10);
-      return null;
-    case 'boolean':
-      if (isBoolean(value, true)) return true;
-      if (isBoolean(value, false)) return false;
-      return null;
-    case 'null':
-      return null;
-    default:
-      console.error(`'${type}' is not a recognized type.`);
-      return null;
+  if (isString(type)) type = [type];
+  if (checkIntegers && inArray('integer', type)) {
+    if (isInteger(value, 'strict')) return value;
+    if (isInteger(value)) return parseInt(value, 10);
   }
+  if (inArray('number', type)) {
+    if (isNumber(value, 'strict')) return value;
+    if (isNumber(value)) return parseFloat(value);
+  }
+  if (inArray('string', type)) {
+    if (isString(value)) return value;
+  }
+  if (inArray('boolean', type)) {
+    if (isBoolean(value, true)) return true;
+    if (isBoolean(value, false)) return false;
+  }
+  return null;
 }
 
 /**

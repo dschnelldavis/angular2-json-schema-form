@@ -6,7 +6,9 @@ import { FormGroup } from '@angular/forms';
   template: ``,
 })
 export class TabComponent {
-  @Input() formGroup: FormGroup; // Parent Angular 2 FormGroup object
-  @Input() layoutNode: any; // JSON Schema Form layout node
-  @Input() formOptions: any; // Global form defaults and options
+  @Input() formGroup: FormGroup;
+  @Input() layoutNode: any;
+  @Input() formOptions: any;
+  @Input() index: number[];
+  @Input() debug: boolean;
 }
