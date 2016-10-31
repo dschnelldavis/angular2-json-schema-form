@@ -59,7 +59,7 @@ export class RadiosInlineComponent implements OnInit {
         this.bindControl = true;
       } else {
         console.error(
-          'Warning: control "' + this.layoutNode.pointer +
+          'RadiosInlineComponent warning: control "' + this.layoutNode.pointer +
           '" is not bound to the Angular 2 FormGroup.'
         );
       }

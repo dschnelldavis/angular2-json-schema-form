@@ -62,7 +62,7 @@ export class InputComponent implements OnInit {
         }
       } else {
         console.error(
-          'Warning: control "' + this.layoutNode.pointer +
+          'InputComponent warning: control "' + this.layoutNode.pointer +
           '" is not bound to the Angular 2 FormGroup.'
         );
       }

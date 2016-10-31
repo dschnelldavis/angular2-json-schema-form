@@ -1,18 +1,18 @@
 import { Injectable } from '@angular/core';
 
-import { forEach, isObject, isArray } from './index';
+import { copy, isObject, isArray } from './index';
 
 /**
  * 'JsonPointer' class
  *
- * Some utilities for using JSON Pointers with JSON objects and JSON schemas
+ * Some utilities for using JSON Pointers with JSON objects
  * https://tools.ietf.org/html/rfc6901
  *
- * JSON Pointer Functions: get, getFirst, set, insert, remove, has, dict, walk,
- * escape, unescape, parse, compile, toKey, isJsonPointer, isSubPointer,
- * parseObjectPath
+ * get, getFirst, set, setCopy, insert, insertCopy, remove, has, dict,
+ * forEachDeep, forEachDeepCopy, escape, unescape, parse, compile, toKey,
+ * isJsonPointer, isSubPointer, parseObjectPath
  *
- * Based on manuelstofer's json-pointer utilities
+ * Partly based on manuelstofer's json-pointer utilities
  * https://github.com/manuelstofer/json-pointer
  */
 export type Pointer = string | string[];
@@ -36,27 +36,24 @@ export class JsonPointer {
   ): any {
     let subObject = object;
     let keyArray: any[] = this.parse(pointer);
-    if (keyArray === null) {
-      if (errors) console.error('Unable to get object - invalid JSON Pointer: ' + pointer);
-      return getBoolean ? false : null;
-    }
-    for (let key of keyArray) {
-      if (!isObject(subObject) && !isArray(subObject)) {
-        if (errors) console.error('Pointer does not match structure of object.');
-        if (errors) console.error(pointer);
-        if (errors) console.error(object);
-        return getBoolean ? false : null;
-      } else if (key === '-' && isArray(subObject) && subObject.length) {
-        key = subObject.length - 1;
-      } else if (!subObject.hasOwnProperty(key)) {
-        if (errors) console.error('Unable to find "' + key + '" key in object.');
-        if (errors) console.error(pointer);
-        if (errors) console.error(object);
-        return getBoolean ? false : null;
+    if (keyArray !== null) {
+      for (let key of keyArray) {
+        if (key === '-' && isArray(subObject) && subObject.length) {
+          key = subObject.length - 1;
+        }
+        if (typeof subObject === 'object' && subObject.hasOwnProperty(key)) {
+          subObject = subObject[key];
+        } else {
+          if (errors) console.error('get error: "' + key + '" key not found in object.');
+          if (errors) console.error(pointer);
+          if (errors) console.error(object);
+          return getBoolean ? false : undefined;
+        }
       }
-      subObject = subObject[key];
+      return getBoolean ? true : subObject;
     }
-    return getBoolean ? true : subObject;
+    if (errors) console.error('get error: Invalid JSON Pointer: ' + pointer);
+    return getBoolean ? false : undefined;
   }
 
   /**
@@ -70,19 +67,21 @@ export class JsonPointer {
    * @return {any} - first set value
    */
   static getFirst(items: [any, Pointer][], defaultValue: any = null): any {
-    if (!isArray(items)) return null;
-    for (let item of items) {
-      if (isArray(item) && item.length === 2) {
-        let value: any = this.get(item[0], item[1]);
-        if (value) return value;
-      } else {
-        console.error(
-          'Error: getFirst input not in correct format.\n' +
-          'Should be: [ [ object1, pointer1 ], [ object 2, pointer2 ], etc... ]'
-        );
+    if (isArray(items)) {
+      for (let item of items) {
+        if (isArray(item) && item.length === 2) {
+          let value: any = this.get(item[0], item[1]);
+          if (value) return value;
+        } else {
+          console.error('getFirst error: Input not in correct format.\n' +
+            'Should be: [ [ object1, pointer1 ], [ object 2, pointer2 ], etc... ]');
+          return;
+        }
       }
+      return defaultValue;
     }
-    return defaultValue;
+    console.error('getFirst error: Input not in correct format.\n' +
+      'Should be: [ [ object1, pointer1 ], [ object 2, pointer2 ], etc... ]');
   }
 
   /**
@@ -94,51 +93,106 @@ export class JsonPointer {
    * is an array, the function will insert the value as a new item at the
    * specified location in the array, rather than overwriting the existing value
    *
-   * @param {object} object - object to set value in
-   * @param {Pointer} pointer - JSON Pointer (string or array)
-   * @param {any} value - value to set
-   * @return {object}
+   * @param {object} object - The object to set value in
+   * @param {Pointer} pointer - The JSON Pointer (string or array)
+   * @param {any} value - The value to set
+   * @return {object} - The original object, modified with the set value
    */
   static set(
     object: any, pointer: Pointer, value: any, insert: boolean = false
   ): any {
     const keyArray: string[] = this.parse(pointer);
-    let subObject: any = object;
-    if (keyArray === null) {
-      console.error('Unable to set - invalid JSON Pointer: ' + pointer);
-      return null;
-    }
-    for (let i = 0, l = keyArray.length - 1; i < l; ++i) {
-      let key: string = keyArray[i];
-      if (key === '-' && isArray(subObject)) key = subObject.length;
-      if (!(subObject.hasOwnProperty(key))) {
-        subObject[key] = (keyArray[i + 1].match(/^(\d+|-)$/)) ? [] : {};
+    if (keyArray !== null) {
+      let subObject: any = object;
+      for (let i = 0, l = keyArray.length - 1; i < l; ++i) {
+        let key: string = keyArray[i];
+        if (key === '-' && isArray(subObject)) key = subObject.length;
+        if (!(subObject.hasOwnProperty(key))) {
+          subObject[key] = (keyArray[i + 1].match(/^(\d+|-)$/)) ? [] : {};
+        }
+        subObject = subObject[key];
       }
-      subObject = subObject[key];
+      let lastKey: string = keyArray[keyArray.length - 1];
+      if (insert && isArray(subObject) && !isNaN(+lastKey)) {
+        subObject = subObject.splice(lastKey, 0, value);
+      } else {
+        if (lastKey === '-' && isArray(subObject)) lastKey = subObject.length;
+        subObject[lastKey] = value;
+      }
+      return object;
     }
-    let lastKey: string = keyArray[keyArray.length - 1];
-    if (insert && isArray(subObject) && !isNaN(+lastKey)) {
-      subObject = subObject.splice(lastKey, 0, value);
-    } else {
-      if (lastKey === '-' && isArray(subObject)) lastKey = subObject.length;
-      subObject[lastKey] = value;
+    console.error('set error: Invalid JSON Pointer: ' + pointer);
+  }
+
+  /**
+   * 'setCopy' function
+   *
+   * Copies an object and uses a JSON Pointer to set a value on the copy.
+   *
+   * If the optional fourth parameter is TRUE and the inner-most container
+   * is an array, the function will insert the value as a new item at the
+   * specified location in the array, rather than overwriting the existing value.
+   *
+   * @param {object} object - The object to copy and set value in
+   * @param {Pointer} pointer - The JSON Pointer (string or array)
+   * @param {any} value - The value to set
+   * @return {object} - The new object with the set value
+   */
+  static setCopy(
+    object: any, pointer: Pointer, value: any, insert: boolean = false
+  ): any {
+    const keyArray: string[] = this.parse(pointer);
+    if (keyArray !== null) {
+      let newObject: any = copy(object);
+      let subObject: any = newObject;
+      for (let i = 0, l = keyArray.length - 1; i < l; ++i) {
+        let key: string = keyArray[i];
+        if (key === '-' && isArray(subObject)) key = subObject.length;
+        if (!(subObject.hasOwnProperty(key))) {
+          subObject[key] = (keyArray[i + 1].match(/^(\d+|-)$/)) ? [] : {};
+        }
+        subObject[key] = copy(subObject[key]);
+        subObject = subObject[key];
+      }
+      let lastKey: string = keyArray[keyArray.length - 1];
+      if (insert && isArray(subObject) && !isNaN(+lastKey)) {
+        subObject = subObject.splice(lastKey, 0, value);
+      } else {
+        if (lastKey === '-' && isArray(subObject)) lastKey = subObject.length;
+        subObject[lastKey] = value;
+      }
+      return newObject;
     }
-    return object;
+    console.error('setCopy error: Invalid JSON Pointer: ' + pointer);
   }
 
   /**
    * 'insert' function
    *
-   * Uses a JSON Pointer to insert a new item at a specific point in an array
+   * Calls 'set' with insert = TRUE
    *
    * @param {object} object - object to insert value in
    * @param {Pointer} pointer - JSON Pointer (string or array)
    * @param {any} value - value to insert
    * @return {object}
    */
-   static insert(object: any, pointer: Pointer, value: any): any {
-     this.set(object, pointer, value, true);
-   }
+  static insert(object: any, pointer: Pointer, value: any): any {
+    this.set(object, pointer, value, true);
+  }
+
+  /**
+   * 'insertCopy' function
+   *
+   * Calls 'setCopy' with insert = TRUE
+   *
+   * @param {object} object - object to insert value in
+   * @param {Pointer} pointer - JSON Pointer (string or array)
+   * @param {any} value - value to insert
+   * @return {object}
+   */
+  static insertCopy(object: any, pointer: Pointer, value: any): any {
+    this.setCopy(object, pointer, value, true);
+  }
 
   /**
    * 'remove' function
@@ -151,13 +205,12 @@ export class JsonPointer {
    */
   static remove(object: any, pointer: Pointer): any {
     let keyArray: any[] = this.parse(pointer);
-    if (keyArray === null) {
-      console.error('Unable to remove - invalid JSON Pointer: ' + pointer);
-      return null;
+    if (keyArray !== null) {
+      let lastKey = keyArray.pop();
+      delete this.get(object, keyArray)[lastKey];
+      return object;
     }
-    let lastKey = keyArray.pop();
-    delete this.get(object, keyArray)[lastKey];
-    return object;
+    console.error('remove error: Invalid JSON Pointer: ' + pointer);
   }
 
   /**
@@ -181,39 +234,90 @@ export class JsonPointer {
    * @param {Object} object - The object to create a dictionary from
    * @return {Object} - The resulting dictionary object
    */
-  static dict(object: any) {
+  static dict(object: any): any {
     let results: any = {};
-    this.walk(object, (value, pointer) => results[pointer] = value);
+    this.forEachDeep(object, (value, pointer) => {
+      if (typeof value !== 'object') results[pointer] = value;
+    });
     return results;
   }
 
   /**
-   * 'walk' function
+   * 'forEachDeep' function
    *
-   * Iterates over an object or array, recursively iterating over any
-   * sub-objects or sub-arrays, and calls an iterator function on each
-   * primitive value (so all strings, numbers, booleans, and nulls,
-   * but not objects or arrays).
+   * Iterates over own enumerable properties of an object or items in an array
+   * and invokes an iteratee function for each key/value or index/value pair.
+   * By default, iterates over items within objects and arrays after calling
+   * the iteratee function on the containing object or array itself.
    *
-   * Iterator: function (value, pointer) => any
+   * The iteratee is invoked with three arguments: (value, pointer, rootObject),
+   * where pointer is a JSON pointer indicating the location of the current
+   * value within the root object, and rootObject is the root object initially
+   * submitted to th function.
    *
-   * @param {Object} object - the object or array to walk through
-   * @param {function} fn - the iterator function to call on each value
-   * @return {Object}
+   * If a third optional parameter 'bottomUp' is set to TRUE, the iterator
+   * function will be called on sub-objects and arrays after being
+   * called on their contents, rather than before, which is the default.
+   *
+   * This function can also optionally be called directly on a sub-object by
+   * including optional 4th and 5th parameterss to specify the initial
+   * root object and pointer.
+   *
+   * @param {object} object - the initial object or array
+   * @param {(v: any, k?: string, o?: any, p?: any) => any} function - iteratee function
+   * @param {boolean = false} bottomUp - optional, set to TRUE to reverse direction
+   * @param {object = object} rootObject - optional, root object or array
+   * @param {string = ''} pointer - optional, JSON Pointer to object within rootObject
    */
-  static walk(object: any, fn: (v: any, p: string) => any) {
-    let refTokens = [];
-    (function next(item) {
-      forEach(item, (value, key) => {
-        refTokens.push(String(key));
-        if (isObject(value) || isArray(value)) {
-          next(value);
-        } else {
-          fn(value, this.compile(refTokens));
+  static forEachDeep(
+    object: any, fn: (v: any, p?: string, o?: any) => any,
+    bottomUp: boolean = false, pointer: string = '', rootObject: any = object
+  ): void {
+    if (typeof fn === 'function') {
+      if (!bottomUp) fn(object, pointer, rootObject);
+      if (isObject(object) || isArray(object)) {
+        for (let key of Object.keys(object)) {
+          const newPointer: string = pointer + '/' + JsonPointer.escape(key);
+          this.forEachDeep(object[key], fn, bottomUp, newPointer, rootObject);
         }
-        refTokens.pop();
-      });
-    } (object));
+      }
+      if (bottomUp) fn(object, pointer, rootObject);
+    } else {
+      console.error('forEachDeep error: Iterator must be a function.');
+    }
+  }
+
+  /**
+   * 'forEachDeepCopy' function
+   *
+   * Similar to forEachDeep, but returns a copy of the original object, with
+   * the same keys and indexes, but with values replaced with the result of
+   * the iteratee function.
+   *
+   * @param {object} object - the initial object or array
+   * @param {(v: any, k?: string, o?: any, p?: any) => any} function - iteratee function
+   * @param {boolean = false} bottomUp - optional, set to TRUE to reverse direction
+   * @param {object = object} rootObject - optional, root object or array
+   * @param {string = ''} pointer - optional, JSON Pointer to object within rootObject
+   */
+  static forEachDeepCopy(
+    object: any, fn: (v: any, p?: string, o?: any) => any,
+    bottomUp: boolean = false, pointer: string = '', rootObject: any = object
+  ): void {
+    if (typeof fn === 'function') {
+      if (isObject(object) || isArray(object)) {
+        let newObject = Object.assign(isArray(object) ? [] : {}, object);
+        if (!bottomUp) fn(newObject, pointer, rootObject);
+        for (let key of Object.keys(newObject)) {
+          const newPointer: string = pointer + '/' + JsonPointer.escape(key);
+          newObject[key] = this.forEachDeepCopy(object[key], fn, bottomUp, newPointer, rootObject);
+        }
+        if (bottomUp) fn(newObject, pointer, rootObject);
+      } else {
+        return fn(object, pointer, rootObject);
+      }
+    }
+    console.error('forEachDeep error: Iterator must be a function.');
   }
 
   /**
@@ -250,18 +354,18 @@ export class JsonPointer {
    */
   static parse(pointer: Pointer): string[] {
     if (isArray(pointer)) return <string[]>pointer;
-    if (typeof pointer !== 'string') {
-      console.error('Invalid JSON Pointer, not a string or array:');
-      console.error(pointer);
-      return null;
+    if (typeof pointer === 'string') {
+      if ((<string>pointer)[0] === '#') pointer = pointer.slice(1);
+      if (<string>pointer === '') return [];
+      if ((<string>pointer)[0] !== '/') {
+        console.error('parse error: Invalid JSON Pointer, does not start with "/": ' +
+          pointer);
+        return;
+      }
+      return (<string>pointer).slice(1).split('/').map(this.unescape);
     }
-    if ((<string>pointer)[0] === '#') pointer = pointer.slice(1);
-    if (<string>pointer === '') return [];
-    if ((<string>pointer)[0] !== '/') {
-      console.error('Invalid JSON Pointer, does not start with "/": ' + pointer);
-      return null;
-    }
-    return (<string>pointer).slice(1).split('/').map(this.unescape);
+    console.error('parse error: Invalid JSON Pointer, not a string or array:');
+    console.error(pointer);
   }
 
   /**
@@ -282,17 +386,16 @@ export class JsonPointer {
         key => key === '' ? defaultValue : this.escape(key)
       ).join('/');
     }
-    if (typeof keyArray !== 'string') {
-      console.error('Invalid JSON Pointer, not a string or array:');
-      console.error(keyArray);
-      return null;
+    if (typeof keyArray === 'string') {
+      if (keyArray[0] === '#') keyArray = keyArray.slice(1);
+      if (keyArray.length && keyArray[0] !== '/') {
+        console.error('compile error: Invalid JSON Pointer, does not start with "/": ' + keyArray);
+        return;
+      }
+      return keyArray;
     }
-    if (keyArray[0] === '#') keyArray = keyArray.slice(1);
-    if (keyArray.length && keyArray[0] !== '/') {
-      console.error('Invalid JSON Pointer, does not start with "/": ' + keyArray);
-      return null;
-    }
-    return keyArray;
+    console.error('compile error: Invalid JSON Pointer, not a string or array:');
+    console.error(keyArray);
   }
 
   /**
@@ -338,28 +441,22 @@ export class JsonPointer {
    * @param {Pointer} longPointer -
    * @return {boolean} - true if shortPointer is a subset of longPointer
    */
-  static isSubPointer(
-    shortPointer: Pointer, longPointer: Pointer
-  ): boolean {
+  static isSubPointer(shortPointer: Pointer, longPointer: Pointer): boolean {
     let shortArray: string[] = (isArray(shortPointer)) ?
       <string[]>shortPointer : this.parse(<string>shortPointer);
     let longArray: string[] = (isArray(longPointer)) ?
       <string[]>longPointer : this.parse(<string>longPointer);
     if (!shortArray || !longArray) {
-      console.error('Invalid JSON Pointer, not a string or array:');
+      console.error('isSubPointer error: Invalid JSON Pointer, not a string or array:');
       if (!shortArray) console.error(shortPointer);
       if (!longArray) console.error(longPointer);
-      return null;
+      return;
     }
     if (shortArray.length > longArray.length) return false;
-    let isSubPointer: boolean = true;
     for (let i of Object.keys(shortArray)) {
-      if (shortArray[i] !== longArray[i]) {
-        isSubPointer = false;
-        break;
-      }
+      if (shortArray[i] !== longArray[i]) return false;
     }
-    return isSubPointer;
+    return true;
   }
 
   /**
@@ -371,57 +468,51 @@ export class JsonPointer {
    * Based on mike-marcacci's objectpath parse function:
    * https://github.com/mike-marcacci/objectpath
    *
-   * @param {string} objectPath - the object path to parse
-   * @return {string[]} - the resulting array of keys
+   * @param {string} path - The object path to parse
+   * @return {string[]} - The resulting array of keys
    */
-  static parseObjectPath(objectPath: string | string[]): string[] {
-    if (isArray(objectPath)) return <string[]>objectPath;
-    if (typeof objectPath !== 'string') {
-      console.error('parseObjectPath can only parse string paths.');
-      return null;
-    }
-    let index: number = 0;
-    let parts: string[] = [];
-    while (index < objectPath.length) {
-      let nextDot: number = objectPath.indexOf('.', index);
-      let nextOpenBracket: number = objectPath.indexOf('[', index);
-      if (nextDot === -1 && nextOpenBracket === -1) { // last item
-        parts.push(objectPath.slice(index));
-        index = objectPath.length;
-      } else if (
-        nextDot !== -1 && (nextDot < nextOpenBracket || nextOpenBracket === -1)
-      ) { // dot notation
-        parts.push(objectPath.slice(index, nextDot));
-        index = nextDot + 1;
-      } else { // bracket notation
-        if (nextOpenBracket > index) {
-          parts.push(objectPath.slice(index, nextOpenBracket));
-          index = nextOpenBracket;
-        }
-        let quote: string = objectPath.charAt(nextOpenBracket + 1);
-        if (quote === '"' || quote === "'") { // enclosing quotes
-          let nextCloseBracket: number = objectPath.indexOf(quote + ']', nextOpenBracket);
-          while (nextCloseBracket !== -1 &&
-            objectPath.charAt(nextCloseBracket - 1) === '\\'
-          ) {
-            nextCloseBracket = objectPath.indexOf(quote + ']', nextCloseBracket + 2);
+  static parseObjectPath(path: string | string[]): string[] {
+    if (isArray(path)) return <string[]>path;
+    if (typeof path === 'string') {
+      let index: number = 0;
+      let parts: string[] = [];
+      while (index < path.length) {
+        const nextDot: number = path.indexOf('.', index);
+        const nextOB: number = path.indexOf('[', index); // next open bracket
+        if (nextDot === -1 && nextOB === -1) { // last item
+          parts.push(path.slice(index));
+          index = path.length;
+        } else if ( nextDot !== -1 &&
+          (nextDot < nextOB || nextOB === -1)
+        ) { // dot notation
+          parts.push(path.slice(index, nextDot));
+          index = nextDot + 1;
+        } else { // bracket notation
+          if (nextOB > index) {
+            parts.push(path.slice(index, nextOB));
+            index = nextOB;
           }
-          if (nextCloseBracket === -1) nextCloseBracket = objectPath.length;
-          parts.push(
-            objectPath
-              .slice(index + 2, nextCloseBracket)
-              .replace(new RegExp('\\' + quote, 'g'), quote)
-          );
-          index = nextCloseBracket + 2;
-        } else { // no enclosing quotes
-          let nextCloseBracket: number = objectPath.indexOf(']', nextOpenBracket);
-          if (nextCloseBracket === -1) nextCloseBracket = objectPath.length;
-          parts.push(objectPath.slice(index + 1, nextCloseBracket));
-          index = nextCloseBracket + 1;
+          const quote: string = path.charAt(nextOB + 1);
+          if (quote === '"' || quote === "'") { // enclosing quotes
+            let nextCB: number = path.indexOf(quote + ']', nextOB); // next close bracket
+            while (nextCB !== -1 && path.charAt(nextCB - 1) === '\\') {
+              nextCB = path.indexOf(quote + ']', nextCB + 2);
+            }
+            if (nextCB === -1) nextCB = path.length;
+            parts.push(path.slice(index + 2, nextCB)
+              .replace(new RegExp('\\' + quote, 'g'), quote));
+            index = nextCB + 2;
+          } else { // no enclosing quotes
+            let nextCB: number = path.indexOf(']', nextOB); // next close bracket
+            if (nextCB === -1) nextCB = path.length;
+            parts.push(path.slice(index + 1, nextCB));
+            index = nextCB + 1;
+          }
+          if (path.charAt(index) === '.') index++;
         }
-        if (objectPath.charAt(index) === '.') index++;
       }
+      return parts;
     }
-    return parts;
+    console.error('parseObjectPath error: Input object path must be a string.');
   }
 }

@@ -47,6 +47,7 @@ export class NumberComponent implements OnInit {
   private step: string;
   private allowNegative: boolean = true;
   private allowDecimal: boolean = true;
+  private allowExponents: boolean = true;
   private lastValidNumber: string = '';
   @Input() formGroup: FormGroup;
   @Input() layoutNode: any;
@@ -56,7 +57,8 @@ export class NumberComponent implements OnInit {
 
   ngOnInit() {
     if (this.layoutNode.hasOwnProperty('pointer')) {
-      this.formControlGroup = getControl(this.formGroup, this.layoutNode.pointer, true);
+      this.formControlGroup =
+        getControl(this.formGroup, this.layoutNode.pointer, true);
       if (this.formControlGroup &&
         this.formControlGroup.controls.hasOwnProperty(this.layoutNode.name)
       ) {
@@ -64,7 +66,7 @@ export class NumberComponent implements OnInit {
         this.lastValidNumber = this.formControlGroup.controls[this.layoutNode.name].value;
       } else {
         console.error(
-          'Warning: control "' + this.layoutNode.pointer +
+          'NumberComponent warning: control "' + this.layoutNode.pointer +
           '" is not bound to the Angular 2 FormGroup.'
         );
       }
@@ -73,28 +75,37 @@ export class NumberComponent implements OnInit {
       (this.layoutNode.dataType === 'integer' ? '1' : 'any');
     if (this.layoutNode.dataType === 'integer') this.allowDecimal = false;
     if (this.layoutNode.minimum) this.allowNegative = this.layoutNode.minimum < 0;
+    if (this.layoutNode.allowExponents) this.allowExponents = this.layoutNode.allowExponents;
   }
 
   private validateInput(event) {
+    const val = event.target.value;
     if (/^Digit\d$/.test(event.code)) return true;
     if (/^Numpad\d$/.test(event.code)) return true;
     if (/^Arrow/.test(event.code)) return true;
     if (event.code === 'Backspace' || event.code === 'Delete') return true;
-    if (this.allowDecimal && event.key === '.' && event.target.value.indexOf('.') === -1) return true;
-    if (this.allowNegative && event.key === '-' && event.target.value.indexOf('-') === -1) return true;
-    if (/^e$/i.test(event.key) && !(/e/i.test(event.target.value))) return true;
+    if (event.key === '.' && this.allowDecimal && val.indexOf('.') === -1) return true;
+    const hasExp = /e/i.test(val);
+    if (/^e$/i.test(event.key) && val && !hasExp && this.allowExponents) return true;
+    if (event.key === '-') {
+      const minusCount = (val.match(/\-/g) || []).length;
+      // const minusCount = val.split('-').length - 1;
+      if (!minusCount && (this.allowNegative || hasExp)) return true;
+      if (minusCount === 1 && this.allowNegative && hasExp) return true;
+    }
     return false;
   }
 
   private validateNumber(event) {
-    if (event.target.value !== '' && isNaN(event.target.value)) {
-      if (event.target.value !== '-' && event.target.value !== '.' &&
-        event.target.value !== '-.' && event.target.value.slice(-1).toLowerCase() !== 'e'
-      ) {
-        this.formControlGroup.controls[this.layoutNode.name].setValue(this.lastValidNumber);
-      }
+    const val = event.target.value;
+    if (!isNaN(val) || val === '' || val === '.' || val === '-' || val === '-.' ||
+      (val.length > 1 && val.slice(-1).toLowerCase() === 'e') ||
+      (val.length > 2 && val.slice(-2).toLowerCase() === 'e-')
+    ) {
+      this.lastValidNumber = val;
     } else {
-      this.lastValidNumber = event.target.value;
+      this.formControlGroup.controls[this.layoutNode.name]
+        .setValue(this.lastValidNumber);
     }
   }
 }

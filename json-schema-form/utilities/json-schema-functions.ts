@@ -9,10 +9,9 @@ import 'rxjs/add/operator/map';
 import * as _ from 'lodash';
 
 import {
-  buildFormGroupTemplate, forOwnDeep, hasOwn, inArray, isPresent, isBlank,
-  isSet, isEmpty, isString, isInteger, isFunction, isObject, isArray, getType,
-  JsonPointer, JsonValidators, toJavaScriptType, toSchemaType, JavaScriptType,
-  PlainObject, Pointer, SchemaPrimitiveType, SchemaType,
+  buildFormGroupTemplate, forEach, hasOwn, inArray, isPresent,
+  isBlank, isSet, isString, isFunction, isObject, isArray,
+  JsonPointer, JsonValidators, Pointer, SchemaType,
 } from './index';
 
 /**
@@ -37,29 +36,28 @@ import {
  * Uses a JSON Pointer for a data object to retrieve a sub-schema from
  * a JSON Schema which describes that data object
  *
- * @param {JSON Schema} schema - schema to get value from
+ * @param {JSON Schema} schema - Tchema to get value from
  * @param {Pointer} dataPointer - JSON Pointer (string or array)
- * @param {boolean = false} returnContainer - return containing object instead
- * @return {schema} - located value or object
+ * @param {boolean = false} returnContainer - Return containing object instead?
+ * @return {schema} - The located value or object
  */
 export function getFromSchema(
   schema: any, dataPointer: Pointer, returnContainer: boolean = false
 ): any {
+  const dataPointerArray: any[] = JsonPointer.parse(dataPointer);
   let subSchema = schema;
-  let dataPointerArray: any[] = JsonPointer.parse(dataPointer);
   if (dataPointerArray === null) {
-    console.error('Unable to get schema - invalid JSON Pointer: ' + dataPointer);
+    console.error('getFromSchema error: Invalid JSON Pointer: ' + dataPointer);
     return null;
   }
-  let l = dataPointerArray.length;
-  if (returnContainer) l--;
+  const l = returnContainer ? dataPointerArray.length - 1 : dataPointerArray.length;
   for (let i = 0; i < l; ++i) {
-    let parentSchema = subSchema;
-    let key = dataPointerArray[i];
+    const parentSchema = subSchema;
+    const key = dataPointerArray[i];
     let subSchemaArray = false;
     let subSchemaObject = false;
     if (typeof subSchema !== 'object') {
-      console.error('Unable to find "' + key + '" key in schema.');
+      console.error('getFromSchema error: Unable to find "' + key + '" key in schema.');
       console.error(schema);
       console.error(dataPointer);
       return null;
@@ -78,13 +76,14 @@ export function getFromSchema(
       if (subSchemaArray && key === '-') {
         subSchema = (parentSchema.hasOwnProperty('additionalItems')) ?
           parentSchema.additionalItems : {};
-      } else if (typeof subSchema !== 'object' || !(subSchema.hasOwnProperty(key))) {
-        console.error('Unable to find "' + key + '" item in schema.');
+      } else if (typeof subSchema === 'object' && subSchema.hasOwnProperty(key)) {
+        subSchema = subSchema[key];
+      } else {
+        console.error('getFromSchema error: Unable to find "' + key + '" item in schema.');
         console.error(schema);
         console.error(dataPointer);
-        return null;
+        return;
       }
-      subSchema = subSchema[key];
     }
   }
   return subSchema;
@@ -232,7 +231,7 @@ export function getInputType(schema: any): string {
  */
 export function isInputRequired(schema: any, pointer: string): boolean {
   if (!isObject(schema)) {
-    console.error('Schema must be an object.');
+    console.error('isInputRequired error: Input schema must be an object.');
     return false;
   }
   let listPointerArray: string[] = JsonPointer.parse(pointer);
@@ -300,9 +299,9 @@ export function updateInputOptions(
     optionsToUpdate = optionsToUpdate
       .concat('minItems', 'maxItems', 'uniqueItems');
   }
-  _.forEach(optionsToUpdate, option => {
+  forEach(optionsToUpdate, option => {
 
-    // If a new validator is needed in template, set it
+    // If a new validator is needed in formGroup template, set it
     if (hasOwn(layout, option) && isFunction(JsonValidators[option]) && (
       !hasOwn(schema, option) || (schema[option] !== layout[option] &&
         !(option.slice(0, 3) === 'min' && schema[option] < layout[option]) &&
@@ -311,7 +310,7 @@ export function updateInputOptions(
     )) {
       let validatorPointer =
         fieldMap[layout.pointer]['templatePointer'] + '/validators/' + option;
-      JsonPointer.set(formGroupTemplate, validatorPointer, [layout[option]]);
+      formGroupTemplate = JsonPointer.set(formGroupTemplate, validatorPointer, [layout[option]]);
     }
 
     // Check for option value, and set in layout
@@ -337,8 +336,8 @@ export function updateInputOptions(
 
   // For React Jsonschema Form compatibility
   if (JsonPointer.has(schema, '/ui:widget/options')) {
-    _.forOwn(JsonPointer.get(schema, '/ui:widget/options'), (value, option) => {
-      if (!hasOwn(layout, option)) layout[option] = value;
+    forEach(JsonPointer.get(schema, '/ui:widget/options'), (value, option) => {
+      if (!hasOwn(layout, <string>option)) layout[option] = value;
     });
   }
 
@@ -377,12 +376,6 @@ export function updateInputOptions(
     );
   }
 
-// console.log(layout.pointer);
-// console.log(schemaRefLibrary[layout.pointer]);
-// console.log(JsonPointer.get(formGroupTemplate, templatePointer + '/controls/-'));
-
-
-
   // If field value is set in layout, and no input data, update template value
   if (templatePointer && schema.type !== 'array' && schema.type !== 'object') {
     let layoutValue: any = JsonPointer.getFirst([
@@ -392,7 +385,7 @@ export function updateInputOptions(
     ]);
     let templateValue: any = JsonPointer.get(formGroupTemplate, templatePointer + '/value');
     if (isSet(layoutValue) && layoutValue !== templateValue) {
-      JsonPointer.set(formGroupTemplate, templatePointer + '/value', layoutValue);
+      formGroupTemplate = JsonPointer.set(formGroupTemplate, templatePointer + '/value', layoutValue);
     }
     if (isPresent(layout.value)) delete layout.value;
     if (isPresent(layout.default)) delete layout.default;
@@ -410,12 +403,12 @@ export function getControlValidators(schema: any) {
   if (hasOwn(schema, 'type')) {
     switch (schema.type) {
       case 'string':
-        _.forEach(['pattern', 'format', 'minLength', 'maxLength'], (prop) => {
+        forEach(['pattern', 'format', 'minLength', 'maxLength'], (prop) => {
           if (hasOwn(schema, prop)) validators[prop] = [schema[prop]];
         });
       break;
       case 'number': case 'integer':
-        _.forEach(['Minimum', 'Maximum'], (Limit) => {
+        forEach(['Minimum', 'Maximum'], (Limit) => {
           let eLimit = 'exclusive' + Limit;
           let limit = Limit.toLowerCase();
           if (hasOwn(schema, limit)) {
@@ -423,17 +416,17 @@ export function getControlValidators(schema: any) {
             validators[limit] = [schema[limit], exclusive];
           }
         });
-        _.forEach(['multipleOf', 'type'], (prop) => {
+        forEach(['multipleOf', 'type'], (prop) => {
           if (hasOwn(schema, prop)) validators[prop] = [schema[prop]];
         });
       break;
       case 'object':
-        _.forEach(['minProperties', 'maxProperties', 'dependencies'], (prop) => {
+        forEach(['minProperties', 'maxProperties', 'dependencies'], (prop) => {
           if (hasOwn(schema, prop)) validators[prop] = [schema[prop]];
         });
       break;
       case 'array':
-        _.forEach(['minItems', 'maxItems', 'uniqueItems'], (prop) => {
+        forEach(['minItems', 'maxItems', 'uniqueItems'], (prop) => {
           if (hasOwn(schema, prop)) validators[prop] = [schema[prop]];
         });
       break;

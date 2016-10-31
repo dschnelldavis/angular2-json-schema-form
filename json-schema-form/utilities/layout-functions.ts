@@ -9,10 +9,9 @@ import 'rxjs/add/operator/map';
 import * as _ from 'lodash';
 
 import {
-  buildFormGroupTemplate, getFromSchema, getInputType, getControl,
-  getControlValidators, hasOwn, isArray, isBlank, isBoolean, isEmpty,
-  isInputRequired, isNumber, isObject, isPresent, isString, JsonPointer,
-  JsonValidators, setRequiredFields, toTitleCase, updateInputOptions,
+  buildFormGroupTemplate, forEach, getFromSchema, getInputType, getControl,
+  hasOwn, isArray, isEmpty, isInputRequired, isNumber, isObject, isPresent,
+  isString, JsonPointer, toTitleCase, updateInputOptions,
 } from './index';
 
 /**
@@ -59,7 +58,7 @@ export function buildLayout(
     } else if (isString(layoutItem)) {
       newItem.key = layoutItem;
     } else {
-      console.error('Form layout element not recognized:');
+      console.error('buildLayout error: Form layout element not recognized:');
       console.error(layoutItem);
       return null;
     }
@@ -272,7 +271,7 @@ export function buildLayoutFromSchema(
   newItem.dataType = schema.type;
   if (isArrayItem === true) newItem.isArrayItem = true;
   if (isPresent(arrayItemType)) newItem.arrayItemType = arrayItemType;
-  if (isBoolean(isRemovable)) newItem.isRemovable = isRemovable;
+  if (isPresent(isRemovable)) newItem.isRemovable = isRemovable;
   newItem.widget = widgetLibrary.getWidget(newItem.type);
   if (dataPointer !== '') {
     if (!hasOwn(fieldMap, newItem.pointer)) fieldMap[newItem.pointer] = {};
@@ -474,10 +473,10 @@ export function mapLayout(
   rootLayout: any[] = layout,
   path: string = ''
 ): any[] {
+  let indexPad: number = 0;
   let newLayout: any[] = [];
-  let indexPad = 0;
-  _.forEach(layout, (item, index) => {
-    let realIndex = index + indexPad;
+  forEach(layout, (item, index) => {
+    let realIndex = +index + indexPad;
     let newPath = path + '/' + realIndex;
     let newItem: any = item;
     if (isObject(newItem)) {

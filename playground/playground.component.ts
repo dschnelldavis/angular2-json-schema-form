@@ -9,10 +9,6 @@ import { Http } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 
-import * as _ from 'lodash';
-
-import { JsonPointer, forOwnDeep } from '../json-schema-form/utilities/index';
-
 @Component({
   moduleId: module.id,
   selector: 'playground',

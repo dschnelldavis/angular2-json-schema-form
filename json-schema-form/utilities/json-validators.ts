@@ -2,8 +2,8 @@ import { AbstractControl } from '@angular/forms';
 
 import {
   _convertToPromise, _executeValidators, _executeAsyncValidators, _mergeObjects,
-  _mergeErrors, forOwn, isEmpty, isPresent, isBlank, isSet, isNotSet, isString,
-  isNumber, isBoolean, isObject, isArray, getType, isType, toJavaScriptType,
+  _mergeErrors, forEachCopy, isEmpty, isPresent, isBlank, isSet, isNotSet,
+  isString, isNumber, isBoolean, isArray, getType, isType, toJavaScriptType,
   xor, SchemaPrimitiveType, PlainObject, IValidatorFn, AsyncIValidatorFn,
 } from './index';
 
@@ -314,7 +314,8 @@ export class JsonValidators {
             isValid = !!actualValue.match(/^#[A-Fa-f0-9]{6}$/);
             break;
           default:
-            console.error(`'${format}' is not a recognized format.`)
+            console.error('format validator error: "' + format +
+              '" is not a recognized format.');
             isValid = true;
         }
       }
@@ -447,7 +448,7 @@ export class JsonValidators {
       if (isEmpty(control.value)) return null;
       if (getType(dependencies) !== 'object' || isEmpty(dependencies)) return null;
       let allErrors: PlainObject = _mergeObjects(
-        forOwn(dependencies, (value, requiringField) => {
+        forEachCopy(dependencies, (value, requiringField) => {
           if (isNotSet(control.value[requiringField])) return null;
           let requiringFieldErrors: PlainObject = {};
           let requiredFields: string[];
@@ -458,17 +459,19 @@ export class JsonValidators {
             requiredFields = dependencies[requiringField]['required'] || [];
             properties = dependencies[requiringField]['properties'] || {};
           }
+
           // Validate property dependencies
           for (let requiredField of requiredFields) {
             if (xor(isNotSet(control.value[requiredField]), invert)) {
               requiringFieldErrors[requiredField] = { 'required': true };
             }
           }
+
           // Validate schema dependencies
           requiringFieldErrors = _mergeObjects(requiringFieldErrors,
-            forOwn(properties, (requirements, requiredField) => {
+            forEachCopy(properties, (requirements, requiredField) => {
               let requiredFieldErrors: PlainObject = _mergeObjects(
-                forOwn(requirements, (requirement, parameter) => {
+                forEachCopy(requirements, (requirement, parameter) => {
                   let validator: IValidatorFn = null;
                   if (requirement === 'maximum' || requirement === 'minimum') {
                     let exclusive: boolean =

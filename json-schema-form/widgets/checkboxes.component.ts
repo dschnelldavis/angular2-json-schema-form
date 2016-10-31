@@ -71,7 +71,7 @@ export class CheckboxesComponent implements OnInit {
         }
       } else {
         console.error(
-          'Warning: control "' + this.layoutNode.pointer +
+          'CheckboxesComponent warning: control "' + this.layoutNode.pointer +
           '" is not bound to the Angular 2 FormGroup.'
         );
       }

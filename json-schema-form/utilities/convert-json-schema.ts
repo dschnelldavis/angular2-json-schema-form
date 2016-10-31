@@ -8,19 +8,24 @@
  * @return {object} - JSON schema (version 4)
  */
 export function convertJsonSchema3to4(schema: any): any {
-  if (typeof schema !== 'object') return schema;
 
   const isArray = (item: any): boolean => Array.isArray(item) ||
     Object.prototype.toString.call(item) === '[object Array]';
-  const convertTypes = (types, replace: boolean = false): boolean | string[] => {
+
+  const convertTypes = (types, replace: boolean = false): boolean | any[] => {
     let newTypes: any[] = [];
     for (let type of isArray(types) ? types : [types]) {
-      newTypes.push(typeof type === 'object' ? type : { 'type': type });
-      if (typeof type === 'object') replace = true;
+      if (typeof type === 'object') {
+        newTypes.push(type);
+        replace = true;
+      } else {
+        newTypes.push({ 'type': type });
+      }
     }
     return replace && newTypes;
   };
 
+  if (typeof schema !== 'object') return schema;
   let newSchema = isArray(schema) ? [].concat(schema) : Object.assign({}, schema);
   let converted: boolean = false;
 

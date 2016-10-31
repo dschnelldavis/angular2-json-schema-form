@@ -5,20 +5,32 @@ import { Http } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 
-import * as _ from 'lodash';
-
-import {
-  isPresent, isBlank, isSet, isEmpty, isString,
-  isInteger, isFunction, isObject, isArray, getType,
-  JsonPointer, JsonValidators, toJavaScriptType, toSchemaType,
-  JavaScriptType, PlainObject, SchemaPrimitiveType, SchemaType,
-} from './index';
+import { isObject, isArray, JsonPointer, PlainObject, } from './index';
 
 /**
  * Utility function library:
  *
- * forEach, forOwn, forOwnDeep, hasOwn, inArray, toTitleCase, xor
+ * copy, forEach, forEachCopy, hasOwn, inArray, toTitleCase, xor
  */
+
+/**
+ * 'copy' function
+ *
+ * Makes a shallow copy of a JavaScript object or array.
+ * If passed a JavaScript primitive value (string, number, boolean, or null),
+ * it returns the value.
+ *
+ * @param {Object|Array|string|number|boolean|null} object - The object to copy
+ * @return {Object|Array|string|number|boolean|null} - The copied object
+ */
+export function copy(object: any): any {
+  if (typeof object !== 'object' || object === null) return object;
+  if (isArray(object) || isObject(object)) {
+    return Object.assign(isArray(object) ? [] : {}, object);
+  }
+  console.error('copy error: Object to copy must be a JavaScript object,' +
+    'array, or primitive value.');
+}
 
 /**
  * 'forEach' function
@@ -28,76 +40,52 @@ import {
  *
  * Does NOT recursively iterate over items in sub-objects or sub-arrays.
  *
- * Based on manuelstofer's foreach function:
- * https://github.com/manuelstofer/foreach
- *
- * @param {Object|Array} col - collection: the object or array to iterate over
+ * @param {Object|Array} object - The object or array to iterate over
  * @param {function} fn - the iterator funciton to call on each item
- * @param {any = null} ctx - an optional context in which to call the iterator function
  * @return {void}
  */
 export function forEach(
-  col: any, fn: (v: any, k: string | number, c?: any) => any, ctx: any = null
+  object: any, fn: (v: any, k: string | number, c?: any) => any
 ): void {
-  if (typeof fn !== 'function') {
-    console.error('Iterator must be a function'); return;
-  } else if (!isObject(col) && !isArray(col)) {
-    console.error('Collection must be an object or array'); return;
-  }
-  if (typeof col === 'object') {
-    for (let k of Object.keys(col)) fn.call(ctx, col[k], k, col);
+  if ((isObject(object) || isArray(object)) && typeof fn === 'function') {
+    for (let key of Object.keys(object)) fn(object[key], key, object);
+  } else if (typeof fn !== 'function') {
+    console.error('forEach error: Iterator must be a function');
+  } else {
+    console.error('forEach error: Input object must be an object or array');
   }
 }
 
 /**
- * 'forOwnDeep' function
+ * 'forEachCopy' function
  *
- * Iterates over own enumerable properties of an object or items in an array
- * and invokes an iteratee function for each key/value or index/value pair.
+ * Iterates over all items in the first level of an object or array
+ * and calls an iterator function on each item. Returns a new object or array
+ * with the same keys or indexes as the original, and values set to the results
+ * of the iterator function.
  *
- * Similar to the Lodash _.forOwn and _.forEach functions, except:
+ * Does NOT recursively iterate over items in sub-objects or sub-arrays.
  *
- * - This function also iterates over sub-objects and arrays after calling
- * the iteratee function on the containing object or array itself
- * (except for the root object or array).
- *
- * - The iteratee function is invoked with four arguments (instead of three):
- * (value, key/index, rootObject, jsonPointer), where rootObject is the root
- * object submitted (not necesarily the sub-object directly containing the
- * key/value or index/value), and jsonPointer is a JSON pointer indicating the
- * location of the key/value or index/value within the root object.
- *
- * - This function can also optionally be called directly on a sub-object by
- * including optional parameterss to specify the initial root object and JSON pointer.
- *
- * - A fifth optional boolean parameter of TRUE may also be added, which causes
- * the iterator function to be called on sub-objects and arrays before being
- * called on the containing object or array itself. (Excluding the root
- * object or array).
- *
- * @param {object} object - the initial object or array
- * @param {(v: any, k?: string, o?: any, p?: any) => any} function - iteratee function
- * @param {object = object} rootObject - optional, root object or array
- * @param {string = ''} jsonPointer - optional, JSON Pointer to object within rootObject
- * @param {boolean = false} bottomUp - optional, set to TRUE to reverse direction
- * @return {object} - the object or array
+ * @param {Object|Array} object - The object or array to iterate over
+ * @param {function} fn - The iterator funciton to call on each item
+ * @param {any = null} context - An optional context in which to call the iterator function
+ * @return {void} - A new object or array with the results of the iterator function
  */
-export function forOwnDeep( object: any,
-  fn: (value: any, key?: string, object?: any, jsonPointer?: string) => any,
-  rootObject: any = null, jsonPointer: string = '', bottomUp: boolean = false
+export function forEachCopy(
+  object: any, fn: (v: any, k?: string | number, o?: any, p?: string) => any
 ): any {
-  let isRoot: boolean = !rootObject;
-  if (isRoot) { rootObject = object; }
-  let currentKey = JsonPointer.parse(jsonPointer).pop();
-  if (!isRoot && !bottomUp) fn(object, currentKey, rootObject, jsonPointer);
-  if (isArray(object) || isObject(object)) {
+  if ((isObject(object) || isArray(object)) && typeof fn !== 'function') {
+    let newObject: any = isArray(object) ? [] : {};
     for (let key of Object.keys(object)) {
-      forOwnDeep(object[key], fn, rootObject,
-        jsonPointer + '/' + JsonPointer.escape(key), bottomUp);
-    };
+      newObject[key] = fn(object[key], key, object);
+    }
+    return newObject;
   }
-  if (!isRoot && bottomUp) fn(object, currentKey, rootObject, jsonPointer);
-  return object;
+  if (typeof fn !== 'function') {
+    console.error('forEachCopy error: Iterator must be a function');
+  } else {
+    console.error('forEachCopy error: Input object must be an object or array');
+  }
 }
 
 /**
@@ -118,14 +106,10 @@ export function forOwnDeep( object: any,
  */
 export function inArray(item: any|any[], array: any[], allIn: boolean = false): boolean {
   if (isArray(item)) {
-    let inArray: boolean = allIn;
     for (let subItem of item) {
-      if (xor(array.indexOf(subItem) !== -1, allIn)) {
-        inArray = !allIn;
-        break;
-      }
+      if (xor(array.indexOf(subItem) !== -1, allIn)) return !allIn;
     }
-    return inArray;
+    return allIn;
   } else {
     return array.indexOf(item) !== -1;
   }
@@ -154,34 +138,8 @@ export function xor(value1: any, value2: any): boolean {
  * @return {boolean} - true if object has property, false if not
  */
 export function hasOwn(object: PlainObject, property: string): boolean {
-  if (!isObject(object)) return false;
+  if (typeof object !== 'object') return false;
   return object.hasOwnProperty(property);
-}
-
-/**
- * 'forOwn' utility function
- *
- * Iterates through an object and calls a function on each key and value.
- * The function is called with three arguments: (value, key, object).
- * Returns a new object with the same keys as the original object,
- * but with the values returned by the function.
- *
- * @param {object} object - the object to iterate through
- * @param {(v: string, k: any) => any} fn - the function to call
- * @return {PlainObject} - the resulting object
- */
-export function forOwn(
-  object: PlainObject, fn: (v: any, k: string, o: PlainObject) => any
-): PlainObject {
-  if (getType(object) !== 'object') return null;
-  if (isEmpty(object)) return {};
-  let newObject = {};
-  for (let field in object) {
-    if (object.hasOwnProperty(field)) {
-      newObject[field] = fn(object[field], field, object);
-    }
-  }
-  return newObject;
 }
 
 /**
@@ -189,24 +147,25 @@ export function forOwn(
  *
  * Intelligently converts an input string to Title Case.
  *
- * Accepts an optional second parameter with an alternate list of
+ * Accepts an optional second parameter with a list of additional
  * words and abbreviations to force into a particular case.
  *
  * This function is built on prior work by John Gruber and David Gouch:
  * http://daringfireball.net/2008/08/title_case_update
  * https://github.com/gouch/to-title-case
  *
- * @param  {string} input -
- * @param  {string | string[]} forceWords? -
+ * @param {string} input -
+ * @param {string | string[]} forceWords? -
  * @return {string} -
  */
 export function toTitleCase(input: string, forceWords?: string | string[]): string {
-  let forceArray: string[] = ['a', 'an', 'and', 'as', 'at', 'but', 'by', 'en', 'for', 'if',
-    'in', 'nor', 'of', 'on', 'or', 'per', 'the', 'to', 'v', 'v.', 'vs', 'vs.', 'via'];
+  let forceArray: string[] = ['a', 'an', 'and', 'as', 'at', 'but', 'by', 'en',
+   'for', 'if', 'in', 'nor', 'of', 'on', 'or', 'per', 'the', 'to', 'v', 'v.',
+   'vs', 'vs.', 'via'];
   if (typeof forceWords === 'string') forceWords = forceWords.split('|');
-  if (Array.isArray(forceWords)) forceArray = forceArray.concat(forceWords);
-  let forceArrayLower: string[] = forceArray.map(w => w.toLowerCase());
-  let noInitialCase: boolean =
+  if (isArray(forceWords)) forceArray = forceArray.concat(forceWords);
+  const forceArrayLower: string[] = forceArray.map(w => w.toLowerCase());
+  const noInitialCase: boolean =
     input === input.toUpperCase() || input === input.toLowerCase();
   let prevLastChar: string = '';
   input = input.trim();
@@ -215,7 +174,8 @@ export function toTitleCase(input: string, forceWords?: string | string[]): stri
       return word;
     } else {
       let newWord: string;
-      let forceWord: string = forceArray[forceArrayLower.indexOf(word.toLowerCase())];
+      const forceWord: string =
+        forceArray[forceArrayLower.indexOf(word.toLowerCase())];
       if (!forceWord) {
         if (noInitialCase) {
           if (word.slice(1).search(/\../) !== -1) {

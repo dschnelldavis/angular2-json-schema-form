@@ -18,8 +18,8 @@ import { FrameworkLibraryService } from './frameworks/framework-library.service'
 import { WidgetLibraryService } from './widgets/widget-library.service';
 import {
   buildFormGroup, buildFormGroupTemplate, buildLayout, convertJsonSchema3to4,
-  formatFormData, forOwnDeep, getSchemaReference, hasOwn, isArray, isEmpty,
-  isObject, isString, JsonPointer
+  formatFormData, getSchemaReference, hasOwn, isArray, isEmpty, isObject,
+  isString, JsonPointer
 } from './utilities/index';
 
 /**
@@ -208,7 +208,7 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
         this.validateFormData = this.ajv.compile(this.masterSchema);
 
         // Resolve schema $ref links, and save them in schemaRefLibrary
-        forOwnDeep(this.masterSchema, (value, key, ignore, pointer) => {
+        JsonPointer.forEachDeep(this.masterSchema, (value, pointer) => {
           if (hasOwn(value, '$ref') && isString(value['$ref'])) {
             const newReference: string = JsonPointer.compile(value['$ref']);
             const isCircular = JsonPointer.isSubPointer(newReference, pointer);
@@ -221,12 +221,12 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
             // it with a copy of the schema it links to
             if (!isCircular) {
               delete value['$ref'];
-              JsonPointer.set(this.masterSchema, pointer, Object.assign(
-                {}, _.cloneDeep(this.schemaRefLibrary[newReference]), value
+              this.masterSchema = JsonPointer.set(this.masterSchema, pointer, Object.assign(
+                _.cloneDeep(this.schemaRefLibrary[newReference]), value
               ));
             }
           }
-        }, this.masterSchema, '', true);
+        }, true);
       }
 
       // Initialize 'masterLayout'
@@ -258,11 +258,12 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
         const UISchema = this.UISchema || this.form.UISchema;
 
         // if UISchema found, copy UISchema items into masterSchema
-        forOwnDeep(UISchema, (value, key, ignore, pointer) => {
+        JsonPointer.forEachDeep(UISchema, (value, pointer) => {
           const schemaPointer: string = pointer.replace(/\//g, '/properties/')
             .replace(/\/properties\/items\/properties\//g, '/items/properties/');
           if (!JsonPointer.has(this.masterSchema, schemaPointer)) {
-            const groupPointer: string[] = JsonPointer.parse(schemaPointer).slice(0, -2);
+            const groupPointer: string[] =
+              JsonPointer.parse(schemaPointer).slice(0, -2);
             const item = JsonPointer.toKey(schemaPointer);
             const itemPointer: string | string[] =
               item === 'ui:order' ? schemaPointer : groupPointer.concat(item);
@@ -362,7 +363,6 @@ console.log(this.masterFormGroup);
       } else {
         // TODO: Output error message
       }
-
     }
   }
 

@@ -9,10 +9,10 @@ import 'rxjs/add/operator/map';
 import * as _ from 'lodash';
 
 import {
-  forOwnDeep, getInputType, getControlValidators, hasOwn, inArray, isArray,
-  isBlank, isEmpty, isInputRequired, isInteger, isNumber, isObject, isPresent,
-  isPrimitive, isSet, isString, JsonPointer, JsonValidators, mapLayout,
-  toJavaScriptType, toSchemaType, Pointer, SchemaPrimitiveType,
+  forEach, getControlValidators, hasOwn, inArray, isArray,
+  isEmpty, isInteger, isObject, isPresent, isPrimitive, isSet, isString,
+  JsonPointer, JsonValidators, toJavaScriptType, toSchemaType, Pointer,
+  SchemaPrimitiveType,
 } from './index';
 
 /**
@@ -80,7 +80,7 @@ export function buildFormGroupTemplate(
       if (isEmpty(defaultValues) && schema.properties.hasOwnProperty('default')) {
         defaultValues = schema.properties.default;
       }
-      _.forOwn(schema.properties, (item, key) => {
+      forEach(schema.properties, (item, key) => {
         if (key !== 'ui:order') {
           groupControls[key] = buildFormGroupTemplate(
             item, schemaRefLibrary, fieldMap,
@@ -201,7 +201,7 @@ export function buildFormGroupTemplate(
 //   layoutPointer: string = '', templatePointer: string = '',
 // ) {
 //   let newModel: any = {};
-//   _.forEach(layout, (value: any) => {
+//   forEach(layout, (value: any) => {
 //     let thisKey: any = null;
 //     if (value === '*') {
 //       _.assign(newModel, JsonPointer.buildFormGroupTemplate(rootSchema, fieldMap));
@@ -238,7 +238,7 @@ export function buildFormGroup(template: any, defaultValue: any = null): Abstrac
   let validatorFns: ValidatorFn[] = [];
   let validatorFn: ValidatorFn = null;
   if (hasOwn(template, 'validators')) {
-    _.forOwn(template.validators, (parameters, validator) => {
+    forEach(template.validators, (parameters, validator) => {
       if (typeof JsonValidators[validator] === 'function') {
         validatorFns.push(JsonValidators[validator].apply(null, parameters));
       }
@@ -253,8 +253,8 @@ export function buildFormGroup(template: any, defaultValue: any = null): Abstrac
   if (hasOwn(template, 'controlType')) {
     switch (template.controlType) {
       case 'FormGroup':
-        let groupControls: {[key: string]: AbstractControl} = {};
-        _.forOwn(template.controls, (controls, key) => {
+        let groupControls: { [key: string]: AbstractControl } = {};
+        forEach(template.controls, (controls, key) => {
           let newControl: AbstractControl = buildFormGroup(controls);
           if (newControl) groupControls[key] = newControl;
         });
@@ -282,7 +282,7 @@ export function setRequiredFields(schema: any, formControlTemplate: any): boolea
   if (hasOwn(schema, 'required') && !_.isEmpty(schema.required)) {
     fieldsRequired = true;
     let requiredArray = isArray(schema.required) ? schema.required : [schema.required];
-    _.forEach(requiredArray,
+    requiredArray = forEach(requiredArray,
       key => JsonPointer.set(formControlTemplate, '/' + key + '/validators/required', [])
     );
   }
@@ -300,28 +300,39 @@ export function setRequiredFields(schema: any, formControlTemplate: any): boolea
  * @param {boolean = false} fixErrors - if TRUE, tries to fix data
  * @return {any} - formatted data object
  */
-export function formatFormData(formData: any, fieldMap: any, fixErrors: boolean = false): any {
+export function formatFormData(
+  formData: any, fieldMap: any, fixErrors: boolean = false
+): any {
   let formattedData = {};
-  forOwnDeep(formData, (value, key, ignore, pointer) => {
-    let genericPointer: string;
-    if (fieldMap.hasOwnProperty(pointer) && fieldMap[pointer].hasOwnProperty('schemaType')) {
-      genericPointer = pointer;
-    } else { // TODO: Fix to allow for integer object keys
-      genericPointer = JsonPointer.compile(
-        JsonPointer.parse(pointer).map(k => (isInteger(k)) ? '-' : k)
-      );
-    }
-    if (fieldMap.hasOwnProperty(genericPointer) &&
-      fieldMap[genericPointer].hasOwnProperty('schemaType')
-    ) {
-      let schemaType: SchemaPrimitiveType | SchemaPrimitiveType[] =
-        fieldMap[genericPointer]['schemaType'];
-      if (isSet(value) &&
-        inArray(schemaType, ['string', 'integer', 'number', 'boolean', 'null'])
+  JsonPointer.forEachDeep(formData, (value, pointer) => {
+    if (typeof value !== 'object') {
+      let genericPointer: string;
+      if ( fieldMap.hasOwnProperty(pointer) &&
+        fieldMap[pointer].hasOwnProperty('schemaType')
       ) {
-        let newValue = fixErrors ? toSchemaType(value, schemaType) :
-          toJavaScriptType(value, <SchemaPrimitiveType>schemaType);
-        if (isPresent(newValue)) JsonPointer.set(formattedData, pointer, newValue);
+        genericPointer = pointer;
+      } else { // TODO: Fix to allow for integer object keys and tuple arrays
+        genericPointer = JsonPointer.compile(
+          JsonPointer.parse(pointer).map(k => (isInteger(k)) ? '-' : k)
+        );
+      }
+      if ( fieldMap.hasOwnProperty(genericPointer) &&
+        fieldMap[genericPointer].hasOwnProperty('schemaType')
+      ) {
+        const schemaType: SchemaPrimitiveType | SchemaPrimitiveType[] =
+          fieldMap[genericPointer]['schemaType'];
+        if (schemaType === 'null') {
+          JsonPointer.set(formattedData, pointer, null);
+        } else if ( isSet(value) &&
+          inArray(schemaType, ['string', 'integer', 'number', 'boolean'])
+        ) {
+          const newValue = fixErrors ? toSchemaType(value, schemaType) :
+            toJavaScriptType(value, <SchemaPrimitiveType>schemaType);
+          if (isPresent(newValue)) JsonPointer.set(formattedData, pointer, newValue);
+        }
+      } else {
+        console.error('formatFormData error: Schema type not found ' +
+          'for form value at "' + genericPointer + '".');
       }
     }
   });
@@ -332,10 +343,10 @@ export function formatFormData(formData: any, fieldMap: any, fixErrors: boolean 
  * 'getControl' function
  *
  * Uses a JSON Pointer for a data object to retrieve a control from
- * an Angular 2 FormGroup object.
+ * an Angular 2 FormGroup.
  *
- * If the optional third parameter 'returnGroup' is set to TRUE, this function
- * returns the group containing the control, rather than the control itself.
+ * If the optional third parameter 'returnGroup' is set to TRUE, the group
+ * containing the control is returned, rather than the control itself.
  *
  * @param {FormGroup} formGroup - Angular 2 FormGroup to get value from
  * @param {Pointer} pointer - JSON Pointer (string or array)
@@ -347,27 +358,25 @@ export function getControl(
 ): any {
   let subGroup = formGroup;
   let pointerArray: string[] = JsonPointer.parse(pointer);
-  if (pointerArray === null) {
-    console.error('Unable to get FormGroup - invalid JSON Pointer: ' + pointer);
-    return null;
-  }
-  let l = pointerArray.length;
-  if (returnGroup) l--;
-  for (let i = 0; i < l; ++i) {
-    let key = pointerArray[i];
-    if (subGroup.hasOwnProperty('controls')) {
-      subGroup = subGroup.controls;
+  if (pointerArray !== null) {
+    let l = returnGroup ? pointerArray.length - 1 : pointerArray.length;
+    for (let i = 0; i < l; ++i) {
+      let key = pointerArray[i];
+      if (subGroup.hasOwnProperty('controls')) {
+        subGroup = subGroup.controls;
+      }
+      if (isArray(subGroup) && (key === '-')) {
+        subGroup = subGroup[subGroup.length - 1];
+      } else if (subGroup.hasOwnProperty(key)) {
+        subGroup = subGroup[key];
+      } else {
+        console.error('getControl error: Unable to find "' + key + '" item in FormGroup.');
+        console.error(pointer);
+        console.error(formGroup);
+        return;
+      }
     }
-    if (isArray(subGroup) && (key === '-')) {
-      subGroup = subGroup[subGroup.length - 1];
-    } else if (subGroup.hasOwnProperty(key)) {
-      subGroup = subGroup[key];
-    } else {
-      console.error('Unable to find "' + key + '" item in FormGroup.');
-      console.error(pointer);
-      console.error(formGroup);
-      return null;
-    }
+    return subGroup;
   }
-  return subGroup;
+  console.error('getControl error: Invalid JSON Pointer: ' + pointer);
 }

@@ -49,7 +49,7 @@ export class SelectComponent implements OnInit {
         this.bindControl = true;
       } else {
         console.error(
-          'Warning: control "' + this.layoutNode.pointer +
+          'SelectComponent warning: control "' + this.layoutNode.pointer +
           '" is not bound to the Angular 2 FormGroup.'
         );
       }

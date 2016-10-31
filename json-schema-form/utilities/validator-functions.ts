@@ -1,7 +1,7 @@
 import { AbstractControl } from '@angular/forms';
 import { toPromise } from 'rxjs/operator/toPromise';
 
-import { inArray, xor, hasOwn, forOwn } from './index';
+import { inArray, xor } from './index';
 
 /**
  * Validator utility function library:
@@ -90,25 +90,28 @@ export function _executeAsyncValidators(
 export function _mergeObjects(...object: PlainObject[]): PlainObject {
   let mergedObject: PlainObject = {};
   for (let i = 0, l = arguments.length; i < l; i++) {
-    let currentObject = arguments[i];
-    forOwn(currentObject, (newValue, key) => {
-      let OldValue = mergedObject[key];
-      if (isPresent(OldValue)) {
-        if (key === 'not' &&
-          isBoolean(OldValue, 'strict') && isBoolean(newValue, 'strict')
+    const currentObject = arguments[i];
+    for (let key of Object.keys(currentObject)) {
+      const currentValue = currentObject[key];
+      const mergedValue = mergedObject[key];
+      if (isPresent(mergedValue)) {
+        if ( key === 'not' &&
+          isBoolean(mergedValue, 'strict') &&
+          isBoolean(currentValue, 'strict')
         ) {
-          mergedObject[key] = xor(OldValue, newValue);
+          mergedObject[key] = xor(mergedValue, currentValue);
         } else if (
-          getType(OldValue) === 'object' && getType(newValue) === 'object'
+          getType(mergedValue) === 'object' &&
+          getType(currentValue) === 'object'
         ) {
-          mergedObject[key] = _mergeObjects(OldValue, newValue);
+          mergedObject[key] = _mergeObjects(mergedValue, currentValue);
         } else {
-          mergedObject[key] = newValue;
+          mergedObject[key] = currentValue;
         }
       } else {
-        mergedObject[key] = newValue;
+        mergedObject[key] = currentValue;
       }
-    });
+    }
   }
   return mergedObject;
 }
@@ -123,7 +126,7 @@ export function _mergeObjects(...object: PlainObject[]): PlainObject {
  * @return {PlainObject} - merged object, or null if no usable input objectcs
  */
 export function _mergeErrors(arrayOfErrors: PlainObject[]): PlainObject {
-  let mergedErrors: PlainObject = _mergeObjects.apply(arrayOfErrors);
+  let mergedErrors: PlainObject = _mergeObjects.apply(null, arrayOfErrors);
   return isEmpty(mergedErrors) ? null : mergedErrors;
 }
 
@@ -346,7 +349,7 @@ export function isType(value: PrimitiveValue, type: SchemaPrimitiveType): boolea
     case 'null':
       return !isSet(value);
     default:
-      console.error(`'${type}' is not a recognized type.`);
+      console.error('isType error: "' + type + '" is not a recognized type.');
       return null;
   }
 }
@@ -375,10 +378,10 @@ export function isPrimitive(value: any): boolean {
  * of values that would otherwise be valid.
  *
  * If the optional third parameter 'checkIntegers' is TRUE, and the
- * JSON Schema type 'integer' is specified, it verifies the input
- * is an integer value and, if it is, returns it as a JaveScript number.
+ * JSON Schema type 'integer' is specified, it also verifies the input value
+ * is an integer and, if it is, returns it as a JaveScript number.
  * If 'checkIntegers' is FALSE, or not set, the type 'integer' is treated
- * exactly the same as 'number', and allows decimals.
+ * exactly the same as 'number', and does allow decimals.
  *
  * Examples:
  * toJavaScriptType('10', 'number') = 10
@@ -403,7 +406,9 @@ export function toJavaScriptType(
     if (isInteger(value, 'strict')) return value;
     if (isInteger(value)) return parseInt(value, 10);
   }
-  if (inArray('number', type)) {
+  if (inArray('number', type) ||
+    (!checkIntegers && inArray('integer', type))
+  ) {
     if (isNumber(value, 'strict')) return value;
     if (isNumber(value)) return parseFloat(value);
   }
