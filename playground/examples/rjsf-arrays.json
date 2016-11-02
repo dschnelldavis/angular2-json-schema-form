@@ -62,7 +62,7 @@
   "formData": {
     "listOfStrings": [ "foo", "bar" ],
     "multipleChoicesList": [ "foo", "bar" ],
-    "fixedItemsList": [ "Some text", true, 123 ],
+    "fixedItemsList": [ "Some text", true, 123, 456 ],
     "nestedList": [ [ "lorem", "ipsum" ], [ "dolor" ] ]
   }
 }

@@ -1,6 +1,8 @@
 import { AbstractControl } from '@angular/forms';
 import { toPromise } from 'rxjs/operator/toPromise';
 
+import * as Immutable from 'immutable';
+
 import { inArray, xor } from './index';
 
 /**

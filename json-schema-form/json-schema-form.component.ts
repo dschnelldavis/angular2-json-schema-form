@@ -1,7 +1,7 @@
 import {
-  Component, ComponentFactoryResolver, ComponentRef, DoCheck, EventEmitter,
-  Input, Output, OnChanges, OnInit, AfterContentInit, AfterViewInit,
-  ViewChild, ViewContainerRef
+  ChangeDetectionStrategy, Component, ComponentFactoryResolver, ComponentRef,
+  DoCheck, EventEmitter, Input, Output, OnChanges, OnInit, AfterContentInit,
+  AfterViewInit, ViewChild, ViewContainerRef
 } from '@angular/core';
 import {
   AbstractControl, FormArray, FormControl, FormGroup, FormBuilder, NgForm,
@@ -13,13 +13,14 @@ import 'rxjs/add/operator/map';
 
 import * as Ajv from 'ajv';
 import * as _ from 'lodash';
+import * as Immutable from 'immutable';
 
 import { FrameworkLibraryService } from './frameworks/framework-library.service';
 import { WidgetLibraryService } from './widgets/widget-library.service';
 import {
   buildFormGroup, buildFormGroupTemplate, buildLayout, convertJsonSchema3to4,
   formatFormData, getSchemaReference, hasOwn, isArray, isEmpty, isObject,
-  isString, JsonPointer
+  isSet, isString, JsonPointer, toGenericPointer
 } from './utilities/index';
 
 /**
@@ -57,46 +58,56 @@ import {
   selector: 'json-schema-form',
   template: `<form (ngSubmit)="submitForm()">
     <root-widget *ngIf="formActive"
-      [layoutNode]="masterLayout"
-      [formGroup]="masterFormGroup"
-      [formOptions]="formOptions"
+      [layoutNode]="formOptions.layout"
+      [options]="formOptions"
       [isFirstRoot]="true"
       [debug]="debug">
     </root-widget>
   </form>
   <div *ngIf="debug">Debug output: <pre>{{debugOutput}}</pre></div>`,
+  // changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit, DoCheck, OnChanges, OnInit {
   private formActive: boolean = false; // Used to trigger form rendering
-  private masterSchema: any = {}; // The internal JSON Schema
-  private masterLayout: any[] = []; // The internal Form layout
-  private initialData: any = {}; // The initial Data model (e.g. previously submitted data)
-  private formGroupTemplate: any = {}; // Template used to create formGroup
-  private masterFormGroup: FormGroup; // Angular 2 formGroup, for powering reactive form
-  private schemaRefLibrary: any = {}; // Library of references for schema $refs
-  private fieldMap: any = {}; // Links schema, layout, formGroup template, and data
-  private ajv: any = new Ajv({ allErrors: true }); // AJV JSON Schema validator
-  private validateFormData: any = null; // Compiled AJV to validate this form's schema
+  private ajv: any = new Ajv({ allErrors: true }); // AJV: Another JSON Schema Validator
+  private validateFormData: any; // Compiled AJV function to validate this form's schema
   private debugOutput: any; // Debug information, if requested
-  private formOptions: any = { // Global form options, with default values
-    supressPropertyTitles: false,
-    fieldsRequired: false,
-    formDefaults: { notitle: false, readonly: false, feedback: true, },
-    framework: null, // The active framework
-    masterLayout: null, // Will link to this.masterLayout
-    noSubmit: false, // Even if layout does not have a submit button, do not add one
-    pristine: { errors: true, success: true },
-    setSchemaDefaults: true,
-    validateOnRender: false,
-    validationMessage: {},
-    layoutRefLibrary: {}, // Layouts for adding dynamic arrays and circular schema $refs
+
+  private formOptions: any = { // Form options and control structures
+    globalOptions: { // Default global form options
+      addSubmit: true, // Add a submit button if layout does not have one?
+      fieldsRequired: false, // Are there any required fields in the form?
+      pristine: { errors: true, success: true },
+      supressPropertyTitles: false,
+      setSchemaDefaults: true,
+      validateOnRender: false,
+      formDefaults: { // Default options for individual form controls
+        allowExponents: false, // Allow exponent entry in number fields?
+        disableErrorState: false, // Don't apply 'has-error' class when field fails validation?
+        disableSuccessState: false, // Don't apply 'has-success' class when field validates?
+        feedback: true, // Show inline feedback icons?
+        notitle: false, // Hide title?
+        readonly: false, // Set control as read only?
+      },
+    },
+    arrayMap: new Map, // Map of arrays in data object
+    defaultValues: {}, // The initial data model (e.g. previously submitted data)
+    dataMap: {}, // Maps paths in data model to schema and formGroup
+    formGroupTemplate: {}, // Template used to create formGroup
+    framework: null, // The active framework component
+    schema: {}, // The internal JSON Schema
+    layout: [], // The internal Form layout
+    formGroup: null, // Angular 2 formGroup, for powering reactive form
+    layoutRefLibrary: {}, // Library of layout nodes for adding to form
+    schemaRefLibrary: {}, // Library of schemas for resolving schema $refs
+    widgetLibrary: null,
   };
 
   @Input() schema: any; // The input JSON Schema
-  @Input() data: any; // The input Form layout
   @Input() layout: any[]; // The input Data model
+  @Input() data: any; // The input Form layout
   @Input() options: any; // The input form options
-  @Input() form: any; // For testing and JSON Schema Form API compatibility
+  @Input() form: any; // For testing, and JSON Schema Form API compatibility
   @Input() model: any; // For Angular Schema Form API compatibility
   @Input() JSONSchema: any; // For React JSON Schema Form API compatibility
   @Input() UISchema: any; // For React JSON Schema Form API compatibility
@@ -105,7 +116,7 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
   @Output() onChanges = new EventEmitter<any>(); // Live unvalidated internal form data
   @Output() onSubmit = new EventEmitter<any>(); // Validated complete form data
   @Output() isValid = new EventEmitter<boolean>(); // Is current data valid?
-  @Output() validationErrors = new EventEmitter<any>(); // Validation errors, if not valid
+  @Output() validationErrors = new EventEmitter<any>(); // Validation errors
 
   constructor(
     private formBuilder: FormBuilder,
@@ -115,7 +126,8 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
     private widgetLibrary: WidgetLibraryService,
     private frameworkLibrary: FrameworkLibraryService,
   ) {
-    this.masterFormGroup = this.formBuilder.group({});
+    this.formOptions.formGroup = this.formBuilder.group({});
+    this.formOptions.widgetLibrary = widgetLibrary;
   }
 
   ngOnInit() { }
@@ -125,45 +137,43 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
   ngAfterViewInit() { }
 
   ngOnChanges() {
-    if (isObject(this.options)) Object.assign(this.formOptions, this.options);
+    if (isObject(this.options)) Object.assign(this.formOptions.globalOptions, this.options);
     this.formOptions.framework = this.frameworkLibrary.getFramework();
-    this.buildFormInputs();
+    this.buildFormInputs(this.formOptions);
   }
 
   /**
    * 'buildFormInputs' function
    *
-   * - Update 'masterSchema', 'masterLayout', and 'initialData',
-   *   the inputs used to construct the form.
+   * - Update 'schema', 'layout', and 'defaultValues', from inputs.
    *
-   * - Create 'fieldMap' to map the relationships between the schema and layout.
+   * - Create 'dataMap' to map the data to the schema and template.
    *
    * - Create 'schemaRefLibrary' to resolve schema $ref links.
    *
-   * - Create 'formOptions.layoutRefLibrary' to add components to arrays and
-   *   circular $ref points in the form.
+   * - Create 'layoutRefLibrary' to use when adding components to form
+   *   arrays and circular $ref points.
    *
-   * - Create 'formGroupTemplate', then from it 'masterFormGroup',
+   * - Create 'formGroupTemplate', then from it 'formGroup',
    *   the Angular 2 formGroup used to control the reactive form.
    *
    * @return {void}
    */
-  public buildFormInputs() {
+  public buildFormInputs(options: any) {
     if (
-      this.form || this.layout || this.schema || this.data ||
-      this.model || this.JSONSchema || this.UISchema || this.formData
+      this.schema || this.layout || this.form || this.JSONSchema || this.UISchema
     ) {
       this.formActive = false;
-      this.masterSchema = {};
-      this.masterLayout = [];
-      this.initialData = {};
-      this.fieldMap = {};
-      this.schemaRefLibrary = {};
-      this.formOptions.layoutRefLibrary = {};
-      this.formGroupTemplate = {};
-      this.masterFormGroup = this.formBuilder.group({});
+      options.schema = {};
+      options.layout = [];
+      options.defaultValues = {};
+      options.dataMap = {};
+      options.schemaRefLibrary = {};
+      options.layoutRefLibrary = {};
+      options.formGroupTemplate = {};
+      options.formGroup = null;
 
-      // Initialize 'masterSchema'
+      // Initialize 'formOptions.schema'
       // Use first available input:
       // 1. schema - recommended / Angular Schema Form style
       // 2. form.schema - Single input / JSON Form style
@@ -172,64 +182,72 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
       // 5. form - For easier testing
       // 6. (none) no schema - construct form entirely from layout instead
       if (isObject(this.schema)) {
-        this.masterSchema = this.schema;
+        options.schema = this.schema;
       } else if (hasOwn(this.form, 'schema') &&
         isObject(this.form.schema)) {
-        this.masterSchema = this.form.schema;
+        options.schema = this.form.schema;
       } else if (isObject(this.JSONSchema)) {
-        this.masterSchema = this.JSONSchema;
+        options.schema = this.JSONSchema;
       } else if (hasOwn(this.form, 'JSONSchema') &&
       isObject(this.form.JSONSchema)) {
-        this.masterSchema = this.form.JSONSchema;
+        options.schema = this.form.JSONSchema;
       } else if (hasOwn(this.form, 'properties') &&
         isObject(this.form.properties)) {
-        this.masterSchema = this.form;
+        options.schema = this.form;
       }
 
-      if (!isEmpty(this.masterSchema)) {
+      if (!isEmpty(options.schema)) {
 
         // Allow for JSON schema shorthand (JSON Form style)
-        if (!hasOwn(this.masterSchema, 'type') &&
-          hasOwn(this.masterSchema, 'properties') &&
-          isObject(this.masterSchema.properties)
+        if (!hasOwn(options.schema, 'type') &&
+          hasOwn(options.schema, 'properties') &&
+          isObject(options.schema.properties)
         ) {
-          this.masterSchema.type = 'object';
-        } else if (!hasOwn(this.masterSchema, 'type') ||
-          this.masterSchema.type !== 'object' ||
-          !hasOwn(this.masterSchema, 'properties')
+          options.schema.type = 'object';
+        } else if (!hasOwn(options.schema, 'type') ||
+          options.schema.type !== 'object' ||
+          !hasOwn(options.schema, 'properties')
         ) {
-          this.masterSchema = { 'type': 'object', 'properties': this.masterSchema };
+          options.schema = {
+            'type': 'object', 'properties': options.schema
+          };
         }
 
-        // If JSON Schema is version 3 (JSON Form style), convert to version 4
-        this.masterSchema = convertJsonSchema3to4(this.masterSchema);
+        // If JSON Schema is version 3 (JSON Form style), convert it to version 4
+        options.schema = convertJsonSchema3to4(options.schema);
 
         // Initialize ajv and compile schema
-        this.validateFormData = this.ajv.compile(this.masterSchema);
+        this.validateFormData = this.ajv.compile(options.schema);
 
         // Resolve schema $ref links, and save them in schemaRefLibrary
-        JsonPointer.forEachDeep(this.masterSchema, (value, pointer) => {
+        JsonPointer.forEachDeep(options.schema, (value, pointer) => {
           if (hasOwn(value, '$ref') && isString(value['$ref'])) {
             const newReference: string = JsonPointer.compile(value['$ref']);
             const isCircular = JsonPointer.isSubPointer(newReference, pointer);
-            if (!hasOwn(this.schemaRefLibrary, newReference) && newReference !== '') {
-              this.schemaRefLibrary[newReference] = getSchemaReference(
-                this.masterSchema, newReference, this.schemaRefLibrary
+            if (isSet(newReference) &&
+              !hasOwn(options.schemaRefLibrary, newReference)
+            ) {
+              options.schemaRefLibrary[newReference] = getSchemaReference(
+                options.schema, newReference, options.schemaRefLibrary
               );
             }
-            // If $ref link is not circular, remove it and replace
+
+            // If a $ref link is not circular, remove it and replace
             // it with a copy of the schema it links to
             if (!isCircular) {
               delete value['$ref'];
-              this.masterSchema = JsonPointer.set(this.masterSchema, pointer, Object.assign(
-                _.cloneDeep(this.schemaRefLibrary[newReference]), value
-              ));
+              options.schema = JsonPointer.set(
+                options.schema, pointer, Object.assign(
+                  _.cloneDeep(options.schemaRefLibrary[newReference]),
+                  value
+                )
+              );
             }
           }
         }, true);
       }
 
-      // Initialize 'masterLayout'
+      // Initialize 'formOptions.layout'
       // Use first available array input:
       // 1. layout - recommended
       // 2. form - Angular Schema Form style
@@ -237,15 +255,15 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
       // 4. form.layout - Single input style
       // 5. (none) no input - use default layout instead
       if (isArray(this.layout)) {
-        this.masterLayout = this.layout;
+        options.layout = this.layout;
       } else if (isArray(this.form)) {
-        this.masterLayout = this.form;
+        options.layout = this.form;
       } else if (isArray(this.form.form)) {
-        this.masterLayout = this.form.form;
+        options.layout = this.form.form;
       } else if (isArray(this.form.layout)) {
-        this.masterLayout = this.form.layout;
+        options.layout = this.form.layout;
       } else {
-        this.masterLayout = [ '*', { type: 'submit', title: 'Submit' } ];
+        options.layout = [ '*', { type: 'submit', title: 'Submit' } ];
       }
 
       // Look for and import alternate layout format 'UISchema'
@@ -257,26 +275,26 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
       if (isObject(this.UISchema) || hasOwn(this.form, 'UISchema')) {
         const UISchema = this.UISchema || this.form.UISchema;
 
-        // if UISchema found, copy UISchema items into masterSchema
+        // if UISchema found, copy UISchema items into formOptions.schema
         JsonPointer.forEachDeep(UISchema, (value, pointer) => {
           const schemaPointer: string = pointer.replace(/\//g, '/properties/')
             .replace(/\/properties\/items\/properties\//g, '/items/properties/');
-          if (!JsonPointer.has(this.masterSchema, schemaPointer)) {
+          if (!JsonPointer.has(options.schema, schemaPointer)) {
             const groupPointer: string[] =
               JsonPointer.parse(schemaPointer).slice(0, -2);
             const item = JsonPointer.toKey(schemaPointer);
             const itemPointer: string | string[] =
               item === 'ui:order' ? schemaPointer : groupPointer.concat(item);
-            if (JsonPointer.has(this.masterSchema, groupPointer) &&
-              !JsonPointer.has(this.masterSchema, itemPointer)
+            if (JsonPointer.has(options.schema, groupPointer) &&
+              !JsonPointer.has(options.schema, itemPointer)
             ) {
-              JsonPointer.set(this.masterSchema, itemPointer, value);
+              JsonPointer.set(options.schema, itemPointer, value);
             }
           }
         });
       }
 
-      // Initialize 'initialData'
+      // Initialize 'formOptions.defaultValues'
       // Use first available input:
       // 1. data - recommended
       // 2. model - Angular Schema Form style
@@ -286,35 +304,32 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
       // 6. form.formData - For easier testing of React JSON Schema Forms
       // 7. (none) no data - initialize data from schema and layout defaults
       if (isObject(this.data)) {
-        this.initialData = this.data;
+        options.defaultValues = this.data;
       } else if (isObject(this.model)) {
-        this.initialData = this.model;
+        options.defaultValues = this.model;
       } else if (isObject(this.form) &&
         isObject(this.form.value)) {
-        this.initialData = this.form.value;
+        options.defaultValues = this.form.value;
       } else if (isObject(this.form) &&
         isObject(this.form.data)) {
-        this.initialData = this.form.data;
+        options.defaultValues = this.form.data;
       } else if (isObject(this.formData)) {
-        this.initialData = this.formData;
-      } else if (hasOwn(this.form, 'formData') &&
-        isObject(this.form.formData)) {
-        this.initialData = this.form.formData;
+        options.defaultValues = this.formData;
+      } else if (hasOwn(this.form, 'formData') && isObject(this.form.formData)) {
+        options.defaultValues = this.form.formData;
       }
 
-      if (!isEmpty(this.masterSchema)) {
+      if (!isEmpty(options.schema)) {
 
         // Build the Angular 2 FormGroup template from the schema
-        this.formGroupTemplate = buildFormGroupTemplate(
-          this.masterSchema, this.schemaRefLibrary,
-          this.fieldMap, this.initialData
-        );
+        options.formGroupTemplate = buildFormGroupTemplate(options);
+
       } else {
 
-        // TODO: If the schema does not exist,
+        // TODO: (?) If the schema does not exist,
         // build the Angular 2 FormGroup template from the layout instead
         // this.formGroupTemplate =
-        //   this.buildFormGroupTemplateFromLayout(this.masterLayout, this.fieldMap);
+        //   this.buildFormGroupTemplateFromLayout(options.layout, options);
       }
 
       // Update all layout elements, set values, and add validators,
@@ -322,29 +337,22 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
       // and update the FormGroup template with any new validators
       // TODO: Update layout and Angular 2 FormGroup template from data
       // (set default values and extend arrays)
-      this.masterLayout = buildLayout(
-        this.masterLayout, this.masterSchema, this.initialData, this.formOptions,
-        this.fieldMap, this.schemaRefLibrary, this.formOptions.layoutRefLibrary,
-        this.widgetLibrary, this.formGroupTemplate
-      );
-
-      // Make entire form layout available to all controls
-      this.formOptions.masterLayout = this.masterLayout;
+      options.layout = buildLayout(options);
 
       // Build the real Angular 2 FormGroup from the FormGroup template
-      this.masterFormGroup = <FormGroup>(buildFormGroup(this.formGroupTemplate));
+      options.formGroup = <FormGroup>buildFormGroup(options.formGroupTemplate);
 
-      if (this.masterFormGroup) {
-console.log(this.masterFormGroup);
-        // Activate the *ngIf in the template to render form
+      if (options.formGroup) {
+
+        // Display the template to render form
         this.formActive = true;
 
         // Subscribe to form value changes to output live data, validation, and errors
-        this.masterFormGroup.valueChanges.subscribe(
+        options.formGroup.valueChanges.subscribe(
           value => {
-            const formattedData = formatFormData(value, this.fieldMap);
-            this.onChanges.emit(formattedData);
-            // this.onChanges.emit(value);
+            const formattedData = formatFormData(value, options);
+            this.onChanges.emit(formattedData); // Formatted output
+            // this.onChanges.emit(value); // Non-formatted output
             const isValid = this.validateFormData(formattedData);
             this.isValid.emit(isValid);
             this.validationErrors.emit(this.validateFormData.errors);
@@ -352,14 +360,16 @@ console.log(this.masterFormGroup);
         );
 
         // Output initial data
-        this.onChanges.emit(formatFormData(this.masterFormGroup.value, this.fieldMap));
+        this.onChanges.emit(formatFormData(options.formGroup.value, options));
 
         // If 'validateOnRender' = true, output initial validation and any errors
-        if (this.formOptions.validateOnRender) {
-          const isValid = this.validateFormData(formatFormData(this.masterFormGroup.value, this.fieldMap));
+        if (options.globalOptions.validateOnRender) {
+          const isValid =
+            this.validateFormData(formatFormData(options.formGroup.value, options));
           this.isValid.emit(isValid);
           this.validationErrors.emit(this.validateFormData.errors);
         }
+
       } else {
         // TODO: Output error message
       }
@@ -370,20 +380,21 @@ console.log(this.masterFormGroup);
   ngDoCheck() {
     if (this.debug) {
       const vars: any[] = [];
-      vars.push(this.masterSchema);
-      // vars.push(this.fieldMap);
-      // vars.push(this.formGroupTemplate);
-      // vars.push(this.masterLayout);
-      // vars.push(this.schemaRefLibrary);
-      // vars.push(this.initialData);
-      // vars.push(this.masterFormGroup);
-      // vars.push(this.masterFormGroup.value);
+      // vars.push(this.formOptions.schema);
+      // vars.push(this.formOptions.dataMap);
+      vars.push(this.formOptions.arrayMap);
+      // vars.push(this.formOptions.formGroupTemplate);
+      // vars.push(this.formOptions.layout);
+      // vars.push(this.formOptions.schemaRefLibrary);
+      // vars.push(this.formOptions.defaultValues);
+      // vars.push(this.formOptions.formGroup);
+      // vars.push(this.formOptions.formGroup.value);
       // vars.push(this.formOptions.layoutRefLibrary);
       this.debugOutput = _.map(vars, thisVar => JSON.stringify(thisVar, null, 2)).join('\n');
     }
   }
 
   private submitForm() {
-    this.onSubmit.emit(formatFormData(this.masterFormGroup.value, this.fieldMap, true));
+    this.onSubmit.emit(formatFormData(this.formOptions.formGroup.value, this.formOptions, true));
   }
 }

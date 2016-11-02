@@ -6,9 +6,8 @@ import { FormGroup } from '@angular/forms';
   template: ``,
 })
 export class TabComponent {
-  @Input() formGroup: FormGroup;
   @Input() layoutNode: any;
-  @Input() formOptions: any;
+  @Input() options: any;
   @Input() index: number[];
   @Input() debug: boolean;
 }

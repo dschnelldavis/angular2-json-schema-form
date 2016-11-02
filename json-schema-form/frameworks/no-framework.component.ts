@@ -17,8 +17,9 @@ import { FormGroup } from '@angular/forms';
 export class NoFrameworkComponent implements AfterContentChecked {
   private controlInitialized: boolean = false;
   @Input() layoutNode: any;
-  @Input() formGroup: FormGroup;
   @Input() options: any;
+  @Input() index: number[];
+  @Input() debug: boolean;
   @ViewChild('widgetContainer', { read: ViewContainerRef })
     private widgetContainer: ViewContainerRef;
 
@@ -34,7 +35,7 @@ export class NoFrameworkComponent implements AfterContentChecked {
       let addedNode: ComponentRef<any> = this.widgetContainer.createComponent(
         this.componentFactory.resolveComponentFactory(this.layoutNode.widget)
       );
-      for (let input of ['formGroup', 'layoutNode', 'formOptions', 'index', 'debug']) {
+      for (let input of ['layoutNode', 'formOptions', 'index', 'debug']) {
         addedNode.instance[input] = this[input];
       }
     }

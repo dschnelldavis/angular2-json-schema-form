@@ -41,15 +41,14 @@ export class InputComponent implements OnInit {
   private formControlGroup: any;
   private bindControl: boolean = false;
   private pattern: string = null;
-  @Input() formGroup: FormGroup;
   @Input() layoutNode: any;
-  @Input() formOptions: any;
+  @Input() options: any;
   @Input() index: number[];
   @Input() debug: boolean;
 
   ngOnInit() {
     if (this.layoutNode.hasOwnProperty('pointer')) {
-      this.formControlGroup = getControl(this.formGroup, this.layoutNode.pointer, true);
+      this.formControlGroup = getControl(this.options.formGroup, this.layoutNode.pointer, true);
       if (this.formControlGroup &&
         this.formControlGroup.controls.hasOwnProperty(this.layoutNode.name)
       ) {

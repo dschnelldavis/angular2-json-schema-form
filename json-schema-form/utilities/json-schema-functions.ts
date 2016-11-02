@@ -7,6 +7,7 @@ import { toPromise } from 'rxjs/operator/toPromise';
 import 'rxjs/add/operator/map';
 
 import * as _ from 'lodash';
+import * as Immutable from 'immutable';
 
 import {
   buildFormGroupTemplate, forEach, hasOwn, inArray, isPresent,
@@ -260,13 +261,9 @@ export function isInputRequired(schema: any, pointer: string): boolean {
  * @param {any} schema
  * @return {void}
  */
-export function updateInputOptions(
-  layout: any, schema: any, data: any, formDefaults: any,
-  fieldMap: any, schemaRefLibrary: any, formGroupTemplate: any
-) {
-  let type: string[] = [];
-  if (isPresent(layout.type)) type = isArray(layout.type) ?
-    <string[]>layout.type : [<string>layout.type];
+export function updateInputOptions(layout: any, schema: any, formOptions: any) {
+  const templatePointer =
+    JsonPointer.get(formOptions, ['dataMap', layout.pointer, 'templatePointer']);
   let optionsToUpdate: string[] = [
     'title', 'notitle', 'disabled', 'description', 'validationMessage',
     'onChange', 'feedback', 'disableSuccessState', 'disableErrorState',
@@ -276,49 +273,53 @@ export function updateInputOptions(
     'ui:readonly', 'ui:placeholder', 'ui:autofocus', 'ui:options', 'classNames',
     'label', 'errors', 'help', 'hidden', 'required', 'displayLabel'
   ];
+  let type: string[] = [];
+  if (isPresent(layout.type)) type = isArray(layout.type) ?
+    <string[]>layout.type : [<string>layout.type];
   if (inArray(['text', 'textarea', 'search'], type) || isBlank(type)) {
-    optionsToUpdate = optionsToUpdate.concat('minLength', 'maxLength', 'pattern');
+    optionsToUpdate.push('minLength', 'maxLength', 'pattern');
   }
   if (inArray(['text', 'textarea', 'search', 'email', 'url', 'date', 'datetime',
-    'date-time', 'datetime-local'], type) || isBlank(type)) {
-    optionsToUpdate = optionsToUpdate.concat('format');
+    'date-time', 'datetime-local'], type) || isBlank(type)
+  ) {
+    optionsToUpdate.push('format');
   }
   if (inArray(['date', 'datetime', 'date-time', 'datetime-local',
-    'number', 'integer', 'range'], type) || isBlank(type)) {
-    optionsToUpdate = optionsToUpdate.concat('minimum', 'maximum');
+    'number', 'integer', 'range'], type) || isBlank(type)
+  ) {
+    optionsToUpdate.push('minimum', 'maximum');
   }
   if (inArray(['number', 'integer', 'range'], type) || isBlank(type)) {
-    optionsToUpdate = optionsToUpdate
-      .concat('exclusiveMinimum', 'exclusiveMaximum', 'multipleOf');
+    optionsToUpdate.push('exclusiveMinimum', 'exclusiveMaximum', 'multipleOf');
   }
   if (inArray('fieldset', type) || isBlank(type)) {
-    optionsToUpdate = optionsToUpdate
-      .concat('minProperties', 'maxProperties', 'dependencies');
+    optionsToUpdate.push('minProperties', 'maxProperties', 'dependencies');
   }
   if (inArray(['array', 'checkboxes'], type) || isBlank(type)) {
-    optionsToUpdate = optionsToUpdate
-      .concat('minItems', 'maxItems', 'uniqueItems');
+    optionsToUpdate.push('minItems', 'maxItems', 'uniqueItems');
   }
-  forEach(optionsToUpdate, option => {
 
-    // If a new validator is needed in formGroup template, set it
+  forEach(optionsToUpdate, option => {
+    // If a validator is available and not set in formGroup template, set it
     if (hasOwn(layout, option) && isFunction(JsonValidators[option]) && (
-      !hasOwn(schema, option) || (schema[option] !== layout[option] &&
+      !hasOwn(schema, option) || (
+        schema[option] !== layout[option] &&
         !(option.slice(0, 3) === 'min' && schema[option] < layout[option]) &&
         !(option.slice(0, 3) === 'max' && schema[option] > layout[option])
       )
     )) {
-      let validatorPointer =
-        fieldMap[layout.pointer]['templatePointer'] + '/validators/' + option;
-      formGroupTemplate = JsonPointer.set(formGroupTemplate, validatorPointer, [layout[option]]);
+      const validatorPointer = templatePointer + '/validators/' + option;
+      formOptions.formGroupTemplate = JsonPointer.set(
+        formOptions.formGroupTemplate, validatorPointer, [layout[option]]
+      );
     }
 
     // Check for option value, and set in layout
     let newValue: any = JsonPointer.getFirst([
       [ layout, [option] ],
-      [ schema['x-schema-form'], [option] ],
-      [ schema, [option]],
-      [ formDefaults, [option] ]
+      [ schema, ['x-schema-form', option] ],
+      [ schema, [option] ],
+      [ formOptions, ['globalOptions', 'formDefaults', option] ]
     ]);
     if (option === 'enum' && isBlank(newValue) &&
       schema.hasOwnProperty('items') && schema.items.hasOwnProperty('enum')
@@ -326,11 +327,7 @@ export function updateInputOptions(
       newValue = schema.items.enum;
     }
     if (isPresent(newValue)) {
-      if (option.slice(0, 3) === 'ui:') {
-        layout[option.slice(3)] = newValue;
-      } else {
-        layout[option] = newValue;
-      }
+      layout[option.slice(0, 3) === 'ui:' ? option.slice(3) : option] = newValue;
     }
   });
 
@@ -341,10 +338,6 @@ export function updateInputOptions(
     });
   }
 
-  let templatePointer = (fieldMap.hasOwnProperty(layout.pointer) &&
-    fieldMap[layout.pointer].hasOwnProperty('templatePointer')) ?
-    fieldMap[layout.pointer]['templatePointer'] : null;
-
   // If schema type is integer, enforce by setting multipleOf = 1
   if (inArray(schema.type, ['integer']) && !hasOwn(layout, 'multipleOf')) {
     layout.multipleOf = 1;
@@ -353,39 +346,40 @@ export function updateInputOptions(
   } else if (templatePointer && schema.type === 'array') {
     if (JsonPointer.has(schema, '/items/$ref')) {
       layout.controlTemplate = buildFormGroupTemplate(
-        getSchemaReference(schema, schema.items.$ref, schemaRefLibrary),
-        schemaRefLibrary, fieldMap
+        formOptions, schema.items.$ref
       );
     } else {
-      layout.controlTemplate = _.cloneDeep(
-        JsonPointer.get(formGroupTemplate, templatePointer + '/controls/-')
-      );
+      layout.controlTemplate = _.cloneDeep(JsonPointer.get(
+        formOptions.formGroupTemplate, templatePointer + '/controls/-'
+      ));
     }
-    if (JsonPointer.has(layout, '/controlTemplate/value')) delete layout.controlTemplate.value;
+    JsonPointer.remove(layout, '/controlTemplate/value');
 
   // If schema is an object with a $ref link, save controlTemplate in layout
   } else if (hasOwn(schema, '$ref')) {
     layout.controlTemplate = buildFormGroupTemplate(
-      getSchemaReference(schema, schema.$ref, schemaRefLibrary),
-      schemaRefLibrary, fieldMap
+      formOptions, schema.$ref
     );
   } else if (JsonPointer.has(schema, '/additionalProperties/$ref')) {
     layout.controlTemplate = buildFormGroupTemplate(
-      getSchemaReference(schema, schema.additionalProperties.$ref, schemaRefLibrary),
-      schemaRefLibrary, fieldMap
+      formOptions, schema.additionalProperties.$ref
     );
   }
 
   // If field value is set in layout, and no input data, update template value
   if (templatePointer && schema.type !== 'array' && schema.type !== 'object') {
     let layoutValue: any = JsonPointer.getFirst([
-      [ data, layout.pointer ],
+      [ formOptions.defaultValues, layout.pointer ],
       [ layout, '/value' ],
       [ layout, '/default' ]
     ]);
-    let templateValue: any = JsonPointer.get(formGroupTemplate, templatePointer + '/value');
+    let templateValue: any = JsonPointer.get(
+      formOptions.formGroupTemplate, templatePointer + '/value'
+    );
     if (isSet(layoutValue) && layoutValue !== templateValue) {
-      formGroupTemplate = JsonPointer.set(formGroupTemplate, templatePointer + '/value', layoutValue);
+      formOptions.formGroupTemplate = JsonPointer.set(
+        formOptions.formGroupTemplate, templatePointer + '/value', layoutValue
+      );
     }
     if (isPresent(layout.value)) delete layout.value;
     if (isPresent(layout.default)) delete layout.default;

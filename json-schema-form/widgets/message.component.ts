@@ -9,9 +9,8 @@ import { FormGroup } from '@angular/forms';
 })
 export class MessageComponent implements OnInit {
   private message: string = null;
-  @Input() formGroup: FormGroup;
   @Input() layoutNode: any;
-  @Input() formOptions: any;
+  @Input() options: any;
   @Input() index: number[];
   @Input() debug: boolean;
 

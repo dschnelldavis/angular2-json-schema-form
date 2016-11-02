@@ -39,15 +39,14 @@ import { getControl } from '../utilities/index';
 export class CheckboxComponent implements OnInit {
   private formControlGroup: any;
   private bindControl: boolean = false;
-  @Input() formGroup: FormGroup;
   @Input() layoutNode: any;
-  @Input() formOptions: any;
+  @Input() options: any;
   @Input() index: number[];
   @Input() debug: boolean;
 
   ngOnInit() {
     if (this.layoutNode.hasOwnProperty('pointer')) {
-      this.formControlGroup = getControl(this.formGroup, this.layoutNode.pointer, true);
+      this.formControlGroup = getControl(this.options.formGroup, this.layoutNode.pointer, true);
       if (this.formControlGroup &&
         this.formControlGroup.controls.hasOwnProperty(this.layoutNode.name)
       ) {

@@ -11,8 +11,7 @@ import { FormGroup } from '@angular/forms';
       <div *ngFor="let item of layoutNode?.items; let i = index; trackBy: item?.pointer">
         <root-widget
           [layoutNode]="item"
-          [formGroup]="formGroup"
-          [formOptions]="formOptions"
+          [options]="options"
           [index]="index.concat(i)"
           [debug]="debug"></root-widget>
       </div>
@@ -21,8 +20,7 @@ import { FormGroup } from '@angular/forms';
 })
 export class FieldsetComponent {
   @Input() layoutNode: any;
-  @Input() formGroup: FormGroup;
-  @Input() formOptions: any;
+  @Input() options: any;
   @Input() index: number[];
   @Input() debug: boolean;
 }

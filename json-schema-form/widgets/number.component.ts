@@ -44,21 +44,20 @@ import { getControl } from '../utilities/index';
 export class NumberComponent implements OnInit {
   private formControlGroup: any;
   private bindControl: boolean = false;
-  private step: string;
   private allowNegative: boolean = true;
   private allowDecimal: boolean = true;
   private allowExponents: boolean = true;
   private lastValidNumber: string = '';
-  @Input() formGroup: FormGroup;
+  private step: string;
   @Input() layoutNode: any;
-  @Input() formOptions: any;
+  @Input() options: any;
   @Input() index: number[];
   @Input() debug: boolean;
 
   ngOnInit() {
     if (this.layoutNode.hasOwnProperty('pointer')) {
       this.formControlGroup =
-        getControl(this.formGroup, this.layoutNode.pointer, true);
+        getControl(this.options.formGroup, this.layoutNode.pointer, true);
       if (this.formControlGroup &&
         this.formControlGroup.controls.hasOwnProperty(this.layoutNode.name)
       ) {
@@ -85,13 +84,17 @@ export class NumberComponent implements OnInit {
     if (/^Arrow/.test(event.code)) return true;
     if (event.code === 'Backspace' || event.code === 'Delete') return true;
     if (event.key === '.' && this.allowDecimal && val.indexOf('.') === -1) return true;
-    const hasExp = /e/i.test(val);
-    if (/^e$/i.test(event.key) && val && !hasExp && this.allowExponents) return true;
-    if (event.key === '-') {
-      const minusCount = (val.match(/\-/g) || []).length;
-      // const minusCount = val.split('-').length - 1;
-      if (!minusCount && (this.allowNegative || hasExp)) return true;
-      if (minusCount === 1 && this.allowNegative && hasExp) return true;
+    if (this.allowExponents) {
+      const hasExp = /e/i.test(val);
+      if (/^e$/i.test(event.key) && val && !hasExp) return true;
+      if (event.key === '-') {
+        // const minusCount = (val.match(/\-/g) || []).length;
+        const minusCount = val.split('-').length - 1;
+        if (!minusCount && (this.allowNegative || hasExp)) return true;
+        if (minusCount === 1 && this.allowNegative && hasExp) return true;
+      }
+    } else if (event.key === '-' && this.allowNegative && val.indexOf('-') === -1) {
+      return true;
     }
     return false;
   }

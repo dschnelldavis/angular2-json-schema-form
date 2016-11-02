@@ -9,12 +9,11 @@ import { FormGroup } from '@angular/forms';
         [class]="layoutNode?.labelHtmlClass" [class.sr-only]="layoutNode?.notitle"
         [innerHTML]="layoutNode?.title"></label>
 
-      <div *ngFor="let item of layoutNode?.items; let index = index; trackBy: item?.pointer">
+      <div *ngFor="let item of layoutNode?.items; let i = index; trackBy: item?.pointer">
         <root-widget
           [layoutNode]="item"
-          [formGroup]="formGroup"
-          [formOptions]="formOptions"
-          [index]="index"
+          [options]="options"
+          [index]="index.concat(i)"
           [debug]="debug"></root-widget>
       </div>
 
@@ -22,8 +21,7 @@ import { FormGroup } from '@angular/forms';
 })
 export class SectionComponent {
   @Input() layoutNode: any;
-  @Input() formGroup: FormGroup;
-  @Input() formOptions: any;
+  @Input() options: any;
   @Input() index: number[];
   @Input() debug: boolean;
 }

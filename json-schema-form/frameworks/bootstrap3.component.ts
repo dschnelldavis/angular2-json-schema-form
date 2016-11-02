@@ -12,9 +12,7 @@ import {
   moduleId: module.id,
   selector: 'bootstrap3-framework',
   templateUrl: 'bootstrap3.component.html',
-  styles: [`
-    .list-group-item .form-control-feedback { top: 40; }
-    `],
+  styles: ['.list-group-item .form-control-feedback { top: 40; }'],
 })
 export class Bootstrap3Component implements OnInit, AfterContentChecked {
   private controlInitialized: boolean = false;
@@ -29,8 +27,7 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked {
   private debugOutput: any = '';
   private innerNode: any;
   @Input() layoutNode: any;
-  @Input() formGroup: FormGroup;
-  @Input() formOptions: any;
+  @Input() options: any;
   @Input() index: number[];
   @Input() debug: boolean;
   @ViewChild('widgetContainer', { read: ViewContainerRef })
@@ -45,7 +42,7 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked {
       this.innerNode = Object.assign({}, this.layoutNode);
 
       if (this.layoutNode.hasOwnProperty('pointer')) {
-        let thisControl = getControl(this.formGroup, this.layoutNode.pointer);
+        let thisControl = getControl(this.options.formGroup, this.layoutNode.pointer);
         if (thisControl) this.formControl = thisControl;
       }
 
@@ -68,20 +65,20 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked {
       } else {
         this.htmlClass += ' form-group';
       }
-      if (this.formOptions.formDefaults.htmlClass) {
-        this.htmlClass += ' ' + this.formOptions.formDefaults.htmlClass;
+      if (this.options.globalOptions.formDefaults.htmlClass) {
+        this.htmlClass += ' ' + this.options.globalOptions.formDefaults.htmlClass;
       }
       this.innerNode.htmlClass = '';
 
       this.labelHtmlClass = this.layoutNode.labelHtmlClass || '';
       this.labelHtmlClass += ' control-label';
-      if (this.formOptions.formDefaults.labelHtmlClass) {
-        this.labelHtmlClass += ' ' + this.formOptions.formDefaults.labelHtmlClass;
+      if (this.options.globalOptions.formDefaults.labelHtmlClass) {
+        this.labelHtmlClass += ' ' + this.options.globalOptions.formDefaults.labelHtmlClass;
       }
 
       this.innerNode.fieldHtmlClass = this.layoutNode.fieldHtmlClass || '';
-      if (this.formOptions.formDefaults.fieldHtmlClass) {
-        this.innerNode.fieldHtmlClass += ' ' + this.formOptions.formDefaults.fieldHtmlClass;
+      if (this.options.globalOptions.formDefaults.fieldHtmlClass) {
+        this.innerNode.fieldHtmlClass += ' ' + this.options.globalOptions.formDefaults.fieldHtmlClass;
       }
 
       this.layoutNode.fieldAddonLeft =
@@ -147,7 +144,7 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked {
         this.componentFactory.resolveComponentFactory(this.layoutNode.widget)
       );
       addedNode.instance.layoutNode = this.innerNode;
-      for (let input of ['formGroup', 'formOptions', 'index', 'debug']) {
+      for (let input of ['formGroup', 'options', 'index', 'debug']) {
         addedNode.instance[input] = this[input];
       }
       this.controlInitialized = true;
@@ -169,12 +166,12 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked {
     }
 
     if (
-      this.debug && this.formGroup && this.formGroup.controls &&
-      this.innerNode && this.formGroup.controls[this.innerNode.name]
+      this.debug && this.options.formGroup && this.options.formGroup.controls &&
+      this.innerNode && this.options.formGroup.controls[this.innerNode.name]
     ) {
       let vars: any[] = [];
-      // vars.push(this.formGroup.value[this.innerNode.name]);
-      // vars.push(this.formGroup.controls[this.innerNode.name]['errors']);
+      // vars.push(this.options.formGroup.value[this.innerNode.name]);
+      // vars.push(this.options.formGroup.controls[this.innerNode.name]['errors']);
       this.debugOutput = _.map(vars, thisVar => JSON.stringify(thisVar, null, 2)).join('\n');
     }
   }
@@ -204,11 +201,11 @@ export class Bootstrap3Component implements OnInit, AfterContentChecked {
 
   private removeItem() {
 console.log(this.index);
-    let formArray = getControl(this.formGroup, this.layoutNode.pointer, true);
+    let formArray = getControl(this.options.formGroup, this.layoutNode.pointer, true);
     formArray.removeAt(this.index[this.index.length - 1]);
     let indexedPointer = toIndexedPointer(this.layoutNode.layoutPointer, this.index);
-console.log(this.formOptions.masterLayout);
+console.log(this.options.masterLayout);
 console.log(indexedPointer);
-    JsonPointer.remove(this.formOptions.masterLayout, indexedPointer);
+    JsonPointer.remove(this.options.masterLayout, indexedPointer);
   }
 }

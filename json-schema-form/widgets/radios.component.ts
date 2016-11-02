@@ -43,14 +43,13 @@ export class RadiosComponent implements OnInit {
   private formControlGroup: any;
   private bindControl: boolean = false;
   private titleMap: any[] = [];
-  @Input() formGroup: FormGroup;
   @Input() layoutNode: any;
-  @Input() formOptions: any;
+  @Input() options: any;
   @Input() index: number[];
   @Input() debug: boolean;
 
   ngOnInit() {
-    this.formControlGroup = getControl(this.formGroup, this.layoutNode.pointer, true);
+    this.formControlGroup = getControl(this.options.formGroup, this.layoutNode.pointer, true);
     if (this.formControlGroup &&
       this.formControlGroup.controls.hasOwnProperty(this.layoutNode.name)
     ) {

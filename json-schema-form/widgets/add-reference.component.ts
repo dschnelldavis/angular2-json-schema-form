@@ -20,9 +20,8 @@ import { JsonPointer } from '../utilities/index';
 })
 export class AddReferenceComponent {
   private formControlGroup: any;
-  @Input() formGroup: FormGroup;
   @Input() layoutNode: any;
-  @Input() formOptions: any;
+  @Input() options: any;
   @Input() index: number[];
   @Input() debug: boolean;
   @ViewChild('widgetContainer', { read: ViewContainerRef })
