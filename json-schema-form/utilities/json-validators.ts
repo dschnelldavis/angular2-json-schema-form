@@ -27,8 +27,11 @@ import {
  * all patterns in '^' and '$', forcing them to always match an entire value).
  * However, the old behavior can be restored by simply adding '^' and '$'
  * around your patterns, or by passing an optional second parameter of TRUE.
+ * This change is to make the 'pattern' validator match the behavior of a
+ * JSON Schema pattern, which allows partial matches, rather than the behavior
+ * of an HTML input control pattern, which does not.
  *
- * This library replaces Angular 2's four validators and one validator combination
+ * This library replaces Angular 2's 4 validators and 1 validator combination
  * function with the following 16 validators and 4 transformation functions:
  *
  * Validators:
@@ -44,13 +47,14 @@ import {
  *
  * Validator transformation functions:
  *   composeAnyOf, composeOneOf, composeAllOf, composeNot
- * (Angular 2's original combination funciton, compose, is also included for
- * backward compatibility, though it is essentially equivalent to composeAllOf.)
+ * (Angular 2's original combination funciton, 'compose', is also included for
+ * backward compatibility, though it is effectively equivalent to composeAllOf,
+ * though with a more generic error message.)
  *
  * All validators have also been extended to accept an optional second argument
  * which, if passed a TRUE value, causes the validator to perform the opposite
  * of its original finction. (This is used internally to enable 'not' and
- * 'composeOneOf' to function and return useful errors.)
+ * 'composeOneOf' to function and return useful error messages.)
  *
  * The 'required' validator has also been overloaded so that if called with
  * a boolean parameter (or no parameters) it returns the original validator

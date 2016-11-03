@@ -92,6 +92,10 @@ export class WidgetLibraryService {
     'template': TemplateComponent, // inserts a custom Angular 2 component
 
   // Widgets included for backward-compatibility with JSON Form API
+    // 'tagsinput': NoneComponent, // For entering short text tags
+    // See: http://ulion.github.io/jsonform/playground/?example=fields-text-autocomplete
+    // 'checkboxbuttons': FieldsetComponent, // Checkbox buttons
+    // See: http://ulion.github.io/jsonform/playground/?example=fields-checkboxbuttons
     'advancedfieldset': FieldsetComponent, // Adds 'Advanced settings' title
     'authfieldset': FieldsetComponent, // Adds 'Authentication settings' title
     'selectfieldset': FieldsetComponent, // Select control, displays selected array sub-item

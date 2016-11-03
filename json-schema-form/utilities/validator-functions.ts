@@ -93,25 +93,27 @@ export function _mergeObjects(...object: PlainObject[]): PlainObject {
   let mergedObject: PlainObject = {};
   for (let i = 0, l = arguments.length; i < l; i++) {
     const currentObject = arguments[i];
-    for (let key of Object.keys(currentObject)) {
-      const currentValue = currentObject[key];
-      const mergedValue = mergedObject[key];
-      if (isPresent(mergedValue)) {
-        if ( key === 'not' &&
-          isBoolean(mergedValue, 'strict') &&
-          isBoolean(currentValue, 'strict')
-        ) {
-          mergedObject[key] = xor(mergedValue, currentValue);
-        } else if (
-          getType(mergedValue) === 'object' &&
-          getType(currentValue) === 'object'
-        ) {
-          mergedObject[key] = _mergeObjects(mergedValue, currentValue);
+    if (isObject(currentObject)) {
+      for (let key of Object.keys(currentObject)) {
+        const currentValue = currentObject[key];
+        const mergedValue = mergedObject[key];
+        if (isPresent(mergedValue)) {
+          if ( key === 'not' &&
+            isBoolean(mergedValue, 'strict') &&
+            isBoolean(currentValue, 'strict')
+          ) {
+            mergedObject[key] = xor(mergedValue, currentValue);
+          } else if (
+            getType(mergedValue) === 'object' &&
+            getType(currentValue) === 'object'
+          ) {
+            mergedObject[key] = _mergeObjects(mergedValue, currentValue);
+          } else {
+            mergedObject[key] = currentValue;
+          }
         } else {
           mergedObject[key] = currentValue;
         }
-      } else {
-        mergedObject[key] = currentValue;
       }
     }
   }
@@ -203,8 +205,8 @@ export function isNotSet(value: any): boolean {
  * @return {boolean} - false if undefined, null, or '', otherwise true
  */
 export function isEmpty(value: any): boolean {
-  if (getType(value) === 'array') return !value.length;
-  if (getType(value) === 'object') return !Object.keys(value).length;
+  if (isArray(value)) return !value.length;
+  if (isObject(value)) return !Object.keys(value).length;
   return value === undefined || value === null || value === '';
 }
 
@@ -217,8 +219,8 @@ export function isEmpty(value: any): boolean {
  * @return {boolean} - true if undefined, null, or '', otherwise false
  */
 export function isNotEmpty(value: any): boolean {
-  if (getType(value) === 'array') return !!value.length;
-  if (getType(value) === 'object') return !!Object.keys(value).length;
+  if (isArray(value)) return !!value.length;
+  if (isObject(value)) return !!Object.keys(value).length;
   return value !== undefined && value !== null && value !== '';
 }
 

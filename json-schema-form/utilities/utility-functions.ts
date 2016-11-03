@@ -7,13 +7,35 @@ import 'rxjs/add/operator/map';
 
 import * as Immutable from 'immutable';
 
-import { isObject, isArray, JsonPointer, PlainObject, } from './index';
+import {
+  isArray, isObject, isEmpty, isNotSet, JsonPointer, PlainObject,
+} from './index';
 
 /**
  * Utility function library:
  *
- * copy, forEach, forEachCopy, hasOwn, inArray, toTitleCase, xor
+ * addClasses, copy, forEach, forEachCopy, hasOwn, inArray, toTitleCase, xor
+*/
+
+/**
+ * 'addClasses' function
+ *
+ * @param {string | string[]} oldClasses
+ * @param {string | string[]} newClasses
+ * @return {string | string[]}
  */
+export function addClasses(oldClasses, newClasses) {
+  if (!isArray(oldClasses) && typeof oldClasses !== 'string') return newClasses;
+  if (!isArray(newClasses) && typeof newClasses !== 'string') return oldClasses;
+  let addArray: string[] = isArray(oldClasses) ?
+    oldClasses : oldClasses.trim().split(' ');
+  let newArray: string[] = isArray(newClasses) ?
+    newClasses : newClasses.trim().split(' ');
+  for (let newClass of newArray) {
+    if (addArray.indexOf(newClass) === -1) addArray.push(newClass);
+  }
+  return isArray(oldClasses) ? addArray : addArray.join(' ').trim();
+}
 
 /**
  * 'copy' function
@@ -49,12 +71,15 @@ export function copy(object: any): any {
 export function forEach(
   object: any, fn: (v: any, k: string | number, c?: any) => any
 ): void {
+  if (isEmpty(object)) return;
   if ((isObject(object) || isArray(object)) && typeof fn === 'function') {
     for (let key of Object.keys(object)) fn(object[key], key, object);
   } else if (typeof fn !== 'function') {
-    console.error('forEach error: Iterator must be a function');
+    console.error('forEach error: Iterator must be a function.');
+    console.error(fn);
   } else {
-    console.error('forEach error: Input object must be an object or array');
+    console.error('forEach error: Input object must be an object or array.');
+    console.error(object);
   }
 }
 
@@ -71,11 +96,12 @@ export function forEach(
  * @param {Object|Array} object - The object or array to iterate over
  * @param {function} fn - The iterator funciton to call on each item
  * @param {any = null} context - An optional context in which to call the iterator function
- * @return {void} - A new object or array with the results of the iterator function
+ * @return {Object|Array} - A new object or array with the results of the iterator function
  */
 export function forEachCopy(
   object: any, fn: (v: any, k?: string | number, o?: any, p?: string) => any
 ): any {
+  if (isNotSet(object)) return;
   if ((isObject(object) || isArray(object)) && typeof fn !== 'function') {
     let newObject: any = isArray(object) ? [] : {};
     for (let key of Object.keys(object)) {
@@ -84,9 +110,11 @@ export function forEachCopy(
     return newObject;
   }
   if (typeof fn !== 'function') {
-    console.error('forEachCopy error: Iterator must be a function');
+    console.error('forEachCopy error: Iterator must be a function.');
+    console.error(fn);
   } else {
-    console.error('forEachCopy error: Input object must be an object or array');
+    console.error('forEachCopy error: Input object must be an object or array.');
+    console.error(object);
   }
 }
 
@@ -157,10 +185,10 @@ export function hasOwn(object: PlainObject, property: string): boolean {
  * https://github.com/gouch/to-title-case
  *
  * @param {string} input -
- * @param {string | string[]} forceWords? -
+ * @param {string|string[]} forceWords? -
  * @return {string} -
  */
-export function toTitleCase(input: string, forceWords?: string | string[]): string {
+export function toTitleCase(input: string, forceWords?: string|string[]): string {
   let forceArray: string[] = ['a', 'an', 'and', 'as', 'at', 'but', 'by', 'en',
    'for', 'if', 'in', 'nor', 'of', 'on', 'or', 'per', 'the', 'to', 'v', 'v.',
    'vs', 'vs.', 'via'];

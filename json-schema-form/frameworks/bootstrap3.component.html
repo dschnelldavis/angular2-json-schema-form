@@ -2,8 +2,9 @@
   [class.has-feedback]="layoutNode?.feedback !== false && isInputWidget && formControl?.dirty"
   [class.has-error]="!layoutNode?.disableErrorState && formControl?.errors && formControl?.dirty"
   [class.has-success]="!layoutNode?.disableSuccessState && !formControl?.errors && formControl?.dirty">
-  <button *ngIf="layoutNode?.isRemovable" (click)="removeItem()"
-    class="close pull-right" style="position: relative; z-index: 20;" type="button">
+
+  <button *ngIf="isRemovable" (click)="removeItem()" class="close pull-right"
+    style="position: relative; z-index: 20;" type="button">
     <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
   </button>
   <div *ngIf="messageLocation === 'top'">

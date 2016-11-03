@@ -1,7 +1,4 @@
-import {
-  AbstractControl, FormArray, FormControl, FormGroup, FormBuilder, NgForm,
-  ValidatorFn, Validators
-} from '@angular/forms';
+import { FormGroup, FormBuilder } from '@angular/forms';
 import { Http } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
@@ -24,9 +21,11 @@ import {
  *
  * mapLayout:
  *
+ * buildTitleMap:
+ *
  * toIndexedPointer:
  *
- * buildTitleMap:
+ * toGenericPointer:
  */
 
 /**
@@ -51,8 +50,8 @@ export function buildLayout(formOptions: any): any[] {
       console.error(layoutItem);
       return null;
     }
-    if (formOptions.setSchemaDefaults) {
-      Object.assign(newItem, _.cloneDeep(formOptions.globalOptions.formDefaults));
+    if (formOptions.globalOptions.setSchemaDefaults) {
+      newItem = Object.assign(_.cloneDeep(formOptions.globalOptions.formDefaults), newItem);
     }
     newItem.layoutPointer = layoutPointer.replace(/\/\d+/g, '/-');
     let itemSchema: any = null;
@@ -159,15 +158,6 @@ export function buildLayout(formOptions: any): any[] {
           });
         }
 
-        // If schema type is array, save controlTemplate in layout
-        // TODO: fix to set controlTemplate for all layout $ref links instead
-        // if (schema.type === 'array') {
-        //   newItem.formGroupTemplate = _.cloneDeep(
-        //     JsonPointer.get(formOptions.formGroupTemplate, templatePointer + '/controls/-')
-        //   );
-        //   if (isPresent(newItem.formGroupTemplate.value)) delete layout.formGroupTemplate.value;
-        // }
-
         // TODO: check maxItems to verify adding new items is OK, and check
         // additionalItems for whether there is a different schema for new items
         formOptions.layoutRefLibrary[arrayPointer] = newItem.items[newItem.items.length - 1];
@@ -235,8 +225,8 @@ export function buildLayoutFromSchema(
   if (!hasOwn(schema, 'type') && !hasOwn(schema, 'x-schema-form') &&
     !hasOwn(schema, '$ref')) return null;
   let newItem: any = {};
-  if (formOptions.setSchemaDefaults) {
-    Object.assign(newItem, _.cloneDeep(formOptions.globalOptions.formDefaults));
+  if (formOptions.globalOptions.setSchemaDefaults) {
+    newItem = _.cloneDeep(formOptions.globalOptions.formDefaults);
   }
   if (hasOwn(schema, 'x-schema-form')) {
     Object.assign(newItem, schema['x-schema-form']);
@@ -275,10 +265,12 @@ export function buildLayoutFromSchema(
       }
       for (let key of newKeys) {
         if (hasOwn(schema[subObject], key)) {
-          let item = schema[subObject][key];
+          // let item = schema[subObject][key];
+          const newLayoutPointer = newItem.layoutPointer === '' ?
+            '/-'  : newItem.layoutPointer + '/items/-';
           let innerItem = buildLayoutFromSchema(
             formOptions, index,
-            newItem.layoutPointer + '/-',
+            newLayoutPointer,
             schemaPointer + '/properties/' + key,
             dataPointer + '/' + key, false
           );
@@ -450,8 +442,12 @@ export function mapLayout(
     if (isObject(newItem)) {
       if (isArray(newItem.items)) {
         newItem.items = mapLayout(newItem.items, fn, rootLayout, newPath + '/items');
+      } else if (isObject(newItem.items)) {
+        newItem.items = mapLayout([newItem.items], fn, rootLayout, newPath + '/items');
       } else if (isArray(newItem.tabs)) {
         newItem.tabs = mapLayout(newItem.tabs, fn, rootLayout, newPath + '/tabs');
+      } else if (isObject(newItem.tabs)) {
+        newItem.tabs = mapLayout([newItem.tabs], fn, rootLayout, newPath + '/tabs');
       }
     }
     newItem = fn(newItem, realIndex, rootLayout, newPath);
@@ -463,56 +459,6 @@ export function mapLayout(
     }
   });
   return newLayout;
-};
-
-/**
- * 'toIndexedPointer' function
- *
- * Merges an array of numeric indexes and a generic pointer to create an
- * indexed pointer for a specific item.
- *
- * For example, merging the generic pointer '/foo/-/bar/-/baz' and
- * the array [4, 2] would result in the indexed pointer '/foo/4/bar/2/baz'
- *
- * @function
- * @param {string | string[]} pointer - The generic pointer
- * @param {number[]} indexArray - The array of numeric indexes
- * @return {string} - The merged pointer with indexes
-**/
-export function toIndexedPointer(pointer: string, indexArray: number[]) {
-  let indexedPointer = pointer;
-  for (let pointerIndex of indexArray) {
-    indexedPointer = indexedPointer.replace('/-', '/' + pointerIndex);
-  }
-  return indexedPointer;
-};
-
-/**
- * 'toGenericPointer' function
- *
- * Compares an indexed pointer to an array map and removes list array
- * indexes (but leaves tuple arrray indexes) to create a generic pointer.
- *
- * For example, comparing the indexed pointer '/foo/1/bar/2/baz/3' and
- * the arrayMap [['/foo', 0], ['/foo/-/bar', 3], ['/foo/-/bar/2/baz', 0]]
- * would result in the generic pointer '/foo/-/bar/2/baz/-'
- *
- * The structure of the arrayMap is: ['path to array', number of tuple items]
- *
- * @function
- * @param {string | string[]} pointer - The generic pointer
- * @param {number[]} indexArray - The array of numeric indexes
- * @return {string} - The merged pointer with indexes
-**/
-export function toGenericPointer(pointer: string, arrayMap: Map<string, number>) {
-  let pointerArray = JsonPointer.parse(pointer);
-  for (let i = 1, l = pointerArray.length; i < l; i++) {
-    const subPointer = JsonPointer.compile(pointerArray.slice(0, i));
-    if (arrayMap.has(subPointer) && arrayMap.get(subPointer) <= +pointerArray[i]) {
-      pointerArray[i] = '-';
-    }
-  }
-  return JsonPointer.compile(pointerArray);
 };
 
 /**
@@ -583,3 +529,53 @@ export function buildTitleMap(
   }
   return newTitleMap;
 }
+
+/**
+ * 'toIndexedPointer' function
+ *
+ * Merges an array of numeric indexes and a generic pointer to create an
+ * indexed pointer for a specific item.
+ *
+ * For example, merging the generic pointer '/foo/-/bar/-/baz' and
+ * the array [4, 2] would result in the indexed pointer '/foo/4/bar/2/baz'
+ *
+ * @function
+ * @param {string | string[]} pointer - The generic pointer
+ * @param {number[]} indexArray - The array of numeric indexes
+ * @return {string} - The merged pointer with indexes
+**/
+export function toIndexedPointer(pointer: string, indexArray: number[]) {
+  let indexedPointer = pointer;
+  for (let pointerIndex of indexArray) {
+    indexedPointer = indexedPointer.replace('/-', '/' + pointerIndex);
+  }
+  return indexedPointer;
+};
+
+/**
+ * 'toGenericPointer' function
+ *
+ * Compares an indexed pointer to an array map and removes list array
+ * indexes (but leaves tuple arrray indexes) to create a generic pointer.
+ *
+ * For example, comparing the indexed pointer '/foo/1/bar/2/baz/3' and
+ * the arrayMap [['/foo', 0], ['/foo/-/bar', 3], ['/foo/-/bar/2/baz', 0]]
+ * would result in the generic pointer '/foo/-/bar/2/baz/-'
+ *
+ * The structure of the arrayMap is: ['path to array', number of tuple items]
+ *
+ * @function
+ * @param {string | string[]} pointer - The generic pointer
+ * @param {number[]} indexArray - The array of numeric indexes
+ * @return {string} - The merged pointer with indexes
+**/
+export function toGenericPointer(pointer: string, arrayMap: Map<string, number>) {
+  let pointerArray = JsonPointer.parse(pointer);
+  for (let i = 1, l = pointerArray.length; i < l; i++) {
+    const subPointer = JsonPointer.compile(pointerArray.slice(0, i));
+    if (arrayMap.has(subPointer) && arrayMap.get(subPointer) <= +pointerArray[i]) {
+      pointerArray[i] = '-';
+    }
+  }
+  return JsonPointer.compile(pointerArray);
+};

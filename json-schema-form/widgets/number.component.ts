@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
-import { getControl } from '../utilities/index';
+import { getControl, isPresent } from '../utilities/index';
 
 @Component({
   selector: 'number-widget',
@@ -70,11 +70,17 @@ export class NumberComponent implements OnInit {
         );
       }
     }
-    this.step = this.layoutNode.multipleOf ||
+    this.step = this.layoutNode.multipleOf || this.layoutNode.step ||
       (this.layoutNode.dataType === 'integer' ? '1' : 'any');
-    if (this.layoutNode.dataType === 'integer') this.allowDecimal = false;
-    if (this.layoutNode.minimum) this.allowNegative = this.layoutNode.minimum < 0;
-    if (this.layoutNode.allowExponents) this.allowExponents = this.layoutNode.allowExponents;
+    if (this.layoutNode.dataType === 'integer') {
+      this.allowDecimal = false;
+      this.allowExponents = false;
+    } else if (isPresent(this.layoutNode.allowExponents)) {
+      this.allowExponents = this.layoutNode.allowExponents;
+    }
+    if (isPresent(this.layoutNode.minimum)) {
+      this.allowNegative = this.layoutNode.minimum < 0;
+    }
   }
 
   private validateInput(event) {
@@ -88,8 +94,8 @@ export class NumberComponent implements OnInit {
       const hasExp = /e/i.test(val);
       if (/^e$/i.test(event.key) && val && !hasExp) return true;
       if (event.key === '-') {
-        // const minusCount = (val.match(/\-/g) || []).length;
-        const minusCount = val.split('-').length - 1;
+        const minusCount = (val.match(/\-/g) || []).length;
+        // const minusCount = val.split('-').length - 1;
         if (!minusCount && (this.allowNegative || hasExp)) return true;
         if (minusCount === 1 && this.allowNegative && hasExp) return true;
       }

@@ -41,7 +41,9 @@ export class JsonPointer {
         if (key === '-' && isArray(subObject) && subObject.length) {
           key = subObject.length - 1;
         }
-        if (typeof subObject === 'object' && subObject.hasOwnProperty(key)) {
+        if (typeof subObject === 'object' && subObject !== null &&
+          subObject.hasOwnProperty(key)
+        ) {
           subObject = subObject[key];
         } else {
           if (errors) console.error('get error: "' + key + '" key not found in object.');

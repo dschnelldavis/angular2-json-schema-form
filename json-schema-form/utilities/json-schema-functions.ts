@@ -264,67 +264,49 @@ export function isInputRequired(schema: any, pointer: string): boolean {
 export function updateInputOptions(layout: any, schema: any, formOptions: any) {
   const templatePointer =
     JsonPointer.get(formOptions, ['dataMap', layout.pointer, 'templatePointer']);
-  let optionsToUpdate: string[] = [
-    'title', 'notitle', 'disabled', 'description', 'validationMessage',
-    'onChange', 'feedback', 'disableSuccessState', 'disableErrorState',
-    'placeholder', 'ngModelOptions', 'readonly', 'copyValueTo', 'condition',
-    'destroyStrategy', 'htmlClass', 'fieldHtmlClass', 'labelHtmlClass', 'enum',
-    'enumNames', 'options', 'ui:rootFieldId', 'ui:help', 'ui:disabled',
-    'ui:readonly', 'ui:placeholder', 'ui:autofocus', 'ui:options', 'classNames',
-    'label', 'errors', 'help', 'hidden', 'required', 'displayLabel'
-  ];
-  let type: string[] = [];
-  if (isPresent(layout.type)) type = isArray(layout.type) ?
-    <string[]>layout.type : [<string>layout.type];
-  if (inArray(['text', 'textarea', 'search'], type) || isBlank(type)) {
-    optionsToUpdate.push('minLength', 'maxLength', 'pattern');
-  }
-  if (inArray(['text', 'textarea', 'search', 'email', 'url', 'date', 'datetime',
-    'date-time', 'datetime-local'], type) || isBlank(type)
-  ) {
-    optionsToUpdate.push('format');
-  }
-  if (inArray(['date', 'datetime', 'date-time', 'datetime-local',
-    'number', 'integer', 'range'], type) || isBlank(type)
-  ) {
-    optionsToUpdate.push('minimum', 'maximum');
-  }
-  if (inArray(['number', 'integer', 'range'], type) || isBlank(type)) {
-    optionsToUpdate.push('exclusiveMinimum', 'exclusiveMaximum', 'multipleOf');
-  }
-  if (inArray('fieldset', type) || isBlank(type)) {
-    optionsToUpdate.push('minProperties', 'maxProperties', 'dependencies');
-  }
-  if (inArray(['array', 'checkboxes'], type) || isBlank(type)) {
-    optionsToUpdate.push('minItems', 'maxItems', 'uniqueItems');
+  let optionsToUpdate: Set<any> = new Set();
+  if (isObject(layout)) {
+    Object.keys(layout).forEach(v => optionsToUpdate.add(v));
   }
 
-  forEach(optionsToUpdate, option => {
-    // If a validator is available and not set in formGroup template, set it
-    if (hasOwn(layout, option) && isFunction(JsonValidators[option]) && (
-      !hasOwn(schema, option) || (
-        schema[option] !== layout[option] &&
-        !(option.slice(0, 3) === 'min' && schema[option] < layout[option]) &&
-        !(option.slice(0, 3) === 'max' && schema[option] > layout[option])
-      )
-    )) {
+  // If a validator is available and not set in the formGroup template, set it
+  optionsToUpdate.forEach(option => {
+    if (option !== 'type' && isFunction(JsonValidators[option]) && (
+      !hasOwn(schema, option) || ( schema[option] !== layout[option] &&
+      !(option.slice(0, 3) === 'min' && schema[option] < layout[option]) &&
+      !(option.slice(0, 3) === 'max' && schema[option] > layout[option])
+    ))) {
       const validatorPointer = templatePointer + '/validators/' + option;
       formOptions.formGroupTemplate = JsonPointer.set(
         formOptions.formGroupTemplate, validatorPointer, [layout[option]]
       );
     }
+  });
 
-    // Check for option value, and set in layout
+  if (isObject(schema)) {
+    Object.keys(schema).forEach(v => {
+      if (!inArray(v, ['properties', 'items', 'required', 'x-schema-form'])) {
+        optionsToUpdate.add(v);
+      }
+    });
+    if (isObject(schema['x-schema-form'])) {
+      Object.keys(schema['x-schema-form']).forEach(v => optionsToUpdate.add(v));
+    }
+  }
+  if (isObject(formOptions.globalOptions.formDefaults)) {
+    Object.keys(formOptions.globalOptions.formDefaults).forEach(v => optionsToUpdate.add(v));
+  }
+
+  // Check for option value, and set in layout
+  optionsToUpdate.forEach(option => {
     let newValue: any = JsonPointer.getFirst([
       [ layout, [option] ],
       [ schema, ['x-schema-form', option] ],
       [ schema, [option] ],
       [ formOptions, ['globalOptions', 'formDefaults', option] ]
     ]);
-    if (option === 'enum' && isBlank(newValue) &&
-      schema.hasOwnProperty('items') && schema.items.hasOwnProperty('enum')
-    ) {
-      newValue = schema.items.enum;
+    if (option === 'enum' && isBlank(newValue)) {
+      newValue = JsonPointer.get(schema, '/items/enum');
     }
     if (isPresent(newValue)) {
       layout[option.slice(0, 3) === 'ui:' ? option.slice(3) : option] = newValue;
@@ -332,11 +314,9 @@ export function updateInputOptions(layout: any, schema: any, formOptions: any) {
   });
 
   // For React Jsonschema Form compatibility
-  if (JsonPointer.has(schema, '/ui:widget/options')) {
-    forEach(JsonPointer.get(schema, '/ui:widget/options'), (value, option) => {
-      if (!hasOwn(layout, <string>option)) layout[option] = value;
-    });
-  }
+  forEach(JsonPointer.get(schema, '/ui:widget/options'), (value, option) => {
+    if (!hasOwn(layout, <string>option)) layout[option] = value;
+  });
 
   // If schema type is integer, enforce by setting multipleOf = 1
   if (inArray(schema.type, ['integer']) && !hasOwn(layout, 'multipleOf')) {
@@ -393,6 +373,7 @@ export function updateInputOptions(layout: any, schema: any, formOptions: any) {
  * @return {validators}
  */
 export function getControlValidators(schema: any) {
+  if (!isObject(schema)) return null;
   let validators: any = {};
   if (hasOwn(schema, 'type')) {
     switch (schema.type) {

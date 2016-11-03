@@ -100,6 +100,7 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
     formGroup: null, // Angular 2 formGroup, for powering reactive form
     layoutRefLibrary: {}, // Library of layout nodes for adding to form
     schemaRefLibrary: {}, // Library of schemas for resolving schema $refs
+    templateRefLibrary: {}, // Library of formGroup templates for adding to form
     widgetLibrary: null,
   };
 
@@ -369,7 +370,7 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
           this.isValid.emit(isValid);
           this.validationErrors.emit(this.validateFormData.errors);
         }
-
+console.log(options.formGroup);
       } else {
         // TODO: Output error message
       }
@@ -382,8 +383,8 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
       const vars: any[] = [];
       // vars.push(this.formOptions.schema);
       // vars.push(this.formOptions.dataMap);
-      vars.push(this.formOptions.arrayMap);
-      // vars.push(this.formOptions.formGroupTemplate);
+      // vars.push(this.formOptions.arrayMap);
+      vars.push(this.formOptions.formGroupTemplate);
       // vars.push(this.formOptions.layout);
       // vars.push(this.formOptions.schemaRefLibrary);
       // vars.push(this.formOptions.defaultValues);
