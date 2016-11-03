@@ -18,7 +18,8 @@ import { buildTitleMap, getControl } from '../utilities/index';
         [attr.readonly]="layoutNode?.readonly ? 'readonly' : null"
         [attr.required]="layoutNode?.required"
         [attr.aria-describedby]="layoutNode?.pointer + 'Status'">
-        <option [value]="item.value" *ngFor="let item of titleMap">{{item.name}}</option>
+        <option [value]="selectItem.value"
+          *ngFor="let selectItem of selectList">{{selectItem.name}}</option>
       </select>
     </div>
     <select *ngIf="!bindControl"
@@ -27,13 +28,14 @@ import { buildTitleMap, getControl } from '../utilities/index';
       [attr.readonly]="layoutNode?.readonly ? 'readonly' : null"
       [attr.required]="layoutNode?.required"
       [attr.aria-describedby]="layoutNode?.pointer + 'Status'">
-      <option [value]="item.value" *ngFor="let item of titleMap">{{item.name}}</option>
+      <option [value]="selectItem.value"
+        *ngFor="let selectItem of selectList">{{selectItem.name}}</option>
     </select>`,
 })
 export class SelectComponent implements OnInit {
   private formControlGroup: any;
   private bindControl: boolean = false;
-  private titleMap: any[] = [];
+  private selectList: any[] = [];
   @Input() layoutNode: any;
   @Input() options: any;
   @Input() index: number[];
@@ -53,7 +55,10 @@ export class SelectComponent implements OnInit {
         );
       }
     }
-    this.titleMap = buildTitleMap(this.layoutNode.titleMap || this.layoutNode.enumNames,
-      this.layoutNode.enum, !!this.layoutNode.required);
+    this.selectList = buildTitleMap(
+      this.layoutNode.titleMap || this.layoutNode.enumNames,
+      this.layoutNode.enum,
+      !!this.layoutNode.required
+    );
   }
 }

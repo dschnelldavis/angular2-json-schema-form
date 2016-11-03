@@ -10,40 +10,40 @@ import { buildTitleMap, getControl } from '../utilities/index';
       [class]="layoutNode?.labelHtmlClass" [class.sr-only]="layoutNode?.notitle"
       [innerHTML]="layoutNode?.title"></label>
     <div *ngIf="bindControl" [formGroup]="formControlGroup">
-      <label *ngFor="let item of titleMap"
-        [attr.for]="layoutNode?.pointer + '/' + item?.value"
+      <label *ngFor="let radioItem of radiosList"
+        [attr.for]="layoutNode?.pointer + '/' + radioItem?.value"
         [class]="layoutNode?.labelHtmlClass"
-        [class.active]="formControlGroup.value[layoutNode?.name] === item?.value">
+        [class.active]="formControlGroup.value[layoutNode?.name] === radioItem?.value">
         <input type="radio"
           [formControlName]="layoutNode?.name"
-          [id]="layoutNode?.pointer + '/' + item?.value"
+          [id]="layoutNode?.pointer + '/' + radioItem?.value"
           [class]="layoutNode?.fieldHtmlClass"
-          [value]="item?.value"
+          [value]="radioItem?.value"
           [attr.readonly]="layoutNode?.readonly ? 'readonly' : null"
           [attr.required]="layoutNode?.required"
-          [checked]="item?.value === layoutNode?.value">
-        <span [innerHTML]="item?.name"></span>
+          [checked]="radioItem?.value === layoutNode?.value">
+        <span [innerHTML]="radioItem?.name"></span>
       </label>
     </div>
     <div *ngIf="!bindControl">
-      <label *ngFor="let item of titleMap"
-        [attr.for]="item?.value"
+      <label *ngFor="let radioItem of radiosList"
+        [attr.for]="radioItem?.value"
         [class]="layoutNode?.labelHtmlClass"
-        [class.active]="formControlGroup.value[layoutNode?.name] === item?.value">
+        [class.active]="formControlGroup.value[layoutNode?.name] === radioItem?.value">
         <input type="radio"
-          [id]="item?.value"
+          [id]="radioItem?.value"
           [class]="layoutNode?.fieldHtmlClass"
-          [value]="item?.value"
+          [value]="radioItem?.value"
           [attr.readonly]="layoutNode?.readonly ? 'readonly' : null"
           [attr.required]="layoutNode?.required">
-        <span [innerHTML]="item?.name"></span>
+        <span [innerHTML]="radioItem?.name"></span>
       </label>
     </div>`,
 })
 export class RadiosInlineComponent implements OnInit {
   private formControlGroup: any;
   private bindControl: boolean = false;
-  private titleMap: any[] = [];
+  private radiosList: any[] = [];
   @Input() layoutNode: any;
   @Input() options: any;
   @Input() index: number[];
@@ -63,6 +63,6 @@ export class RadiosInlineComponent implements OnInit {
         );
       }
     }
-    this.titleMap = buildTitleMap(this.layoutNode.titleMap, this.layoutNode.enum);
+    this.radiosList = buildTitleMap(this.layoutNode.titleMap, this.layoutNode.enum);
   }
 }

@@ -263,7 +263,7 @@ export function isInputRequired(schema: any, pointer: string): boolean {
  */
 export function updateInputOptions(layout: any, schema: any, formOptions: any) {
   const templatePointer =
-    JsonPointer.get(formOptions, ['dataMap', layout.pointer, 'templatePointer']);
+    formOptions.dataMap.get(layout.pointer).get('templatePointer');
   let optionsToUpdate: Set<any> = new Set();
   if (isObject(layout)) {
     Object.keys(layout).forEach(v => optionsToUpdate.add(v));

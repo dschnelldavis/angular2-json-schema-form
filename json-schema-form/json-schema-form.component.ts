@@ -92,7 +92,7 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
     },
     arrayMap: new Map, // Map of arrays in data object
     defaultValues: {}, // The initial data model (e.g. previously submitted data)
-    dataMap: {}, // Maps paths in data model to schema and formGroup
+    dataMap: new Map, // Maps paths in data model to schema and formGroup
     formGroupTemplate: {}, // Template used to create formGroup
     framework: null, // The active framework component
     schema: {}, // The internal JSON Schema
@@ -168,7 +168,7 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
       options.schema = {};
       options.layout = [];
       options.defaultValues = {};
-      options.dataMap = {};
+      options.dataMap = new Map;
       options.schemaRefLibrary = {};
       options.layoutRefLibrary = {};
       options.formGroupTemplate = {};

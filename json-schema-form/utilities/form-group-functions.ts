@@ -12,8 +12,8 @@ import * as Immutable from 'immutable';
 import {
   forEach, getControlValidators, hasOwn, inArray, isArray,
   isEmpty, isNotEmpty, isInteger, isObject, isPresent, isPrimitive, isSet,
-  isString, JsonPointer, JsonValidators, toJavaScriptType, toSchemaType,
-  Pointer, SchemaPrimitiveType,
+  isString, JsonPointer, JsonValidators, toGenericPointer, toJavaScriptType,
+  toSchemaType, Pointer, SchemaPrimitiveType,
 } from './index';
 
 /**
@@ -68,13 +68,13 @@ export function buildFormGroupTemplate(
   } else {
     controlType = 'FormControl';
   }
-  if (dataPointer !== '' && !hasOwn(formOptions.dataMap, dataPointer)) {
-    formOptions.dataMap[dataPointer] = {};
-    formOptions.dataMap[dataPointer]['schemaPointer'] = schemaPointer;
-    formOptions.dataMap[dataPointer]['schemaType'] = schema.type;
+  if (dataPointer !== '' && !formOptions.dataMap.has(dataPointer)) {
+    formOptions.dataMap.set(dataPointer, new Map);
+    formOptions.dataMap.get(dataPointer).set('schemaPointer', schemaPointer);
+    formOptions.dataMap.get(dataPointer).set('schemaType', schema.type);
     if (controlType) {
-      formOptions.dataMap[dataPointer]['templatePointer'] = templatePointer;
-      formOptions.dataMap[dataPointer]['templateType'] = controlType;
+      formOptions.dataMap.get(dataPointer).set('templatePointer', templatePointer);
+      formOptions.dataMap.get(dataPointer).set('templateType', controlType);
     }
   }
   let controls: any;
@@ -392,20 +392,18 @@ export function formatFormData(
   JsonPointer.forEachDeep(formData, (value, pointer) => {
     if (typeof value !== 'object') {
       let genericPointer: string;
-      if ( formOptions.dataMap.hasOwnProperty(pointer) &&
-        formOptions.dataMap[pointer].hasOwnProperty('schemaType')
+      if ( formOptions.dataMap.has(pointer) &&
+        formOptions.dataMap.get(pointer).has('schemaType')
       ) {
         genericPointer = pointer;
-      } else { // TODO: Fix to allow for integer object keys and tuple arrays
-        genericPointer = JsonPointer.compile(
-          JsonPointer.parse(pointer).map(k => (isInteger(k)) ? '-' : k)
-        );
+      } else {
+        genericPointer = toGenericPointer(pointer, formOptions.arryMap);
       }
-      if ( formOptions.dataMap.hasOwnProperty(genericPointer) &&
-        formOptions.dataMap[genericPointer].hasOwnProperty('schemaType')
+      if ( formOptions.dataMap.has(genericPointer) &&
+        formOptions.dataMap.get(genericPointer).has('schemaType')
       ) {
         const schemaType: SchemaPrimitiveType | SchemaPrimitiveType[] =
-          formOptions.dataMap[genericPointer]['schemaType'];
+          formOptions.dataMap.get(genericPointer).get('schemaType');
         if (schemaType === 'null') {
           JsonPointer.set(formattedData, pointer, null);
         } else if ( isSet(value) &&

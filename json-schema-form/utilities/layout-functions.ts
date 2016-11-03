@@ -69,9 +69,13 @@ export function buildLayout(formOptions: any): any[] {
           JsonPointer.compile(JsonPointer.parseObjectPath(newItem.key), '-');
       }
       newItem.name = JsonPointer.toKey(newItem.pointer);
-      if (!hasOwn(formOptions.dataMap, newItem.pointer)) formOptions.dataMap[newItem.pointer] = {};
-      if (hasOwn(formOptions.dataMap[newItem.pointer], 'schemaPointer')) {
-        itemSchema = JsonPointer.get(formOptions.schema, formOptions.dataMap[newItem.pointer]['schemaPointer']);
+      if (!formOptions.dataMap.has(newItem.pointer)) {
+        formOptions.dataMap.set(newItem.pointer, new Map)
+      };
+      if (formOptions.dataMap.get(newItem.pointer).has('schemaPointer')) {
+        itemSchema = JsonPointer.get(formOptions.schema,
+          formOptions.dataMap.get(newItem.pointer).get('schemaPointer')
+        );
       } else {
         itemSchema = getFromSchema(formOptions.schema, newItem.pointer);
       }
@@ -113,13 +117,15 @@ export function buildLayout(formOptions: any): any[] {
         // TODO: create item in FormGroup model from layout key
       }
       newItem.widget = formOptions.widgetLibrary.getWidget(newItem.type);
-      formOptions.dataMap[newItem.pointer]['inputType'] = newItem.type;
-      formOptions.dataMap[newItem.pointer]['widget'] = newItem.widget;
+      formOptions.dataMap.get(newItem.pointer).set('inputType', newItem.type);
+      formOptions.dataMap.get(newItem.pointer).set('widget', newItem.widget);
       if (newItem.type === 'array' && hasOwn(newItem, 'items')) {
         if (newItem.required && !newItem.minItems) newItem.minItems = 1;
         let arrayPointer: string = newItem.pointer + '/-';
-        if (!hasOwn(formOptions.dataMap, arrayPointer)) formOptions.dataMap[arrayPointer] = {};
-        formOptions.dataMap[arrayPointer]['inputType'] = 'section';
+        if (!formOptions.dataMap.has(arrayPointer)) {
+          formOptions.dataMap.set(arrayPointer, new Map);
+        }
+        formOptions.dataMap.get(arrayPointer).set('inputType', 'section');
 
         // Fix insufficiently nested array item groups
         let arrayItemGroup = [];
@@ -241,10 +247,12 @@ export function buildLayoutFromSchema(
   if (isPresent(isRemovable)) newItem.isRemovable = isRemovable;
   newItem.widget = formOptions.widgetLibrary.getWidget(newItem.type);
   if (dataPointer !== '') {
-    if (!hasOwn(formOptions.dataMap, newItem.pointer)) formOptions.dataMap[newItem.pointer] = {};
-    formOptions.dataMap[newItem.pointer]['schemaPointer'] = schemaPointer;
-    formOptions.dataMap[newItem.pointer]['inputType'] = newItem.type;
-    formOptions.dataMap[newItem.pointer]['widget'] = newItem.widget;
+    if (!formOptions.dataMap.has(newItem.pointer)) {
+      formOptions.dataMap.set(newItem.pointer, new Map);
+    }
+    formOptions.dataMap.get(newItem.pointer).set('schemaPointer', schemaPointer);
+    formOptions.dataMap.get(newItem.pointer).set('inputType', newItem.type);
+    formOptions.dataMap.get(newItem.pointer).set('widget', newItem.widget);
   }
   updateInputOptions(newItem, schema, formOptions);
   if (!newItem.title && !isNumber(newItem.name) && newItem.name !== '-') {
