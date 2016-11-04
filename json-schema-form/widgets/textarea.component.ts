@@ -40,7 +40,6 @@ export class TextareaComponent implements OnInit {
   @Input() layoutNode: any;
   @Input() formSettings: any;
   @Input() index: number[];
-  @Input() debug: boolean;
 
   ngOnInit() {
     this.options = this.layoutNode.options;

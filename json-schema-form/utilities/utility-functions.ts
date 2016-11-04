@@ -8,39 +8,41 @@ import 'rxjs/add/operator/map';
 import * as Immutable from 'immutable';
 
 import {
-  hasValue, isArray, isObject, isEmpty, isMap, JsonPointer, PlainObject,
+  hasValue, isArray, isDefined, isObject, isEmpty, isMap, isSet,
+  isString, JsonPointer, PlainObject,
 } from './index';
 
 /**
  * Utility function library:
  *
- * addClasses, copy, forEach, forEachCopy, hasOwn, inArray, toTitleCase, xor
+ * addClasses, copy, forEach, forEachCopy, hasOwn, inArray,
+ * mergeFilteredObject, toTitleCase, xor
 */
 
 /**
  * 'addClasses' function
  *
- * @param {string | string[]} oldClasses
- * @param {string | string[]} newClasses
- * @return {string | string[]}
+ * @param {string | string[] | Set<string>} oldClasses
+ * @param {string | string[] | Set<string>} newClasses
+ * @return {string | string[] | Set<string>} - Combined classes
  */
 export function addClasses(oldClasses, newClasses) {
-  if (!isArray(oldClasses) && typeof oldClasses !== 'string') return newClasses;
-  if (!isArray(newClasses) && typeof newClasses !== 'string') return oldClasses;
-  let addArray: string[] = isArray(oldClasses) ?
-    oldClasses : oldClasses.trim().split(' ');
-  let newArray: string[] = isArray(newClasses) ?
-    newClasses : newClasses.trim().split(' ');
-  for (let newClass of newArray) {
-    if (addArray.indexOf(newClass) === -1) addArray.push(newClass);
-  }
-  return isArray(oldClasses) ? addArray : addArray.join(' ').trim();
+  const badType = i => !isSet(i) && !isArray(i) && !isString(i);
+  if (badType(newClasses)) return oldClasses;
+  if (badType(oldClasses)) oldClasses = '';
+  const toSet = i => isSet(i) ? i : isArray(i) ? new Set(i) : new Set(i.split(' '));
+  let combinedSet: Set<any> = toSet(oldClasses);
+  let newSet: Set<any> = toSet(newClasses);
+  newSet.forEach(c => combinedSet.add(c));
+  if (isSet(oldClasses)) return combinedSet;
+  if (isArray(oldClasses)) return Array.from(combinedSet);
+  return Array.from(combinedSet).join(' ');
 }
 
 /**
  * 'copy' function
  *
- * Makes a shallow copy of a JavaScript object or array.
+ * Makes a shallow copy of a JavaScript object, array, Map, or Set.
  * If passed a JavaScript primitive value (string, number, boolean, or null),
  * it returns the value.
  *
@@ -52,8 +54,8 @@ export function copy(object: any): any {
   if (isObject(object)) return Object.assign({}, object);
   if (isArray(object)) return [].concat(object);
   if (isMap(object)) return new Map(object);
-  console.error('copy error: Object to copy must be a JavaScript object,' +
-    'array, or primitive value.');
+  if (isSet(object)) return new Set(object);
+  console.error('copy error: Object to copy must be a JavaScript object or value.');
 }
 
 /**
@@ -146,19 +148,6 @@ export function inArray(item: any|any[], array: any[], allIn: boolean = false): 
 }
 
 /**
- * 'xor' utility function - exclusive or
- *
- * Returns true if exactly one of two values is truthy.
- *
- * @param {any} value1 - first value to check
- * @param {any} value2 - second value to check
- * @return {boolean} - true if exactly one input value is truthy, false if not
- */
-export function xor(value1: any, value2: any): boolean {
-  return (!!value1 && !value2) || (!value1 && !!value2);
-}
-
-/**
  * 'hasOwn' utility function
  *
  * Checks whether an object has a particular property.
@@ -170,6 +159,37 @@ export function xor(value1: any, value2: any): boolean {
 export function hasOwn(object: PlainObject, property: string): boolean {
   if (typeof object !== 'object') return false;
   return object.hasOwnProperty(property);
+}
+
+/**
+ * 'mergeFilteredObject' utility function
+ *
+ * Shallowly merges two objects, setting key and values from source object
+ * in target object, excluding specified keys.
+ *
+ * @param {PlainObject} targetObject - Target object to add keys and values to
+ * @param {PlainObject} sourceObject - Source object to copy keys and values from
+ * @param {string[]} excludeKeys - Array of keys to exclude
+ * @param {boolean = false} deleteCopiedKeys - Delete copied keys from source?
+ * @param {(string) => string = (k) => k} keyFn - Function to apply to keys
+ * @param {(any) => any = (v) => v} valueFn - Function to apply to values
+ * @return {PlainObject} - Returns targetObject
+ */
+export function mergeFilteredObject(
+  targetObject: PlainObject, sourceObject: PlainObject,
+  excludeKeys: string[] = [], deleteCopiedKeys: boolean = false,
+  keyFn: (string) => string = (k) => k,
+  valueFn: (any) => any = (v) => v
+): PlainObject {
+  if (!isObject(sourceObject)) return targetObject;
+  if (!isObject(targetObject)) targetObject = {};
+  for (let key of Object.keys(sourceObject)) {
+    if (!inArray(key, excludeKeys) && isDefined(sourceObject[key])) {
+      targetObject[keyFn(key)] = valueFn(sourceObject[key]);
+      if (deleteCopiedKeys) delete sourceObject[key];
+    }
+  }
+  return targetObject;
 }
 
 /**
@@ -192,7 +212,7 @@ export function toTitleCase(input: string, forceWords?: string|string[]): string
   let forceArray: string[] = ['a', 'an', 'and', 'as', 'at', 'but', 'by', 'en',
    'for', 'if', 'in', 'nor', 'of', 'on', 'or', 'per', 'the', 'to', 'v', 'v.',
    'vs', 'vs.', 'via'];
-  if (typeof forceWords === 'string') forceWords = forceWords.split('|');
+  if (isString(forceWords)) forceWords = forceWords.split('|');
   if (isArray(forceWords)) forceArray = forceArray.concat(forceWords);
   const forceArrayLower: string[] = forceArray.map(w => w.toLowerCase());
   const noInitialCase: boolean =
@@ -232,3 +252,16 @@ export function toTitleCase(input: string, forceWords?: string|string[]): string
     }
   });
 };
+
+/**
+ * 'xor' utility function - exclusive or
+ *
+ * Returns true if exactly one of two values is truthy.
+ *
+ * @param {any} value1 - first value to check
+ * @param {any} value2 - second value to check
+ * @return {boolean} - true if exactly one input value is truthy, false if not
+ */
+export function xor(value1: any, value2: any): boolean {
+  return (!!value1 && !value2) || (!value1 && !!value2);
+}

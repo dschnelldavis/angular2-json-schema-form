@@ -1,7 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormArray, FormGroup } from '@angular/forms';
 
-import { buildFormGroup, buildTitleMap, getControl } from '../utilities/index';
+import {
+  buildFormGroup, buildTitleMap, getControl, JsonPointer
+} from '../utilities/index';
 
 @Component({
   selector: 'checkboxes-widget',
@@ -54,7 +56,6 @@ export class CheckboxesComponent implements OnInit {
   @Input() layoutNode: any;
   @Input() formSettings: any;
   @Input() index: number[];
-  @Input() debug: boolean;
 
   ngOnInit() {
     this.options = this.layoutNode.options;
@@ -65,7 +66,7 @@ export class CheckboxesComponent implements OnInit {
       ) {
         this.bindControl = true;
         this.formArray = this.formControlGroup.controls[this.layoutNode.name];
-        this.checkboxList = buildTitleMap(this.layoutNode.titleMap, this.layoutNode.enum);
+        this.checkboxList = buildTitleMap(this.options.titleMap, this.options.enum);
         for (let checkboxItem of this.checkboxList) {
           checkboxItem.checked = this.formArray.value.length ?
             this.formArray.value.indexOf(checkboxItem.value) !== -1 : false;
@@ -80,6 +81,8 @@ export class CheckboxesComponent implements OnInit {
   }
 
   onClick(event) {
+    const templateLibrary = this.formSettings.templateRefLibrary;
+    const dataPointer = this.layoutNode.dataPointer;
     if (this.bindControl) {
       while (this.formArray.value.length) this.formArray.removeAt(0);
       for (let checkboxItem of this.checkboxList) {
@@ -87,11 +90,13 @@ export class CheckboxesComponent implements OnInit {
           checkboxItem.checked = event.target.checked;
         }
         if (checkboxItem.checked) {
-          this.layoutNode.controlTemplate.value = checkboxItem.value;
-          this.formArray.push(buildFormGroup(this.layoutNode.controlTemplate));
+          let newFormControl =
+            buildFormGroup(JsonPointer.get(templateLibrary, [dataPointer + '/-']));
+          newFormControl.setValue(checkboxItem.value);
+          this.formArray.push(newFormControl);
         }
       }
     }
-    (<any>this.formArray)._pristine = false;
+    this.formArray.markAsDirty();
   }
 }

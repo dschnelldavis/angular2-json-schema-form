@@ -8,7 +8,7 @@ import * as Immutable from 'immutable';
 
 import {
   buildFormGroupTemplate, copy, forEach, getFromSchema, getInputType, getControl,
-  hasOwn, isArray, isEmpty, isInputRequired, isNumber, isObject, isDefined,
+  hasOwn, isArray, isEmpty, isInputRequired, isMap, isNumber, isObject, isDefined,
   isString, JsonPointer, toControlPointer, toTitleCase, updateInputOptions,
 } from './index';
 
@@ -72,6 +72,7 @@ export function buildLayout(formSettings: any): any[] {
           newNode.dataPointer =
             JsonPointer.compile(JsonPointer.parseObjectPath(newNode.key), '-');
         }
+        delete newNode.key;
       }
       newNode.name = JsonPointer.toKey(newNode.dataPointer);
       if (!formSettings.dataMap.has(newNode.dataPointer)) {
@@ -85,16 +86,14 @@ export function buildLayout(formSettings: any): any[] {
         itemSchema = getFromSchema(formSettings.schema, newNode.dataPointer);
       }
       if (itemSchema) {
-console.log('schema:' + layoutPointer);
         if (!hasOwn(newNode, 'type')) {
           newNode.type = getInputType(itemSchema);
         }
         if (!hasOwn(newNode, 'dataType')) {
           newNode.dataType = itemSchema.type;
         }
-console.log(_.cloneDeep(newNode));
         updateInputOptions(newNode, itemSchema, formSettings);
-console.log(_.cloneDeep(newNode));
+
         // Present checkboxes as single control, rather than array
         if (newNode.type === 'checkboxes' && hasOwn(itemSchema, 'items')) {
           updateInputOptions(newNode, itemSchema.items, formSettings);
@@ -116,7 +115,7 @@ console.log(_.cloneDeep(newNode));
           newNode.options.title = toTitleCase(newNode.name.replace(/_/g, ' '));
         }
         if (isInputRequired(formSettings.schema, newNode.dataPointer)) {
-          newNode.required = true;
+          newNode.options.required = true;
           formSettings.fieldsRequired = true;
         }
         schemaDefaultValue = itemSchema.default;
@@ -128,7 +127,7 @@ console.log(_.cloneDeep(newNode));
       formSettings.dataMap.get(newNode.dataPointer).set('inputType', newNode.type);
       formSettings.dataMap.get(newNode.dataPointer).set('widget', newNode.widget);
       if (newNode.type === 'array' && hasOwn(newNode, 'items')) {
-        if (newNode.required && !newNode.minItems) newNode.minItems = 1;
+        if (newNode.options.required && !newNode.minItems) newNode.minItems = 1;
         let arrayPointer: string = newNode.dataPointer + '/-';
         if (!formSettings.dataMap.has(arrayPointer)) {
           formSettings.dataMap.set(arrayPointer, new Map);
@@ -183,14 +182,17 @@ console.log(_.cloneDeep(newNode));
             toTitleCase(JsonPointer.toKey(newNode.dataPointer).replace(/_/g, ' '));
         }
         let newNodeRef: any = {
-          arrayItemType: 'list',
+          dataPointer: arrayPointer,
           layoutPointer: newNode.layoutPointer + '/items/-',
-          isArrayItem: true,
-          options: { isRemovable: false, },
-          title: buttonText,
+          name: '-',
+          options: {
+            arrayItemType: 'list',
+            isArrayItem: true,
+            isRemovable: false,
+            title: buttonText,
+          },
           type: '$ref',
           widget: formSettings.widgetLibrary.getWidget('$ref'),
-          '$ref': arrayPointer,
           '$refType': 'array',
         };
 
@@ -207,7 +209,6 @@ console.log(_.cloneDeep(newNode));
 
       }
     } else if (hasOwn(newNode, 'type')) {
-console.log('no key:' + layoutPointer);
       newNode.widget = formSettings.widgetLibrary.getWidget(newNode.type);
       updateInputOptions(newNode, {}, formSettings);
     }
@@ -292,7 +293,7 @@ export function buildLayoutFromSchema(
           );
           if (innerItem) {
             if (isInputRequired(schema, '/' + key)) {
-              innerItem.required = true;
+              innerItem.options.required = true;
               formSettings.fieldsRequired = true;
             }
             newFieldset.push(innerItem);
@@ -405,15 +406,18 @@ export function buildLayoutFromSchema(
             toTitleCase(JsonPointer.toKey(dataPointer).replace(/_/g, ' '));
         }
         newNode.items.push({
-          'type': '$ref',
-          'isArrayItem': true,
-          'arrayItemType': 'list',
-          'isRemovable': false,
-          'layoutPointer': newNode.layoutPointer + '/items/-',
-          '$ref': dataPointer + '/-',
+          dataPointer: dataPointer + '/-',
+          layoutPointer: newNode.layoutPointer + '/items/-',
+          name: '-',
+          options: {
+            arrayItemType: 'list',
+            isArrayItem: true,
+            isRemovable: false,
+            title: buttonText,
+          },
+          type: '$ref',
+          widget: formSettings.widgetLibrary.getWidget('$ref'),
           '$refType': 'array',
-          'title': buttonText,
-          'widget': formSettings.widgetLibrary.getWidget('$ref')
         });
       }
     break;
@@ -588,12 +592,18 @@ export function toIndexedPointer(genericPointer: string, indexArray: number[]) {
 export function toGenericPointer(
   genericPointer: string, arrayMap: Map<string, number>
 ) {
-  let pointerArray = JsonPointer.parse(genericPointer);
-  for (let i = 1, l = pointerArray.length; i < l; i++) {
-    const subPointer = JsonPointer.compile(pointerArray.slice(0, i));
-    if (arrayMap.has(subPointer) && arrayMap.get(subPointer) <= +pointerArray[i]) {
-      pointerArray[i] = '-';
+  if (JsonPointer.isJsonPointer(genericPointer) && isMap(arrayMap)) {
+    let pointerArray = JsonPointer.parse(genericPointer);
+    for (let i = 1, l = pointerArray.length; i < l; i++) {
+      const subPointer = JsonPointer.compile(pointerArray.slice(0, i));
+      if (arrayMap.has(subPointer) && arrayMap.get(subPointer) <= +pointerArray[i]) {
+        pointerArray[i] = '-';
+      }
     }
+    return JsonPointer.compile(pointerArray);
   }
-  return JsonPointer.compile(pointerArray);
+  console.error('toGenericPointer error: genericPointer must be a string ' +
+    'and arrayMap must be a Map.');
+  console.error(genericPointer);
+  console.error(arrayMap);
 };

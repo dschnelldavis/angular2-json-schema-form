@@ -12,7 +12,7 @@ import * as Immutable from 'immutable';
 import {
   buildFormGroupTemplate, forEach, hasOwn, inArray, isDefined,
   hasValue, isString, isFunction, isObject, isArray, JsonPointer,
-  JsonValidators, Pointer, SchemaType,
+  JsonValidators, mergeFilteredObject, Pointer, SchemaType,
 } from './index';
 
 /**
@@ -263,91 +263,47 @@ export function isInputRequired(schema: any, pointer: string): boolean {
  */
 export function updateInputOptions(layoutNode: any, schema: any, formSettings: any) {
   if (!isObject(layoutNode)) return;
-  if (!isObject(layoutNode.options)) layoutNode.options = {};
-  const templatePointer =
-    JsonPointer.get(formSettings, ['dataMap', layoutNode.dataPointer, 'templatePointer']);
-  let optionsToUpdate: Set<any> = new Set();
-  let exclude: Set<string> = new Set(['default', 'value', 'required', 'type', 'widget']);
+  const templatePointer = JsonPointer.get(formSettings,
+    ['dataMap', layoutNode.dataPointer, 'templatePointer']);
 
-  // Create list of available sources
-  let optionSources: any[] = [{ data: layoutNode,
-    exclude: new Set(['layoutPointer', 'items', 'dataPointer', 'name', 'options'])
-  }];
-  if (isObject(schema)) {
-    optionSources.push({ data: schema,
-      exclude: new Set(['properties', 'items', 'required', 'x-schema-form'])
-    });
-    if (isObject(schema['x-schema-form'])) {
-      optionSources.push({ data: schema['x-schema-form'],
-      exclude: new Set() });
-    }
-    const widget = schema['ui:widget'];
-    if (isObject(widget)) {
-      optionSources.push({ data: widget,
-        exclude: new Set(['options']) });
-      if (isObject(widget['options'])) {
-        optionSources.push({ data: widget['options'],
-        exclude: new Set() });
-      }
-    }
-
-    // If a validator is available for a layout option,
-    // and not already set in the formGroup template, set it
-    Object.keys(layoutNode).forEach(option => {
-      if (option !== 'type' && isFunction(JsonValidators[option]) && (
-        !hasOwn(schema, option) || ( schema[option] !== layoutNode[option] &&
-          !(option.slice(0, 3) === 'min' && schema[option] < layoutNode[option]) &&
-          !(option.slice(0, 3) === 'max' && schema[option] > layoutNode[option])
-        )
-      )) {
-        const validatorPointer = templatePointer + '/validators/' + option;
-        formSettings.formGroupTemplate = JsonPointer.set(
-          formSettings.formGroupTemplate, validatorPointer, [layoutNode[option]]
-        );
-      }
-    });
-  }
-  const defaultOptions = formSettings.globalOptions.formDefaults;
-  if (isObject(defaultOptions)) {
-    optionSources.push({ data: defaultOptions, exclude: new Set() });
-  }
-
-  // Compile list of all options available from all sources
-  for (let optionSource of optionSources) {
-    optionSource.uiOptions = new Set();
-    optionSource.options = new Set();
-    Object.keys(optionSource.data)
-      .filter(key => !optionSource.exclude.has(key) && !exclude.has(key))
-      .forEach(key => {
-        if (key.slice(0, 3) === 'ui:') {
-          if (!optionSource.exclude.has(key.slice(3)) && !exclude.has(key.slice(3))) {
-            optionSource.uiOptions.add(key.slice(3));
-            optionsToUpdate.add(key.slice(3));
-          }
-        } else {
-          optionsToUpdate.add(key);
-        }
-      });
-  }
-
-  // Check for option value, and set in layoutNode
-  optionsToUpdate.forEach(option => {
-    let checkMap = [];
-    for (let optionSource of optionSources) {
-      if (!optionSource.exclude.has(option) && !exclude.has(option)) {
-        checkMap.push([optionSource.data, [option]]);
-      }
-      if (optionSource.uiOptions.has(option)) {
-        checkMap.push([optionSource.data, ['ui:' + option]]);
-      }
-    }
-    if (option === 'enum') checkMap.push([ schema, '/items/enum' ]);
-    let newValue: any = JsonPointer.getFirst(checkMap);
-    if (isDefined(newValue)) {
-      layoutNode.options[option] = newValue;
-      delete layoutNode[option];
+  // If a validator is available for a layout option,
+  // and not already set in the formGroup template, set it
+  Object.keys(layoutNode).forEach(option => {
+    if (option !== 'type' && isFunction(JsonValidators[option]) && (
+      !hasOwn(schema, option) || ( schema[option] !== layoutNode[option] &&
+        !(option.slice(0, 3) === 'min' && schema[option] < layoutNode[option]) &&
+        !(option.slice(0, 3) === 'max' && schema[option] > layoutNode[option])
+      )
+    )) {
+      const validatorPointer = templatePointer + '/validators/' + option;
+      formSettings.formGroupTemplate = JsonPointer.set(
+        formSettings.formGroupTemplate, validatorPointer, [layoutNode[option]]
+      );
     }
   });
+
+  // Set all option values in layoutNode.options
+  let newOptions: any = {};
+  const fixUiKeys = (key) => key.slice(0, 3) === 'ui:' ? key.slice(3) : key;
+  mergeFilteredObject(newOptions, formSettings.globalOptions.formDefaults,
+    [], false, fixUiKeys);
+  if (JsonPointer.has(schema, '/items/enum')) newOptions.enum = schema.items.enum;
+  if (JsonPointer.has(schema, '/items/titleMap')) newOptions.enum = schema.items.titleMap;
+  mergeFilteredObject(newOptions, JsonPointer.get(schema, ['ui:widget', 'options']),
+    [], true, fixUiKeys);
+  JsonPointer.remove(schema, ['ui:widget', 'options']);
+  mergeFilteredObject(newOptions, JsonPointer.get(schema, ['ui:widget']),
+    [], true, fixUiKeys);
+  JsonPointer.remove(schema, ['ui:widget']);
+  mergeFilteredObject(newOptions, schema,
+    ['properties', 'items', 'required', 'type', 'x-schema-form'], false, fixUiKeys);
+  mergeFilteredObject(newOptions, JsonPointer.get(schema, ['x-schema-form']),
+    [], true, fixUiKeys);
+  JsonPointer.remove(schema, ['x-schema-form']);
+  mergeFilteredObject(newOptions, layoutNode,
+    ['dataPointer', 'items', 'layoutPointer', 'name', 'options', 'type', 'widget'], true, fixUiKeys);
+  mergeFilteredObject(newOptions, layoutNode.options, [], false, fixUiKeys);
+  layoutNode.options = newOptions;
 
   // If schema type is integer, enforce by setting multipleOf = 1
   if (inArray(schema.type, ['integer']) && !hasOwn(layoutNode, 'multipleOf')) {

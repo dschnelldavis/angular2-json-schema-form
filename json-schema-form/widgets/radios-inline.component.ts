@@ -48,7 +48,6 @@ export class RadiosInlineComponent implements OnInit {
   @Input() layoutNode: any;
   @Input() formSettings: any;
   @Input() index: number[];
-  @Input() debug: boolean;
 
   ngOnInit() {
     this.options = this.layoutNode.options;
@@ -65,6 +64,6 @@ export class RadiosInlineComponent implements OnInit {
         );
       }
     }
-    this.radiosList = buildTitleMap(this.layoutNode.titleMap, this.layoutNode.enum);
+    this.radiosList = buildTitleMap(this.options.titleMap, this.options.enum);
   }
 }

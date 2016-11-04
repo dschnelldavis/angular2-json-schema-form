@@ -9,5 +9,4 @@ export class NoneComponent {
   @Input() layoutNode: any;
   @Input() formSettings: any;
   @Input() index: number[];
-  @Input() debug: boolean;
 }

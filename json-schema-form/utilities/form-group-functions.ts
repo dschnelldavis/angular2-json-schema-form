@@ -393,7 +393,7 @@ export function formatFormData(
     if (typeof value !== 'object') {
       let genericPointer: string = dataPointer;
       if (!JsonPointer.has(formSettings.dataMap, [dataPointer, 'schemaType'])) {
-        genericPointer = toGenericPointer(dataPointer, formSettings.arryMap);
+        genericPointer = toGenericPointer(dataPointer, formSettings.arrayMap);
       }
       if (JsonPointer.has(formSettings.dataMap, [genericPointer, 'schemaType'])) {
         const schemaType: SchemaPrimitiveType | SchemaPrimitiveType[] =

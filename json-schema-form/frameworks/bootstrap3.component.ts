@@ -28,7 +28,6 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
   @Input() layoutNode: any;
   @Input() formSettings: any;
   @Input() index: number[];
-  @Input() debug: boolean;
   @ViewChild('widgetContainer', { read: ViewContainerRef })
     private widgetContainer: ViewContainerRef;
 
@@ -39,7 +38,8 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
   ngOnInit() {
     this.arrayIndex = this.index[this.index.length - 1];
     if (this.layoutNode) {
-      this.options = Object.assign({}, this.layoutNode.options);
+      const widgetOptions = this.layoutNode.options;
+      this.options = Object.assign({}, widgetOptions);
       this.layoutPointer =
         toIndexedPointer(this.layoutNode.layoutPointer, this.index);
       this.updateArrayItems();
@@ -60,35 +60,20 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
 
       this.options.title = this.setTitle(this.layoutNode.type);
 
-      this.options.htmlClass = this.options.htmlClass || '';
       this.options.htmlClass = addClasses(this.options.htmlClass,
         'schema-form-' + this.layoutNode.type);
       if (this.layoutNode.type === 'array') {
         this.options.htmlClass = addClasses(this.options.htmlClass,
           'list-group');
       } else if (this.options.isArrayItem && this.layoutNode.type !== '$ref') {
-        this.options.htmlClass = addClasses(this.options.htmlClass,
-          'list-group-item');
+        this.options.htmlClass = addClasses(this.options.htmlClass, 'list-group-item');
       } else {
-        this.options.htmlClass = addClasses(this.options.htmlClass,
-          'form-group');
+        this.options.htmlClass = addClasses(this.options.htmlClass, 'form-group');
       }
-      this.options.htmlClass = addClasses(this.options.htmlClass,
-        this.formSettings.globalOptions.formDefaults.htmlClass);
-      this.layoutNode.options.htmlClass = '';
+      widgetOptions.htmlClass = '';
 
-      this.options.labelHtmlClass = this.options.labelHtmlClass || '';
       this.options.labelHtmlClass = addClasses(this.options.labelHtmlClass,
         'control-label');
-      this.options.labelHtmlClass = addClasses(this.options.labelHtmlClass,
-        this.formSettings.globalOptions.formDefaults.labelHtmlClass);
-
-      this.layoutNode.options.fieldHtmlClass =
-        this.layoutNode.options.fieldHtmlClass || '';
-      this.layoutNode.options.fieldHtmlClass = addClasses(
-        this.layoutNode.options.fieldHtmlClass,
-        this.formSettings.globalOptions.formDefaults.fieldHtmlClass
-      );
 
       this.options.fieldAddonLeft =
         this.options.fieldAddonLeft || this.options.prepend;
@@ -110,20 +95,15 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
             'checkbox-inline');
         break;
         case 'button': case 'submit':
-          this.layoutNode.options.fieldHtmlClass =
-            addClasses(this.layoutNode.options.fieldHtmlClass, 'btn');
-          this.layoutNode.options.fieldHtmlClass = addClasses(
-            this.layoutNode.options.fieldHtmlClass,
-            this.options.style || 'btn-info'
-          );
+          widgetOptions.fieldHtmlClass = addClasses(widgetOptions.fieldHtmlClass, 'btn');
+          widgetOptions.fieldHtmlClass =
+            addClasses(widgetOptions.fieldHtmlClass, this.options.style || 'btn-info');
         break;
         case '$ref':
-          this.layoutNode.options.fieldHtmlClass =
-            addClasses(this.layoutNode.options.fieldHtmlClass, 'btn pull-right');
-          this.layoutNode.options.fieldHtmlClass = addClasses(
-            this.layoutNode.options.fieldHtmlClass,
-            this.options.style || 'btn-default'
-          );
+          widgetOptions.fieldHtmlClass =
+            addClasses(widgetOptions.fieldHtmlClass, 'btn pull-right');
+          widgetOptions.fieldHtmlClass =
+            addClasses(widgetOptions.fieldHtmlClass, this.options.style || 'btn-default');
           this.options.icon = 'glyphicon glyphicon-plus';
         break;
         case 'array': case 'fieldset': case 'section': case 'conditional':
@@ -142,20 +122,19 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
           this.options.htmlClass = addClasses(this.options.htmlClass, 'btn-group');
           this.options.labelHtmlClass =
             addClasses(this.options.labelHtmlClass, 'btn btn-default');
-          this.layoutNode.options.fieldHtmlClass =
-            addClasses(this.layoutNode.options.fieldHtmlClass, 'sr-only');
+          widgetOptions.fieldHtmlClass =
+            addClasses(widgetOptions.fieldHtmlClass, 'sr-only');
         break;
         case 'radio': case 'radios':
-          this.options.htmlClass =
-            addClasses(this.options.htmlClass, 'radio');
+          this.options.htmlClass = addClasses(this.options.htmlClass, 'radio');
         break;
         case 'radios-inline':
           this.options.labelHtmlClass =
             addClasses(this.options.labelHtmlClass, 'radio-inline');
         break;
         default:
-          this.layoutNode.options.fieldHtmlClass =
-            addClasses(this.layoutNode.options.fieldHtmlClass, 'form-control');
+          widgetOptions.fieldHtmlClass =
+            addClasses(widgetOptions.fieldHtmlClass, 'form-control');
       }
 
       if (
@@ -166,7 +145,7 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
         let addedNode: ComponentRef<any> = this.widgetContainer.createComponent(
           this.componentFactory.resolveComponentFactory(this.layoutNode.widget)
         );
-        for (let input of ['layoutNode', 'formSettings', 'index', 'debug']) {
+        for (let input of ['layoutNode', 'formSettings', 'index']) {
           addedNode.instance[input] = this[input];
         }
         this.controlInitialized = true;
@@ -181,12 +160,12 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
                   ).join(', ')].filter(e => e).join(' - ')
                 ).join('<br>');
             } else {
-              this.layoutNode.options.errorMessage = null;
+              widgetOptions.errorMessage = null;
             }
           });
         }
 
-        if (this.debug) {
+        if (this.options.debug) {
           let vars: any[] = [];
           // vars.push(this.formSettings.formGroup.value[this.options.name]);
           // vars.push(this.formSettings.formGroup.controls[this.options.name]['errors']);
@@ -204,7 +183,7 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
   }
 
   private updateArrayItems() {
-    if (this.layoutNode.isArrayItem) {
+    if (this.layoutNode.options.isArrayItem) {
       const arrayPointer = JsonPointer.parse(this.layoutPointer).slice(0, -2);
       const parentArray = JsonPointer.get(this.formSettings.layout, arrayPointer);
       const minItems = parentArray.minItems || 0;

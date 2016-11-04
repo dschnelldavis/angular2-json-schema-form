@@ -1,10 +1,12 @@
 /**
+ * 'convertJsonSchema3to4' function
+ *
  * Converts JSON Schema version 3 to JSON Schema version 4
  *
  * Based on geraintluff's JSON Schema compatibility function
  * https://github.com/geraintluff/json-schema-compatibility
  *
- * @param {object} originalSchema - JSON schema (version 3)
+ * @param {object} originalSchema - JSON schema (version 3 or 4)
  * @return {object} - JSON schema (version 4)
  */
 export function convertJsonSchema3to4(schema: any): any {

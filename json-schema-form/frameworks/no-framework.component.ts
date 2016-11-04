@@ -19,7 +19,6 @@ export class NoFrameworkComponent implements AfterContentChecked {
   @Input() layoutNode: any;
   @Input() formSettings: any;
   @Input() index: number[];
-  @Input() debug: boolean;
   @ViewChild('widgetContainer', { read: ViewContainerRef })
     private widgetContainer: ViewContainerRef;
 
@@ -35,7 +34,7 @@ export class NoFrameworkComponent implements AfterContentChecked {
       let addedNode: ComponentRef<any> = this.widgetContainer.createComponent(
         this.componentFactory.resolveComponentFactory(this.layoutNode.widget)
       );
-      for (let input of ['layoutNode', 'formSettings', 'index', 'debug']) {
+      for (let input of ['layoutNode', 'formSettings', 'index']) {
         addedNode.instance[input] = this[input];
       }
     }

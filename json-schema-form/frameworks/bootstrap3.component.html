@@ -3,7 +3,7 @@
   [class.has-error]="!options?.disableErrorState && formControl?.errors && formControl?.dirty"
   [class.has-success]="!options?.disableSuccessState && !formControl?.errors && formControl?.dirty">
 
-  <button *ngIf="isRemovable" (click)="removeItem()" class="close pull-right"
+  <button *ngIf="options?.isRemovable" (click)="removeItem()" class="close pull-right"
     style="position: relative; z-index: 20;" type="button">
     <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
   </button>

@@ -60,8 +60,7 @@ import {
     <root-widget *ngIf="formActive"
       [layoutNode]="formSettings.layout"
       [formSettings]="formSettings"
-      [isFirstRoot]="true"
-      [debug]="debug">
+      [isFirstRoot]="true">
     </root-widget>
   </form>
   <div *ngIf="debug">Debug output: <pre>{{debugOutput}}</pre></div>`,
@@ -76,6 +75,7 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
   private formSettings: any = { // Form options and control structures
     globalOptions: { // Default global form options
       addSubmit: true, // Add a submit button if layout does not have one?
+      debug: this.debug, // Show debugging output?
       fieldsRequired: false, // Are there any required fields in the form?
       pristine: { errors: true, success: true },
       supressPropertyTitles: false,
@@ -99,7 +99,7 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
 
     framework: null, // The active framework component
 
-    arrayMap: new Map, // Maps arrays in data object to number of tuple values
+    arrayMap: new Map, // Maps arrays in data object and number of tuple values
     dataMap: new Map, // Maps paths in data model to schema and formGroup paths
     layoutRefLibrary: {}, // Library of layout nodes for adding to form
     schemaRefLibrary: {}, // Library of schemas for resolving schema $refs

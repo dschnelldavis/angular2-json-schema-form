@@ -47,7 +47,6 @@ export class RadiosComponent implements OnInit {
   @Input() layoutNode: any;
   @Input() formSettings: any;
   @Input() index: number[];
-  @Input() debug: boolean;
 
   ngOnInit() {
     this.options = this.layoutNode.options;
@@ -62,6 +61,6 @@ export class RadiosComponent implements OnInit {
         '" is not bound to the Angular 2 FormGroup.'
       );
     }
-    this.radiosList = buildTitleMap(this.layoutNode.titleMap, this.layoutNode.enum);
+    this.radiosList = buildTitleMap(this.options.titleMap, this.options.enum);
   }
 }
