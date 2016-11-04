@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { copy, isObject, isArray } from './index';
+import { copy, isEmpty, isObject, isArray, isMap } from './index';
 
 /**
  * 'JsonPointer' class
@@ -45,6 +45,8 @@ export class JsonPointer {
           subObject.hasOwnProperty(key)
         ) {
           subObject = subObject[key];
+        } else if (isMap(subObject) && subObject.has(key)) {
+          subObject = subObject.get(key);
         } else {
           if (errors) console.error('get error: "' + key + '" key not found in object.');
           if (errors) console.error(pointer);
@@ -68,17 +70,28 @@ export class JsonPointer {
    * @param {any} defaultValue - Optional value to return if nothing found
    * @return {any} - first set value
    */
-  static getFirst(items: [any, Pointer][], defaultValue: any = null): any {
+  static getFirst(items: any, defaultValue: any = null): any {
+    if (isEmpty(items)) return;
     if (isArray(items)) {
       for (let item of items) {
+        if (isEmpty(item)) continue;
         if (isArray(item) && item.length === 2) {
-          let value: any = this.get(item[0], item[1]);
+          if (isEmpty(item[0]) || isEmpty(item[1])) continue;
+          const value: any = this.get(item[0], item[1]);
           if (value) return value;
-        } else {
-          console.error('getFirst error: Input not in correct format.\n' +
-            'Should be: [ [ object1, pointer1 ], [ object 2, pointer2 ], etc... ]');
-          return;
+          continue;
         }
+        console.error('getFirst error: Input not in correct format.\n' +
+          'Should be: [ [ object1, pointer1 ], [ object 2, pointer2 ], etc... ]');
+        return;
+      }
+      return defaultValue;
+    }
+    if (isMap(items)) {
+      for (let [object, pointer] of items) {
+        if (object === null || !this.isJsonPointer(pointer)) continue;
+        const value: any = this.get(object, pointer);
+        if (value) return value;
       }
       return defaultValue;
     }
@@ -109,16 +122,23 @@ export class JsonPointer {
       for (let i = 0, l = keyArray.length - 1; i < l; ++i) {
         let key: string = keyArray[i];
         if (key === '-' && isArray(subObject)) key = subObject.length;
-        if (!(subObject.hasOwnProperty(key))) {
-          subObject[key] = (keyArray[i + 1].match(/^(\d+|-)$/)) ? [] : {};
+        if (isMap(subObject) && subObject.has(key)) {
+          subObject = subObject.get(key);
+        } else {
+          if (!(subObject.hasOwnProperty(key))) {
+            subObject[key] = (keyArray[i + 1].match(/^(\d+|-)$/)) ? [] : {};
+          }
+          subObject = subObject[key];
         }
-        subObject = subObject[key];
       }
       let lastKey: string = keyArray[keyArray.length - 1];
-      if (insert && isArray(subObject) && !isNaN(+lastKey)) {
-        subObject = subObject.splice(lastKey, 0, value);
+      if (isArray(subObject) && lastKey === '-') {
+        subObject.push(value);
+      } else if (insert && isArray(subObject) && !isNaN(+lastKey)) {
+        subObject.splice(lastKey, 0, value);
+      } else if (isMap(subObject)) {
+        subObject.set(lastKey, value);
       } else {
-        if (lastKey === '-' && isArray(subObject)) lastKey = subObject.length;
         subObject[lastKey] = value;
       }
       return object;
@@ -150,17 +170,26 @@ export class JsonPointer {
       for (let i = 0, l = keyArray.length - 1; i < l; ++i) {
         let key: string = keyArray[i];
         if (key === '-' && isArray(subObject)) key = subObject.length;
-        if (!(subObject.hasOwnProperty(key))) {
-          subObject[key] = (keyArray[i + 1].match(/^(\d+|-)$/)) ? [] : {};
+
+        if (isMap(subObject) && subObject.has(key)) {
+          subObject.set(key, copy(subObject.get(key)));
+          subObject = subObject.get(key);
+        } else {
+          if (!(subObject.hasOwnProperty(key))) {
+            subObject[key] = (keyArray[i + 1].match(/^(\d+|-)$/)) ? [] : {};
+          }
+          subObject[key] = copy(subObject[key]);
+          subObject = subObject[key];
         }
-        subObject[key] = copy(subObject[key]);
-        subObject = subObject[key];
       }
       let lastKey: string = keyArray[keyArray.length - 1];
-      if (insert && isArray(subObject) && !isNaN(+lastKey)) {
-        subObject = subObject.splice(lastKey, 0, value);
+      if (isArray(subObject) && lastKey === '-') {
+        subObject.push(value);
+      } else if (insert && isArray(subObject) && !isNaN(+lastKey)) {
+        subObject.splice(lastKey, 0, value);
+      } else if (isMap(subObject)) {
+        subObject.set(lastKey, value);
       } else {
-        if (lastKey === '-' && isArray(subObject)) lastKey = subObject.length;
         subObject[lastKey] = value;
       }
       return newObject;

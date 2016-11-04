@@ -7,53 +7,55 @@ import { getControl } from '../utilities/index';
   selector: 'checkbox-widget',
   template: `
     <label *ngIf="bindControl" [formGroup]="formControlGroup"
-      [attr.for]="layoutNode?.pointer" [class]="layoutNode?.labelHtmlClass">
+      [attr.for]="layoutNode?.dataPointer" [class]="options?.labelHtmlClass">
       <input [formControlName]="layoutNode?.name"
-        [attr.aria-describedby]="layoutNode?.pointer + 'Status'"
+        [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
         [checked]="isChecked ? 'checked' : null"
-        [class]="layoutNode?.fieldHtmlClass"
-        [id]="layoutNode?.pointer"
+        [class]="options?.fieldHtmlClass"
+        [id]="layoutNode?.dataPointer"
         [name]="layoutNode?.name"
-        [readonly]="layoutNode?.readonly ? 'readonly' : false"
-        [value]="layoutNode?.value || true"
+        [readonly]="options?.readonly ? 'readonly' : false"
+        [value]="options?.value || true"
         type="checkbox">
-      <span *ngIf="layoutNode?.title"
-        [class.sr-only]="layoutNode?.notitle"
-        [innerHTML]="layoutNode?.title"></span>
+      <span *ngIf="options?.title"
+        [class.sr-only]="options?.notitle"
+        [innerHTML]="options?.title"></span>
     </label>
-    <label *ngIf="!bindControl" [attr.for]="layoutNode?.pointer"
-      [class]="layoutNode?.labelHtmlClass">
+    <label *ngIf="!bindControl" [attr.for]="layoutNode?.dataPointer"
+      [class]="options?.labelHtmlClass">
       <input
-        [attr.aria-describedby]="layoutNode?.pointer + 'Status'"
-        [checked]="!!layoutNode?.value ? 'checked' : null"
-        [class]="layoutNode?.fieldHtmlClass"
+        [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
+        [checked]="!!options?.value ? 'checked' : null"
+        [class]="options?.fieldHtmlClass"
         [name]="layoutNode?.name"
-        [readonly]="layoutNode?.readonly ? 'readonly' : false"
-        [value]="layoutNode?.value || true"
+        [readonly]="options?.readonly ? 'readonly' : false"
+        [value]="options?.value || true"
         (click)="onClick($event)"
         type="checkbox">
-      <span *ngIf="layoutNode?.title" [class.sr-only]="layoutNode?.notitle"
-        [innerHTML]="layoutNode?.title"></span>
+      <span *ngIf="options?.title" [class.sr-only]="options?.notitle"
+        [innerHTML]="options?.title"></span>
     </label>`,
 })
 export class CheckboxComponent implements OnInit {
   private formControlGroup: any;
   private bindControl: boolean = false;
+  private options: any;
   @Input() layoutNode: any;
-  @Input() options: any;
+  @Input() formSettings: any;
   @Input() index: number[];
   @Input() debug: boolean;
 
   ngOnInit() {
-    if (this.layoutNode.hasOwnProperty('pointer')) {
-      this.formControlGroup = getControl(this.options.formGroup, this.layoutNode.pointer, true);
+    this.options = this.layoutNode.options;
+    if (this.layoutNode.hasOwnProperty('dataPointer')) {
+      this.formControlGroup = getControl(this.formSettings.formGroup, this.layoutNode.dataPointer, true);
       if (this.formControlGroup &&
         this.formControlGroup.controls.hasOwnProperty(this.layoutNode.name)
       ) {
         this.bindControl = true;
       } else {
         console.error(
-          'CheckboxComponent warning: control "' + this.layoutNode.pointer +
+          'CheckboxComponent warning: control "' + this.layoutNode.dataPointer +
           '" is not bound to the Angular 2 FormGroup.'
         );
       }

@@ -5,7 +5,7 @@ import {
 import { FormGroup } from '@angular/forms';
 
 import {
-  addClasses, getControl, isNumber, JsonPointer, toIndexedPointer
+  addClasses, getControl, inArray, isNumber, JsonPointer, toIndexedPointer
 } from '../utilities/index';
 
 @Component({
@@ -20,19 +20,13 @@ import {
 export class Bootstrap3Component implements OnInit, OnChanges, AfterContentChecked {
   private controlInitialized: boolean = false;
   private displayWidget: boolean = true;
-  private isRemovable: boolean = false;
-  private isInputWidget: boolean;
+  private options: any;
   private arrayIndex: number;
-  private itemPointer: string;
+  private layoutPointer: string;
   private formControl: any = null;
-  private messageLocation: string = 'bottom';
-  private htmlClass: string;
-  private labelHtmlClass: string;
-  private title: string;
-  private errorMessage = '';
   private debugOutput: any = '';
   @Input() layoutNode: any;
-  @Input() options: any;
+  @Input() formSettings: any;
   @Input() index: number[];
   @Input() debug: boolean;
   @ViewChild('widgetContainer', { read: ViewContainerRef })
@@ -45,111 +39,123 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
   ngOnInit() {
     this.arrayIndex = this.index[this.index.length - 1];
     if (this.layoutNode) {
-      this.itemPointer = toIndexedPointer(this.layoutNode.layoutPointer, this.index);
+      this.options = Object.assign({}, this.layoutNode.options);
+      this.layoutPointer =
+        toIndexedPointer(this.layoutNode.layoutPointer, this.index);
       this.updateArrayItems();
 
-      if (this.layoutNode.hasOwnProperty('pointer')) {
-        let thisControl = getControl(this.options.formGroup, this.layoutNode.pointer);
+      if (this.layoutNode.hasOwnProperty('dataPointer')) {
+        let thisControl = getControl(this.formSettings.formGroup,
+          this.layoutNode.dataPointer);
         if (thisControl) this.formControl = thisControl;
       }
 
-      this.isInputWidget = [
+      this.options.isInputWidget = inArray(this.layoutNode.type, [
         'button', 'checkbox', 'checkboxes-inline', 'checkboxes', 'color',
         'date', 'datetime-local', 'datetime', 'email', 'file', 'hidden',
         'image', 'integer', 'month', 'number', 'password', 'radio',
         'radiobuttons', 'radios-inline', 'radios', 'range', 'reset', 'search',
         'select', 'submit', 'tel', 'text', 'textarea', 'time', 'url', 'week'
-      ].indexOf(this.layoutNode.type) !== -1;
+      ]);
 
-      this.title = this.setTitle(this.layoutNode.type);
+      this.options.title = this.setTitle(this.layoutNode.type);
 
-      this.htmlClass = this.layoutNode.htmlClass || '';
-      this.htmlClass = addClasses(this.htmlClass, 'schema-form-' + this.layoutNode.type);
+      this.options.htmlClass = this.options.htmlClass || '';
+      this.options.htmlClass = addClasses(this.options.htmlClass,
+        'schema-form-' + this.layoutNode.type);
       if (this.layoutNode.type === 'array') {
-        this.htmlClass = addClasses(this.htmlClass, 'list-group');
-      } else if (this.layoutNode.isArrayItem && this.layoutNode.type !== '$ref') {
-        this.htmlClass = addClasses(this.htmlClass, 'list-group-item');
+        this.options.htmlClass = addClasses(this.options.htmlClass,
+          'list-group');
+      } else if (this.options.isArrayItem && this.layoutNode.type !== '$ref') {
+        this.options.htmlClass = addClasses(this.options.htmlClass,
+          'list-group-item');
       } else {
-        this.htmlClass = addClasses(this.htmlClass, 'form-group');
+        this.options.htmlClass = addClasses(this.options.htmlClass,
+          'form-group');
       }
-      this.htmlClass = addClasses(this.htmlClass, this.options.globalOptions.formDefaults.htmlClass);
-      this.layoutNode.htmlClass = '';
+      this.options.htmlClass = addClasses(this.options.htmlClass,
+        this.formSettings.globalOptions.formDefaults.htmlClass);
+      this.layoutNode.options.htmlClass = '';
 
-      this.labelHtmlClass = this.layoutNode.labelHtmlClass || '';
-      this.labelHtmlClass = addClasses(this.labelHtmlClass, 'control-label');
-      this.labelHtmlClass = addClasses(this.labelHtmlClass, this.options.globalOptions.formDefaults.labelHtmlClass);
+      this.options.labelHtmlClass = this.options.labelHtmlClass || '';
+      this.options.labelHtmlClass = addClasses(this.options.labelHtmlClass,
+        'control-label');
+      this.options.labelHtmlClass = addClasses(this.options.labelHtmlClass,
+        this.formSettings.globalOptions.formDefaults.labelHtmlClass);
 
-      this.layoutNode.fieldHtmlClass = this.layoutNode.fieldHtmlClass || '';
-      this.layoutNode.fieldHtmlClass = addClasses(
-        this.layoutNode.fieldHtmlClass,
-        this.options.globalOptions.formDefaults.fieldHtmlClass
+      this.layoutNode.options.fieldHtmlClass =
+        this.layoutNode.options.fieldHtmlClass || '';
+      this.layoutNode.options.fieldHtmlClass = addClasses(
+        this.layoutNode.options.fieldHtmlClass,
+        this.formSettings.globalOptions.formDefaults.fieldHtmlClass
       );
 
-      this.layoutNode.fieldAddonLeft =
-        this.layoutNode.fieldAddonLeft || this.layoutNode.prepend;
+      this.options.fieldAddonLeft =
+        this.options.fieldAddonLeft || this.options.prepend;
 
-      this.layoutNode.fieldAddonRight =
-        this.layoutNode.fieldAddonRight || this.layoutNode.append;
+      this.options.fieldAddonRight =
+        this.options.fieldAddonRight || this.options.append;
 
       // Set miscelaneous styles and settings for each control type
       switch (this.layoutNode.type) {
         case 'checkbox':
-          this.htmlClass = addClasses(this.htmlClass, 'checkbox');
+          this.options.htmlClass = addClasses(this.options.htmlClass, 'checkbox');
         break;
         case 'checkboxes':
-          this.layoutNode.htmlClass =
-            addClasses(this.layoutNode.htmlClass, 'checkbox');
+          this.options.htmlClass =
+            addClasses(this.options.htmlClass, 'checkbox');
         break;
         case 'checkboxes-inline':
-          this.htmlClass = addClasses(this.htmlClass, 'checkbox-inline');
+          this.options.htmlClass = addClasses(this.options.htmlClass,
+            'checkbox-inline');
         break;
         case 'button': case 'submit':
-          this.layoutNode.fieldHtmlClass =
-            addClasses(this.layoutNode.fieldHtmlClass, 'btn');
-          this.layoutNode.fieldHtmlClass = addClasses(
-            this.layoutNode.fieldHtmlClass,
-            this.layoutNode.style || 'btn-info'
+          this.layoutNode.options.fieldHtmlClass =
+            addClasses(this.layoutNode.options.fieldHtmlClass, 'btn');
+          this.layoutNode.options.fieldHtmlClass = addClasses(
+            this.layoutNode.options.fieldHtmlClass,
+            this.options.style || 'btn-info'
           );
         break;
         case '$ref':
-          this.layoutNode.fieldHtmlClass =
-            addClasses(this.layoutNode.fieldHtmlClass, 'btn pull-right');
-          this.layoutNode.fieldHtmlClass = addClasses(
-            this.layoutNode.fieldHtmlClass,
-            this.layoutNode.style || 'btn-default'
+          this.layoutNode.options.fieldHtmlClass =
+            addClasses(this.layoutNode.options.fieldHtmlClass, 'btn pull-right');
+          this.layoutNode.options.fieldHtmlClass = addClasses(
+            this.layoutNode.options.fieldHtmlClass,
+            this.options.style || 'btn-default'
           );
-          this.layoutNode.icon = 'glyphicon glyphicon-plus';
+          this.options.icon = 'glyphicon glyphicon-plus';
         break;
         case 'array': case 'fieldset': case 'section': case 'conditional':
-          this.layoutNode.isRemovable = false;
-          this.messageLocation = 'top';
-          if (this.layoutNode.title && this.layoutNode.required &&
-            this.layoutNode.title.indexOf('*') === -1
+          this.options.isRemovable = false;
+          this.options.messageLocation = 'top';
+          if (this.options.title && this.options.required &&
+            this.options.title.indexOf('*') === -1
           ) {
-            this.layoutNode.title += ' <strong class="text-danger">*</strong>';
+            this.options.title += ' <strong class="text-danger">*</strong>';
           }
         break;
         case 'help': case 'msg': case 'message':
           this.displayWidget = false;
         break;
         case 'radiobuttons':
-          this.htmlClass = addClasses(this.htmlClass, 'btn-group');
-          this.layoutNode.labelHtmlClass =
-            addClasses(this.layoutNode.labelHtmlClass, 'btn btn-default');
-          this.layoutNode.fieldHtmlClass =
-            addClasses(this.layoutNode.fieldHtmlClass, 'sr-only');
+          this.options.htmlClass = addClasses(this.options.htmlClass, 'btn-group');
+          this.options.labelHtmlClass =
+            addClasses(this.options.labelHtmlClass, 'btn btn-default');
+          this.layoutNode.options.fieldHtmlClass =
+            addClasses(this.layoutNode.options.fieldHtmlClass, 'sr-only');
         break;
         case 'radio': case 'radios':
-          this.layoutNode.htmlClass =
-            addClasses(this.layoutNode.htmlClass, 'radio');
+          this.options.htmlClass =
+            addClasses(this.options.htmlClass, 'radio');
         break;
         case 'radios-inline':
-          this.layoutNode.labelHtmlClass =
-            addClasses(this.layoutNode.labelHtmlClass, 'radio-inline');
+          this.options.labelHtmlClass =
+            addClasses(this.options.labelHtmlClass, 'radio-inline');
         break;
         default:
-          this.layoutNode.fieldHtmlClass =
-            addClasses(this.layoutNode.fieldHtmlClass, 'form-control');
+          this.layoutNode.options.fieldHtmlClass =
+            addClasses(this.layoutNode.options.fieldHtmlClass, 'form-control');
       }
 
       if (
@@ -160,8 +166,7 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
         let addedNode: ComponentRef<any> = this.widgetContainer.createComponent(
           this.componentFactory.resolveComponentFactory(this.layoutNode.widget)
         );
-        addedNode.instance.layoutNode = this.layoutNode;
-        for (let input of ['formGroup', 'options', 'index', 'debug']) {
+        for (let input of ['layoutNode', 'formSettings', 'index', 'debug']) {
           addedNode.instance[input] = this[input];
         }
         this.controlInitialized = true;
@@ -169,22 +174,22 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
         if (this.formControl) {
           this.formControl.statusChanges.subscribe(value => {
             if (value === 'INVALID' && this.formControl.errors) {
-              this.errorMessage = Object.keys(this.formControl.errors).map(
+              this.options.errorMessage = Object.keys(this.formControl.errors).map(
                   error => [error, Object.keys(this.formControl.errors[error]).map(
                     errorParameter => errorParameter + ': ' +
                       this.formControl.errors[error][errorParameter]
                   ).join(', ')].filter(e => e).join(' - ')
                 ).join('<br>');
             } else {
-              this.errorMessage = null;
+              this.layoutNode.options.errorMessage = null;
             }
           });
         }
 
         if (this.debug) {
           let vars: any[] = [];
-          // vars.push(this.options.formGroup.value[this.layoutNode.name]);
-          // vars.push(this.options.formGroup.controls[this.layoutNode.name]['errors']);
+          // vars.push(this.formSettings.formGroup.value[this.options.name]);
+          // vars.push(this.formSettings.formGroup.controls[this.options.name]['errors']);
           this.debugOutput = _.map(vars, thisVar => JSON.stringify(thisVar, null, 2)).join('\n');
         }
       }
@@ -200,15 +205,15 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
 
   private updateArrayItems() {
     if (this.layoutNode.isArrayItem) {
-      const arrayPointer = JsonPointer.parse(this.itemPointer).slice(0, -2);
-      const parentArray = JsonPointer.get(this.options.layout, arrayPointer);
+      const arrayPointer = JsonPointer.parse(this.layoutPointer).slice(0, -2);
+      const parentArray = JsonPointer.get(this.formSettings.layout, arrayPointer);
       const minItems = parentArray.minItems || 0;
       const lastArrayItem = parentArray.items.length - 2;
       const tupleItems = parentArray.tupleItems;
-      if (this.layoutNode.isRemovable && this.arrayIndex >= minItems &&
+      if (this.options.isRemovable && this.arrayIndex >= minItems &&
         (this.arrayIndex >= tupleItems || this.arrayIndex === lastArrayItem)
       ) {
-        this.isRemovable = true;
+        this.options.isRemovable = true;
       }
     }
   }
@@ -220,24 +225,24 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
       case 'section': case 'submit': case '$ref':
         return null;
       case 'advancedfieldset':
-        this.layoutNode.title = null;
+        this.layoutNode.options.title = null;
         return 'Advanced options';
       case 'authfieldset':
-        this.layoutNode.title = null;
+        this.layoutNode.options.title = null;
         return 'Authentication settings';
       default:
-        let thisTitle = this.layoutNode.title
+        let thisTitle = this.options.title
           || (!isNumber(this.layoutNode.name) && this.layoutNode.name !== '-' ?
           this.layoutNode.name : null);
-        this.layoutNode.title = null;
+        this.layoutNode.options.title = null;
         return thisTitle;
     }
   }
 
   private removeItem() {
-    let formArray = getControl(this.options.formGroup, this.layoutNode.pointer, true);
+    let formArray = getControl(this.formSettings.formGroup, this.layoutNode.dataPointer, true);
     formArray.removeAt(this.arrayIndex);
     let indexedPointer = toIndexedPointer(this.layoutNode.layoutPointer, this.index);
-    JsonPointer.remove(this.options.layout, indexedPointer);
+    JsonPointer.remove(this.formSettings.layout, indexedPointer);
   }
 }

@@ -12,10 +12,11 @@ import { inArray, xor } from './index';
  *   _executeValidators, _executeAsyncValidators, _mergeObjects, _mergeErrors
  *
  * Individual value checking:
- *   isPresent, isBlank, isSet, isNotSet, isEmpty, isNotEmpty
+ *   isDefined, hasValue, isEmpty
  *
  * Individual type checking:
- *   isString, isNumber, isInteger, isBoolean, isFunction, isObject, isArray, isPromise
+ *   isString, isNumber, isInteger, isBoolean, isFunction, isObject, isArray,
+ *   isMap, isSet, isPromise
  *
  * Multiple type checking and fixing:
  *   getType, isType, isPrimitive, toJavaScriptType, toSchemaType, _convertToPromise
@@ -38,7 +39,8 @@ export type JavaScriptPrimitiveType =
   'string' | 'number' | 'boolean' | 'null' | 'undefined';
 export type JavaScriptType =
   'string' | 'number' | 'boolean' | 'null' | 'undefined' | 'object' | 'array' |
-  'arguments' | 'date' | 'error' | 'function' | 'json' | 'math' | 'regexp'
+  'map' | 'set' | 'arguments' | 'date' | 'error' | 'function' | 'json' |
+  'math' | 'regexp'
 export type PrimitiveValue = string | number | boolean | null | undefined;
 export type PlainObject = { [k: string]: any };
 
@@ -97,7 +99,7 @@ export function _mergeObjects(...object: PlainObject[]): PlainObject {
       for (let key of Object.keys(currentObject)) {
         const currentValue = currentObject[key];
         const mergedValue = mergedObject[key];
-        if (isPresent(mergedValue)) {
+        if (isDefined(mergedValue)) {
           if ( key === 'not' &&
             isBoolean(mergedValue, 'strict') &&
             isBoolean(currentValue, 'strict')
@@ -135,71 +137,38 @@ export function _mergeErrors(arrayOfErrors: PlainObject[]): PlainObject {
 }
 
 /**
- * 'isPresent' utility function
+ * 'isDefined' utility function
  *
- * Opposite of 'isBlank' function
  * Checks if a variable contains a value of any type.
  * Returns true even for otherwise 'falsey' values of 0, '', and false.
  *
  * @param {any} object - the value to check
  * @return {boolean} - false if undefined or null, otherwise true
  */
-export function isPresent(value: any): boolean {
+export function isDefined(value: any): boolean {
   return value !== undefined && value !== null;
 }
 
 /**
- * 'isBlank' utility function
+ * 'hasValue' utility function
  *
- * Opposite of 'isPresent' function
- * Checks if a variable does not contain a value of any type.
- * Returns false even for otherwise 'falsey' values of 0, '', and false.
- *
- * @param {any} object - the value to check
- * @return {boolean} - true if undefined or null, otherwise false
- */
-export function isBlank(value: any): boolean {
-  return value === undefined || value === null;
-}
-
-/**
- * 'isSet' utility function
- *
- * Opposite of 'isNotSet' function
  * Checks if a variable contains a value.
  * Returs false for null, undefined, or a zero-length strng, '',
  * otherwise returns true.
- * (Stricter than 'isPresent' because it also returns false for '',
+ * (Stricter than 'isDefined' because it also returns false for '',
  * though it stil returns true for otherwise 'falsey' values 0 and false.)
  *
  * @param {any} object - the value to check
  * @return {boolean} - false if undefined, null, or '', otherwise true
  */
-export function isSet(value: any): boolean {
+export function hasValue(value: any): boolean {
   return value !== undefined && value !== null && value !== '';
-}
-
-/**
- * 'isNotSet' utility function
- *
- * Opposite of 'isSet' function
- * Checks if a variable does not contain a value.
- * Returs true for null, undefined, or a zero-length strng, '',
- * otherwise returns false.
- * (Stricter than 'isBlank' because it also returns true for '',
- * though it stil returns false for otherwise 'falsey' values 0 and false.)
- *
- * @param {any} object - the value to check
- * @return {boolean} - false if undefined, null, or '', otherwise true
- */
-export function isNotSet(value: any): boolean {
-  return value === undefined || value === null || value === '';
 }
 
 /**
  * 'isEmpty' utility function
  *
- * Similar to isNotSet, but also returns true for empty arrays and objects.
+ * Similar to !hasValue, but also returns true for empty arrays and objects.
  *
  * @param {any} object - the value to check
  * @return {boolean} - false if undefined, null, or '', otherwise true
@@ -208,20 +177,6 @@ export function isEmpty(value: any): boolean {
   if (isArray(value)) return !value.length;
   if (isObject(value)) return !Object.keys(value).length;
   return value === undefined || value === null || value === '';
-}
-
-/**
- * 'isNotEmpty' utility function
- *
- * Similar to isSet, but also returns true for non-empty arrays and objects.
- *
- * @param {any} object - the value to check
- * @return {boolean} - true if undefined, null, or '', otherwise false
- */
-export function isNotEmpty(value: any): boolean {
-  if (isArray(value)) return !!value.length;
-  if (isObject(value)) return !!Object.keys(value).length;
-  return value !== undefined && value !== null && value !== '';
 }
 
 /**
@@ -298,6 +253,16 @@ export function isArray(item: any): boolean {
     Object.prototype.toString.call(item) === '[object Array]';
 }
 
+export function isMap(item: any): boolean {
+  return typeof item === 'object' &&
+    Object.prototype.toString.call(item) === '[object Map]';
+}
+
+export function isSet(item: any): boolean {
+  return typeof item === 'object' &&
+    Object.prototype.toString.call(item) === '[object Set]';
+}
+
 /**
  * 'getType' function
  *
@@ -320,7 +285,7 @@ export function isArray(item: any): boolean {
  * @return {boolean}
  */
 export function getType(value: any): SchemaType {
-  if (isBlank(value)) return 'null';
+  if (!isDefined(value)) return 'null';
   if (isArray(value)) return 'array';
   if (isObject(value)) return 'object';
   if (isBoolean(value, 'strict')) return 'boolean';
@@ -351,7 +316,7 @@ export function isType(value: PrimitiveValue, type: SchemaPrimitiveType): boolea
     case 'boolean':
       return isBoolean(value);
     case 'null':
-      return !isSet(value);
+      return !hasValue(value);
     default:
       console.error('isType error: "' + type + '" is not a recognized type.');
       return null;
@@ -404,7 +369,7 @@ export function toJavaScriptType(
   type: SchemaPrimitiveType | SchemaPrimitiveType[],
   checkIntegers: boolean = false
 ): PrimitiveValue {
-  if (isBlank(value)) return null;
+  if (!isDefined(value)) return null;
   if (isString(type)) type = [type];
   if (checkIntegers && inArray('integer', type)) {
     if (isInteger(value, 'strict')) return value;
@@ -474,7 +439,7 @@ export function toSchemaType(
   value: PrimitiveValue, types: SchemaPrimitiveType | SchemaPrimitiveType[]
 ): PrimitiveValue {
   if (!isArray(<SchemaPrimitiveType>types)) types = <SchemaPrimitiveType[]>[types];
-  if ((<SchemaPrimitiveType[]>types).indexOf('null') !== -1 && !isSet(value)) {
+  if ((<SchemaPrimitiveType[]>types).indexOf('null') !== -1 && !hasValue(value)) {
     return null;
   }
   if ((<SchemaPrimitiveType[]>types).indexOf('boolean') !== -1 && !isBoolean(value, 'strict')) {

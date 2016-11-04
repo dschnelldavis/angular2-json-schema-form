@@ -1,50 +1,51 @@
-<div [class]="htmlClass"
-  [class.has-feedback]="layoutNode?.feedback !== false && isInputWidget && formControl?.dirty"
-  [class.has-error]="!layoutNode?.disableErrorState && formControl?.errors && formControl?.dirty"
-  [class.has-success]="!layoutNode?.disableSuccessState && !formControl?.errors && formControl?.dirty">
+<div [class]="options?.htmlClass"
+  [class.has-feedback]="options?.feedback !== false && options?.isInputWidget && formControl?.dirty"
+  [class.has-error]="!options?.disableErrorState && formControl?.errors && formControl?.dirty"
+  [class.has-success]="!options?.disableSuccessState && !formControl?.errors && formControl?.dirty">
 
   <button *ngIf="isRemovable" (click)="removeItem()" class="close pull-right"
     style="position: relative; z-index: 20;" type="button">
     <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
   </button>
-  <div *ngIf="messageLocation === 'top'">
-    <p *ngIf="!layoutNode?.disableErrorState && layoutNode?.feedback !== false && errorMessage && formControl?.dirty"
-      [innerHTML]="errorMessage" class="help-block"></p>
-    <p *ngIf="layoutNode?.feedback !== false && formControl?.dirty"
-      [id]="layoutNode?.pointer + 'Status'" class="sr-only"
+  <div *ngIf="options?.messageLocation === 'top'">
+    <p *ngIf="!options?.disableErrorState && options?.feedback !== false && options?.errorMessage && formControl?.dirty"
+      [innerHTML]="options?.errorMessage" class="help-block"></p>
+    <p *ngIf="options?.feedback !== false && formControl?.dirty"
+      [id]="layoutNode?.dataPointer + 'Status'" class="sr-only"
       [innerHTML]="formControl?.errors ? '(error)' : '(success)'"></p>
-    <p *ngIf="layoutNode?.description" [innerHTML]="layoutNode?.description" class="help-block"></p>
-    <p *ngIf="layoutNode?.help" [innerHTML]="layoutNode?.help" class="help-block"></p>
+    <p *ngIf="options?.description" [innerHTML]="options?.description" class="help-block"></p>
+    <p *ngIf="options?.help" [innerHTML]="options?.help" class="help-block"></p>
   </div>
 
-  <label [attr.for]="layoutNode?.pointer" [class]="labelHtmlClass"
-    [class.sr-only]="layoutNode?.notitle || !title" [innerHTML]="title"></label>
-  <strong *ngIf="title && layoutNode?.required" class="text-danger">*</strong>
-  <p *ngIf="layoutNode?.type === 'submit' && formOptions?.fieldsRequired">
+  <label *ngIf="options?.title" [attr.for]="layoutNode?.dataPointer"
+    [class]="options?.labelHtmlClass" [class.sr-only]="options?.notitle"
+    [innerHTML]="options?.title"></label>
+  <strong *ngIf="options?.title && options?.required" class="text-danger">*</strong>
+  <p *ngIf="layoutNode?.type === 'submit' && formSettings?.globalOptions?.fieldsRequired">
     <strong class="text-danger">*</strong> = required fields
   </p>
-  <div [class.input-group]="layoutNode?.fieldAddonLeft || layoutNode?.fieldAddonRight">
-    <span *ngIf="layoutNode?.fieldAddonLeft" class="input-group-addon"
-      [innerHTML]="layoutNode?.fieldAddonLeft"></span>
+  <div [class.input-group]="options?.fieldAddonLeft || options?.fieldAddonRight">
+    <span *ngIf="options?.fieldAddonLeft" class="input-group-addon"
+      [innerHTML]="options?.fieldAddonLeft"></span>
 
     <div #widgetContainer></div>
 
-    <span *ngIf="layoutNode?.fieldAddonRight" class="input-group-addon"
-      [innerHTML]="layoutNode?.fieldAddonRight"></span>
+    <span *ngIf="options?.fieldAddonRight" class="input-group-addon"
+      [innerHTML]="options?.fieldAddonRight"></span>
   </div>
 
-  <span *ngIf="layoutNode?.feedback !== false && isInputWidget &&
-    !layoutNode?.fieldAddonRight && !layoutNode.isArrayItem && formControl?.dirty"
-    [class.glyphicon-ok]="!layoutNode?.disableSuccessState && !formControl?.errors"
-    [class.glyphicon-remove]="!layoutNode?.disableErrorState && formControl?.errors"
+  <span *ngIf="options?.feedback !== false && options?.isInputWidget &&
+    !options?.fieldAddonRight && !options.isArrayItem && formControl?.dirty"
+    [class.glyphicon-ok]="!options?.disableSuccessState && !formControl?.errors"
+    [class.glyphicon-remove]="!options?.disableErrorState && formControl?.errors"
     aria-hidden="true" class="form-control-feedback glyphicon"></span>
-  <div *ngIf="messageLocation === 'bottom'">
-    <p *ngIf="!layoutNode?.disableErrorState && layoutNode?.feedback !== false && errorMessage && formControl?.dirty"
-      [innerHTML]="errorMessage" class="help-block"></p>
-    <p *ngIf="layoutNode?.feedback !== false && formControl?.dirty" [id]="layoutNode?.pointer + 'Status'"
+  <div *ngIf="options?.messageLocation !== 'top'">
+    <p *ngIf="!options?.disableErrorState && options?.feedback !== false && options?.errorMessage && formControl?.dirty"
+      [innerHTML]="options?.errorMessage" class="help-block"></p>
+    <p *ngIf="options?.feedback !== false && formControl?.dirty" [id]="layoutNode?.dataPointer + 'Status'"
       [innerHTML]="formControl?.errors ? '(error)' : '(success)'" class="sr-only"></p>
-    <p *ngIf="layoutNode?.description" [innerHTML]="layoutNode?.description" class="help-block"></p>
-    <p *ngIf="layoutNode?.help" [innerHTML]="layoutNode?.help" class="help-block"></p>
+    <p *ngIf="options?.description" [innerHTML]="options?.description" class="help-block"></p>
+    <p *ngIf="options?.help" [innerHTML]="options?.help" class="help-block"></p>
   </div>
 </div>
 

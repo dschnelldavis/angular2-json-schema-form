@@ -6,38 +6,38 @@ import { buildFormGroup, buildTitleMap, getControl } from '../utilities/index';
 @Component({
   selector: 'checkboxes-widget',
   template: `
-    <label *ngIf="layoutNode?.title" [class]="layoutNode?.labelHtmlClass"
-      [class.sr-only]="layoutNode?.notitle" [innerHTML]="layoutNode?.title"></label>
+    <label *ngIf="options?.title" [class]="options?.labelHtmlClass"
+      [class.sr-only]="options?.notitle" [innerHTML]="options?.title"></label>
     <div [ngSwitch]="layoutNode?.type">
       <div *ngSwitchCase="'checkboxes-inline'"> <!-- checkboxes-inline template -->
         <label *ngFor="let checkboxItem of checkboxList"
-          [attr.for]="layoutNode?.pointer + '/' + checkboxItem?.value"
-          [class]="layoutNode?.labelHtmlClass"
+          [attr.for]="layoutNode?.dataPointer + '/' + checkboxItem?.value"
+          [class]="options?.labelHtmlClass"
           [class.active]="formControlGroup.value[layoutNode?.name].indexOf(checkboxItem?.value) !== -1">
           <input type="checkbox"
             (click)="onClick($event)"
-            [id]="layoutNode?.pointer + '/' + checkboxItem?.value"
+            [id]="layoutNode?.dataPointer + '/' + checkboxItem?.value"
             [name]="layoutNode?.name"
-            [class]="layoutNode?.fieldHtmlClass"
+            [class]="options?.fieldHtmlClass"
             [value]="checkboxItem?.value"
-            [attr.readonly]="layoutNode?.readonly ? 'readonly' : null"
-            [attr.required]="layoutNode?.required"
+            [attr.readonly]="options?.readonly ? 'readonly' : null"
+            [attr.required]="options?.required"
             [checked]="checkboxItem?.checked">
           <span [innerHTML]="checkboxItem?.name"></span>
         </label>
       </div>
       <div *ngSwitchDefault> <!-- regular checkboxes template -->
-        <div *ngFor="let checkboxItem of checkboxList" [class]="layoutNode?.htmlClass">
-          <label [attr.for]="layoutNode?.pointer + '/' + checkboxItem?.value"
+        <div *ngFor="let checkboxItem of checkboxList" [class]="options?.htmlClass">
+          <label [attr.for]="layoutNode?.dataPointer + '/' + checkboxItem?.value"
             [class.active]="formControlGroup.value[layoutNode?.name].indexOf(checkboxItem?.value) !== -1">
             <input type="checkbox"
               (click)="onClick($event)"
-              [id]="layoutNode?.pointer + '/' + checkboxItem?.value"
+              [id]="layoutNode?.dataPointer + '/' + checkboxItem?.value"
               [name]="layoutNode?.name"
-              [class]="layoutNode?.fieldHtmlClass"
+              [class]="options?.fieldHtmlClass"
               [value]="checkboxItem?.value"
-              [attr.readonly]="layoutNode?.readonly ? 'readonly' : null"
-              [attr.required]="layoutNode?.required"
+              [attr.readonly]="options?.readonly ? 'readonly' : null"
+              [attr.required]="options?.required"
               [checked]="checkboxItem?.checked">
             <span [innerHTML]="checkboxItem?.name"></span>
           </label>
@@ -48,16 +48,18 @@ import { buildFormGroup, buildTitleMap, getControl } from '../utilities/index';
 export class CheckboxesComponent implements OnInit {
   private formControlGroup: any;
   private bindControl: boolean = false;
+  private options: any;
   private formArray: FormArray;
   private checkboxList: any[] = [];
   @Input() layoutNode: any;
-  @Input() options: any;
+  @Input() formSettings: any;
   @Input() index: number[];
   @Input() debug: boolean;
 
   ngOnInit() {
-    if (this.layoutNode.hasOwnProperty('pointer')) {
-      this.formControlGroup = getControl(this.options.formGroup, this.layoutNode.pointer, true);
+    this.options = this.layoutNode.options;
+    if (this.layoutNode.hasOwnProperty('dataPointer')) {
+      this.formControlGroup = getControl(this.formSettings.formGroup, this.layoutNode.dataPointer, true);
       if (this.formControlGroup &&
         this.formControlGroup.controls.hasOwnProperty(this.layoutNode.name)
       ) {
@@ -70,7 +72,7 @@ export class CheckboxesComponent implements OnInit {
         }
       } else {
         console.error(
-          'CheckboxesComponent warning: control "' + this.layoutNode.pointer +
+          'CheckboxesComponent warning: control "' + this.layoutNode.dataPointer +
           '" is not bound to the Angular 2 FormGroup.'
         );
       }

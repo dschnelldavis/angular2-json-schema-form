@@ -1,27 +1,32 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'section-widget',
   template: `
-    <div [class]="layoutNode?.htmlClass">
-      <label *ngIf="layoutNode?.title" [attr.for]="layoutNode?.pointer"
-        [class]="layoutNode?.labelHtmlClass" [class.sr-only]="layoutNode?.notitle"
-        [innerHTML]="layoutNode?.title"></label>
+    <div [class]="options?.htmlClass">
+      <label *ngIf="options?.title" [attr.for]="layoutNode?.dataPointer"
+        [class]="options?.labelHtmlClass" [class.sr-only]="options?.notitle"
+        [innerHTML]="options?.title"></label>
 
-      <div *ngFor="let item of layoutNode?.items; let i = index; trackBy: item?.pointer">
+      <div *ngFor="let item of options?.items; let i = index; trackBy: item?.dataPointer">
         <root-widget
           [layoutNode]="item"
-          [options]="options"
+          [formSettings]="formSettings"
           [index]="index.concat(i)"
           [debug]="debug"></root-widget>
       </div>
 
     </div>`,
 })
-export class SectionComponent {
+export class SectionComponent implements OnInit {
+  private options: any;
   @Input() layoutNode: any;
-  @Input() options: any;
+  @Input() formSettings: any;
   @Input() index: number[];
   @Input() debug: boolean;
+
+  ngOnInit() {
+    this.options = this.layoutNode.options;
+  }
 }

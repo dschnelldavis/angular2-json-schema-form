@@ -8,7 +8,7 @@ import 'rxjs/add/operator/map';
 import * as Immutable from 'immutable';
 
 import {
-  isArray, isObject, isEmpty, isNotSet, JsonPointer, PlainObject,
+  hasValue, isArray, isObject, isEmpty, isMap, JsonPointer, PlainObject,
 } from './index';
 
 /**
@@ -49,9 +49,9 @@ export function addClasses(oldClasses, newClasses) {
  */
 export function copy(object: any): any {
   if (typeof object !== 'object' || object === null) return object;
-  if (isArray(object) || isObject(object)) {
-    return Object.assign(isArray(object) ? [] : {}, object);
-  }
+  if (isObject(object)) return Object.assign({}, object);
+  if (isArray(object)) return [].concat(object);
+  if (isMap(object)) return new Map(object);
   console.error('copy error: Object to copy must be a JavaScript object,' +
     'array, or primitive value.');
 }
@@ -101,7 +101,7 @@ export function forEach(
 export function forEachCopy(
   object: any, fn: (v: any, k?: string | number, o?: any, p?: string) => any
 ): any {
-  if (isNotSet(object)) return;
+  if (!hasValue(object)) return;
   if ((isObject(object) || isArray(object)) && typeof fn !== 'function') {
     let newObject: any = isArray(object) ? [] : {};
     for (let key of Object.keys(object)) {

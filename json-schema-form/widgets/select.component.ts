@@ -6,28 +6,28 @@ import { buildTitleMap, getControl } from '../utilities/index';
 @Component({
   selector: 'select-widget',
   template: `
-    <label *ngIf="layoutNode?.title" [attr.for]="layoutNode?.pointer"
-      [class]="layoutNode?.labelHtmlClass" [class.sr-only]="layoutNode?.notitle"
-      [innerHTML]="layoutNode?.title"></label>
+    <label *ngIf="options?.title" [attr.for]="layoutNode?.dataPointer"
+      [class]="options?.labelHtmlClass" [class.sr-only]="options?.notitle"
+      [innerHTML]="options?.title"></label>
     <div *ngIf="bindControl" [formGroup]="formControlGroup">
       <select
         [formControlName]="layoutNode?.name"
-        [id]="layoutNode?.pointer"
-        [class]="layoutNode?.fieldHtmlClass"
+        [id]="layoutNode?.dataPointer"
+        [class]="options?.fieldHtmlClass"
         [name]="layoutNode?.name"
-        [attr.readonly]="layoutNode?.readonly ? 'readonly' : null"
-        [attr.required]="layoutNode?.required"
-        [attr.aria-describedby]="layoutNode?.pointer + 'Status'">
+        [attr.readonly]="options?.readonly ? 'readonly' : null"
+        [attr.required]="options?.required"
+        [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'">
         <option [value]="selectItem.value"
           *ngFor="let selectItem of selectList">{{selectItem.name}}</option>
       </select>
     </div>
     <select *ngIf="!bindControl"
-      [class]="layoutNode?.fieldHtmlClass"
+      [class]="options?.fieldHtmlClass"
       [name]="layoutNode?.name"
-      [attr.readonly]="layoutNode?.readonly ? 'readonly' : null"
-      [attr.required]="layoutNode?.required"
-      [attr.aria-describedby]="layoutNode?.pointer + 'Status'">
+      [attr.readonly]="options?.readonly ? 'readonly' : null"
+      [attr.required]="options?.required"
+      [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'">
       <option [value]="selectItem.value"
         *ngFor="let selectItem of selectList">{{selectItem.name}}</option>
     </select>`,
@@ -35,22 +35,24 @@ import { buildTitleMap, getControl } from '../utilities/index';
 export class SelectComponent implements OnInit {
   private formControlGroup: any;
   private bindControl: boolean = false;
+  private options: any;
   private selectList: any[] = [];
   @Input() layoutNode: any;
-  @Input() options: any;
+  @Input() formSettings: any;
   @Input() index: number[];
   @Input() debug: boolean;
 
   ngOnInit() {
-    if (this.layoutNode.hasOwnProperty('pointer')) {
-      this.formControlGroup = getControl(this.options.formGroup, this.layoutNode.pointer, true);
+    this.options = this.layoutNode.options;
+    if (this.layoutNode.hasOwnProperty('dataPointer')) {
+      this.formControlGroup = getControl(this.formSettings.formGroup, this.layoutNode.dataPointer, true);
       if (this.formControlGroup &&
         this.formControlGroup.controls.hasOwnProperty(this.layoutNode.name)
       ) {
         this.bindControl = true;
       } else {
         console.error(
-          'SelectComponent warning: control "' + this.layoutNode.pointer +
+          'SelectComponent warning: control "' + this.layoutNode.dataPointer +
           '" is not bound to the Angular 2 FormGroup.'
         );
       }

@@ -6,49 +6,51 @@ import { getControl } from '../utilities/index';
 @Component({
   selector: 'input-widget',
   template: `
-    <label *ngIf="layoutNode?.title" [attr.for]="layoutNode?.pointer"
-      [class]="layoutNode?.labelHtmlClass" [class.sr-only]="layoutNode?.notitle"
-      [innerHTML]="layoutNode?.title"></label>
+    <label *ngIf="options?.title" [attr.for]="layoutNode?.dataPointer"
+      [class]="options?.labelHtmlClass" [class.sr-only]="options?.notitle"
+      [innerHTML]="options?.title"></label>
     <div *ngIf="bindControl" [formGroup]="formControlGroup">
       <input
         [formControlName]="layoutNode?.name"
-        [id]="layoutNode?.pointer"
-        [class]="layoutNode?.fieldHtmlClass"
+        [id]="layoutNode?.dataPointer"
+        [class]="options?.fieldHtmlClass"
         [type]="layoutNode?.type"
         [name]="layoutNode?.name"
-        [attr.minlength]="layoutNode?.minLength || layoutNode?.minlength"
-        [attr.maxlength]="layoutNode?.maxLength || layoutNode?.maxlength"
+        [attr.minlength]="options?.minLength || options?.minlength"
+        [attr.maxlength]="options?.maxLength || options?.maxlength"
         [attr.pattern]="pattern"
-        [attr.placeholder]="layoutNode?.placeholder"
-        [attr.readonly]="layoutNode?.readonly ? 'readonly' : null"
-        [attr.required]="layoutNode?.required"
-        [attr.aria-describedby]="layoutNode?.pointer + 'Status'">
+        [attr.placeholder]="options?.placeholder"
+        [attr.readonly]="options?.readonly ? 'readonly' : null"
+        [attr.required]="options?.required"
+        [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'">
     </div>
     <input *ngIf="!bindControl"
-      [class]="layoutNode?.fieldHtmlClass"
+      [class]="options?.fieldHtmlClass"
       [type]="layoutNode?.type"
       [name]="layoutNode?.name"
-      [value]="layoutNode?.value"
-      [attr.minlength]="layoutNode?.minLength || layoutNode?.minlength"
-      [attr.maxlength]="layoutNode?.maxLength || layoutNode?.maxlength"
+      [value]="options?.value"
+      [attr.minlength]="options?.minLength || options?.minlength"
+      [attr.maxlength]="options?.maxLength || options?.maxlength"
       [attr.pattern]="pattern"
-      [attr.placeholder]="layoutNode?.placeholder"
-      [attr.readonly]="layoutNode?.readonly ? 'readonly' : null"
-      [attr.required]="layoutNode?.required"
-      [attr.aria-describedby]="layoutNode?.pointer + 'Status'">`,
+      [attr.placeholder]="options?.placeholder"
+      [attr.readonly]="options?.readonly ? 'readonly' : null"
+      [attr.required]="options?.required"
+      [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'">`,
 })
 export class InputComponent implements OnInit {
   private formControlGroup: any;
   private bindControl: boolean = false;
+  private options: any;
   private pattern: string = null;
   @Input() layoutNode: any;
-  @Input() options: any;
+  @Input() formSettings: any;
   @Input() index: number[];
   @Input() debug: boolean;
 
   ngOnInit() {
-    if (this.layoutNode.hasOwnProperty('pointer')) {
-      this.formControlGroup = getControl(this.options.formGroup, this.layoutNode.pointer, true);
+    this.options = this.layoutNode.options;
+    if (this.layoutNode.hasOwnProperty('dataPointer')) {
+      this.formControlGroup = getControl(this.formSettings.formGroup, this.layoutNode.dataPointer, true);
       if (this.formControlGroup &&
         this.formControlGroup.controls.hasOwnProperty(this.layoutNode.name)
       ) {
@@ -61,7 +63,7 @@ export class InputComponent implements OnInit {
         }
       } else {
         console.error(
-          'InputComponent warning: control "' + this.layoutNode.pointer +
+          'InputComponent warning: control "' + this.layoutNode.dataPointer +
           '" is not bound to the Angular 2 FormGroup.'
         );
       }

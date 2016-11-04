@@ -9,14 +9,16 @@ import { getControl } from '../utilities/index';
 })
 export class FileComponent implements OnInit {
   private formControlGroup: any;
+  private options: any;
   @Input() layoutNode: any;
-  @Input() options: any;
+  @Input() formSettings: any;
   @Input() index: number[];
   @Input() debug: boolean;
 
   ngOnInit() {
-    if (this.layoutNode.hasOwnProperty('pointer')) {
-      this.formControlGroup = getControl(this.options.formGroup, this.layoutNode.pointer, true);
+    this.options = this.layoutNode.options;
+    if (this.layoutNode.hasOwnProperty('dataPointer')) {
+      this.formControlGroup = getControl(this.formSettings.formGroup, this.layoutNode.dataPointer, true);
     }
   }
 }

@@ -20,7 +20,7 @@ import { WidgetLibraryService } from './widgets/widget-library.service';
 import {
   buildFormGroup, buildFormGroupTemplate, buildLayout, convertJsonSchema3to4,
   formatFormData, getSchemaReference, hasOwn, isArray, isEmpty, isObject,
-  isSet, isString, JsonPointer, toGenericPointer
+  hasValue, isString, JsonPointer, toGenericPointer
 } from './utilities/index';
 
 /**
@@ -58,8 +58,8 @@ import {
   selector: 'json-schema-form',
   template: `<form (ngSubmit)="submitForm()">
     <root-widget *ngIf="formActive"
-      [layoutNode]="formOptions.layout"
-      [options]="formOptions"
+      [layoutNode]="formSettings.layout"
+      [formSettings]="formSettings"
       [isFirstRoot]="true"
       [debug]="debug">
     </root-widget>
@@ -73,7 +73,7 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
   private validateFormData: any; // Compiled AJV function to validate this form's schema
   private debugOutput: any; // Debug information, if requested
 
-  private formOptions: any = { // Form options and control structures
+  private formSettings: any = { // Form options and control structures
     globalOptions: { // Default global form options
       addSubmit: true, // Add a submit button if layout does not have one?
       fieldsRequired: false, // Are there any required fields in the form?
@@ -90,14 +90,17 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
         readonly: false, // Set control as read only?
       },
     },
-    arrayMap: new Map, // Map of arrays in data object
+
     defaultValues: {}, // The initial data model (e.g. previously submitted data)
-    dataMap: new Map, // Maps paths in data model to schema and formGroup
-    formGroupTemplate: {}, // Template used to create formGroup
-    framework: null, // The active framework component
     schema: {}, // The internal JSON Schema
     layout: [], // The internal Form layout
-    formGroup: null, // Angular 2 formGroup, for powering reactive form
+    formGroupTemplate: {}, // The template used to create formGroup
+    formGroup: null, // The Angular 2 formGroup, for powering reactive form
+
+    framework: null, // The active framework component
+
+    arrayMap: new Map, // Maps arrays in data object to number of tuple values
+    dataMap: new Map, // Maps paths in data model to schema and formGroup paths
     layoutRefLibrary: {}, // Library of layout nodes for adding to form
     schemaRefLibrary: {}, // Library of schemas for resolving schema $refs
     templateRefLibrary: {}, // Library of formGroup templates for adding to form
@@ -127,8 +130,8 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
     private widgetLibrary: WidgetLibraryService,
     private frameworkLibrary: FrameworkLibraryService,
   ) {
-    this.formOptions.formGroup = this.formBuilder.group({});
-    this.formOptions.widgetLibrary = widgetLibrary;
+    this.formSettings.formGroup = this.formBuilder.group({});
+    this.formSettings.widgetLibrary = widgetLibrary;
   }
 
   ngOnInit() { }
@@ -138,9 +141,9 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
   ngAfterViewInit() { }
 
   ngOnChanges() {
-    if (isObject(this.options)) Object.assign(this.formOptions.globalOptions, this.options);
-    this.formOptions.framework = this.frameworkLibrary.getFramework();
-    this.buildFormInputs(this.formOptions);
+    if (isObject(this.options)) Object.assign(this.formSettings.globalOptions, this.options);
+    this.formSettings.framework = this.frameworkLibrary.getFramework();
+    this.buildFormInputs(this.formSettings);
   }
 
   /**
@@ -174,7 +177,7 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
       options.formGroupTemplate = {};
       options.formGroup = null;
 
-      // Initialize 'formOptions.schema'
+      // Initialize 'formSettings.schema'
       // Use first available input:
       // 1. schema - recommended / Angular Schema Form style
       // 2. form.schema - Single input / JSON Form style
@@ -225,7 +228,7 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
           if (hasOwn(value, '$ref') && isString(value['$ref'])) {
             const newReference: string = JsonPointer.compile(value['$ref']);
             const isCircular = JsonPointer.isSubPointer(newReference, pointer);
-            if (isSet(newReference) &&
+            if (hasValue(newReference) &&
               !hasOwn(options.schemaRefLibrary, newReference)
             ) {
               options.schemaRefLibrary[newReference] = getSchemaReference(
@@ -248,7 +251,7 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
         }, true);
       }
 
-      // Initialize 'formOptions.layout'
+      // Initialize 'formSettings.layout'
       // Use first available array input:
       // 1. layout - recommended
       // 2. form - Angular Schema Form style
@@ -276,7 +279,7 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
       if (isObject(this.UISchema) || hasOwn(this.form, 'UISchema')) {
         const UISchema = this.UISchema || this.form.UISchema;
 
-        // if UISchema found, copy UISchema items into formOptions.schema
+        // if UISchema found, copy UISchema items into formSettings.schema
         JsonPointer.forEachDeep(UISchema, (value, pointer) => {
           const schemaPointer: string = pointer.replace(/\//g, '/properties/')
             .replace(/\/properties\/items\/properties\//g, '/items/properties/');
@@ -295,7 +298,7 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
         });
       }
 
-      // Initialize 'formOptions.defaultValues'
+      // Initialize 'formSettings.defaultValues'
       // Use first available input:
       // 1. data - recommended
       // 2. model - Angular Schema Form style
@@ -371,6 +374,7 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
           this.validationErrors.emit(this.validateFormData.errors);
         }
 console.log(options.formGroup);
+console.log(options.layout);
       } else {
         // TODO: Output error message
       }
@@ -381,21 +385,21 @@ console.log(options.formGroup);
   ngDoCheck() {
     if (this.debug) {
       const vars: any[] = [];
-      // vars.push(this.formOptions.schema);
-      // vars.push(this.formOptions.dataMap);
-      // vars.push(this.formOptions.arrayMap);
-      vars.push(this.formOptions.formGroupTemplate);
-      // vars.push(this.formOptions.layout);
-      // vars.push(this.formOptions.schemaRefLibrary);
-      // vars.push(this.formOptions.defaultValues);
-      // vars.push(this.formOptions.formGroup);
-      // vars.push(this.formOptions.formGroup.value);
-      // vars.push(this.formOptions.layoutRefLibrary);
+      // vars.push(this.formSettings.schema);
+      // vars.push(this.formSettings.dataMap);
+      // vars.push(this.formSettings.arrayMap);
+      // vars.push(this.formSettings.formGroupTemplate);
+      vars.push(this.formSettings.layout);
+      // vars.push(this.formSettings.schemaRefLibrary);
+      // vars.push(this.formSettings.defaultValues);
+      // vars.push(this.formSettings.formGroup);
+      // vars.push(this.formSettings.formGroup.value);
+      // vars.push(this.formSettings.layoutRefLibrary);
       this.debugOutput = _.map(vars, thisVar => JSON.stringify(thisVar, null, 2)).join('\n');
     }
   }
 
   private submitForm() {
-    this.onSubmit.emit(formatFormData(this.formOptions.formGroup.value, this.formOptions, true));
+    this.onSubmit.emit(formatFormData(this.formSettings.formGroup.value, this.formSettings, true));
   }
 }

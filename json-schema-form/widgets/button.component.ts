@@ -6,38 +6,40 @@ import { getControl } from '../utilities/index';
 @Component({
   selector: 'button-widget',
   template: `
-    <div *ngIf="layoutNode?.pointer"
+    <div *ngIf="layoutNode?.dataPointer"
       [formGroup]="formControlGroup"
-      class="form-group schema-form-submit {{layoutNode?.htmlClass}}">
+      class="form-group schema-form-submit {{options?.htmlClass}}">
       <button
         [formControlName]="layoutNode?.name"
-        class="btn {{ layoutNode?.style || 'btn-default' }}"
+        class="btn {{ options?.style || 'btn-default' }}"
         [type]="layoutNode?.type"
-        [disabled]="layoutNode?.readonly"
-        [attr.aria-describedby]="layoutNode?.pointer + 'Status'">
-        <span *ngIf="layoutNode?.icon" class="{{layoutNode?.icon}}"></span>
-        {{layoutNode?.title || layoutNode?.name}}
+        [disabled]="options?.readonly"
+        [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'">
+        <span *ngIf="options?.icon" class="{{options?.icon}}"></span>
+        {{options?.title || layoutNode?.name}}
       </button>
     </div>
-    <button *ngIf="!layoutNode?.pointer"
-      class="btn {{ layoutNode?.style || 'btn-default' }}"
+    <button *ngIf="!layoutNode?.dataPointer"
+      class="btn {{ options?.style || 'btn-default' }}"
       [type]="layoutNode?.type"
-      [disabled]="layoutNode?.readonly"
-      [attr.aria-describedby]="layoutNode?.pointer + 'Status'">
-      <span *ngIf="layoutNode?.icon" class="{{layoutNode?.icon}}"></span>
-      {{layoutNode?.title || layoutNode?.name}}
+      [disabled]="options?.readonly"
+      [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'">
+      <span *ngIf="options?.icon" class="{{options?.icon}}"></span>
+      {{options?.title || layoutNode?.name}}
     </button>`,
 })
 export class ButtonComponent implements OnInit {
   private formControlGroup: any;
+  private options: any;
   @Input() layoutNode: any;
-  @Input() options: any;
+  @Input() formSettings: any;
   @Input() index: number[];
   @Input() debug: boolean;
 
   ngOnInit() {
-    if (this.layoutNode.hasOwnProperty('pointer')) {
-      this.formControlGroup = getControl(this.options.formGroup, this.layoutNode.pointer, true);
+    this.options = this.layoutNode.options;
+    if (this.layoutNode.hasOwnProperty('dataPointer')) {
+      this.formControlGroup = getControl(this.formSettings.formGroup, this.layoutNode.dataPointer, true);
     }
   }
 }

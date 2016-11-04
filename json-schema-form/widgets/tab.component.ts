@@ -1,13 +1,18 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'tab-widget',
   template: ``,
 })
-export class TabComponent {
+export class TabComponent implements OnInit {
+  private options: any;
   @Input() layoutNode: any;
-  @Input() options: any;
+  @Input() formSettings: any;
   @Input() index: number[];
   @Input() debug: boolean;
+
+  ngOnInit() {
+    this.options = this.layoutNode.options;
+  }
 }

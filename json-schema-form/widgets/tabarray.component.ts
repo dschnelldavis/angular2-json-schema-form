@@ -1,13 +1,18 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'tabarray-widget',
   template: ``,
 })
-export class TabarrayComponent {
+export class TabarrayComponent implements OnInit {
+  private options: any;
   @Input() layoutNode: any;
-  @Input() options: any;
+  @Input() formSettings: any;
   @Input() index: number[];
   @Input() debug: boolean;
+
+  ngOnInit() {
+    this.options = this.layoutNode.options;
+  }
 }

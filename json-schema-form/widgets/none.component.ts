@@ -7,7 +7,7 @@ import { FormGroup } from '@angular/forms';
 })
 export class NoneComponent {
   @Input() layoutNode: any;
-  @Input() options: any;
+  @Input() formSettings: any;
   @Input() index: number[];
   @Input() debug: boolean;
 }
