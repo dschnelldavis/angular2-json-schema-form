@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 import { getControl, isDefined } from '../utilities/index';
@@ -6,44 +6,58 @@ import { getControl, isDefined } from '../utilities/index';
 @Component({
   selector: 'number-widget',
   template: `
-    <label *ngIf="options?.title" [attr.for]="layoutNode?.dataPointer"
-      [class]="options?.labelHtmlClass" [class.sr-only]="options?.notitle"
-      [innerHTML]="options?.title"></label>
-    <div *ngIf="bindControl" [formGroup]="formControlGroup">
+    <div *ngIf="boundControl"
+      [class]="options?.htmlClass"
+      [formGroup]="formControlGroup">
+      <label *ngIf="options?.title"
+        [attr.for]="layoutNode?.dataPointer"
+        [class]="options?.labelHtmlClass"
+        [class.sr-only]="options?.notitle"
+        [innerHTML]="options?.title"></label>
       <input
-        [formControlName]="layoutNode?.name"
-        [id]="layoutNode?.dataPointer"
-        [class]="options?.fieldHtmlClass"
-        [type]="layoutNode?.type === 'range' ? 'range' : 'text'"
-        [name]="layoutNode?.name"
-        [attr.min]="options?.minimum"
-        [attr.max]="options?.maximum"
-        [attr.step]="step"
-        [attr.placeholder]="options?.placeholder"
-        [attr.readonly]="options?.readonly ? 'readonly' : null"
-        [attr.required]="options?.required"
         [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
+        [attr.max]="options?.maximum"
+        [attr.min]="options?.minimum"
+        [attr.placeholder]="options?.placeholder"
+        [attr.required]="options?.required"
+        [attr.readonly]="options?.readonly ? 'readonly' : null"
+        [attr.step]="step"
+        [class]="options?.fieldHtmlClass"
+        [formControlName]="formControlName"
+        [id]="layoutNode?.dataPointer"
+        [name]="formControlName"
+        [type]="layoutNode?.type === 'range' ? 'range' : 'text'"
         (keydown)="validateInput($event)"
         (keyup)="validateNumber($event)">
     </div>
-    <input *ngIf="!bindControl"
-      [class]="options?.fieldHtmlClass"
-      [type]="layoutNode?.type === 'range' ? 'range' : 'text'"
-      [name]="layoutNode?.name"
-      [value]="options?.value"
-      [attr.min]="options?.minimum"
-      [attr.max]="options?.maximum"
-      [attr.step]="step"
-      [attr.placeholder]="options?.placeholder"
-      [attr.readonly]="options?.readonly ? 'readonly' : null"
-      [attr.required]="options?.required"
-      [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
-      (keydown)="validateInput($event)"
-      (keyup)="validateNumber($event)">`,
+    <div *ngIf="!boundControl"
+      [class]="options?.htmlClass">
+      <label *ngIf="options?.title"
+        [attr.for]="layoutNode?.dataPointer"
+        [class]="options?.labelHtmlClass"
+        [class.sr-only]="options?.notitle"
+        [innerHTML]="options?.title"></label>
+      <input
+        [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
+        [attr.max]="options?.maximum"
+        [attr.min]="options?.minimum"
+        [attr.placeholder]="options?.placeholder"
+        [attr.readonly]="options?.readonly ? 'readonly' : null"
+        [attr.required]="options?.required"
+        [attr.step]="step"
+        [class]="options?.fieldHtmlClass"
+        [id]="formControlName"
+        [name]="formControlName"
+        [type]="layoutNode?.type === 'range' ? 'range' : 'text'"
+        [value]="layoutNode?.value"
+        (keydown)="validateInput($event)"
+        (keyup)="validateNumber($event)">
+    </div>`,
 })
-export class NumberComponent implements OnInit {
+export class NumberComponent implements OnChanges, OnInit {
   private formControlGroup: any;
-  private bindControl: boolean = false;
+  private formControlName: string;
+  private boundControl: boolean = false;
   private options: any;
   private allowNegative: boolean = true;
   private allowDecimal: boolean = true;
@@ -52,24 +66,29 @@ export class NumberComponent implements OnInit {
   private step: string;
   @Input() layoutNode: any;
   @Input() formSettings: any;
-  @Input() index: number[];
+  @Input() layoutIndex: number[];
+  @Input() dataIndex: number[];
 
   ngOnInit() {
     this.options = this.layoutNode.options;
-    if (this.layoutNode.hasOwnProperty('dataPointer')) {
-      this.formControlGroup =
-        getControl(this.formSettings.formGroup, this.layoutNode.dataPointer, true);
-      if (this.formControlGroup &&
-        this.formControlGroup.controls.hasOwnProperty(this.layoutNode.name)
-      ) {
-        this.bindControl = true;
-        this.lastValidNumber = this.formControlGroup.controls[this.layoutNode.name].value;
-      } else {
-        console.error(
-          'NumberComponent warning: control "' + this.layoutNode.dataPointer +
-          '" is not bound to the Angular 2 FormGroup.'
-        );
-      }
+    this.initializeControl();
+  }
+
+  ngOnChanges() {
+    this.initializeControl();
+  }
+
+  private initializeControl() {
+    this.formControlGroup = this.formSettings.getControlGroup(this);
+    this.formControlName = this.formSettings.getControlName(this);
+    this.boundControl = this.formSettings.isControlBound(this);
+    if (this.boundControl) {
+      this.lastValidNumber = this.formControlGroup.controls[this.formControlName].value;
+    } else {
+      console.error(
+        'NumberComponent warning: control "' + this.formSettings.getDataPointer(this) +
+        '" is not bound to the Angular 2 FormGroup.'
+      );
     }
     this.step = this.layoutNode.multipleOf || this.layoutNode.step ||
       (this.layoutNode.dataType === 'integer' ? '1' : 'any');
@@ -114,8 +133,7 @@ export class NumberComponent implements OnInit {
     ) {
       this.lastValidNumber = val;
     } else {
-      this.formControlGroup.controls[this.layoutNode.name]
-        .setValue(this.lastValidNumber);
+      this.formSettings.getControl(this).setValue(this.lastValidNumber);
     }
   }
 }

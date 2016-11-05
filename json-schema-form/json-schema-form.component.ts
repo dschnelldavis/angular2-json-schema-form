@@ -19,8 +19,8 @@ import { FrameworkLibraryService } from './frameworks/framework-library.service'
 import { WidgetLibraryService } from './widgets/widget-library.service';
 import {
   buildFormGroup, buildFormGroupTemplate, buildLayout, convertJsonSchema3to4,
-  formatFormData, getSchemaReference, hasOwn, isArray, isEmpty, isObject,
-  hasValue, isString, JsonPointer, toGenericPointer
+  formatFormData, getControl, getSchemaReference, hasOwn, isArray, isEmpty,
+  isObject, hasValue, isString, JsonPointer, toGenericPointer, toIndexedPointer
 } from './utilities/index';
 
 /**
@@ -105,6 +105,76 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
     schemaRefLibrary: {}, // Library of schemas for resolving schema $refs
     templateRefLibrary: {}, // Library of formGroup templates for adding to form
     widgetLibrary: null,
+
+    getControl: (ctx) => {
+      if (!ctx.layoutNode || !ctx.layoutNode.dataPointer) return null;
+      return getControl(this.formSettings.formGroup,
+        this.formSettings.getDataPointer(ctx));
+    },
+
+    getControlGroup: (ctx) => {
+      if (!ctx.layoutNode || !ctx.layoutNode.dataPointer) return null;
+      return getControl(this.formSettings.formGroup,
+        this.formSettings.getDataPointer(ctx), true);
+    },
+
+    getControlName: (ctx) => {
+      if (!ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex) return null;
+      return JsonPointer.toKey(toIndexedPointer(ctx.layoutNode.dataPointer,
+        ctx.dataIndex, this.formSettings.arrayMap));
+    },
+
+    getDataPointer: (ctx) => {
+      if (!ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex) return null;
+      return toIndexedPointer(ctx.layoutNode.dataPointer, ctx.dataIndex);
+    },
+
+    getLayoutPointer: (ctx) => {
+      if (!ctx.layoutNode || !ctx.layoutNode.layoutPointer || !ctx.layoutIndex) return null;
+      return toIndexedPointer(ctx.layoutNode.layoutPointer, ctx.layoutIndex);
+    },
+
+    isControlBound: (ctx) => {
+      if (!ctx.layoutNode || !ctx.layoutNode.dataPointer ||
+        !ctx.dataIndex) return false;
+      const dataPointer = this.formSettings.getDataPointer(ctx);
+      const control = this.formSettings.getControlGroup(ctx);
+      if (!control) return false;
+      return control.controls.hasOwnProperty(JsonPointer.toKey(dataPointer));
+    },
+
+    addItem: (ctx) => { // TODO: Change to also add circular reference items
+      if (!ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex ||
+        !ctx.layoutNode.layoutPointer || !ctx.layoutIndex) return false;
+      // Add new data key to formGroup
+      const genericDataPointer = ctx.layoutNode.dataPointer;
+      const indexedDataPointer = this.formSettings.getDataPointer(ctx);
+      const templateLibrary = this.formSettings.templateRefLibrary;
+      const newFormGroup =
+        buildFormGroup(JsonPointer.get(templateLibrary, [genericDataPointer]));
+      let formArray =
+        getControl(this.formSettings.formGroup, indexedDataPointer, true);
+      formArray.push(newFormGroup);
+      // Add new display node to layout
+      const layoutPointer = this.formSettings.getLayoutPointer(ctx);
+      const layoutLibrary = this.formSettings.layoutRefLibrary;
+      const newLayoutNode = JsonPointer.get(layoutLibrary, [genericDataPointer]);
+      JsonPointer.insert(this.formSettings.layout, layoutPointer, newLayoutNode);
+      return true;
+    },
+
+    removeItem: (ctx) => { // TODO: Change to also remove circular reference items
+      if (!ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex ||
+        !ctx.layoutNode.layoutPointer || !ctx.layoutIndex) return false;
+      // Remove data key from formGroup
+console.log('removing item ' + ctx.dataIndex[ctx.dataIndex.length - 1]);
+      this.formSettings.getControlGroup(ctx)
+        .removeAt(ctx.dataIndex[ctx.dataIndex.length - 1]);
+      // Remove display node from layout
+console.log('removing node ' + this.formSettings.getLayoutPointer(ctx));
+      return JsonPointer.remove(this.formSettings.layout,
+        this.formSettings.getLayoutPointer(ctx));
+    }
   };
 
   @Input() schema: any; // The input JSON Schema

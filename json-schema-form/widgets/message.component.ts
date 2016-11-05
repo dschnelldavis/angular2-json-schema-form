@@ -12,7 +12,8 @@ export class MessageComponent implements OnInit {
   private message: string = null;
   @Input() layoutNode: any;
   @Input() formSettings: any;
-  @Input() index: number[];
+  @Input() layoutIndex: number[];
+  @Input() dataIndex: number[];
 
   ngOnInit() {
     this.options = this.layoutNode.options;

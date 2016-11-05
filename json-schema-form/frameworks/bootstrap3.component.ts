@@ -21,13 +21,14 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
   private controlInitialized: boolean = false;
   private displayWidget: boolean = true;
   private options: any;
-  private arrayIndex: number;
   private layoutPointer: string;
   private formControl: any = null;
+  private formControlName: string;
   private debugOutput: any = '';
   @Input() layoutNode: any;
   @Input() formSettings: any;
-  @Input() index: number[];
+  @Input() layoutIndex: number[];
+  @Input() dataIndex: number[];
   @ViewChild('widgetContainer', { read: ViewContainerRef })
     private widgetContainer: ViewContainerRef;
 
@@ -36,12 +37,11 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
   ) { }
 
   ngOnInit() {
-    this.arrayIndex = this.index[this.index.length - 1];
     if (this.layoutNode) {
-      const widgetOptions = this.layoutNode.options;
-      this.options = Object.assign({}, widgetOptions);
+      const widgetOptions = this.layoutNode.options; // Options passed to widget
+      this.options = Object.assign({}, widgetOptions); // Options used by framework
       this.layoutPointer =
-        toIndexedPointer(this.layoutNode.layoutPointer, this.index);
+        toIndexedPointer(this.layoutNode.layoutPointer, this.layoutIndex);
       this.updateArrayItems();
 
       if (this.layoutNode.hasOwnProperty('dataPointer')) {
@@ -145,7 +145,7 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
         let addedNode: ComponentRef<any> = this.widgetContainer.createComponent(
           this.componentFactory.resolveComponentFactory(this.layoutNode.widget)
         );
-        for (let input of ['layoutNode', 'formSettings', 'index']) {
+        for (let input of ['layoutNode', 'formSettings', 'layoutIndex', 'dataIndex']) {
           addedNode.instance[input] = this[input];
         }
         this.controlInitialized = true;
@@ -184,13 +184,14 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
 
   private updateArrayItems() {
     if (this.layoutNode.options.isArrayItem) {
+      const arrayIndex = this.dataIndex[this.dataIndex.length - 1];
       const arrayPointer = JsonPointer.parse(this.layoutPointer).slice(0, -2);
       const parentArray = JsonPointer.get(this.formSettings.layout, arrayPointer);
       const minItems = parentArray.minItems || 0;
       const lastArrayItem = parentArray.items.length - 2;
       const tupleItems = parentArray.tupleItems;
-      if (this.options.isRemovable && this.arrayIndex >= minItems &&
-        (this.arrayIndex >= tupleItems || this.arrayIndex === lastArrayItem)
+      if (this.options.isRemovable && arrayIndex >= minItems &&
+        (arrayIndex >= tupleItems || arrayIndex === lastArrayItem)
       ) {
         this.options.isRemovable = true;
       }
@@ -219,9 +220,6 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
   }
 
   private removeItem() {
-    let formArray = getControl(this.formSettings.formGroup, this.layoutNode.dataPointer, true);
-    formArray.removeAt(this.arrayIndex);
-    let indexedPointer = toIndexedPointer(this.layoutNode.layoutPointer, this.index);
-    JsonPointer.remove(this.formSettings.layout, indexedPointer);
+    this.formSettings.removeItem(this);
   }
 }

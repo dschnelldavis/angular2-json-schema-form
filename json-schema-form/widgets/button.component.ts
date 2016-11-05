@@ -1,44 +1,50 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
-import { getControl } from '../utilities/index';
-
 @Component({
   selector: 'button-widget',
   template: `
-    <div *ngIf="layoutNode?.dataPointer"
-      [formGroup]="formControlGroup"
-      class="form-group schema-form-submit {{options?.htmlClass}}">
+    <div *ngIf="boundControl"
+      [class]="options?.htmlClass"
+      [formGroup]="formControlGroup">
       <button
-        [formControlName]="layoutNode?.name"
-        class="btn {{ options?.style || 'btn-default' }}"
-        [type]="layoutNode?.type"
+        [attr.aria-describedby]="formControlName + 'Status'"
+        [class]="options?.fieldHtmlClass"
         [disabled]="options?.readonly"
-        [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'">
-        <span *ngIf="options?.icon" class="{{options?.icon}}"></span>
-        {{options?.title || layoutNode?.name}}
+        [formControlName]="formControlName"
+        [type]="layoutNode?.type">
+        <span *ngIf="options?.icon"
+          [class]="options?.icon"
+          [innerHTML]="options?.title"></span>
       </button>
     </div>
-    <button *ngIf="!layoutNode?.dataPointer"
-      class="btn {{ options?.style || 'btn-default' }}"
-      [type]="layoutNode?.type"
-      [disabled]="options?.readonly"
-      [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'">
-      <span *ngIf="options?.icon" class="{{options?.icon}}"></span>
-      {{options?.title || layoutNode?.name}}
-    </button>`,
+    <div *ngIf="!boundControl"
+      [class]="options?.htmlClass">
+      <button
+        [attr.aria-describedby]="formControlName + 'Status'"
+        [class]="options?.fieldHtmlClass"
+        [disabled]="options?.readonly"
+        [type]="layoutNode?.type">
+        <span *ngIf="options?.icon"
+          [class]="options?.icon"
+          [innerHTML]="options?.title"></span>
+      </button>
+    </div>`,
 })
 export class ButtonComponent implements OnInit {
   private formControlGroup: any;
+  private formControlName: string;
+  private boundControl: boolean = false;
   private options: any;
   @Input() layoutNode: any;
   @Input() formSettings: any;
-  @Input() index: number[];
+  @Input() layoutIndex: number[];
+  @Input() dataIndex: number[];
 
   ngOnInit() {
     this.options = this.layoutNode.options;
-    if (this.layoutNode.hasOwnProperty('dataPointer')) {
-      this.formControlGroup = getControl(this.formSettings.formGroup, this.layoutNode.dataPointer, true);
-    }
+    this.formControlGroup = this.formSettings.getControlGroup(this);
+    this.formControlName = this.formSettings.getControlName(this);
+    this.boundControl = this.formSettings.isControlBound(this);
   }
 }

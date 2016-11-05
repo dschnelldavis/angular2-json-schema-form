@@ -12,7 +12,8 @@ import { FormGroup } from '@angular/forms';
         <root-widget
           [layoutNode]="item"
           [formSettings]="formSettings"
-          [index]="index.concat(i)"></root-widget>
+          [dataIndex]="layoutNode?.type === 'array' ? dataIndex.concat(i) : dataIndex"
+          [layoutIndex]="layoutIndex.concat(i)"></root-widget>
       </div>
 
     </fieldset>`,
@@ -21,7 +22,8 @@ export class FieldsetComponent implements OnInit {
   private options: any;
   @Input() layoutNode: any;
   @Input() formSettings: any;
-  @Input() index: number[];
+  @Input() layoutIndex: number[];
+  @Input() dataIndex: number[];
 
   ngOnInit() {
     this.options = this.layoutNode.options;

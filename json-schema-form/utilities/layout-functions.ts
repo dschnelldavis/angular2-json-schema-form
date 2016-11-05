@@ -37,19 +37,19 @@ import {
 export function buildLayout(formSettings: any): any[] {
   let hasSubmitButton = !formSettings.addSubmit;
   let formLayout =
-    mapLayout(formSettings.layout, (layoutNode, index, layoutPointer) => {
+    mapLayout(formSettings.layout, (layoutItem, index, layoutPointer) => {
 
     let currentIndex: number = index;
     let newNode: any = {};
-    if (isObject(layoutNode)) {
-      newNode = layoutNode;
-    } else if (JsonPointer.isJsonPointer(layoutNode)) {
-      newNode.dataPointer = layoutNode;
-    } else if (isString(layoutNode)) {
-      newNode.key = layoutNode;
+    if (isObject(layoutItem)) {
+      newNode = layoutItem;
+    } else if (JsonPointer.isJsonPointer(layoutItem)) {
+      newNode.dataPointer = layoutItem;
+    } else if (isString(layoutItem)) {
+      newNode.key = layoutItem;
     } else {
       console.error('buildLayout error: Form layout element not recognized:');
-      console.error(layoutNode);
+      console.error(layoutItem);
       return null;
     }
     newNode.options = {};
@@ -149,7 +149,7 @@ export function buildLayout(formSettings: any): any[] {
               return templateItem;
             })[0];
             arrayItemGroupTemplate.unshift(arrayItemTemplate);
-            arrayItem.dataPointer = newNode.dataPointer + '/0' + arrayItem.dataPointer.slice(length);
+            arrayItem.dataPointer = newNode.dataPointer + '/-' + arrayItem.dataPointer.slice(length);
             arrayItem.layoutPointer = newNode.layoutPointer + '/items/-/items/-';
             arrayItemGroup.unshift(arrayItem);
             newIndex++;
@@ -163,7 +163,7 @@ export function buildLayout(formSettings: any): any[] {
             items: arrayItemGroup,
             layoutPointer: newNode.layoutPointer + '/items/-',
             options: { isRemovable: !newNode.minItems, },
-            dataPointer: newNode.dataPointer + '/0',
+            dataPointer: newNode.dataPointer + '/-',
             type: 'fieldset',
             widget: formSettings.widgetLibrary.getWidget('fieldset'),
           });
@@ -182,7 +182,7 @@ export function buildLayout(formSettings: any): any[] {
             toTitleCase(JsonPointer.toKey(newNode.dataPointer).replace(/_/g, ' '));
         }
         let newNodeRef: any = {
-          dataPointer: arrayPointer,
+          dataPointer: toGenericPointer(arrayPointer, formSettings.arrayMap),
           layoutPointer: newNode.layoutPointer + '/items/-',
           name: '-',
           options: {
@@ -347,7 +347,7 @@ export function buildLayoutFromSchema(
                 formSettings, i,
                 newNode.layoutPointer + '/items/-',
                 schemaPointer + '/additionalItems',
-                dataPointer + '/' + i,
+                dataPointer + '/-',
                 true, 'list', i >= minItems
               ));
             }
@@ -356,7 +356,7 @@ export function buildLayoutFromSchema(
               templateArray.push(buildFormGroupTemplate(
                 formSettings,
                 schemaPointer + '/additionalItems',
-                dataPointer + '/' + i,
+                dataPointer + '/-',
                 toControlPointer(formSettings.formGroupTemplate, dataPointer + '/' + i),
                 false
               ));
@@ -378,7 +378,7 @@ export function buildLayoutFromSchema(
             formSettings, i,
             newNode.layoutPointer + '/items/-',
             schemaPointer + '/items',
-            dataPointer + '/' + i,
+            dataPointer + '/-',
             true, 'list', i >= minItems
           ));
         }
@@ -562,21 +562,39 @@ export function buildTitleMap(
  * @function
  * @param {string | string[]} genericPointer - The generic pointer
  * @param {number[]} indexArray - The array of numeric indexes
+ * @param {Map<string, number>} arrayMap - An optional array map
  * @return {string} - The merged pointer with indexes
 **/
-export function toIndexedPointer(genericPointer: string, indexArray: number[]) {
-  let indexedPointer = genericPointer;
-  for (let pointerIndex of indexArray) {
-    indexedPointer = indexedPointer.replace('/-', '/' + pointerIndex);
+export function toIndexedPointer(
+  genericPointer: string, indexArray: number[], arrayMap: Map<string, number> = null
+) {
+  if (JsonPointer.isJsonPointer(genericPointer) && isArray(indexArray)) {
+    if (isMap(arrayMap)) {
+      let arrayIndex: number = 0;
+      return genericPointer.replace(/\/\-(?=\/|$)/g, (key, stringIndex) => {
+        const subPointer = genericPointer.slice(0, stringIndex);
+        if (arrayMap.has(subPointer)) return '/' + indexArray[arrayIndex++];
+      });
+    } else {
+      let indexedPointer = genericPointer;
+      for (let pointerIndex of indexArray) {
+        indexedPointer = indexedPointer.replace('/-', '/' + pointerIndex);
+      }
+      return indexedPointer;
+    }
   }
-  return indexedPointer;
+  console.error('toIndexedPointer error: genericPointer must be ' +
+    'a JSON Pointer and indexArray must be an array.');
+  console.error(genericPointer);
+  console.error(indexArray);
 };
 
 /**
  * 'toGenericPointer' function
  *
  * Compares an indexed pointer to an array map and removes list array
- * indexes (but leaves tuple arrray indexes) to create a generic pointer.
+ * indexes (but leaves tuple arrray indexes and all object keys, including
+ * numeric keys) to create a generic pointer.
  *
  * For example, comparing the indexed pointer '/foo/1/bar/2/baz/3' and
  * the arrayMap [['/foo', 0], ['/foo/-/bar', 3], ['/foo/-/bar/2/baz', 0]]
@@ -585,15 +603,15 @@ export function toIndexedPointer(genericPointer: string, indexArray: number[]) {
  * The structure of the arrayMap is: ['path to array', number of tuple items]
  *
  * @function
- * @param {string | string[]} genericPointer - The generic pointer
- * @param {number[]} indexArray - The array of numeric indexes
+ * @param {string} indexedPointer - The indexed pointer
+ * @param {Map<string, number>} arrayMap - The array map
  * @return {string} - The merged pointer with indexes
 **/
 export function toGenericPointer(
-  genericPointer: string, arrayMap: Map<string, number>
+  indexedPointer: string, arrayMap: Map<string, number>
 ) {
-  if (JsonPointer.isJsonPointer(genericPointer) && isMap(arrayMap)) {
-    let pointerArray = JsonPointer.parse(genericPointer);
+  if (JsonPointer.isJsonPointer(indexedPointer) && isMap(arrayMap)) {
+    let pointerArray = JsonPointer.parse(indexedPointer);
     for (let i = 1, l = pointerArray.length; i < l; i++) {
       const subPointer = JsonPointer.compile(pointerArray.slice(0, i));
       if (arrayMap.has(subPointer) && arrayMap.get(subPointer) <= +pointerArray[i]) {
@@ -602,8 +620,8 @@ export function toGenericPointer(
     }
     return JsonPointer.compile(pointerArray);
   }
-  console.error('toGenericPointer error: genericPointer must be a string ' +
-    'and arrayMap must be a Map.');
-  console.error(genericPointer);
+  console.error('toGenericPointer error: indexedPointer must be ' +
+    'a JSON Pointer and arrayMap must be a Map.');
+  console.error(indexedPointer);
   console.error(arrayMap);
 };

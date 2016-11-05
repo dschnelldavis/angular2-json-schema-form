@@ -9,7 +9,8 @@ export class TabarrayComponent implements OnInit {
   private options: any;
   @Input() layoutNode: any;
   @Input() formSettings: any;
-  @Input() index: number[];
+  @Input() layoutIndex: number[];
+  @Input() dataIndex: number[];
 
   ngOnInit() {
     this.options = this.layoutNode.options;

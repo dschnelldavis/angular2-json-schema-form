@@ -8,5 +8,6 @@ import { FormGroup } from '@angular/forms';
 export class NoneComponent {
   @Input() layoutNode: any;
   @Input() formSettings: any;
-  @Input() index: number[];
+  @Input() layoutIndex: number[];
+  @Input() dataIndex: number[];
 }

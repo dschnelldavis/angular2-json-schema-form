@@ -209,6 +209,7 @@ export function mergeFilteredObject(
  * @return {string} -
  */
 export function toTitleCase(input: string, forceWords?: string|string[]): string {
+  if (!isString(input)) return input;
   let forceArray: string[] = ['a', 'an', 'and', 'as', 'at', 'but', 'by', 'en',
    'for', 'if', 'in', 'nor', 'of', 'on', 'or', 'per', 'the', 'to', 'v', 'v.',
    'vs', 'vs.', 'via'];

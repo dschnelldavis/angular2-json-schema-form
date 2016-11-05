@@ -1,40 +1,45 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
-import { getControl } from '../utilities/index';
-
 @Component({
   selector: 'submit-widget',
   template: `
-    <div *ngIf="layoutNode?.dataPointer" [formGroup]="formControlGroup"
-      class="form-group schema-form-submit {{options?.htmlClass}}">
+    <div *ngIf="boundControl"
+      [formGroup]="formControlGroup"
+      [class]="options?.htmlClass">
       <input
-        [formControlName]="layoutNode?.name"
-        [type]="layoutNode?.type"
-        class="btn {{ options?.style || 'btn-primary' }} {{options?.fieldHtmlClass}}"
-        [value]="options?.title"
+        [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
+        [class]="options?.fieldHtmlClass"
         [disabled]="options?.readonly"
-        [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'">
+        [formControlName]="formControlName"
+        [type]="layoutNode?.type"
+        [value]="options?.title">
     </div>
-    <input *ngIf="!layoutNode?.dataPointer"
-      [type]="layoutNode?.type"
-      class="btn {{ options?.style || 'btn-primary' }} {{options?.fieldHtmlClass}}"
-      [value]="options?.title"
-      [disabled]="options?.readonly"
-      [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'">
+    <div *ngIf="!boundControl"
+      [class]="options?.htmlClass">
+      <input
+        [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
+        [class]="options?.fieldHtmlClass"
+        [disabled]="options?.readonly"
+        [type]="layoutNode?.type"
+        [value]="options?.title">
+    </div>
 `,
 })
 export class SubmitComponent implements OnInit {
   private formControlGroup: any;
+  private formControlName: string;
+  private boundControl: boolean = false;
   private options: any;
   @Input() layoutNode: any;
   @Input() formSettings: any;
-  @Input() index: number[];
+  @Input() layoutIndex: number[];
+  @Input() dataIndex: number[];
 
   ngOnInit() {
     this.options = this.layoutNode.options;
-    if (this.layoutNode.hasOwnProperty('dataPointer')) {
-      this.formControlGroup = getControl(this.formSettings.formGroup, this.layoutNode.dataPointer, true);
-    }
+    this.formControlGroup = this.formSettings.getControlGroup(this);
+    this.formControlName = this.formSettings.getControlName(this);
+    this.boundControl = this.formSettings.isControlBound(this);
   }
 }

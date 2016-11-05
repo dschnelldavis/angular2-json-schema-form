@@ -13,7 +13,8 @@ import { FormGroup } from '@angular/forms';
         <root-widget
           [layoutNode]="item"
           [formSettings]="formSettings"
-          [index]="index.concat(i)"></root-widget>
+          [layoutIndex]="layoutIndex.concat(i)"
+          [dataIndex]="dataIndex"></root-widget>
       </div>
 
     </div>`,
@@ -22,7 +23,8 @@ export class SectionComponent implements OnInit {
   private options: any;
   @Input() layoutNode: any;
   @Input() formSettings: any;
-  @Input() index: number[];
+  @Input() layoutIndex: number[];
+  @Input() dataIndex: number[];
 
   ngOnInit() {
     this.options = this.layoutNode.options;

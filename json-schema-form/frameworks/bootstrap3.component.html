@@ -11,7 +11,7 @@
     <p *ngIf="!options?.disableErrorState && options?.feedback !== false && options?.errorMessage && formControl?.dirty"
       [innerHTML]="options?.errorMessage" class="help-block"></p>
     <p *ngIf="options?.feedback !== false && formControl?.dirty"
-      [id]="layoutNode?.dataPointer + 'Status'" class="sr-only"
+      [id]="layoutNode?.dataPointer" class="sr-only"
       [innerHTML]="formControl?.errors ? '(error)' : '(success)'"></p>
     <p *ngIf="options?.description" [innerHTML]="options?.description" class="help-block"></p>
     <p *ngIf="options?.help" [innerHTML]="options?.help" class="help-block"></p>
@@ -42,7 +42,7 @@
   <div *ngIf="options?.messageLocation !== 'top'">
     <p *ngIf="!options?.disableErrorState && options?.feedback !== false && options?.errorMessage && formControl?.dirty"
       [innerHTML]="options?.errorMessage" class="help-block"></p>
-    <p *ngIf="options?.feedback !== false && formControl?.dirty" [id]="layoutNode?.dataPointer + 'Status'"
+    <p *ngIf="options?.feedback !== false && formControl?.dirty" [id]="layoutNode?.dataPointer"
       [innerHTML]="formControl?.errors ? '(error)' : '(success)'" class="sr-only"></p>
     <p *ngIf="options?.description" [innerHTML]="options?.description" class="help-block"></p>
     <p *ngIf="options?.help" [innerHTML]="options?.help" class="help-block"></p>

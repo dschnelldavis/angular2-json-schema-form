@@ -13,7 +13,8 @@ export class RootComponent implements OnChanges, OnInit {
   private layoutArray: any[];
   @Input() layoutNode: any;
   @Input() formSettings: any;
-  @Input() index: number[];
+  @Input() layoutIndex: number[];
+  @Input() dataIndex: number[];
   @Input() isFirstRoot: boolean;
   @ViewChild('widgetContainer', { read: ViewContainerRef })
     private widgetContainer: ViewContainerRef;
@@ -33,20 +34,20 @@ export class RootComponent implements OnChanges, OnInit {
   private updateFormLayout() {
     this.widgetContainer.clear();
     if (Array.isArray(this.layoutNode)) {
-      let currentIndex = this.index || [];
       for (let i of Object.keys(this.layoutNode)) {
         let addedNode: ComponentRef<any> = this.widgetContainer.createComponent(
           this.componentFactory.resolveComponentFactory(this.formSettings.framework)
         );
         addedNode.instance.layoutNode = this.layoutNode[i];
-        addedNode.instance.index = currentIndex.concat(+i);
         addedNode.instance.formSettings = this.formSettings;
+        addedNode.instance.layoutIndex = (this.layoutIndex || []).concat(+i);
+        addedNode.instance.dataIndex = this.dataIndex || [];
       }
     } else {
       let addedNode: ComponentRef<any> = this.widgetContainer.createComponent(
         this.componentFactory.resolveComponentFactory(this.formSettings.framework)
       );
-      for (let input of ['layoutNode', 'formSettings', 'index']) {
+      for (let input of ['layoutNode', 'formSettings', 'layoutIndex', 'dataIndex']) {
         addedNode.instance[input] = this[input];
       }
     }
