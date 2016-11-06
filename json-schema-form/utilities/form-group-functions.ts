@@ -29,6 +29,8 @@ import {
  *
  * getControl:
  *
+ * fixJsonFormOptions:
+ *
  * ---- Under construction: ----
  * buildFormGroupTemplateFromLayout: Builds a FormGroupTemplate from a form layout
  */
@@ -54,11 +56,8 @@ export function buildFormGroupTemplate(
   const schema: any = JsonPointer.get(formSettings.schema, schemaPointer);
   let useValues: any = {};
   if (setValues) {
-    useValues = mergeValues(
-      JsonPointer.get(schema, '/default'),
-      setValues,
-      JsonPointer.get(formSettings.defaultValues, dataPointer)
-    );
+    useValues = mergeValues(JsonPointer.get(schema, '/default'), setValues,
+      JsonPointer.get(formSettings.defaultValues, dataPointer));
   }
   let controlType: 'FormGroup' | 'FormArray' | 'FormControl';
   if (JsonPointer.get(schema, '/type') === 'object' && hasOwn(schema, 'properties')) {
@@ -83,7 +82,8 @@ export function buildFormGroupTemplate(
     case 'FormGroup':
       controls = {};
       if (setValues) {
-        useValues = mergeValues(JsonPointer.get(schema, '/properties/default'), useValues);
+        useValues = mergeValues(JsonPointer.get(schema, '/properties/default'),
+          useValues);
       }
       forEach(schema.properties, (item, key) => {
         if (key !== 'ui:order') {
@@ -96,7 +96,8 @@ export function buildFormGroupTemplate(
           );
         }
       });
-      setRequiredFields(schema, controls);
+      formSettings.globalOptions.fieldsRequired =
+        setRequiredFields(schema, controls);
       return { controlType, controls, validators };
     case 'FormArray':
       const minItems = schema.minItems || 0;
@@ -176,7 +177,8 @@ export function buildFormGroupTemplate(
         }
         controls = [];
         if (setValues) {
-          useValues = mergeValues(JsonPointer.get(schema, '/items/default'), useValues);
+          useValues = mergeValues(JsonPointer.get(schema, '/items/default'),
+            useValues);
         }
         if (isArray(useValues) && useValues.length) {
           for (let i of Object.keys(useValues)) {
@@ -207,8 +209,9 @@ export function buildFormGroupTemplate(
       return { controlType, controls, validators };
     case 'FormControl':
       let value: { value: any, disabled: boolean } = {
-        value: (setValues && isPrimitive(useValues)) ? useValues : null,
-        disabled: schema['disabled'] || schema['ui:disabled'] || false
+        value: setValues && isPrimitive(useValues) ? useValues : null,
+        disabled: schema['disabled'] ||
+          JsonPointer.get(schema, ['x-schema-form', 'disabled']) || false
       };
       return { controlType, value, validators };
     default:
@@ -304,13 +307,13 @@ export function buildFormGroup(template: any): AbstractControl {
 /**
  * 'mergeValues' function
  *
- * @param  {any[]} ...valuesToMerge
- * @return {any}
+ * @param  {any[]} ...valuesToMerge - Multiple values to merge
+ * @return {any} - Merged values
  */
 export function mergeValues(...valuesToMerge) {
   let mergedValues: any = null;
-  for (let ai = 0, al = arguments.length; ai < al; ai++) {
-    const currentValue = arguments[ai];
+  for (let index = 0, length = arguments.length; index < length; index++) {
+    const currentValue = arguments[index];
     if (!isEmpty(currentValue)) {
       if (typeof currentValue === 'object' &&
         (isEmpty(mergedValues) || typeof mergedValues !== 'object')
@@ -500,4 +503,30 @@ export function toControlPointer(formGroup: any, dataPointer: Pointer): any {
     return JsonPointer.compile(controlPointerArray);
   }
   console.error('getControl error: Invalid JSON Pointer: ' + dataPointer);
+}
+
+/**
+ * 'fixJsonFormOptions' function
+ *
+ * Rename JSON Form 'options' lists to 'titleMap' lists
+ *
+ * @param  {any} formObject
+ * @return {any}
+ */
+export function fixJsonFormOptions(formObject: any): any {
+  if (isObject(formObject) || isArray(formObject)) {
+    forEach(formObject, (value, key) => {
+      if (isObject(value) && hasOwn(value, 'options') && isObject(value.options)) {
+        value.titleMap = value.options;
+        delete value.options;
+      }
+    }, 'top-down');
+    // JsonPointer.forEachDeep(formObject, (value, pointer) => {
+    //   if (isObject(value) && JsonPointer.toKey(pointer) === 'options') {
+    //     JsonPointer.set(formObject, pointer.slice(0, -7) + 'titleMap', value);
+    //     JsonPointer.remove(formObject, pointer);
+    //   }
+    // });
+  }
+  return formObject;
 }

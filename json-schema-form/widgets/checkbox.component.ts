@@ -4,12 +4,15 @@ import { FormGroup } from '@angular/forms';
 @Component({
   selector: 'checkbox-widget',
   template: `
-    <label *ngIf="boundControl" [formGroup]="formControlGroup"
-      [attr.for]="layoutNode?.dataPointer" [class]="options?.labelHtmlClass">
-      <input [formControlName]="formControlName"
+    <label *ngIf="boundControl"
+      [attr.for]="layoutNode?.dataPointer"
+      [class]="options?.itemLabelHtmlClass"
+      [formGroup]="formControlGroup">
+      <input
         [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
         [checked]="isChecked ? 'checked' : null"
         [class]="options?.fieldHtmlClass"
+        [formControlName]="formControlName"
         [id]="layoutNode?.dataPointer"
         [name]="formControlName"
         [readonly]="options?.readonly ? 'readonly' : false"
@@ -19,8 +22,9 @@ import { FormGroup } from '@angular/forms';
         [class.sr-only]="options?.notitle"
         [innerHTML]="options?.title"></span>
     </label>
-    <label *ngIf="!boundControl" [attr.for]="layoutNode?.dataPointer"
-      [class]="options?.labelHtmlClass">
+    <label *ngIf="!boundControl"
+      [attr.for]="layoutNode?.dataPointer"
+      [class]="options?.itemLabelHtmlClass">
       <input
         [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
         [checked]="!!options?.value ? 'checked' : null"
@@ -28,9 +32,10 @@ import { FormGroup } from '@angular/forms';
         [name]="formControlName"
         [readonly]="options?.readonly ? 'readonly' : false"
         [value]="options?.value || true"
-        (click)="onClick($event)"
-        type="checkbox">
-      <span *ngIf="options?.title" [class.sr-only]="options?.notitle"
+        type="checkbox"
+        (click)="onClick($event)">
+      <span *ngIf="options?.title"
+        [class.sr-only]="options?.notitle"
         [innerHTML]="options?.title"></span>
     </label>`,
 })
@@ -49,8 +54,7 @@ export class CheckboxComponent implements OnInit {
     this.formControlGroup = this.formSettings.getControlGroup(this);
     this.formControlName = this.formSettings.getControlName(this);
     this.boundControl = this.formSettings.isControlBound(this);
-    if (this.boundControl) {
-    } else {
+    if (!this.boundControl) {
       console.error(
         'CheckboxComponent warning: control "' + this.formSettings.getDataPointer(this) +
         '" is not bound to the Angular 2 FormGroup.'
@@ -59,7 +63,7 @@ export class CheckboxComponent implements OnInit {
   }
 
   private get isChecked() {
-    return this.formControlGroup.controls[this.formControlName].value;
+    return this.formSettings.getControl(this).value;
   }
 
   onClick(event) {

@@ -13,7 +13,7 @@ import { FormGroup } from '@angular/forms';
         [disabled]="options?.readonly"
         [formControlName]="formControlName"
         [type]="layoutNode?.type">
-        <span *ngIf="options?.icon"
+        <span *ngIf="options?.icon || options?.title"
           [class]="options?.icon"
           [innerHTML]="options?.title"></span>
       </button>
@@ -25,7 +25,7 @@ import { FormGroup } from '@angular/forms';
         [class]="options?.fieldHtmlClass"
         [disabled]="options?.readonly"
         [type]="layoutNode?.type">
-        <span *ngIf="options?.icon"
+        <span *ngIf="options?.icon || options?.title"
           [class]="options?.icon"
           [innerHTML]="options?.title"></span>
       </button>

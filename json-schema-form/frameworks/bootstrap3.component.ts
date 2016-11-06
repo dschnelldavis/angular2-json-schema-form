@@ -12,15 +12,12 @@ import {
   moduleId: module.id,
   selector: 'bootstrap3-framework',
   templateUrl: 'bootstrap3.component.html',
-  styles: [`
-    .list-group-item .form-control-feedback { top: 40; }
-    .checkbox { margin-top: 0 }
-  `],
+  styleUrls: ['bootstrap3.component.css'],
 })
 export class Bootstrap3Component implements OnInit, OnChanges, AfterContentChecked {
   private controlInitialized: boolean = false;
-  private displayWidget: boolean = true;
-  private options: any;
+  private options: any; // Options used by framework
+  private widgetOptions: any; // Options passed to child widget
   private layoutPointer: string;
   private formControl: any = null;
   private formControlName: string;
@@ -38,16 +35,16 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
 
   ngOnInit() {
     if (this.layoutNode) {
-      const widgetOptions = this.layoutNode.options; // Options passed to widget
-      this.options = Object.assign({}, widgetOptions); // Options used by framework
+      this.options = Object.assign({}, this.layoutNode.options);
+      this.widgetOptions = this.layoutNode.options;
       this.layoutPointer =
         toIndexedPointer(this.layoutNode.layoutPointer, this.layoutIndex);
+
       this.updateArrayItems();
 
       if (this.layoutNode.hasOwnProperty('dataPointer')) {
-        let thisControl = getControl(this.formSettings.formGroup,
-          this.layoutNode.dataPointer);
-        if (thisControl) this.formControl = thisControl;
+        this.formControl =
+          getControl(this.formSettings.formGroup, this.layoutNode.dataPointer);
       }
 
       this.options.isInputWidget = inArray(this.layoutNode.type, [
@@ -60,20 +57,22 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
 
       this.options.title = this.setTitle(this.layoutNode.type);
 
-      this.options.htmlClass = addClasses(this.options.htmlClass,
-        'schema-form-' + this.layoutNode.type);
+      this.options.htmlClass =
+        addClasses(this.options.htmlClass, 'schema-form-' + this.layoutNode.type);
       if (this.layoutNode.type === 'array') {
-        this.options.htmlClass = addClasses(this.options.htmlClass,
-          'list-group');
+        this.options.htmlClass =
+          addClasses(this.options.htmlClass, 'list-group');
       } else if (this.options.isArrayItem && this.layoutNode.type !== '$ref') {
-        this.options.htmlClass = addClasses(this.options.htmlClass, 'list-group-item');
+        this.options.htmlClass =
+          addClasses(this.options.htmlClass, 'list-group-item');
       } else {
-        this.options.htmlClass = addClasses(this.options.htmlClass, 'form-group');
+        this.options.htmlClass =
+          addClasses(this.options.htmlClass, 'form-group');
       }
-      widgetOptions.htmlClass = '';
+      this.widgetOptions.htmlClass = '';
 
-      this.options.labelHtmlClass = addClasses(this.options.labelHtmlClass,
-        'control-label');
+      this.options.labelHtmlClass =
+        addClasses(this.options.labelHtmlClass, 'control-label');
 
       this.options.fieldAddonLeft =
         this.options.fieldAddonLeft || this.options.prepend;
@@ -83,31 +82,50 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
 
       // Set miscelaneous styles and settings for each control type
       switch (this.layoutNode.type) {
-        case 'checkbox':
-          this.options.htmlClass = addClasses(this.options.htmlClass, 'checkbox');
-        break;
-        case 'checkboxes':
-          this.options.htmlClass =
-            addClasses(this.options.htmlClass, 'checkbox');
+        // Checkbox controls
+        case 'checkbox': case 'checkboxes':
+          this.widgetOptions.htmlClass = addClasses(
+            this.widgetOptions.htmlClass, 'checkbox');
         break;
         case 'checkboxes-inline':
-          this.options.htmlClass = addClasses(this.options.htmlClass,
-            'checkbox-inline');
+          this.widgetOptions.htmlClass = addClasses(
+            this.widgetOptions.htmlClass, 'checkbox');
+          this.widgetOptions.itemLabelHtmlClass = addClasses(
+            this.widgetOptions.itemLabelHtmlClass, 'checkbox-inline');
         break;
+        // Radio controls
+        case 'radio': case 'radios':
+          this.widgetOptions.htmlClass = addClasses(
+            this.widgetOptions.htmlClass, 'radio');
+        break;
+        case 'radios-inline':
+          this.widgetOptions.htmlClass = addClasses(
+            this.widgetOptions.htmlClass, 'radio');
+          this.widgetOptions.itemLabelHtmlClass = addClasses(
+            this.widgetOptions.itemLabelHtmlClass, 'radio-inline');
+        break;
+        // Button sets - checkboxbuttons and radiobuttons
+        case 'checkboxbuttons': case 'radiobuttons':
+          this.widgetOptions.htmlClass = addClasses(
+            this.widgetOptions.htmlClass, 'btn-group');
+          this.widgetOptions.itemLabelHtmlClass = addClasses(
+            this.widgetOptions.itemLabelHtmlClass, 'btn');
+          this.widgetOptions.itemLabelHtmlClass = addClasses(
+            this.widgetOptions.itemLabelHtmlClass, this.options.style || 'btn-default');
+          this.widgetOptions.fieldHtmlClass = addClasses(
+            this.widgetOptions.fieldHtmlClass, 'sr-only');
+        break;
+        // Single button controls
         case 'button': case 'submit':
-          widgetOptions.fieldHtmlClass = addClasses(widgetOptions.fieldHtmlClass, 'btn');
-          widgetOptions.fieldHtmlClass =
-            addClasses(widgetOptions.fieldHtmlClass, this.options.style || 'btn-info');
+          this.widgetOptions.fieldHtmlClass = addClasses(
+            this.widgetOptions.fieldHtmlClass, 'btn');
+          this.widgetOptions.fieldHtmlClass = addClasses(
+            this.widgetOptions.fieldHtmlClass, this.options.style || 'btn-info');
         break;
-        case '$ref':
-          widgetOptions.fieldHtmlClass =
-            addClasses(widgetOptions.fieldHtmlClass, 'btn pull-right');
-          widgetOptions.fieldHtmlClass =
-            addClasses(widgetOptions.fieldHtmlClass, this.options.style || 'btn-default');
-          this.options.icon = 'glyphicon glyphicon-plus';
-        break;
+        // Containers - arrays and fieldsets
         case 'array': case 'fieldset': case 'section': case 'conditional':
-          this.options.isRemovable = false;
+        case 'advancedfieldset': case 'authfieldset':
+        case 'selectfieldset': case 'optionfieldset':
           this.options.messageLocation = 'top';
           if (this.options.title && this.options.required &&
             this.options.title.indexOf('*') === -1
@@ -115,32 +133,22 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
             this.options.title += ' <strong class="text-danger">*</strong>';
           }
         break;
-        case 'help': case 'msg': case 'message':
-          this.displayWidget = false;
+        // 'Add' buttons - references
+        case '$ref':
+          this.widgetOptions.fieldHtmlClass =
+            addClasses(this.widgetOptions.fieldHtmlClass, 'btn pull-right');
+          this.widgetOptions.fieldHtmlClass = addClasses(
+            this.widgetOptions.fieldHtmlClass, this.options.style || 'btn-default');
+          this.options.icon = 'glyphicon glyphicon-plus';
         break;
-        case 'radiobuttons':
-          this.options.htmlClass = addClasses(this.options.htmlClass, 'btn-group');
-          this.options.labelHtmlClass =
-            addClasses(this.options.labelHtmlClass, 'btn btn-default');
-          widgetOptions.fieldHtmlClass =
-            addClasses(widgetOptions.fieldHtmlClass, 'sr-only');
-        break;
-        case 'radio': case 'radios':
-          this.options.htmlClass = addClasses(this.options.htmlClass, 'radio');
-        break;
-        case 'radios-inline':
-          this.options.labelHtmlClass =
-            addClasses(this.options.labelHtmlClass, 'radio-inline');
-        break;
+        // Default - including regular inputs
         default:
-          widgetOptions.fieldHtmlClass =
-            addClasses(widgetOptions.fieldHtmlClass, 'form-control');
+          this.widgetOptions.fieldHtmlClass = addClasses(
+            this.widgetOptions.fieldHtmlClass, 'form-control');
       }
-
       if (
-        !this.controlInitialized && this.displayWidget &&
-        this.widgetContainer && !this.widgetContainer.length &&
-        this.layoutNode && this.layoutNode.widget
+        !this.controlInitialized && this.layoutNode && this.layoutNode.widget &&
+        this.widgetContainer && !this.widgetContainer.length
       ) {
         let addedNode: ComponentRef<any> = this.widgetContainer.createComponent(
           this.componentFactory.resolveComponentFactory(this.layoutNode.widget)
@@ -160,7 +168,7 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
                   ).join(', ')].filter(e => e).join(' - ')
                 ).join('<br>');
             } else {
-              widgetOptions.errorMessage = null;
+              this.widgetOptions.errorMessage = null;
             }
           });
         }
@@ -183,7 +191,7 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
   }
 
   private updateArrayItems() {
-    if (this.layoutNode.options.isArrayItem) {
+    if (this.options.isArrayItem) {
       const arrayIndex = this.dataIndex[this.dataIndex.length - 1];
       const arrayPointer = JsonPointer.parse(this.layoutPointer).slice(0, -2);
       const parentArray = JsonPointer.get(this.formSettings.layout, arrayPointer);
@@ -205,16 +213,19 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
       case 'section': case 'submit': case '$ref':
         return null;
       case 'advancedfieldset':
-        this.layoutNode.options.title = null;
-        return 'Advanced options';
+        this.widgetOptions.expandable = true;
+        this.widgetOptions.title = 'Advanced options';
+        return null;
       case 'authfieldset':
-        this.layoutNode.options.title = null;
-        return 'Authentication settings';
+        this.widgetOptions.expandable = true;
+        this.widgetOptions.title = 'Authentication settings';
+        return null;
       default:
-        let thisTitle = this.options.title
-          || (!isNumber(this.layoutNode.name) && this.layoutNode.name !== '-' ?
-          this.layoutNode.name : null);
-        this.layoutNode.options.title = null;
+        let thisTitle = this.options.title || (
+          !isNumber(this.layoutNode.name) && this.layoutNode.name !== '-' ?
+          this.layoutNode.name : null
+        );
+        this.widgetOptions.title = null;
         return thisTitle;
     }
   }

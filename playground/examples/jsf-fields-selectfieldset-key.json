@@ -11,33 +11,21 @@
     "category": {
       "type": "string",
       "title": "Category",
-      "enum": [
-        "Geography",
-        "Entertainment",
-        "History",
-        "Arts",
-        "Science",
-        "Sports"
-      ]
+      "enum": [ "Geography", "Entertainment",
+        "History", "Arts", "Science", "Sports" ]
     }
   },
-  "form": [
-    {
-      "type": "selectfieldset",
-      "key": "choice",
-      "title": "Make a choice",
-      "titleMap": {
-        "text": "Search by text",
-        "cat": "Search by category"
-      },
-      "items": [
-        "text",
-        "category"
-      ]
+  "form": [ {
+    "type": "selectfieldset",
+    "key": "choice",
+    "title": "Make a choice",
+    "titleMap": {
+      "text": "Search by text",
+      "cat": "Search by category"
     },
-    {
-      "type": "submit",
-      "value": "Submit"
-    }
-  ]
+    "items": [ "text", "category" ]
+  }, {
+    "type": "submit",
+    "value": "Submit"
+  } ]
 }

@@ -10,15 +10,13 @@
       "title": "Search string"
     }
   },
-  "form": [
-    {
-      "key": "apikey",
-      "type": "hidden"
-    },
-    "text",
-    {
-      "type": "submit",
-      "title": "Search"
-    }
-  ]
+  "form": [ {
+    "key": "apikey",
+    "type": "hidden"
+  },
+  "text",
+  {
+    "type": "submit",
+    "title": "Search"
+  } ]
 }

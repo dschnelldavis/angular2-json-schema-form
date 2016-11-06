@@ -56,9 +56,9 @@ export class SelectComponent implements OnInit {
       );
     }
     this.selectList = buildTitleMap(
-      this.layoutNode.titleMap || this.layoutNode.enumNames,
-      this.layoutNode.enum,
-      !!this.layoutNode.required
+      this.options.titleMap || this.options.enumNames,
+      this.options.enum,
+      !!this.options.required
     );
   }
 }

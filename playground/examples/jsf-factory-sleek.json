@@ -3,13 +3,7 @@
     "color": {
       "title": "Color",
       "type": "string",
-      "enum": [
-        "blue",
-        "spicy",
-        "gray",
-        "earth",
-        "vegetal"
-       ],
+      "enum": [ "blue", "spicy", "gray", "earth", "vegetal" ],
       "default":"gray",
       "required": true
     },
@@ -33,64 +27,44 @@
       "items": {
         "title": "Tab icon",
         "type": "string",
-        "enum": [
-          "contact",
-          "event",
-          "map",
-          "news",
-          "photo",
-          "product",
-          "sound",
-          "status",
-          "video"
-        ]
+        "enum": [ "contact", "event", "map", "news",
+          "photo", "product", "sound", "status", "video" ]
       }
     }
   },
-  "form": [
-    {
-      "type": "fieldset",
-      "legend": "Styles",
-      "items": [
-        "color",
-        {
-          "key" : "backgroundimage",
-          "type": "file-hosted-public"
-        }
-        
-      ]
-    },
-    {
-      "type": "fieldset",
-      "legend": "Tabs",
-      "items": [
-        {
-          "type": "tabarray",
-          "items": [
-            {
-              "type": "section",
-              "legend": "{{value}}",
-              "items": [
-                {
-                  "key": "tabicons[]",
-                  "type": "imageselect",
-                  "imageWidth": 32,
-                  "imageHeight": 42,
-                  "imageButtonClass": "btn-inverse",
-                  "imagePrefix": "app/images/tv-",
-                  "imageSuffix": ".png",
-                  "imageSelectorTitle": "Based on tab data source"
-                },
-                {
-                  "key": "tabs[]",
-                  "valueInLegend": true,
-                  "value": "{{values.datasources.main[]}}"
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    }
-  ]
+  "form": [ {
+    "type": "fieldset",
+    "legend": "Styles",
+    "items": [
+      "color",
+      {
+        "key" : "backgroundimage",
+        "type": "file-hosted-public"
+      }
+    ]
+  }, {
+    "type": "fieldset",
+    "legend": "Tabs",
+    "items": [ {
+      "type": "tabarray",
+      "items": [ {
+        "type": "section",
+        "legend": "{{value}}",
+        "items": [ {
+          "key": "tabicons[]",
+          "type": "imageselect",
+          "imageWidth": 32,
+          "imageHeight": 42,
+          "imageButtonClass": "btn-inverse",
+          "imagePrefix": "app/images/tv-",
+          "imageSuffix": ".png",
+          "imageSelectorTitle": "Based on tab data source"
+        }, {
+          "key": "tabs[]",
+          "valueInLegend": true,
+          "value": "{{values.datasources.main[]}}"
+        } ]
+      } ]
+    } ]
+  } ]
 }

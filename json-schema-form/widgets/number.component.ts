@@ -1,7 +1,7 @@
 import { Component, Input, OnChanges, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
-import { getControl, isDefined } from '../utilities/index';
+import { getControl, inArray, isDefined } from '../utilities/index';
 
 @Component({
   selector: 'number-widget',
@@ -26,7 +26,9 @@ import { getControl, isDefined } from '../utilities/index';
         [formControlName]="formControlName"
         [id]="layoutNode?.dataPointer"
         [name]="formControlName"
-        [type]="layoutNode?.type === 'range' ? 'range' : 'text'"
+        [title]="lastValidNumber"
+        [type]="layoutNode?.type === 'range' ? 'range' : 'number'"
+        (input)="updateInput($event)"
         (keydown)="validateInput($event)"
         (keyup)="validateNumber($event)">
     </div>
@@ -48,8 +50,10 @@ import { getControl, isDefined } from '../utilities/index';
         [class]="options?.fieldHtmlClass"
         [id]="formControlName"
         [name]="formControlName"
-        [type]="layoutNode?.type === 'range' ? 'range' : 'text'"
+        [title]="lastValidNumber"
+        [type]="layoutNode?.type === 'range' ? 'range' : 'number'"
         [value]="layoutNode?.value"
+        (input)="updateInput($event)"
         (keydown)="validateInput($event)"
         (keyup)="validateNumber($event)">
     </div>`,
@@ -61,7 +65,7 @@ export class NumberComponent implements OnChanges, OnInit {
   private options: any;
   private allowNegative: boolean = true;
   private allowDecimal: boolean = true;
-  private allowExponents: boolean = true;
+  private allowExponents: boolean = false;
   private lastValidNumber: string = '';
   private step: string;
   @Input() layoutNode: any;
@@ -83,24 +87,29 @@ export class NumberComponent implements OnChanges, OnInit {
     this.formControlName = this.formSettings.getControlName(this);
     this.boundControl = this.formSettings.isControlBound(this);
     if (this.boundControl) {
-      this.lastValidNumber = this.formControlGroup.controls[this.formControlName].value;
+      this.lastValidNumber = this.formSettings.getControl(this).value;
     } else {
       console.error(
         'NumberComponent warning: control "' + this.formSettings.getDataPointer(this) +
         '" is not bound to the Angular 2 FormGroup.'
       );
     }
-    this.step = this.layoutNode.multipleOf || this.layoutNode.step ||
+    this.step = this.options.multipleOf || this.options.step ||
       (this.layoutNode.dataType === 'integer' ? '1' : 'any');
     if (this.layoutNode.dataType === 'integer') {
       this.allowDecimal = false;
       this.allowExponents = false;
-    } else if (isDefined(this.layoutNode.allowExponents)) {
-      this.allowExponents = this.layoutNode.allowExponents;
+    } else {
+      this.allowExponents = !!this.options.allowExponents;
     }
-    if (isDefined(this.layoutNode.minimum)) {
-      this.allowNegative = this.layoutNode.minimum < 0;
+    if (isDefined(this.options.minimum)) {
+      this.allowNegative = this.options.minimum < 0;
     }
+  }
+
+  private updateInput(event) {
+    if (this.layoutNode.type !== 'range') return;
+    if (!isNaN(event.target.value)) this.lastValidNumber = event.target.value;
   }
 
   private validateInput(event) {
@@ -108,24 +117,28 @@ export class NumberComponent implements OnChanges, OnInit {
     if (/^Digit\d$/.test(event.code)) return true;
     if (/^Numpad\d$/.test(event.code)) return true;
     if (/^Arrow/.test(event.code)) return true;
-    if (event.code === 'Backspace' || event.code === 'Delete') return true;
-    if (event.key === '.' && this.allowDecimal && val.indexOf('.') === -1) return true;
+    if (inArray(event.code, ['Backspace', 'Delete', 'Enter', 'Escape',
+      'NumpadEnter', 'PrintScreen', 'Tab'])) return true;
+    if (event.ctrlKey || event.altKey || event.metaKey) return true;
+    if (this.allowDecimal && event.key === '.' &&
+      val.indexOf('.') === -1) return true;
     if (this.allowExponents) {
-      const hasExp = /e/i.test(val);
-      if (/^e$/i.test(event.key) && val && !hasExp) return true;
+      const hasExponent = /e/i.test(val);
+      if (/^e$/i.test(event.key) && !hasExponent && val) return true;
       if (event.key === '-') {
         const minusCount = (val.match(/\-/g) || []).length;
-        // const minusCount = val.split('-').length - 1;
-        if (!minusCount && (this.allowNegative || hasExp)) return true;
-        if (minusCount === 1 && this.allowNegative && hasExp) return true;
+        if ((this.allowNegative || hasExponent) && !minusCount) return true;
+        if (this.allowNegative && hasExponent && minusCount === 1) return true;
       }
-    } else if (event.key === '-' && this.allowNegative && val.indexOf('-') === -1) {
+    } else if (this.allowNegative && event.key === '-' && val.indexOf('-') === -1) {
       return true;
     }
+    // TODO: Display feedback for rejected key
     return false;
   }
 
   private validateNumber(event) {
+    // TODO: This only works for input type=text - make it work for type=number
     const val = event.target.value;
     if (!isNaN(val) || val === '' || val === '.' || val === '-' || val === '-.' ||
       (val.length > 1 && val.slice(-1).toLowerCase() === 'e') ||
@@ -133,6 +146,7 @@ export class NumberComponent implements OnChanges, OnInit {
     ) {
       this.lastValidNumber = val;
     } else {
+      // TODO: Display feedback for rejected key
       this.formSettings.getControl(this).setValue(this.lastValidNumber);
     }
   }

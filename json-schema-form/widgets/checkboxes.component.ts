@@ -8,39 +8,49 @@ import {
 @Component({
   selector: 'checkboxes-widget',
   template: `
-    <label *ngIf="options?.title" [class]="options?.labelHtmlClass"
-      [class.sr-only]="options?.notitle" [innerHTML]="options?.title"></label>
-    <div [ngSwitch]="layoutNode?.type">
-      <div *ngSwitchCase="'checkboxes-inline'"> <!-- checkboxes-inline template -->
+    <label *ngIf="options?.title"
+      [class]="options?.labelHtmlClass"
+      [class.sr-only]="options?.notitle"
+      [innerHTML]="options?.title"></label>
+    <div [ngSwitch]="layoutOrientation">
+      <div *ngSwitchCase="'horizontal'"
+        [class]="options?.htmlClass"> <!-- checkboxes-inline or checkboxbuttons -->
         <label *ngFor="let checkboxItem of checkboxList"
-          [attr.for]="layoutNode?.dataPointer + '/' + checkboxItem?.value"
-          [class]="options?.labelHtmlClass"
-          [class.active]="formControlGroup.value[formControlName].indexOf(checkboxItem?.value) !== -1">
+          [attr.for]="layoutNode?.dataPointer + '/' + checkboxItem.value"
+          [class]="options?.itemLabelHtmlClass +
+            (checkboxItem.checked ? ' ' + options?.activeClass : '')"
+          [class.active]="checkboxItem.checked">
           <input type="checkbox"
-            (click)="onClick($event)"
-            [id]="layoutNode?.dataPointer + '/' + checkboxItem?.value"
-            [name]="formControlName"
-            [class]="options?.fieldHtmlClass"
-            [value]="checkboxItem?.value"
             [attr.readonly]="options?.readonly ? 'readonly' : null"
             [attr.required]="options?.required"
-            [checked]="checkboxItem?.checked">
-          <span [innerHTML]="checkboxItem?.name"></span>
+            [checked]="checkboxItem.checked"
+            [class]="options?.fieldHtmlClass"
+            [id]="layoutNode?.dataPointer + '/' + checkboxItem.value"
+            [name]="formControlName"
+            [value]="checkboxItem.value"
+            (click)="onClick($event)">
+          <span [innerHTML]="checkboxItem.name"></span>
         </label>
       </div>
-      <div *ngSwitchDefault> <!-- regular checkboxes template -->
-        <div *ngFor="let checkboxItem of checkboxList" [class]="options?.htmlClass">
-          <label [attr.for]="layoutNode?.dataPointer + '/' + checkboxItem?.value"
-            [class.active]="formControlGroup.value[formControlName].indexOf(checkboxItem?.value) !== -1">
+      <!-- *ngSwitchCase="'vertical'" -->
+      <div *ngSwitchDefault
+        [class]="options?.htmlClass"> <!-- regular checkboxes -->
+        <div *ngFor="let checkboxItem of checkboxList"
+          [class]="options?.htmlClass">
+          <label
+            [attr.for]="layoutNode?.dataPointer + '/' + checkboxItem.value"
+            [class]="options?.itemLabelHtmlClass +
+              (checkboxItem.checked ? ' ' + options?.activeClass : '')"
+            [class.active]="checkboxItem.checked">
             <input type="checkbox"
-              (click)="onClick($event)"
-              [id]="layoutNode?.dataPointer + '/' + checkboxItem?.value"
-              [name]="formControlName"
-              [class]="options?.fieldHtmlClass"
-              [value]="checkboxItem?.value"
               [attr.readonly]="options?.readonly ? 'readonly' : null"
               [attr.required]="options?.required"
-              [checked]="checkboxItem?.checked">
+              [checked]="checkboxItem.checked"
+              [class]="options?.fieldHtmlClass"
+              [id]="layoutNode?.dataPointer + '/' + checkboxItem.value"
+              [name]="formControlName"
+              [value]="checkboxItem.value"
+              (click)="onClick($event)">
             <span [innerHTML]="checkboxItem?.name"></span>
           </label>
         </div>
@@ -49,9 +59,11 @@ import {
 })
 export class CheckboxesComponent implements OnInit {
   private formControlGroup: any;
+  private formControl: any;
   private formControlName: string;
   private boundControl: boolean = false;
   private options: any;
+  private layoutOrientation: string = 'vertical';
   private formArray: FormArray;
   private checkboxList: any[] = [];
   @Input() layoutNode: any;
@@ -60,13 +72,22 @@ export class CheckboxesComponent implements OnInit {
   @Input() dataIndex: number[];
 
   ngOnInit() {
+    if (this.layoutNode.type === 'checkboxes-inline' ||
+      this.layoutNode.type === 'checkboxbuttons'
+    ) {
+      this.layoutOrientation = 'horizontal';
+    }
     this.options = this.layoutNode.options;
     this.formControlGroup = this.formSettings.getControlGroup(this);
     this.formControlName = this.formSettings.getControlName(this);
     this.boundControl = this.formSettings.isControlBound(this);
+    this.checkboxList = buildTitleMap(
+      this.options.titleMap || this.options.enumNames,
+      this.options.enum, true
+    );
     if (this.boundControl) {
-      this.formArray = this.formControlGroup.controls[this.formControlName];
-      this.checkboxList = buildTitleMap(this.options.titleMap, this.options.enum);
+      this.formControl = this.formSettings.getControl(this);
+      this.formArray = this.formSettings.getControl(this);
       for (let checkboxItem of this.checkboxList) {
         checkboxItem.checked = this.formArray.value.length ?
           this.formArray.value.indexOf(checkboxItem.value) !== -1 : false;

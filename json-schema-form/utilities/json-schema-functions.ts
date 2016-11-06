@@ -150,22 +150,17 @@ export function getSchemaReference(
  * @param {any} schema
  * @return {string}
  */
-export function getInputType(schema: any): string {
-  if (JsonPointer.has(schema, '/x-schema-form/type')) {// Angular Schema Form compatibility
-    return schema['x-schema-form']['type'];
-  }
-  if (hasOwn(schema, 'ui:widget')) { // React Jsonschema Form compatibility
-    if (isString(schema['ui:widget'])) return schema['ui:widget'];
-    if (hasOwn(schema['ui:widget'], 'component')) {
-      if (schema['ui:widget']['component'] === 'checkboxes' &&
-        JsonPointer.get(schema, '/ui:widget/component/options/inline') === true
-      ) {
-        return 'checkboxes-inline';
-      } else {
-        return schema['ui:widget']['component'];
-      }
-    }
-  }
+export function getInputType(schema: any, layoutNode: any = null): string {
+  // x-schema-form = Angular Schema Form compatibility
+  // widget & component = React Jsonschema Form compatibility
+  let controlType = JsonPointer.getFirst([
+    [schema, '/x-schema-form/type'],
+    [schema, '/x-schema-form/widget/component'],
+    [schema, '/x-schema-form/widget'],
+    [schema, '/widget/component'],
+    [schema, '/widget']
+  ]);
+  if (isString(controlType)) return checkInlineType(controlType, schema, layoutNode);
   let schemaType = schema.type;
   if (isArray(schemaType)) { // If multiple types listed, use most inclusive type
     if (inArray('object', schemaType) && hasOwn(schema, 'properties')) {
@@ -189,7 +184,7 @@ export function getInputType(schema: any): string {
     if (hasOwn(schema, 'properties')) return 'fieldset';
     if (hasOwn(schema, '$ref') ||
       JsonPointer.has(schema, '/additionalProperties/$ref')) return '$ref';
-    return null; // return 'textarea';
+    return null; // return 'textarea'; (?)
   }
   if (schemaType === 'array') {
     let itemsObject = JsonPointer.getFirst([
@@ -197,8 +192,11 @@ export function getInputType(schema: any): string {
       [schema, '/additionalItems']
     ]);
     if (!itemsObject) return null;
-    if (hasOwn(itemsObject, 'enum')) return 'checkboxes';
-    return 'array';
+    if (hasOwn(itemsObject, 'enum')) {
+      return checkInlineType('checkboxes', schema, layoutNode);
+    } else {
+      return 'array';
+    }
   }
   if (schemaType === 'null') return 'hidden';
   if (hasOwn(schema, 'enum')) return 'select';
@@ -219,6 +217,43 @@ export function getInputType(schema: any): string {
   }
   if (hasOwn(schema, '$ref')) return '$ref';
   return 'text';
+}
+
+/**
+ * 'checkInlineType' function
+ *
+ * @param {string} controlType -
+ * @param {JSON Schema} schema -
+ * @return {string}
+ */
+export function checkInlineType(
+  controlType: string, schema: any, layoutNode: any = null
+): string {
+  if (!isString(controlType) || (
+    controlType.slice(0, 8) !== 'checkbox' && controlType.slice(0, 5) !== 'radio'
+  )) {
+    return controlType;
+  }
+  if (
+    JsonPointer.getFirst([
+      [layoutNode, '/inline'],
+      [layoutNode, '/options/inline'],
+      [schema, '/inline'],
+      [schema, '/x-schema-form/inline'],
+      [schema, '/x-schema-form/options/inline'],
+      [schema, '/x-schema-form/widget/inline'],
+      [schema, '/x-schema-form/widget/component/inline'],
+      [schema, '/x-schema-form/widget/component/options/inline'],
+      [schema, '/widget/inline']
+      [schema, '/widget/component/inline'],
+      [schema, '/widget/component/options/inline'],
+    ]) === true
+  ) {
+    return controlType.slice(0, 5) === 'radio' ?
+      'radios-inline' : 'checkboxes-inline';
+  } else {
+    return controlType;
+  }
 }
 
 /**
@@ -300,13 +335,15 @@ export function updateInputOptions(layoutNode: any, schema: any, formSettings: a
   mergeFilteredObject(newOptions, JsonPointer.get(schema, ['x-schema-form']),
     [], true, fixUiKeys);
   JsonPointer.remove(schema, ['x-schema-form']);
-  mergeFilteredObject(newOptions, layoutNode,
-    ['dataPointer', 'items', 'layoutPointer', 'name', 'options', 'type', 'widget'], true, fixUiKeys);
+  mergeFilteredObject(newOptions, layoutNode, ['dataPointer', 'dataType',
+    'items', 'layoutPointer', 'name', 'options', 'type', 'widget'], true, fixUiKeys);
   mergeFilteredObject(newOptions, layoutNode.options, [], false, fixUiKeys);
   layoutNode.options = newOptions;
 
   // If schema type is integer, enforce by setting multipleOf = 1
-  if (inArray(schema.type, ['integer']) && !hasOwn(layoutNode, 'multipleOf')) {
+  if (inArray(schema.type, ['integer']) &&
+    !JsonPointer.has(layoutNode, '/options/multipleOf')
+  ) {
     layoutNode.options.multipleOf = 1;
 
   // If schema type is array, save controlTemplate in layoutNode

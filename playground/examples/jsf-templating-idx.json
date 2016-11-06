@@ -8,13 +8,11 @@
       }
     }
   },
-  "form": [
-    {
-      "type": "array",
-      "items": [{
-        "key": "thoughts[]",
-        "title": "Thought number {{idx}}"
-      }]
-    }
-  ]
+  "form": [ {
+    "type": "array",
+    "items": [ {
+      "key": "thoughts[]",
+      "title": "Thought number {{idx}}"
+    } ]
+  } ]
 }

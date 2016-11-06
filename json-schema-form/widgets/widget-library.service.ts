@@ -84,7 +84,7 @@ export class WidgetLibraryService {
 
   // Non-HTML layout widgets
     'array': FieldsetComponent, // a list you can add, remove and reorder
-    'tabarray': TabarrayComponent, // a tabbed version of array
+    'tabarray': FieldsetComponent, // TabarrayComponent, // a tabbed version of array
     'tab': TabComponent, // a 'tabarray' item, similar to a fieldset or section
     'help': MessageComponent, // insert arbitrary html
     'message': MessageComponent, // insert arbitrary html
@@ -94,7 +94,7 @@ export class WidgetLibraryService {
   // Widgets included for backward-compatibility with JSON Form API
     // 'tagsinput': NoneComponent, // For entering short text tags
     // See: http://ulion.github.io/jsonform/playground/?example=fields-text-autocomplete
-    // 'checkboxbuttons': FieldsetComponent, // Checkbox buttons
+    'checkboxbuttons': CheckboxesComponent, // Checkbox buttons
     // See: http://ulion.github.io/jsonform/playground/?example=fields-checkboxbuttons
     'advancedfieldset': FieldsetComponent, // Adds 'Advanced settings' title
     'authfieldset': FieldsetComponent, // Adds 'Authentication settings' title
@@ -108,14 +108,15 @@ export class WidgetLibraryService {
     'alt-date': InputComponent,
 
   // Widgets included for backward-compatibility with Angular Schema Form API
-    'actions': NoneComponent,
+    'actions': SectionComponent,
       // horizontal button list, can only submit, uses buttons as items
-    'section': FieldsetComponent, // just a div - (is this similar to fieldset?)
-    'conditional': FieldsetComponent, // identical to 'section' (depeciated)
+    'section': SectionComponent, // just a div - (is this similar to fieldset?)
+    'conditional': SectionComponent, // identical to 'section' (depeciated)
 
   // Recommended 3rd-party add-on widgets
     // 'pikaday': Pikaday date picker - https://github.com/dbushell/Pikaday
     // 'spectrum': Spectrum color picker - http://bgrins.github.io/spectrum
+    // 'bootstrap-slider': Bootstrap Slider range control - https://github.com/seiyria/bootstrap-slider
     // 'ace': ACE code editor - https://ace.c9.io
     // 'ckeditor': CKEditor HTML / rich text editor - http://ckeditor.com
     // 'tinymce': TinyMCE HTML / rich text editor - https://www.tinymce.com

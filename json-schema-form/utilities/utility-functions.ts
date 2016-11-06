@@ -64,18 +64,30 @@ export function copy(object: any): any {
  * Iterates over all items in the first level of an object or array
  * and calls an iterator funciton on each item.
  *
- * Does NOT recursively iterate over items in sub-objects or sub-arrays.
+ * Setting the optional third parameter to 'top-down' or 'bottom-up' will cause
+ * it to also recursively iterate over items in sub-objects or sub-arrays in the
+ * specified direction.
  *
  * @param {Object|Array} object - The object or array to iterate over
  * @param {function} fn - the iterator funciton to call on each item
  * @return {void}
  */
 export function forEach(
-  object: any, fn: (v: any, k: string | number, c?: any) => any
+  object: any, fn: (v: any, k?: string | number, c?: any, rc?: any) => any,
+  recurse: boolean | string = false, rootObject: any = object
 ): void {
   if (isEmpty(object)) return;
   if ((isObject(object) || isArray(object)) && typeof fn === 'function') {
-    for (let key of Object.keys(object)) fn(object[key], key, object);
+    for (let key of Object.keys(object)) {
+      const value = object[key];
+      if (recurse === 'bottom-up' && (isObject(value) || isArray(value))) {
+        forEach(value, fn, recurse, rootObject);
+      }
+      fn(value, key, object, rootObject);
+      if (recurse === 'top-down' && (isObject(value) || isArray(value))) {
+        forEach(value, fn, recurse, rootObject);
+      }
+    }
   } else if (typeof fn !== 'function') {
     console.error('forEach error: Iterator must be a function.');
     console.error(fn);
@@ -136,7 +148,10 @@ export function forEachCopy(
  * @param {boolean = false} allIn - if TRUE, all items must be in array
  * @return {boolean} - true if item(s) in array, false otherwise
  */
-export function inArray(item: any|any[], array: any[], allIn: boolean = false): boolean {
+export function inArray(
+  item: any|any[], array: any[], allIn: boolean = false
+): boolean {
+  if (!isDefined(item) || !isArray(array)) return false;
   if (isArray(item)) {
     for (let subItem of item) {
       if (xor(array.indexOf(subItem) !== -1, allIn)) return !allIn;

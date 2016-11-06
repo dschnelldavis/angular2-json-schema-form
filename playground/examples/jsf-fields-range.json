@@ -10,11 +10,9 @@
       "maximum": 200
     }
   },
-  "form": [
-    {
-      "key": "range",
-      "type": "range",
-      "step": 20
-    }
-  ]
+  "form": [ {
+    "key": "range",
+    "type": "range",
+    "step": 20
+  } ]
 }

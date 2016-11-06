@@ -23,21 +23,19 @@
       }
     }
   },
-  "form": [
-    {
-      "type": "tabarray",
-      "items": {
-        "type": "section",
-        "items": [
-          "friends[].nick",
-          {
-            "type": "array",
-            "items": [
-              "friends[].animals[]"
-            ]
-          }
-        ]
-      }
+  "form": [ {
+    "type": "tabarray",
+    "items": {
+      "type": "section",
+      "items": [
+        "friends[].nick",
+        {
+          "type": "array",
+          "items": [
+            "friends[].animals[]"
+          ]
+        }
+      ]
     }
-  ]
+  } ]
 }

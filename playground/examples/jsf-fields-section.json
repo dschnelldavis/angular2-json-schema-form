@@ -13,18 +13,15 @@
       "title": "Age"
     }
   },
-  "form": [
-    {
-      "key": "comment",
-      "type": "textarea"
-    },
-    {
-      "type": "section",
-      "title": "Author",
-      "items": [
-        "name",
-        "age"
-      ]
-    }
-  ]
+  "form": [ {
+    "key": "comment",
+    "type": "textarea"
+  }, {
+    "type": "section",
+    "title": "Author",
+    "items": [
+      "name",
+      "age"
+    ]
+  } ]
 }

@@ -19,8 +19,9 @@ import { FrameworkLibraryService } from './frameworks/framework-library.service'
 import { WidgetLibraryService } from './widgets/widget-library.service';
 import {
   buildFormGroup, buildFormGroupTemplate, buildLayout, convertJsonSchema3to4,
-  formatFormData, getControl, getSchemaReference, hasOwn, isArray, isEmpty,
-  isObject, hasValue, isString, JsonPointer, toGenericPointer, toIndexedPointer
+  fixJsonFormOptions, formatFormData, getControl, getSchemaReference, hasOwn,
+  hasValue, isArray, isEmpty, isObject, isString, JsonPointer,
+  toGenericPointer, toIndexedPointer
 } from './utilities/index';
 
 /**
@@ -73,21 +74,24 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
   private debugOutput: any; // Debug information, if requested
 
   private formSettings: any = { // Form options and control structures
-    globalOptions: { // Default global form options
+
+    // Default global form options
+    // Note: Unset boolean options default to false
+    globalOptions: {
       addSubmit: true, // Add a submit button if layout does not have one?
       debug: this.debug, // Show debugging output?
       fieldsRequired: false, // Are there any required fields in the form?
       pristine: { errors: true, success: true },
-      supressPropertyTitles: false,
+      // supressPropertyTitles: false,
       setSchemaDefaults: true,
-      validateOnRender: false,
+      // validateOnRender: false,
       formDefaults: { // Default options for individual form controls
-        allowExponents: false, // Allow exponent entry in number fields?
-        disableErrorState: false, // Don't apply 'has-error' class when field fails validation?
-        disableSuccessState: false, // Don't apply 'has-success' class when field validates?
+        // allowExponents: false, // Allow exponent entry in number fields?
+        // disableErrorState: false, // Don't apply 'has-error' class when field fails validation?
+        // disableSuccessState: false, // Don't apply 'has-success' class when field validates?
         feedback: true, // Show inline feedback icons?
-        notitle: false, // Hide title?
-        readonly: false, // Set control as read only?
+        // notitle: false, // Hide title?
+        // readonly: false, // Set control as read only?
       },
     },
 
@@ -167,11 +171,11 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
       if (!ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex ||
         !ctx.layoutNode.layoutPointer || !ctx.layoutIndex) return false;
       // Remove data key from formGroup
-console.log('removing item ' + ctx.dataIndex[ctx.dataIndex.length - 1]);
+// console.log('removing item ' + ctx.dataIndex[ctx.dataIndex.length - 1]);
       this.formSettings.getControlGroup(ctx)
         .removeAt(ctx.dataIndex[ctx.dataIndex.length - 1]);
       // Remove display node from layout
-console.log('removing node ' + this.formSettings.getLayoutPointer(ctx));
+// console.log('removing node ' + this.formSettings.getLayoutPointer(ctx));
       return JsonPointer.remove(this.formSettings.layout,
         this.formSettings.getLayoutPointer(ctx));
     }
@@ -333,6 +337,7 @@ console.log('removing node ' + this.formSettings.getLayoutPointer(ctx));
       } else if (isArray(this.form)) {
         options.layout = this.form;
       } else if (isArray(this.form.form)) {
+        fixJsonFormOptions(this.form.form);
         options.layout = this.form.form;
       } else if (isArray(this.form.layout)) {
         options.layout = this.form.layout;
@@ -340,25 +345,43 @@ console.log('removing node ' + this.formSettings.getLayoutPointer(ctx));
         options.layout = [ '*', { type: 'submit', title: 'Submit' } ];
       }
 
-      // Look for and import alternate layout format 'UISchema'
-      // used for React JSON Schema Form API compatibility
+      // Import alternate layout formats 'UISchema' or 'customFormItems'
+      // used for React JSON Schema Form and JSON Form API compatibility
       // Use first available input:
       // 1. UISchema - React JSON Schema Form style
       // 2. form.UISchema - For testing single input React JSON Schema Forms
-      // 3. (none) no input - don't import UISchema
-      if (isObject(this.UISchema) || hasOwn(this.form, 'UISchema')) {
-        const UISchema = this.UISchema || this.form.UISchema;
-
-        // if UISchema found, copy UISchema items into formSettings.schema
-        JsonPointer.forEachDeep(UISchema, (value, pointer) => {
+      // 2. form.customFormItems - JSON Form style
+      // 3. (none) no input - don't import
+      let alternateLayout: any = null;
+      if (isObject(this.UISchema)) {
+        alternateLayout = this.UISchema;
+      } else if (hasOwn(this.form, 'UISchema')) {
+        alternateLayout = this.form.UISchema;
+      } else if (hasOwn(this.form, 'customFormItems')) {
+        fixJsonFormOptions(this.form.customFormItems);
+        alternateLayout = this.form.customFormItems;
+      }
+      // if alternate layout found, copy options into schema
+      if (alternateLayout) {
+        JsonPointer.forEachDeep(alternateLayout, (value, pointer) => {
           const schemaPointer: string = pointer.replace(/\//g, '/properties/')
-            .replace(/\/properties\/items\/properties\//g, '/items/properties/');
-          if (!JsonPointer.has(options.schema, schemaPointer)) {
+            .replace(/\/properties\/items\/properties\//g, '/items/properties/')
+            .replace(/\/properties\/titleMap\/properties\//g, '/titleMap/properties/');
+          if (hasValue(value) && hasValue(pointer)) {
             const groupPointer: string[] =
               JsonPointer.parse(schemaPointer).slice(0, -2);
-            const item = JsonPointer.toKey(schemaPointer);
-            const itemPointer: string | string[] =
-              item === 'ui:order' ? schemaPointer : groupPointer.concat(item);
+            let key = JsonPointer.toKey(schemaPointer);
+            let itemPointer: string | string[];
+            // If 'ui:order' object found, copy into schema root
+            if (key === 'ui:order') {
+              itemPointer = schemaPointer;
+            // Copy other alternate layout options to schema 'x-schema-form',
+            // (like Angular Schema Form options) and remove any 'ui:' prefixes
+            } else {
+              itemPointer = groupPointer.concat(['x-schema-form',
+                key.slice(0, 3) === 'ui:' ? key.slice(3) : key
+              ]);
+            }
             if (JsonPointer.has(options.schema, groupPointer) &&
               !JsonPointer.has(options.schema, itemPointer)
             ) {
@@ -443,8 +466,9 @@ console.log('removing node ' + this.formSettings.getLayoutPointer(ctx));
           this.isValid.emit(isValid);
           this.validationErrors.emit(this.validateFormData.errors);
         }
-console.log(options.formGroup);
-console.log(options.layout);
+// console.log(options.formGroupTemplate);
+// console.log(options.templateRefLibrary);
+// console.log(options.layout);
       } else {
         // TODO: Output error message
       }

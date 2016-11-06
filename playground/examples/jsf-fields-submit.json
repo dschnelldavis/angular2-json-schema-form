@@ -9,11 +9,7 @@
       "title": "Gender",
       "description": "Your gender",
       "type": "string",
-      "enum": [
-        "male",
-        "female",
-        "alien"
-      ]
+      "enum": [ "male", "female", "alien" ]
     }
   },
   "form": [
@@ -21,6 +17,6 @@
     {
       "type": "submit",
       "title": "OK Go - This Too Shall Pass"
-    }    
+    }
   ]
 }

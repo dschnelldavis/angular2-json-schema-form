@@ -1,52 +1,80 @@
-<div [class]="options?.htmlClass"
-  [class.has-feedback]="options?.feedback !== false && options?.isInputWidget && formControl?.dirty"
-  [class.has-error]="!options?.disableErrorState && formControl?.errors && formControl?.dirty"
-  [class.has-success]="!options?.disableSuccessState && !formControl?.errors && formControl?.dirty">
+<div
+  [class]="options?.htmlClass"
+  [class.has-feedback]="options?.feedback &&
+    options?.isInputWidget && formControl?.dirty"
+  [class.has-error]="!options?.disableErrorState &&
+    formControl?.errors && formControl?.dirty"
+  [class.has-success]="!options?.disableSuccessState &&
+    !formControl?.errors && formControl?.dirty">
 
-  <button *ngIf="options?.isRemovable" (click)="removeItem()" class="close pull-right"
-    style="position: relative; z-index: 20;" type="button">
-    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+  <button *ngIf="options?.isRemovable"
+    class="close pull-right"
+    style="position: relative; z-index: 20;"
+    type="button"
+    (click)="removeItem()">
+    <span aria-hidden="true">&times;</span>
+    <span class="sr-only">Close</span>
   </button>
   <div *ngIf="options?.messageLocation === 'top'">
-    <p *ngIf="!options?.disableErrorState && options?.feedback !== false && options?.errorMessage && formControl?.dirty"
+    <p *ngIf="!options?.disableErrorState && options?.feedback &&
+      options?.errorMessage && formControl?.dirty"
       [innerHTML]="options?.errorMessage" class="help-block"></p>
-    <p *ngIf="options?.feedback !== false && formControl?.dirty"
-      [id]="layoutNode?.dataPointer" class="sr-only"
+    <p *ngIf="options?.feedback && formControl?.dirty"
+      class="sr-only"
+      [id]="layoutNode?.dataPointer"
       [innerHTML]="formControl?.errors ? '(error)' : '(success)'"></p>
-    <p *ngIf="options?.description" [innerHTML]="options?.description" class="help-block"></p>
-    <p *ngIf="options?.help" [innerHTML]="options?.help" class="help-block"></p>
+    <p *ngIf="options?.description"
+      class="help-block"
+      [innerHTML]="options?.description"></p>
+    <p *ngIf="options?.help"
+      class="help-block"
+      [innerHTML]="options?.help"></p>
   </div>
 
-  <label *ngIf="options?.title" [attr.for]="layoutNode?.dataPointer"
-    [class]="options?.labelHtmlClass" [class.sr-only]="options?.notitle"
+  <label *ngIf="options?.title"
+    [attr.for]="layoutNode?.dataPointer"
+    [class]="options?.labelHtmlClass"
+    [class.sr-only]="options?.notitle"
     [innerHTML]="options?.title"></label>
-  <strong *ngIf="options?.title && options?.required" class="text-danger">*</strong>
-  <p *ngIf="layoutNode?.type === 'submit' && formSettings?.globalOptions?.fieldsRequired">
+  <strong *ngIf="options?.title && options?.required"
+    class="text-danger">*</strong>
+  <p *ngIf="layoutNode?.type === 'submit' &&
+    formSettings?.globalOptions?.fieldsRequired">
     <strong class="text-danger">*</strong> = required fields
   </p>
   <div [class.input-group]="options?.fieldAddonLeft || options?.fieldAddonRight">
-    <span *ngIf="options?.fieldAddonLeft" class="input-group-addon"
+    <span *ngIf="options?.fieldAddonLeft"
+      class="input-group-addon"
       [innerHTML]="options?.fieldAddonLeft"></span>
 
     <div #widgetContainer></div>
 
-    <span *ngIf="options?.fieldAddonRight" class="input-group-addon"
+    <span *ngIf="options?.fieldAddonRight"
+      class="input-group-addon"
       [innerHTML]="options?.fieldAddonRight"></span>
   </div>
 
-  <span *ngIf="options?.feedback !== false && options?.isInputWidget &&
+  <span *ngIf="options?.feedback && options?.isInputWidget &&
     !options?.fieldAddonRight && !options.isArrayItem && formControl?.dirty"
     [class.glyphicon-ok]="!options?.disableSuccessState && !formControl?.errors"
     [class.glyphicon-remove]="!options?.disableErrorState && formControl?.errors"
-    aria-hidden="true" class="form-control-feedback glyphicon"></span>
+    aria-hidden="true"
+    class="form-control-feedback glyphicon"></span>
   <div *ngIf="options?.messageLocation !== 'top'">
-    <p *ngIf="!options?.disableErrorState && options?.feedback !== false && options?.errorMessage && formControl?.dirty"
-      [innerHTML]="options?.errorMessage" class="help-block"></p>
-    <p *ngIf="options?.feedback !== false && formControl?.dirty" [id]="layoutNode?.dataPointer"
-      [innerHTML]="formControl?.errors ? '(error)' : '(success)'" class="sr-only"></p>
-    <p *ngIf="options?.description" [innerHTML]="options?.description" class="help-block"></p>
-    <p *ngIf="options?.help" [innerHTML]="options?.help" class="help-block"></p>
+    <p *ngIf="!options?.disableErrorState && options?.feedback && options?.errorMessage && formControl?.dirty"
+      class="help-block"
+      [innerHTML]="options?.errorMessage"></p>
+    <p *ngIf="options?.feedback && formControl?.dirty"
+      class="sr-only"
+      [id]="layoutNode?.dataPointer"
+      [innerHTML]="formControl?.errors ? '(error)' : '(success)'"></p>
+    <p *ngIf="options?.description"
+      class="help-block"
+      [innerHTML]="options?.description"></p>
+    <p *ngIf="options?.help"
+      class="help-block"
+      [innerHTML]="options?.help"></p>
   </div>
 </div>
 
-<div *ngIf="debug && debugOutput">debug: <pre *ngIf="debug">{{debugOutput}}</pre></div>
+<div *ngIf="debug && debugOutput">debug: <pre>{{debugOutput}}</pre></div>

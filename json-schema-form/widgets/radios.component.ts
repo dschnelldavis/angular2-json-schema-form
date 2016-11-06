@@ -6,13 +6,22 @@ import { buildTitleMap, getControl } from '../utilities/index';
 @Component({
   selector: 'radios-widget',
   template: `
-    <label *ngIf="options?.title" [attr.for]="layoutNode?.dataPointer"
-      [class]="options?.labelHtmlClass" [class.sr-only]="options?.notitle"
+    <label *ngIf="options?.title"
+      [attr.for]="layoutNode?.dataPointer"
+      [class]="options?.labelHtmlClass"
+      [class.sr-only]="options?.notitle"
       [innerHTML]="options?.title"></label>
-    <div *ngIf="boundControl" [formGroup]="formControlGroup">
-      <div *ngFor="let radioItem of radiosList" [class]="options?.htmlClass">
-        <label [attr.for]="layoutNode?.dataPointer + '/' + radioItem?.value"
-          [class.active]="formControlGroup.value[formControlName] === radioItem?.value">
+    <div *ngIf="boundControl"
+      [class]="options?.htmlClass"
+      [formGroup]="formControlGroup">
+      <div *ngFor="let radioItem of radiosList"
+        [class]="options?.htmlClass">
+        <label
+          [attr.for]="layoutNode?.dataPointer + '/' + radioItem?.value"
+          [class]="options?.itemLabelHtmlClass +
+            (formControl?.value === radioItem?.value ?
+            ' ' + options?.activeClass : '')"
+          [class.active]="formControl?.value === radioItem?.value">
           <input type="radio"
             [formControlName]="formControlName"
             [id]="layoutNode?.dataPointer + '/' + radioItem?.value"
@@ -24,10 +33,16 @@ import { buildTitleMap, getControl } from '../utilities/index';
         </label>
       </div>
     </div>
-    <div *ngIf="!boundControl">
-      <div *ngFor="let radioItem of radiosList">
-        <label [attr.for]="radioItem?.value" [class]="options?.labelHtmlClass"
-          [class.active]="formControlGroup.value[formControlName] === radioItem?.value">
+    <div *ngIf="!boundControl"
+      [class]="options?.htmlClass">
+      <div *ngFor="let radioItem of radiosList"
+        [class]="options?.htmlClass">
+        <label
+          [attr.for]="radioItem?.value"
+          [class]="options?.itemLabelHtmlClass +
+            (formControl?.value === radioItem?.value ?
+            ' ' + options?.activeClass : '')"
+          [class.active]="formControl?.value === radioItem?.value">
           <input type="radio"
             [id]="radioItem?.value"
             [class]="options?.fieldHtmlClass"
@@ -41,6 +56,7 @@ import { buildTitleMap, getControl } from '../utilities/index';
 })
 export class RadiosComponent implements OnInit {
   private formControlGroup: any;
+  private formControl: any;
   private formControlName: string;
   private boundControl: boolean = false;
   private options: any;
@@ -56,12 +72,16 @@ export class RadiosComponent implements OnInit {
     this.formControlName = this.formSettings.getControlName(this);
     this.boundControl = this.formSettings.isControlBound(this);
     if (this.boundControl) {
+      this.formControl = this.formSettings.getControl(this);
     } else {
       console.error(
         'RadiosComponent warning: control "' + this.formSettings.getDataPointer(this) +
         '" is not bound to the Angular 2 FormGroup.'
       );
     }
-    this.radiosList = buildTitleMap(this.options.titleMap, this.options.enum);
+    this.radiosList = buildTitleMap(
+      this.options.titleMap || this.options.enumNames,
+      this.options.enum, true
+    );
   }
 }

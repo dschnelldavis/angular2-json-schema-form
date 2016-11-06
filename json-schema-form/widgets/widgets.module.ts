@@ -30,9 +30,9 @@ let componentList: any[] = [
   AddReferenceComponent, ButtonComponent, CheckboxComponent,
   CheckboxesComponent, FieldsetComponent, FileComponent, HiddenComponent,
   InputComponent, NoneComponent, NumberComponent, MessageComponent,
-  RadiosComponent, RadiosInlineComponent, RootComponent, SectionComponent,
-  SelectComponent, SubmitComponent, TabComponent, TabarrayComponent,
-  TemplateComponent, TextareaComponent
+  RadiosComponent, RadiosInlineComponent, RootComponent,
+  SectionComponent, SelectComponent, SubmitComponent, TabComponent,
+  TabarrayComponent, TemplateComponent, TextareaComponent
 ];
 
 @NgModule({

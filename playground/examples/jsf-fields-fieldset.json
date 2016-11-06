@@ -13,19 +13,16 @@
       "title": "Age"
     }
   },
-  "form": [
-    {
-      "key": "comment",
-      "type": "textarea"
-    },
-    {
-      "type": "fieldset",
-      "title": "Author",
-      "expandable": true,
-      "items": [
-        "name",
-        "age"
-      ]
-    }
-  ]
+  "form": [ {
+    "key": "comment",
+    "type": "textarea"
+  }, {
+    "type": "fieldset",
+    "title": "Author",
+    "expandable": true,
+    "items": [
+      "name",
+      "age"
+    ]
+  } ]
 }

@@ -9,16 +9,13 @@
       }
     }
   },
-  "form": [
-    {
-      "key": "language",
-      "type": "checkboxbuttons",
-      "activeClass": "btn-success"
-    },
-    {
-      "title": "Submit",
-      "type": "submit"
-    }
-  ],
+  "form": [ {
+    "key": "language",
+    "type": "checkboxbuttons",
+    "activeClass": "btn-success"
+  }, {
+    "title": "Submit",
+    "type": "submit"
+  } ],
   "value": {"language": "Python"}
 }
