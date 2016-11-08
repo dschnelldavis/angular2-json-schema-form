@@ -41,7 +41,10 @@
       "ui:widget": "updown"
     },
     "numberEnumRadio": {
-      "ui:widget": "radio"
+      "ui:widget": {
+        "component": "radio",
+        "options": { "inline": true }
+      }
     },
     "integerRange": {
       "ui:widget": "range"
@@ -53,8 +56,9 @@
   "formData": {
     "number": 3.14,
     "integer": 42,
-    "numberEnum": 2,
-    "integerRange": 42,
-    "integerRangeSteps": 80
+    "numberEnum": 3,
+    "numberEnumRadio": 3,
+    "integerRange": 58,
+    "integerRangeSteps": 60
   }
 }

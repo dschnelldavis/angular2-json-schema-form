@@ -14,9 +14,9 @@
   },
   "value": {
     "reminders": [
-      ["Buy clothes", "Pick up kids"],
-      ["Call John", "Send email"],
-      ["Wash car"]
+      [ "Buy clothes", "Pick up kids" ],
+      [ "Call John", "Send email" ],
+      [ "Wash car" ]
     ]
   }
 }

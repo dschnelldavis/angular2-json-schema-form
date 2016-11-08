@@ -20,7 +20,8 @@ import { SectionComponent } from './section.component';
 import { SelectComponent } from './select.component';
 import { SubmitComponent } from './submit.component';
 import { TabComponent } from './tab.component';
-import { TabarrayComponent } from './tabarray.component';
+// import { TabarrayComponent } from './tabarray.component';
+import { TabsComponent } from './tabs.component';
 import { TemplateComponent } from './template.component';
 import { TextareaComponent } from './textarea.component';
 
@@ -32,7 +33,7 @@ let componentList: any[] = [
   InputComponent, NoneComponent, NumberComponent, MessageComponent,
   RadiosComponent, RadiosInlineComponent, RootComponent,
   SectionComponent, SelectComponent, SubmitComponent, TabComponent,
-  TabarrayComponent, TemplateComponent, TextareaComponent
+  TabsComponent, TemplateComponent, TextareaComponent
 ];
 
 @NgModule({

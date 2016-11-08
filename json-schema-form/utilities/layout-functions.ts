@@ -60,6 +60,8 @@ export function buildLayout(formSettings: any): any[] {
     newNode.layoutPointer = layoutPointer.replace(/\/\d+/g, '/-');
     let itemSchema: any = null;
     let schemaDefaultValue: any = null;
+
+    // If newNode does not have a dataPointer, try to find an equivalent
     if (!hasOwn(newNode, 'dataPointer')) {
 
       // If newNode has a key, change it to a dataPointer
@@ -100,6 +102,7 @@ export function buildLayout(formSettings: any): any[] {
         }
       }
     }
+
     if (hasOwn(newNode, 'dataPointer')) {
       if (newNode.dataPointer === '*') {
         return buildLayoutFromSchema(formSettings, currentIndex,
@@ -148,7 +151,9 @@ export function buildLayout(formSettings: any): any[] {
             newNode.listItems = itemSchema.maxItems || true;
           }
         }
-        if (!newNode.options.title && !isNumber(newNode.name)) {
+        if (!newNode.options.title && newNode.options.legend) {
+          newNode.options.title = newNode.options.legend;
+        } else if (!newNode.options.title && !isNumber(newNode.name)) {
           newNode.options.title = toTitleCase(newNode.name.replace(/_/g, ' '));
         }
         if (isInputRequired(formSettings.schema, newNode.dataPointer)) {
@@ -163,7 +168,9 @@ export function buildLayout(formSettings: any): any[] {
       newNode.widget = formSettings.widgetLibrary.getWidget(newNode.type);
       formSettings.dataMap.get(newNode.dataPointer).set('inputType', newNode.type);
       formSettings.dataMap.get(newNode.dataPointer).set('widget', newNode.widget);
-      if (newNode.type === 'array' && hasOwn(newNode, 'items')) {
+      if ((newNode.type === 'array' || newNode.type === 'tabarray') &&
+        hasOwn(newNode, 'items')
+      ) {
         if (newNode.options.required && !newNode.minItems) newNode.minItems = 1;
         let arrayPointer: string = newNode.dataPointer + '/-';
         if (!formSettings.dataMap.has(arrayPointer)) {
@@ -202,7 +209,7 @@ export function buildLayout(formSettings: any): any[] {
             layoutPointer: newNode.layoutPointer + '/items/-',
             options: {
               isArrayItem: true,
-              isRemovable: !newNode.minItems,
+              removable: newNode.options.removable || !newNode.options.minItems,
             },
             dataPointer: newNode.dataPointer + '/-',
             type: 'fieldset',
@@ -212,43 +219,43 @@ export function buildLayout(formSettings: any): any[] {
 
         // TODO: check maxItems to verify adding new items is OK, and check
         // additionalItems for whether there is a different schema for new items
-        formSettings.layoutRefLibrary[arrayPointer] =
+        if (newNode.options.addable !== false) {
+          formSettings.layoutRefLibrary[arrayPointer] =
           newNode.items[newNode.items.length - 1];
-        let buttonText: string = 'Add ';
-        if (newNode.options.title) {
-          buttonText += newNode.options.title;
-        } else if (formSettings.schema.title) {
-          buttonText += 'to ' + formSettings.schema.title;
-        } else {
-          buttonText += 'to ' +
+          let buttonText: string = 'Add ';
+          if (newNode.options.title) {
+            buttonText += newNode.options.title;
+          } else if (formSettings.schema.title) {
+            buttonText += 'to ' + formSettings.schema.title;
+          } else {
+            buttonText += 'to ' +
             toTitleCase(JsonPointer.toKey(newNode.dataPointer).replace(/_/g, ' '));
+          }
+          let newNodeRef: any = {
+            dataPointer: toGenericPointer(arrayPointer, formSettings.arrayMap),
+            layoutPointer: newNode.layoutPointer + '/items/-',
+            name: '-',
+            options: {
+              arrayItemType: 'list',
+              isArrayItem: true,
+              removable: !!newNode.options.removable,
+              title: buttonText,
+            },
+            type: '$ref',
+            widget: formSettings.widgetLibrary.getWidget('$ref'),
+            '$refType': 'array',
+          };
+          // If newNode doesn't have a title, look for title of array parent item ?
+          if (!newNodeRef.options.title && !isNumber(newNode.name) && newNode.name !== '-') {
+            newNode.options.title = toTitleCase(newNode.name.replace(/_/g, ' '));
+          }
+          if (isString(JsonPointer.get(newNode, '/style/add'))) {
+            newNodeRef.options.fieldStyle = newNode.style.add;
+            delete newNode.style.add;
+            if (isEmpty(newNode.style)) delete newNode.style;
+          }
+          newNode.items.push(newNodeRef);
         }
-        let newNodeRef: any = {
-          dataPointer: toGenericPointer(arrayPointer, formSettings.arrayMap),
-          layoutPointer: newNode.layoutPointer + '/items/-',
-          name: '-',
-          options: {
-            arrayItemType: 'list',
-            isArrayItem: true,
-            isRemovable: false,
-            title: buttonText,
-          },
-          type: '$ref',
-          widget: formSettings.widgetLibrary.getWidget('$ref'),
-          '$refType': 'array',
-        };
-
-        // TODO: If newNode doesn't have a title, look for title of array parent item ?
-        if (!newNodeRef.options.title && !isNumber(newNode.name) && newNode.name !== '-') {
-          newNode.options.title = toTitleCase(newNode.name.replace(/_/g, ' '));
-        }
-        if (isString(JsonPointer.get(newNode, '/style/add'))) {
-          newNodeRef.options.fieldStyle = newNode.style.add;
-          delete newNode.style.add;
-          if (isEmpty(newNode.style)) delete newNode.style;
-        }
-        newNode.items.push(newNodeRef);
-
       }
     } else if (hasOwn(newNode, 'type')) {
       newNode.widget = formSettings.widgetLibrary.getWidget(newNode.type);
@@ -276,7 +283,7 @@ export function buildLayoutFromSchema(
   formSettings: any, layoutIndex: number = 0, layoutPointer: string = '',
   schemaPointer: string = '', dataPointer: string = '',
   isArrayItem: boolean = false, arrayItemType: string = null,
-  isRemovable: boolean = null
+  removable: boolean = null
 ): any {
   const schema = JsonPointer.get(formSettings.schema, schemaPointer);
   if (!hasOwn(schema, 'type') && !hasOwn(schema, 'x-schema-form') &&
@@ -295,7 +302,7 @@ export function buildLayoutFromSchema(
   newNode.dataType = schema.type;
   if (isArrayItem === true) newNode.options.isArrayItem = true;
   if (isDefined(arrayItemType)) newNode.options.arrayItemType = arrayItemType;
-  if (isDefined(isRemovable)) newNode.options.isRemovable = isRemovable;
+  if (isDefined(removable)) newNode.options.removable = removable;
   newNode.widget = formSettings.widgetLibrary.getWidget(newNode.type);
   if (dataPointer !== '') {
     if (!formSettings.dataMap.has(newNode.dataPointer)) {
@@ -306,7 +313,9 @@ export function buildLayoutFromSchema(
     formSettings.dataMap.get(newNode.dataPointer).set('widget', newNode.widget);
   }
   updateInputOptions(newNode, schema, formSettings);
-  if (!newNode.options.title && !isNumber(newNode.name) && newNode.name !== '-') {
+  if (!newNode.options.title && newNode.options.legend) {
+    newNode.options.title = newNode.options.legend;
+  } else if (!newNode.options.title && !isNumber(newNode.name) && newNode.name !== '-') {
     newNode.options.title = toTitleCase(newNode.name.replace(/_/g, ' '));
   }
   switch (newNode.type) {
@@ -454,7 +463,7 @@ export function buildLayoutFromSchema(
           options: {
             arrayItemType: 'list',
             isArrayItem: true,
-            isRemovable: false,
+            removable: false,
             title: buttonText,
           },
           type: '$ref',

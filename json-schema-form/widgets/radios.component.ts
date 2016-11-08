@@ -20,8 +20,7 @@ import { buildTitleMap, getControl } from '../utilities/index';
           [attr.for]="layoutNode?.dataPointer + '/' + radioItem?.value"
           [class]="options?.itemLabelHtmlClass +
             (formControl?.value === radioItem?.value ?
-            ' ' + options?.activeClass : '')"
-          [class.active]="formControl?.value === radioItem?.value">
+            ' ' + options?.activeClass : '')">
           <input type="radio"
             [formControlName]="formControlName"
             [id]="layoutNode?.dataPointer + '/' + radioItem?.value"
@@ -41,8 +40,7 @@ import { buildTitleMap, getControl } from '../utilities/index';
           [attr.for]="radioItem?.value"
           [class]="options?.itemLabelHtmlClass +
             (formControl?.value === radioItem?.value ?
-            ' ' + options?.activeClass : '')"
-          [class.active]="formControl?.value === radioItem?.value">
+            ' ' + options?.activeClass : '')">
           <input type="radio"
             [id]="radioItem?.value"
             [class]="options?.fieldHtmlClass"

@@ -5,7 +5,8 @@ import {
 import { FormGroup } from '@angular/forms';
 
 import {
-  addClasses, getControl, inArray, isNumber, JsonPointer, toIndexedPointer
+  addClasses, getControl, inArray, isNumber, JsonPointer, parseText,
+  toIndexedPointer
 } from '../utilities/index';
 
 @Component({
@@ -74,6 +75,8 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
       this.options.labelHtmlClass =
         addClasses(this.options.labelHtmlClass, 'control-label');
 
+      this.widgetOptions.activeClass = 'active';
+
       this.options.fieldAddonLeft =
         this.options.fieldAddonLeft || this.options.prepend;
 
@@ -133,6 +136,14 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
             this.options.title += ' <strong class="text-danger">*</strong>';
           }
         break;
+        case 'tabarray': case 'tabs':
+          this.widgetOptions.htmlClass = addClasses(
+            this.widgetOptions.htmlClass, 'tab-content');
+          this.widgetOptions.fieldHtmlClass = addClasses(
+            this.widgetOptions.fieldHtmlClass, 'tab-pane');
+          this.widgetOptions.labelHtmlClass = addClasses(
+            this.widgetOptions.labelHtmlClass, 'nav nav-tabs');
+        break;
         // 'Add' buttons - references
         case '$ref':
           this.widgetOptions.fieldHtmlClass =
@@ -160,7 +171,10 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
 
         if (this.formControl) {
           this.formControl.statusChanges.subscribe(value => {
-            if (value === 'INVALID' && this.formControl.errors) {
+            if (!this.options.disableErrorState &&
+              this.options.feedback && value === 'INVALID' &&
+              this.formControl.dirty && this.formControl.errors
+            ) {
               this.options.errorMessage = Object.keys(this.formControl.errors).map(
                   error => [error, Object.keys(this.formControl.errors[error]).map(
                     errorParameter => errorParameter + ': ' +
@@ -168,7 +182,7 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
                   ).join(', ')].filter(e => e).join(' - ')
                 ).join('<br>');
             } else {
-              this.widgetOptions.errorMessage = null;
+              this.options.errorMessage = null;
             }
           });
         }
@@ -198,10 +212,11 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
       const minItems = parentArray.minItems || 0;
       const lastArrayItem = parentArray.items.length - 2;
       const tupleItems = parentArray.tupleItems;
-      if (this.options.isRemovable && arrayIndex >= minItems &&
+      if (this.options.type !== '$ref' && this.options.removable &&
+        arrayIndex >= minItems &&
         (arrayIndex >= tupleItems || arrayIndex === lastArrayItem)
       ) {
-        this.options.isRemovable = true;
+        this.options.removable = true;
       }
     }
   }
@@ -210,7 +225,7 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
     switch (this.layoutNode.type) {
       case 'array': case 'button': case 'checkbox': case 'conditional':
       case 'fieldset': case 'help': case 'msg': case 'message':
-      case 'section': case 'submit': case '$ref':
+      case 'section': case 'submit': case 'tabarray': case '$ref':
         return null;
       case 'advancedfieldset':
         this.widgetOptions.expandable = true;
@@ -226,7 +241,9 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
           this.layoutNode.name : null
         );
         this.widgetOptions.title = null;
-        return thisTitle;
+        return parseText(thisTitle, this.formControl.value,
+          this.formSettings.formGroup.value,
+          this.dataIndex[this.dataIndex.length - 1]);
     }
   }
 

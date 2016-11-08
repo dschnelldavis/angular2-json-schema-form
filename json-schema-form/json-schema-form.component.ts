@@ -251,7 +251,7 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
       options.formGroupTemplate = {};
       options.formGroup = null;
 
-      // Initialize 'formSettings.schema'
+      // Initialize 'schema'
       // Use first available input:
       // 1. schema - recommended / Angular Schema Form style
       // 2. form.schema - Single input / JSON Form style
@@ -325,7 +325,7 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
         }, true);
       }
 
-      // Initialize 'formSettings.layout'
+      // Initialize 'layout'
       // Use first available array input:
       // 1. layout - recommended
       // 2. form - Angular Schema Form style
@@ -391,7 +391,7 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
         });
       }
 
-      // Initialize 'formSettings.defaultValues'
+      // Initialize 'defaultValues'
       // Use first available input:
       // 1. data - recommended
       // 2. model - Angular Schema Form style
@@ -432,8 +432,6 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
       // Update all layout elements, set values, and add validators,
       // replace any '*' with a layout built from all schema elements,
       // and update the FormGroup template with any new validators
-      // TODO: Update layout and Angular 2 FormGroup template from data
-      // (set default values and extend arrays)
       options.layout = buildLayout(options);
 
       // Build the real Angular 2 FormGroup from the FormGroup template

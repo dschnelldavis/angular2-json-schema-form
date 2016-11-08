@@ -346,18 +346,18 @@ export function updateInputOptions(layoutNode: any, schema: any, formSettings: a
   ) {
     layoutNode.options.multipleOf = 1;
 
-  // If schema type is array, save controlTemplate in layoutNode
-  } else if (templatePointer && schema.type === 'array') {
-    if (JsonPointer.has(schema, '/items/$ref')) {
-      layoutNode.controlTemplate = buildFormGroupTemplate(
-        formSettings, schema.items.$ref
-      );
-    } else {
-      layoutNode.controlTemplate = _.cloneDeep(JsonPointer.get(
-        formSettings.formGroupTemplate, templatePointer + '/controls/-'
-      ));
-    }
-    JsonPointer.remove(layoutNode, '/controlTemplate/value');
+  // // If schema type is array, save controlTemplate in layoutNode
+  // } else if (templatePointer && schema.type === 'array') {
+  //   if (JsonPointer.has(schema, '/items/$ref')) {
+  //     layoutNode.controlTemplate = buildFormGroupTemplate(
+  //       formSettings, schema.items.$ref
+  //     );
+  //   } else {
+  //     layoutNode.controlTemplate = _.cloneDeep(JsonPointer.get(
+  //       formSettings.formGroupTemplate, templatePointer + '/controls/-'
+  //     ));
+  //   }
+  //   JsonPointer.remove(layoutNode, '/controlTemplate/value');
 
   // If schema is an object with a $ref link, save controlTemplate in layoutNode
   } else if (hasOwn(schema, '$ref')) {

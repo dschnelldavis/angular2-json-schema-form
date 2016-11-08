@@ -65,11 +65,14 @@ export class InputComponent implements OnInit {
     this.formControlName = this.formSettings.getControlName(this);
     this.boundControl = this.formSettings.isControlBound(this);
     if (this.boundControl) {
-      if (this.layoutNode.hasOwnProperty('pattern') &&
-        this.layoutNode.pattern[1] === '^' &&
-        this.layoutNode.pattern.slice(-1) === '$'
-      ) {
-        this.pattern = this.layoutNode.pattern.slice(1, -1);
+      // if (this.layoutNode.hasOwnProperty('pattern') &&
+      //   this.layoutNode.pattern[1] === '^' &&
+      //   this.layoutNode.pattern.slice(-1) === '$'
+      // ) {
+      //   this.pattern = this.layoutNode.pattern.slice(1, -1);
+      // }
+      if (this.layoutNode.hasOwnProperty('pattern')) {
+        this.pattern = this.layoutNode.pattern;
       }
     } else {
       console.error(

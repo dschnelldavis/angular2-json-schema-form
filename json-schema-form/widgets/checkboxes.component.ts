@@ -18,8 +18,7 @@ import {
         <label *ngFor="let checkboxItem of checkboxList"
           [attr.for]="layoutNode?.dataPointer + '/' + checkboxItem.value"
           [class]="options?.itemLabelHtmlClass +
-            (checkboxItem.checked ? ' ' + options?.activeClass : '')"
-          [class.active]="checkboxItem.checked">
+            (checkboxItem.checked ? ' ' + options?.activeClass : '')">
           <input type="checkbox"
             [attr.readonly]="options?.readonly ? 'readonly' : null"
             [attr.required]="options?.required"
@@ -32,7 +31,7 @@ import {
           <span [innerHTML]="checkboxItem.name"></span>
         </label>
       </div>
-      <!-- *ngSwitchCase="'vertical'" -->
+      <!-- default: *ngSwitchCase="'vertical'" -->
       <div *ngSwitchDefault
         [class]="options?.htmlClass"> <!-- regular checkboxes -->
         <div *ngFor="let checkboxItem of checkboxList"
@@ -40,8 +39,7 @@ import {
           <label
             [attr.for]="layoutNode?.dataPointer + '/' + checkboxItem.value"
             [class]="options?.itemLabelHtmlClass +
-              (checkboxItem.checked ? ' ' + options?.activeClass : '')"
-            [class.active]="checkboxItem.checked">
+              (checkboxItem.checked ? ' ' + options?.activeClass : '')">
             <input type="checkbox"
               [attr.readonly]="options?.readonly ? 'readonly' : null"
               [attr.required]="options?.required"

@@ -16,7 +16,7 @@ import {
  * Utility function library:
  *
  * addClasses, copy, forEach, forEachCopy, hasOwn, inArray,
- * mergeFilteredObject, toTitleCase, xor
+ * mergeFilteredObject, parseText, toTitleCase, xor
 */
 
 /**
@@ -205,6 +205,30 @@ export function mergeFilteredObject(
     }
   }
   return targetObject;
+}
+
+/**
+ * 'parseText' function
+ *
+ * @param  {string = ''} text -
+ * @param  {any = {}} value -
+ * @param  {number = null} index -
+ * @return {string} -
+ */
+export function parseText(
+  text: string = '', value: any = {}, values: any = {}, index: number = null
+): string {
+  let parsedText: string;
+  const $index: number = index + 1;
+  const idx: number = index + 1;
+  try {
+    parsedText = text.replace(/{{.+?}}/g, exp => eval(exp.slice(2, -2)));
+  } catch (error) {
+    console.error('parseText error: ');
+    console.error(error);
+    parsedText = text;
+  }
+  return parsedText;
 }
 
 /**
