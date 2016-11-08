@@ -1,10 +1,5 @@
-import {
-  AfterViewInit, Component, OnInit, ViewChild, ViewContainerRef
-} from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import {
-  FormArray, FormControl, FormGroup, FormBuilder, NgForm, Validators
-} from '@angular/forms';
 import { Http } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
@@ -208,7 +203,6 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
   };
 
   constructor(
-    private formBuilder: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
     private http: Http,
@@ -254,7 +248,6 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
 
   get prettyValidationErrors() {
     if (!this.formValidationErrors) return null;
-    // return JSON.stringify(this.formValidationErrors, null, 2);
     let prettyValidationErrors = '';
     for (let error of this.formValidationErrors) {
       prettyValidationErrors += (error.dataPath.length ?

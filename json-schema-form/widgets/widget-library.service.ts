@@ -16,9 +16,11 @@ import { RadiosInlineComponent } from './radios-inline.component';
 import { RootComponent } from './root.component';
 import { SectionComponent } from './section.component';
 import { SelectComponent } from './select.component';
+import { SelectComponentComponent } from './select-component.component';
+import { SelectFrameworkComponent } from './select-framework.component';
+import { SelectWidgetComponent } from './select-widget.component';
 import { SubmitComponent } from './submit.component';
 import { TabComponent } from './tab.component';
-// import { TabarrayComponent } from './tabarray.component';
 import { TabsComponent } from './tabs.component';
 import { TemplateComponent } from './template.component';
 import { TextareaComponent } from './textarea.component';
@@ -30,13 +32,16 @@ export class WidgetLibraryService {
   private widgets: { [type: string]: any } = {
 
   // Angular 2 JSON Schema Form administrative widgets
-    'root': RootComponent, // form root, renders a complete layout
-    'none': NoneComponent, // placeholder, displays nothing
-    '$ref': AddReferenceComponent, // to add new array items or $ref elements
+    'none': NoneComponent, // Placeholder for development, displays nothing
+    // 'root': RootComponent, // Form root, renders a complete layout
+    // 'select-component': SelectComponentComponent, // Displays a specified component
+    // 'select-framework': SelectFrameworkComponent, // Applies the selected framework to a specified widget
+    // 'select-widget': SelectWidgetComponent, // Displays a specified widget
+    '$ref': AddReferenceComponent, // Button, adds new array item or $ref element
 
   // Free-form text HTML 'input' form control widgets <input type="...">
     'email': InputComponent,
-    'integer': NumberComponent, // Note: integer is not a recognized HTML input type
+    'integer': NumberComponent, // Note: 'integer' is not an HTML 5 input type
     'number': NumberComponent,
     'password': InputComponent,
     'search': InputComponent,

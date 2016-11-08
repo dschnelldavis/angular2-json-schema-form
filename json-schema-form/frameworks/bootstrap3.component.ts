@@ -1,7 +1,4 @@
-import {
-  AfterContentChecked, Component, ComponentFactoryResolver, ComponentRef,
-  Input, OnChanges, OnInit, ViewChild, ViewContainerRef
-} from '@angular/core';
+import { Component, Input, OnChanges, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 import {
@@ -15,7 +12,7 @@ import {
   templateUrl: 'bootstrap3.component.html',
   styleUrls: ['bootstrap3.component.css'],
 })
-export class Bootstrap3Component implements OnInit, OnChanges, AfterContentChecked {
+export class Bootstrap3Component implements OnInit, OnChanges {
   private controlInitialized: boolean = false;
   private options: any; // Options used by framework
   private widgetOptions: any; // Options passed to child widget
@@ -27,26 +24,14 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
   @Input() formSettings: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
-  @ViewChild('widgetContainer', { read: ViewContainerRef })
-    private widgetContainer: ViewContainerRef;
-
-  constructor(
-    private componentFactory: ComponentFactoryResolver,
-  ) { }
 
   ngOnInit() {
     if (this.layoutNode) {
       this.options = Object.assign({}, this.layoutNode.options);
       this.widgetOptions = this.layoutNode.options;
-      this.layoutPointer =
-        toIndexedPointer(this.layoutNode.layoutPointer, this.layoutIndex);
-
+      this.layoutPointer = this.formSettings.getLayoutPointer(this);
+      this.formControl = this.formSettings.getControl(this);
       this.updateArrayItems();
-
-      if (this.layoutNode.hasOwnProperty('dataPointer')) {
-        this.formControl =
-          getControl(this.formSettings.formGroup, this.layoutNode.dataPointer);
-      }
 
       this.options.isInputWidget = inArray(this.layoutNode.type, [
         'button', 'checkbox', 'checkboxes-inline', 'checkboxes', 'color',
@@ -157,35 +142,24 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
           this.widgetOptions.fieldHtmlClass = addClasses(
             this.widgetOptions.fieldHtmlClass, 'form-control');
       }
-      if (
-        !this.controlInitialized && this.layoutNode && this.layoutNode.widget &&
-        this.widgetContainer && !this.widgetContainer.length
-      ) {
-        let addedNode: ComponentRef<any> = this.widgetContainer.createComponent(
-          this.componentFactory.resolveComponentFactory(this.layoutNode.widget)
-        );
-        for (let input of ['layoutNode', 'formSettings', 'layoutIndex', 'dataIndex']) {
-          addedNode.instance[input] = this[input];
-        }
-        this.controlInitialized = true;
 
-        if (this.formControl) {
-          this.formControl.statusChanges.subscribe(value => {
-            if (!this.options.disableErrorState &&
-              this.options.feedback && value === 'INVALID' &&
-              this.formControl.dirty && this.formControl.errors
-            ) {
-              this.options.errorMessage = Object.keys(this.formControl.errors).map(
-                  error => [error, Object.keys(this.formControl.errors[error]).map(
-                    errorParameter => errorParameter + ': ' +
-                      this.formControl.errors[error][errorParameter]
-                  ).join(', ')].filter(e => e).join(' - ')
-                ).join('<br>');
-            } else {
-              this.options.errorMessage = null;
-            }
-          });
-        }
+      if (this.formControl && this.controlInitialized) {
+        this.controlInitialized = true;
+        this.formControl.statusChanges.subscribe(value => {
+          if (!this.options.disableErrorState &&
+            this.options.feedback && value === 'INVALID' &&
+            this.formControl.dirty && this.formControl.errors
+          ) {
+            this.options.errorMessage = Object.keys(this.formControl.errors).map(
+                error => [error, Object.keys(this.formControl.errors[error]).map(
+                  errorParameter => errorParameter + ': ' +
+                    this.formControl.errors[error][errorParameter]
+                ).join(', ')].filter(e => e).join(' - ')
+              ).join('<br>');
+          } else {
+            this.options.errorMessage = null;
+          }
+        });
 
         if (this.options.debug) {
           let vars: any[] = [];
@@ -199,9 +173,6 @@ export class Bootstrap3Component implements OnInit, OnChanges, AfterContentCheck
 
   ngOnChanges() {
     this.updateArrayItems();
-  }
-
-  ngAfterContentChecked() {
   }
 
   private updateArrayItems() {

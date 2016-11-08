@@ -1,19 +1,11 @@
 import {
-  ChangeDetectionStrategy, Component, ComponentFactoryResolver, ComponentRef,
-  DoCheck, EventEmitter, Input, Output, OnChanges, OnInit, AfterContentInit,
-  AfterViewInit, ViewChild, ViewContainerRef
+  ChangeDetectionStrategy, Component, DoCheck, EventEmitter, Input, Output,
+  OnChanges, OnInit,
 } from '@angular/core';
-import {
-  AbstractControl, FormArray, FormControl, FormGroup, FormBuilder, NgForm,
-  ValidatorFn, Validators
-} from '@angular/forms';
-import { Http } from '@angular/http';
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/operator/map';
+import { FormGroup } from '@angular/forms';
 
 import * as Ajv from 'ajv';
 import * as _ from 'lodash';
-import * as Immutable from 'immutable';
 
 import { FrameworkLibraryService } from './frameworks/framework-library.service';
 import { WidgetLibraryService } from './widgets/widget-library.service';
@@ -59,15 +51,14 @@ import {
   selector: 'json-schema-form',
   template: `<form (ngSubmit)="submitForm()">
     <root-widget *ngIf="formActive"
-      [layoutNode]="formSettings.layout"
-      [formSettings]="formSettings"
-      [isFirstRoot]="true">
+      [layout]="formSettings.layout"
+      [formSettings]="formSettings">
     </root-widget>
   </form>
   <div *ngIf="debug">Debug output: <pre>{{debugOutput}}</pre></div>`,
-  // changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit, DoCheck, OnChanges, OnInit {
+export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
   private formActive: boolean = false; // Used to trigger form rendering
   private ajv: any = new Ajv({ allErrors: true }); // AJV: Another JSON Schema Validator
   private validateFormData: any; // Compiled AJV function to validate this form's schema
@@ -99,7 +90,7 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
     schema: {}, // The internal JSON Schema
     layout: [], // The internal Form layout
     formGroupTemplate: {}, // The template used to create formGroup
-    formGroup: null, // The Angular 2 formGroup, for powering reactive form
+    formGroup: null, // The Angular 2 formGroup, which powers the reactive form
 
     framework: null, // The active framework component
 
@@ -108,10 +99,10 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
     layoutRefLibrary: {}, // Library of layout nodes for adding to form
     schemaRefLibrary: {}, // Library of schemas for resolving schema $refs
     templateRefLibrary: {}, // Library of formGroup templates for adding to form
-    widgetLibrary: null,
 
     getControl: (ctx) => {
-      if (!ctx.layoutNode || !ctx.layoutNode.dataPointer) return null;
+      if (!ctx.layoutNode || !ctx.layoutNode.dataPointer ||
+        ctx.layoutNode.type === '$ref') return null;
       return getControl(this.formSettings.formGroup,
         this.formSettings.getDataPointer(ctx));
     },
@@ -197,22 +188,11 @@ export class JsonSchemaFormComponent implements AfterContentInit, AfterViewInit,
   @Output() validationErrors = new EventEmitter<any>(); // Validation errors
 
   constructor(
-    private formBuilder: FormBuilder,
-    private http: Http,
-    private componentFactoryResolver: ComponentFactoryResolver,
-    private viewContainer: ViewContainerRef,
     private widgetLibrary: WidgetLibraryService,
     private frameworkLibrary: FrameworkLibraryService,
-  ) {
-    this.formSettings.formGroup = this.formBuilder.group({});
-    this.formSettings.widgetLibrary = widgetLibrary;
-  }
+  ) { }
 
   ngOnInit() { }
-
-  ngAfterContentInit() { }
-
-  ngAfterViewInit() { }
 
   ngOnChanges() {
     if (isObject(this.options)) Object.assign(this.formSettings.globalOptions, this.options);

@@ -6,6 +6,9 @@ import 'rxjs/add/operator/map';
 import * as _ from 'lodash';
 import * as Immutable from 'immutable';
 
+import { WidgetLibraryService } from '../widgets/widget-library.service';
+const widgetLibrary = new WidgetLibraryService();
+
 import {
   buildFormGroupTemplate, checkInlineType, copy, forEach, getFromSchema,
   getInputType, getControl, hasOwn, inArray, isArray, isEmpty, isInputRequired,
@@ -123,7 +126,7 @@ export function buildLayout(formSettings: any): any[] {
       if (itemSchema) {
         if (!hasOwn(newNode, 'type')) {
           newNode.type = getInputType(itemSchema, newNode);
-        } else if (!formSettings.widgetLibrary.hasWidget(newNode.type)) {
+        } else if (!widgetLibrary.hasWidget(newNode.type)) {
           const oldWidgetType = newNode.type;
           newNode.type = getInputType(itemSchema, newNode);
           console.error('error: widget type "' + oldWidgetType +
@@ -165,7 +168,7 @@ export function buildLayout(formSettings: any): any[] {
         // TODO: create item in FormGroup model from layout key
         updateInputOptions(newNode, {}, formSettings);
       }
-      newNode.widget = formSettings.widgetLibrary.getWidget(newNode.type);
+      newNode.widget = widgetLibrary.getWidget(newNode.type);
       formSettings.dataMap.get(newNode.dataPointer).set('inputType', newNode.type);
       formSettings.dataMap.get(newNode.dataPointer).set('widget', newNode.widget);
       if ((newNode.type === 'array' || newNode.type === 'tabarray') &&
@@ -213,7 +216,7 @@ export function buildLayout(formSettings: any): any[] {
             },
             dataPointer: newNode.dataPointer + '/-',
             type: 'fieldset',
-            widget: formSettings.widgetLibrary.getWidget('fieldset'),
+            widget: widgetLibrary.getWidget('fieldset'),
           });
         }
 
@@ -242,7 +245,7 @@ export function buildLayout(formSettings: any): any[] {
               title: buttonText,
             },
             type: '$ref',
-            widget: formSettings.widgetLibrary.getWidget('$ref'),
+            widget: widgetLibrary.getWidget('$ref'),
             '$refType': 'array',
           };
           // If newNode doesn't have a title, look for title of array parent item ?
@@ -258,7 +261,7 @@ export function buildLayout(formSettings: any): any[] {
         }
       }
     } else if (hasOwn(newNode, 'type')) {
-      newNode.widget = formSettings.widgetLibrary.getWidget(newNode.type);
+      newNode.widget = widgetLibrary.getWidget(newNode.type);
       updateInputOptions(newNode, {}, formSettings);
     }
     return newNode;
@@ -303,7 +306,7 @@ export function buildLayoutFromSchema(
   if (isArrayItem === true) newNode.options.isArrayItem = true;
   if (isDefined(arrayItemType)) newNode.options.arrayItemType = arrayItemType;
   if (isDefined(removable)) newNode.options.removable = removable;
-  newNode.widget = formSettings.widgetLibrary.getWidget(newNode.type);
+  newNode.widget = widgetLibrary.getWidget(newNode.type);
   if (dataPointer !== '') {
     if (!formSettings.dataMap.has(newNode.dataPointer)) {
       formSettings.dataMap.set(newNode.dataPointer, new Map);
@@ -467,7 +470,7 @@ export function buildLayoutFromSchema(
             title: buttonText,
           },
           type: '$ref',
-          widget: formSettings.widgetLibrary.getWidget('$ref'),
+          widget: widgetLibrary.getWidget('$ref'),
           '$refType': 'array',
         });
       }

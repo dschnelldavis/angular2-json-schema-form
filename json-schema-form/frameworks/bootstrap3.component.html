@@ -46,7 +46,11 @@
       class="input-group-addon"
       [innerHTML]="options?.fieldAddonLeft"></span>
 
-    <div #widgetContainer></div>
+    <select-widget-widget
+      [layoutNode]="layoutNode"
+      [formSettings]="formSettings"
+      [dataIndex]="dataIndex"
+      [layoutIndex]="layoutIndex"></select-widget-widget>
 
     <span *ngIf="options?.fieldAddonRight"
       class="input-group-addon"

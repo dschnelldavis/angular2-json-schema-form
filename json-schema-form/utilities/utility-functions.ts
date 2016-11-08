@@ -218,17 +218,16 @@ export function mergeFilteredObject(
 export function parseText(
   text: string = '', value: any = {}, values: any = {}, index: number = null
 ): string {
-  let parsedText: string;
+  if (!text) return text;
   const $index: number = index + 1;
   const idx: number = index + 1;
   try {
-    parsedText = text.replace(/{{.+?}}/g, exp => eval(exp.slice(2, -2)));
+    return text.replace(/{{.+?}}/g, exp => eval(exp.slice(2, -2)));
   } catch (error) {
     console.error('parseText error: ');
     console.error(error);
-    parsedText = text;
+    return text;
   }
-  return parsedText;
 }
 
 /**

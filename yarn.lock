@@ -36,26 +36,6 @@
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/@angular/upgrade/-/upgrade-2.1.2.tgz#fc9423f87fcae418a0ae3b8d56c615d93563d44f"
 
-"@ngrx/core@^1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@ngrx/core/-/core-1.2.0.tgz#882b46abafa2e0e6d887cb71a1b2c2fa3e6d0dc6"
-
-"@ngrx/effects@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@ngrx/effects/-/effects-2.0.0.tgz#db4c3e1b69030229cb6b908477115b3479e4c4e0"
-
-"@ngrx/router-store@^1.2.5":
-  version "1.2.5"
-  resolved "https://registry.yarnpkg.com/@ngrx/router-store/-/router-store-1.2.5.tgz#1cff82c5488fab995872c6f0d57a29a7ac91e598"
-
-"@ngrx/store-devtools@^3.2.1":
-  version "3.2.1"
-  resolved "https://registry.yarnpkg.com/@ngrx/store-devtools/-/store-devtools-3.2.1.tgz#2b5c3c438a1c6e0181251fadba0d071b2cbcf6c2"
-
-"@ngrx/store@^2.2.1":
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/@ngrx/store/-/store-2.2.1.tgz#316ec1e43aa5a0166e5e6e1aa2c34a4049386510"
-
 "@types/ace@0.0.32":
   version "0.0.32"
   resolved "https://registry.yarnpkg.com/@types/ace/-/ace-0.0.32.tgz#d584813960607540ddb202de8b3e229504d45cff"
@@ -1422,7 +1402,7 @@ ieee754@^1.1.4:
   version "1.1.8"
   resolved "https://registry.yarnpkg.com/ieee754/-/ieee754-1.1.8.tgz#be33d40ac10ef1926701f6f08a2d86fbfd1ad3e4"
 
-immutable, immutable@^3.7.6, immutable@3.8.1:
+immutable@^3.7.6, immutable@3.8.1:
   version "3.8.1"
   resolved "https://registry.yarnpkg.com/immutable/-/immutable-3.8.1.tgz#200807f11ab0f72710ea485542de088075f68cd2"
 

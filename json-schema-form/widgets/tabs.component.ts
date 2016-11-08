@@ -21,13 +21,12 @@ import { JsonPointer, parseText } from '../utilities/index';
 
     <div *ngFor="let item of layoutNode?.items; let i = index; trackBy: item?.dataPointer"
       [class]="options?.htmlClass">
-      <root-widget *ngIf="selectedItem === i"
-        [class]="options?.fieldHtmlClass +
-          (selectedItem === i ? ' ' + options?.activeClass : '')"
+      <select-framework-widget *ngIf="selectedItem === i"
+        [class]="options?.fieldHtmlClass + ' ' + options?.activeClass"
         [layoutNode]="item"
         [formSettings]="formSettings"
         [dataIndex]="layoutNode?.type === 'tabarray' ? dataIndex.concat(i) : dataIndex"
-        [layoutIndex]="layoutIndex.concat(i)"></root-widget>
+        [layoutIndex]="layoutIndex.concat(i)"></select-framework-widget>
     </div>`,
   styles: [`a { cursor: pointer; }`],
 })
@@ -56,7 +55,16 @@ export class TabsComponent implements OnInit {
     item: any = null, layoutNode: any, value: any, index: number = null
   ): string {
     let text: string;
-    if (layoutNode.type !== 'tabarray' || item.type === '$ref') {
+    if (layoutNode.type.slice(-5) === 'array' && item.type !== '$ref') {
+      text = JsonPointer.getFirst([
+        [item, '/options/legend'],
+        [item, '/options/title'],
+        [item, '/title'],
+        [layoutNode, '/options/title'],
+        [layoutNode, '/options/legend'],
+        [layoutNode, '/title'],
+      ]);
+    } else {
       text = JsonPointer.getFirst([
         [item, '/title'],
         [item, '/options/title'],
@@ -66,15 +74,6 @@ export class TabsComponent implements OnInit {
         [layoutNode, '/options/legend']
       ]);
       if (item.type === '$ref') text = '+ ' + text;
-    } else {
-        text = JsonPointer.getFirst([
-          [item, '/options/legend'],
-          [item, '/options/title'],
-          [item, '/title'],
-          [layoutNode, '/options/title'],
-          [layoutNode, '/options/legend'],
-          [layoutNode, '/title'],
-        ]);
     }
     if (!text) return text;
     if (layoutNode.type === 'tabarray' && Array.isArray(value)) {

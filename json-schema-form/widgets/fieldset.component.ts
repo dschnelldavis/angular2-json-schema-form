@@ -16,13 +16,12 @@ import { FormGroup } from '@angular/forms';
         (click)="expand()"></legend>
 
       <div *ngIf="expanded">
-        <div *ngFor="let item of layoutNode?.items; let i = index; trackBy: item?.dataPointer">
-          <root-widget
-            [layoutNode]="item"
-            [formSettings]="formSettings"
-            [dataIndex]="layoutNode?.type === 'array' ? dataIndex.concat(i) : dataIndex"
-            [layoutIndex]="layoutIndex.concat(i)"></root-widget>
-        </div>
+        <root-widget
+          [layout]="layoutNode.items"
+          [formSettings]="formSettings"
+          [dataIndex]="dataIndex"
+          [layoutIndex]="layoutIndex"
+          [incrementDataIndex]="layoutNode?.type?.slice(-5) === 'array'"></root-widget>
       </div>
 
     </fieldset>`,
