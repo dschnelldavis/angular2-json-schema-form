@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnChanges, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 import {
@@ -17,10 +17,7 @@ import {
       <span *ngIf="options?.title" [innerHTML]="options?.title"></span>
     </button>`,
 })
-export class AddReferenceComponent {
-  private formControlGroup: any;
-  private formControlName: string;
-  private arrayIndex: number;
+export class AddReferenceComponent implements OnInit, OnChanges {
   private options: any;
   private showAddButton: boolean = true;
   @Input() layoutNode: any;
@@ -30,13 +27,22 @@ export class AddReferenceComponent {
 
   ngOnInit() {
     this.options = this.layoutNode.options;
-    this.arrayIndex = this.layoutIndex[this.layoutIndex.length - 1];
-    if (this.layoutNode.isArrayItem) {
+    this.updateControl();
+  }
+
+  ngOnChanges() {
+    this.updateControl();
+  }
+
+  private updateControl() {
+    if (this.layoutNode.arrayItem) {
+      // TODO: Add 'maxItems' to $ref and remove complex lookup
+      const arrayIndex = this.layoutIndex[this.layoutIndex.length - 1];
       const layoutPointer = this.formSettings.getLayoutPointer(this);
       const parentArrayPointer = JsonPointer.parse(layoutPointer).slice(0, -2);
       const parentArray = JsonPointer.get(this.formSettings.layout, parentArrayPointer);
       const maxItems = parentArray.maxItems || 1000000;
-      if (this.arrayIndex >= maxItems) this.showAddButton = false;
+      if (arrayIndex >= maxItems) this.showAddButton = false;
     }
   }
 

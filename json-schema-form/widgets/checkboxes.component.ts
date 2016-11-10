@@ -1,9 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormArray, FormGroup } from '@angular/forms';
+import { FormArray, AbstractControl } from '@angular/forms';
 
-import {
-  buildFormGroup, buildTitleMap, getControl, JsonPointer
-} from '../utilities/index';
+import { buildFormGroup, buildTitleMap, JsonPointer } from '../utilities/index';
 
 @Component({
   selector: 'checkboxes-widget',
@@ -13,8 +11,10 @@ import {
       [class.sr-only]="options?.notitle"
       [innerHTML]="options?.title"></label>
     <div [ngSwitch]="layoutOrientation">
+
+      <!-- 'horizontal' = checkboxes-inline or checkboxbuttons -->
       <div *ngSwitchCase="'horizontal'"
-        [class]="options?.htmlClass"> <!-- checkboxes-inline or checkboxbuttons -->
+        [class]="options?.htmlClass">
         <label *ngFor="let checkboxItem of checkboxList"
           [attr.for]="layoutNode?.dataPointer + '/' + checkboxItem.value"
           [class]="options?.itemLabelHtmlClass +
@@ -27,13 +27,13 @@ import {
             [id]="layoutNode?.dataPointer + '/' + checkboxItem.value"
             [name]="formControlName"
             [value]="checkboxItem.value"
-            (click)="onClick($event)">
+            (change)="updateValue($event)">
           <span [innerHTML]="checkboxItem.name"></span>
         </label>
       </div>
-      <!-- default: *ngSwitchCase="'vertical'" -->
-      <div *ngSwitchDefault
-        [class]="options?.htmlClass"> <!-- regular checkboxes -->
+
+      <!-- 'vertical' = regular checkboxes -->
+      <div *ngSwitchDefault>
         <div *ngFor="let checkboxItem of checkboxList"
           [class]="options?.htmlClass">
           <label
@@ -45,20 +45,21 @@ import {
               [attr.required]="options?.required"
               [checked]="checkboxItem.checked"
               [class]="options?.fieldHtmlClass"
-              [id]="layoutNode?.dataPointer + '/' + checkboxItem.value"
-              [name]="formControlName"
+              [id]="options?.name + '/' + checkboxItem.value"
+              [name]="options?.name"
               [value]="checkboxItem.value"
-              (click)="onClick($event)">
+              (change)="updateValue($event)">
             <span [innerHTML]="checkboxItem?.name"></span>
           </label>
         </div>
       </div>
+
     </div>`,
 })
 export class CheckboxesComponent implements OnInit {
-  private formControlGroup: any;
-  private formControl: any;
-  private formControlName: string;
+  private formControl: AbstractControl;
+  private controlName: string;
+  private controlValue: any;
   private boundControl: boolean = false;
   private options: any;
   private layoutOrientation: string = 'vertical';
@@ -70,38 +71,30 @@ export class CheckboxesComponent implements OnInit {
   @Input() dataIndex: number[];
 
   ngOnInit() {
-    if (this.layoutNode.type === 'checkboxes-inline' ||
-      this.layoutNode.type === 'checkboxbuttons'
-    ) {
-      this.layoutOrientation = 'horizontal';
-    }
     this.options = this.layoutNode.options;
-    this.formControlGroup = this.formSettings.getControlGroup(this);
-    this.formControlName = this.formSettings.getControlName(this);
-    this.boundControl = this.formSettings.isControlBound(this);
+    if (this.layoutNode.type === 'checkboxes-inline' ||
+    this.layoutNode.type === 'checkboxbuttons'
+  ) {
+    this.layoutOrientation = 'horizontal';
+  }
+    this.formSettings.initializeControl(this);
     this.checkboxList = buildTitleMap(
       this.options.titleMap || this.options.enumNames,
       this.options.enum, true
     );
     if (this.boundControl) {
-      this.formControl = this.formSettings.getControl(this);
       this.formArray = this.formSettings.getControl(this);
       for (let checkboxItem of this.checkboxList) {
         checkboxItem.checked = this.formArray.value.length ?
           this.formArray.value.indexOf(checkboxItem.value) !== -1 : false;
       }
-    } else {
-      console.error(
-        'CheckboxesComponent warning: control "' + this.formSettings.getDataPointer(this) +
-        '" is not bound to the Angular 2 FormGroup.'
-      );
     }
   }
 
-  onClick(event) {
-    const templateLibrary = this.formSettings.templateRefLibrary;
-    const dataPointer = this.layoutNode.dataPointer;
+  updateValue(event) {
     if (this.boundControl) {
+      const templateLibrary = this.formSettings.templateRefLibrary;
+      const dataPointer = this.layoutNode.dataPointer;
       while (this.formArray.value.length) this.formArray.removeAt(0);
       for (let checkboxItem of this.checkboxList) {
         if (event.target.value === checkboxItem.value) {

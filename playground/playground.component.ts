@@ -14,13 +14,12 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
   private examples: any = {
     exampleSetList: [ 'ng2jsf', 'jsf', 'rjsf', 'asf' ],
     exampleSets: {
-      'ng2jsf': 'Angular 2 JSON Schema Form examples',
       'rjsf': 'React JSON Schema Form compatibility examples',
       'asf': 'Angular Schema Form compatibility examples',
       'jsf': 'JSONForm compatibility examples',
+      'ng2jsf': 'Other examples',
     },
     exampleList: {
-      'ng2jsf': [ 'ng2jsf-json-schema-draft04', 'ng2jsf-json-schema-draft03', ],
       'rjsf': [
         'rjsf-simple', 'rjsf-nested', 'rjsf-arrays', 'rjsf-numbers', 'rjsf-widgets',
         'rjsf-ordering', 'rjsf-references', 'rjsf-errors', 'rjsf-large',
@@ -42,19 +41,19 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
         'jsf-fields-range', 'jsf-fields-imageselect', 'jsf-fields-iconselect',
         'jsf-fields-fieldset', 'jsf-fields-advancedfieldset', 'jsf-fields-authfieldset',
         'jsf-fields-section', 'jsf-fields-actions', 'jsf-fields-array',
-        'jsf-fields-tabarray', 'jsf-fields-tabarray-maxitems', 'jsf-fields-tabarray-value',
-        'jsf-fields-selectfieldset', 'jsf-fields-selectfieldset-key', 'jsf-fields-submit',
-        'jsf-fields-help', 'jsf-fields-hidden', 'jsf-fields-questions',
-        'jsf-templating-idx', 'jsf-templating-value', 'jsf-templating-values',
-        'jsf-templating-tpldata', 'jsf-events', 'jsf-previousvalues',
-        'jsf-previousvalues-multidimensional',
+        'jsf-fields-array-simple', 'jsf-fields-tabarray', 'jsf-fields-tabarray-maxitems',
+        'jsf-fields-tabarray-value', 'jsf-fields-selectfieldset', 'jsf-fields-selectfieldset-key',
+        'jsf-fields-submit', 'jsf-fields-help', 'jsf-fields-hidden',
+        'jsf-fields-questions', 'jsf-templating-idx', 'jsf-templating-value',
+        'jsf-templating-values', 'jsf-templating-tpldata', 'jsf-events',
+        'jsf-previousvalues', 'jsf-previousvalues-multidimensional',
+      ],
+      'ng2jsf': [
+        'ng2jsf-simple-array', 'ng2jsf-json-schema-draft04',
+        'ng2jsf-json-schema-draft03',
       ],
     },
     examples: {
-      'ng2jsf': {
-        'ng2jsf-json-schema-draft04': 'JSON Meta-Schema - Version 4',
-        'ng2jsf-json-schema-draft03': 'JSON Meta-Schema - Version3',
-      },
       'rjsf': {
         'rjsf-simple': 'Simple',
         'rjsf-nested': 'Nested',
@@ -109,7 +108,8 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
         'jsf-fields-authfieldset': 'Fields - Authentication settings section: the authfieldset type',
         'jsf-fields-section': 'Fields - Generic group: the section type',
         'jsf-fields-actions': 'Fields - Group of buttons: the actions type',
-        'jsf-fields-array': 'Fields - Generic array: the array type',
+        'jsf-fields-array': 'Fields - Generic array: the array type (complex)',
+        'jsf-fields-array-simple': 'Fields - Generic array: the array type (simple)',
         'jsf-fields-tabarray': 'Fields - Arrays with tabs: the tabarray type',
         'jsf-fields-tabarray-maxitems': 'Fields - Arrays with tabs: the tabarray type w/ maxItems',
         'jsf-fields-tabarray-value': 'Fields - Arrays with tabs: the tabarray type w/ default & legend',
@@ -127,6 +127,11 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
         'jsf-previousvalues': 'Using previously submitted values',
         'jsf-previousvalues-multidimensional': 'Using previously submitted values - Multidimensional arrays',
       },
+        'ng2jsf': {
+          'ng2jsf-simple-array': 'Simple Array',
+          'ng2jsf-json-schema-draft04': 'JSON Meta-Schema - Version 4',
+          'ng2jsf-json-schema-draft03': 'JSON Meta-Schema - Version3',
+        },
     },
     links: {
       'asf': { 'url': 'http://schemaform.io/examples/bootstrap-example.html', },

@@ -325,18 +325,21 @@ export function updateInputOptions(layoutNode: any, schema: any, formSettings: a
   if (JsonPointer.has(schema, '/items/enum')) newOptions.enum = schema.items.enum;
   if (JsonPointer.has(schema, '/items/titleMap')) newOptions.enum = schema.items.titleMap;
   mergeFilteredObject(newOptions, JsonPointer.get(schema, ['ui:widget', 'options']),
-    [], true, fixUiKeys);
-  JsonPointer.remove(schema, ['ui:widget', 'options']);
+    [], false, fixUiKeys);
+  // JsonPointer.remove(schema, ['ui:widget', 'options']);
   mergeFilteredObject(newOptions, JsonPointer.get(schema, ['ui:widget']),
-    [], true, fixUiKeys);
-  JsonPointer.remove(schema, ['ui:widget']);
+    [], false, fixUiKeys);
+  // JsonPointer.remove(schema, ['ui:widget']);
   mergeFilteredObject(newOptions, schema,
     ['properties', 'items', 'required', 'type', 'x-schema-form'], false, fixUiKeys);
+  mergeFilteredObject(newOptions, JsonPointer.get(schema, ['x-schema-form', 'options']),
+    [], false, fixUiKeys);
   mergeFilteredObject(newOptions, JsonPointer.get(schema, ['x-schema-form']),
-    [], true, fixUiKeys);
-  JsonPointer.remove(schema, ['x-schema-form']);
-  mergeFilteredObject(newOptions, layoutNode, ['dataPointer', 'dataType',
-    'items', 'layoutPointer', 'name', 'options', 'type', 'widget'], true, fixUiKeys);
+    ['items', 'options'], false, fixUiKeys);
+  // JsonPointer.remove(schema, ['x-schema-form']);
+  mergeFilteredObject(newOptions, layoutNode, ['arrayItem', 'dataPointer',
+    'dataType', 'items', 'layoutPointer', 'name', 'options', 'type', 'widget'],
+    false, fixUiKeys);
   mergeFilteredObject(newOptions, layoutNode.options, [], false, fixUiKeys);
   layoutNode.options = newOptions;
 
@@ -359,15 +362,16 @@ export function updateInputOptions(layoutNode: any, schema: any, formSettings: a
   //   }
   //   JsonPointer.remove(layoutNode, '/controlTemplate/value');
 
-  // If schema is an object with a $ref link, save controlTemplate in layoutNode
-  } else if (hasOwn(schema, '$ref')) {
-    layoutNode.controlTemplate = buildFormGroupTemplate(
-      formSettings, schema.$ref
-    );
-  } else if (JsonPointer.has(schema, '/additionalProperties/$ref')) {
-    layoutNode.controlTemplate = buildFormGroupTemplate(
-      formSettings, schema.additionalProperties.$ref
-    );
+  // // If schema is an object with a $ref link, save controlTemplate in layoutNode
+  // } else if (hasOwn(schema, '$ref')) {
+  //   layoutNode.controlTemplate = buildFormGroupTemplate(
+  //     formSettings, schema.$ref
+  //   );
+  // } else if (JsonPointer.has(schema, '/additionalProperties/$ref')) {
+  //   layoutNode.controlTemplate = buildFormGroupTemplate(
+  //     formSettings, schema.additionalProperties.$ref
+  //   );
+
   }
 
   // If field value is set in layoutNode, and no input data, update template value
@@ -378,11 +382,11 @@ export function updateInputOptions(layoutNode: any, schema: any, formSettings: a
       [ layoutNode, '/default' ]
     ]);
     let templateValue: any = JsonPointer.get(
-      formSettings.formGroupTemplate, templatePointer + '/value'
+      formSettings.formGroupTemplate, templatePointer + '/value/value'
     );
     if (hasValue(layoutNodeValue) && layoutNodeValue !== templateValue) {
       formSettings.formGroupTemplate = JsonPointer.set(
-        formSettings.formGroupTemplate, templatePointer + '/value', layoutNodeValue
+        formSettings.formGroupTemplate, templatePointer + '/value/value', layoutNodeValue
       );
     }
     delete layoutNode.value;

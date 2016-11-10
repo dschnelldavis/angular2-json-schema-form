@@ -1,10 +1,13 @@
-import { Component, Input, OnInit } from '@angular/core';
+import {
+  ChangeDetectorRef, Component, Input, OnChanges, OnInit
+} from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'message-widget',
   template: `
-    <span *ngIf="message" [class]="options?.labelHtmlClass"
+    <span *ngIf="message"
+      [class]="options?.labelHtmlClass"
       [innerHTML]="message"></span>`,
 })
 export class MessageComponent implements OnInit {

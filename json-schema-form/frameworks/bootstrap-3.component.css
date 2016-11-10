@@ -1,7 +1,8 @@
 :host /deep/ .list-group-item .form-control-feedback {
   top: 40;
 }
-:host /deep/ .checkbox {
+:host /deep/ .checkbox,
+:host /deep/ .radio {
   margin-top: 0;
   margin-bottom: 0;
 }

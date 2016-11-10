@@ -1,39 +1,35 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { AbstractControl } from '@angular/forms';
 
 @Component({
   selector: 'textarea-widget',
   template: `
-    <label *ngIf="options?.title" [attr.for]="layoutNode?.dataPointer"
-      [class]="options?.labelHtmlClass" [class.sr-only]="options?.notitle"
-      [innerHTML]="options?.title"></label>
-    <div *ngIf="boundControl" [formGroup]="formControlGroup">
+    <div
+      [class]="options?.htmlClass">
+      <label *ngIf="options?.title"
+        [attr.for]="layoutNode?.dataPointer"
+        [class]="options?.labelHtmlClass"
+        [class.sr-only]="options?.notitle"
+        [innerHTML]="options?.title"></label>
       <textarea
-        [formControlName]="formControlName"
-        [class]="options?.fieldHtmlClass"
-        [id]="formControlName"
-        [name]="formControlName"
-        [attr.minlength]="options?.minLength || options?.minlength"
-        [attr.maxlength]="options?.maxLength || options?.maxlength"
+        [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
+        [attr.maxlength]="options?.maxLength"
+        [attr.minlength]="options?.minLength"
         [attr.pattern]="options?.pattern"
         [attr.placeholder]="options?.placeholder"
         [attr.readonly]="options?.readonly ? 'readonly' : null"
-        [attr.required]="options?.required"></textarea>
-    </div>
-    <textarea *ngIf="!boundControl"
-      [class]="options?.fieldHtmlClass"
-      [name]="formControlName"
-      [value]="options?.value"
-      [attr.minlength]="options?.minLength || options?.minlength"
-      [attr.maxlength]="options?.maxLength || options?.maxlength"
-      [attr.pattern]="options?.pattern"
-      [attr.placeholder]="options?.placeholder"
-      [attr.readonly]="options?.readonly ? 'readonly' : null"
-      [attr.required]="options?.required"></textarea>`,
+        [attr.required]="options?.required"
+        [class]="options?.fieldHtmlClass"
+        [id]="layoutNode?.dataPointer"
+        [name]="controlName"
+        [value]="controlValue"
+        (input)="updateValue($event)"></textarea>
+    </div>`,
 })
 export class TextareaComponent implements OnInit {
-  private formControlGroup: any;
-  private formControlName: string;
+  private formControl: AbstractControl;
+  private controlName: string;
+  private controlValue: any;
   private boundControl: boolean = false;
   private options: any;
   @Input() layoutNode: any;
@@ -43,15 +39,10 @@ export class TextareaComponent implements OnInit {
 
   ngOnInit() {
     this.options = this.layoutNode.options;
-    this.formControlGroup = this.formSettings.getControlGroup(this);
-    this.formControlName = this.formSettings.getControlName(this);
-    this.boundControl = this.formSettings.isControlBound(this);
-    if (this.boundControl) {
-    } else {
-      console.error(
-        'TextareaComponent warning: control "' + this.formSettings.getDataPointer(this) +
-        '" is not bound to the Angular 2 FormGroup.'
-      );
-    }
+    this.formSettings.initializeControl(this);
+  }
+
+  private updateValue(event) {
+    this.formSettings.updateValue(this, event);
   }
 }

@@ -4,7 +4,7 @@ import {
 
 @Component({
   moduleId: module.id,
-  selector: 'none-framework',
+  selector: 'bootstrap-4-framework',
   template: `
     <select-widget-widget
       [layoutNode]="layoutNode"
@@ -12,7 +12,7 @@ import {
       [dataIndex]="dataIndex"
       [layoutIndex]="layoutIndex"></select-widget-widget>`,
 })
-export class NoFrameworkComponent implements OnInit, OnChanges {
+export class Bootstrap4Component implements OnInit, OnChanges {
   @Input() layoutNode: any;
   @Input() formSettings: any;
   @Input() layoutIndex: number[];

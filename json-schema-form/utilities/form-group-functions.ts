@@ -51,14 +51,11 @@ import {
  */
 export function buildFormGroupTemplate(
   formSettings: any, schemaPointer: string = '', dataPointer: string = '',
-  templatePointer: any = '', mapArrays: boolean = true, setValues: any = {}
+  templatePointer: any = '', mapArrays: boolean = true, setValues: any = null
 ): any {
   const schema: any = JsonPointer.get(formSettings.schema, schemaPointer);
-  let useValues: any = {};
-  if (setValues) {
-    useValues = mergeValues(JsonPointer.get(schema, '/default'), setValues,
-      JsonPointer.get(formSettings.defaultValues, dataPointer));
-  }
+  let useValues: any = formSettings.globalOptions.setSchemaDefaults ?
+    mergeValues(JsonPointer.get(schema, '/default'), setValues) : setValues;
   let controlType: 'FormGroup' | 'FormArray' | 'FormControl';
   if (JsonPointer.get(schema, '/type') === 'object' && hasOwn(schema, 'properties')) {
     controlType = 'FormGroup';
@@ -81,9 +78,9 @@ export function buildFormGroupTemplate(
   switch (controlType) {
     case 'FormGroup':
       controls = {};
-      if (setValues) {
-        useValues = mergeValues(JsonPointer.get(schema, '/properties/default'),
-          useValues);
+      if (formSettings.globalOptions.setSchemaDefaults) {
+        useValues = mergeValues(
+          JsonPointer.get(schema, '/properties/default'), useValues);
       }
       forEach(schema.properties, (item, key) => {
         if (key !== 'ui:order') {
@@ -108,8 +105,8 @@ export function buildFormGroupTemplate(
         }
         controls = [];
         for (let i = 0, l = schema.items.length; i < l; i++) {
-          if (i >= minItems &&
-            !JsonPointer.has(formSettings, ['templateRefLibrary', dataPointer + '/' + i])
+          if (i >= minItems && !JsonPointer.has(formSettings,
+            ['templateRefLibrary', dataPointer + '/' + i])
           ) {
             formSettings.templateRefLibrary[dataPointer + '/' + i] =
               buildFormGroupTemplate(
@@ -117,7 +114,7 @@ export function buildFormGroupTemplate(
                 schemaPointer + '/items/' + i,
                 dataPointer + '/' + i,
                 templatePointer + '/controls/' + i,
-                mapArrays, false
+                mapArrays, null
               );
           }
           if (i < maxItems) {
@@ -150,14 +147,16 @@ export function buildFormGroupTemplate(
             ));
             if (isArray(useValues)) useValues = null;
           }
-          if (!JsonPointer.has(formSettings, ['templateRefLibrary', dataPointer + '/-'])) {
+          if (!JsonPointer.has(formSettings,
+            ['templateRefLibrary', dataPointer + '/-'])
+          ) {
             formSettings.templateRefLibrary[dataPointer + '/-'] =
               buildFormGroupTemplate(
                 formSettings,
                 schemaPointer + '/additionalItems',
                 dataPointer + '/-',
                 templatePointer + '/controls/-',
-                mapArrays, false
+                mapArrays, null
               );
           }
         }
@@ -172,13 +171,13 @@ export function buildFormGroupTemplate(
               schemaPointer + '/items',
               dataPointer + '/-',
               templatePointer + '/controls/-',
-              mapArrays, false
+              mapArrays, null
             );
         }
         controls = [];
-        if (setValues) {
-          useValues = mergeValues(JsonPointer.get(schema, '/items/default'),
-            useValues);
+        if (formSettings.globalOptions.setSchemaDefaults) {
+          useValues = mergeValues(
+            JsonPointer.get(schema, '/items/default'), useValues);
         }
         if (isArray(useValues) && useValues.length) {
           for (let i of Object.keys(useValues)) {
@@ -193,10 +192,10 @@ export function buildFormGroupTemplate(
           useValues = null;
         }
       }
-      let initialItems =
+      let initialItemCount =
         Math.max(minItems, JsonPointer.has(schema, '/items/$ref') ? 0 : 1);
-      if (controls.length < initialItems) {
-        for (let i = controls.length, l = initialItems; i < l; i++) {
+      if (controls.length < initialItemCount) {
+        for (let i = controls.length, l = initialItemCount; i < l; i++) {
           controls.push(buildFormGroupTemplate(
             formSettings,
             schemaPointer + '/items',
@@ -209,7 +208,7 @@ export function buildFormGroupTemplate(
       return { controlType, controls, validators };
     case 'FormControl':
       let value: { value: any, disabled: boolean } = {
-        value: setValues && isPrimitive(useValues) ? useValues : null,
+        value: isPrimitive(useValues) ? useValues : null,
         disabled: schema['disabled'] ||
           JsonPointer.get(schema, ['x-schema-form', 'disabled']) || false
       };

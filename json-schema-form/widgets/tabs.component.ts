@@ -1,5 +1,4 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormGroup } from '@angular/forms';
 
 import { JsonPointer, parseText } from '../utilities/index';
 
@@ -19,22 +18,19 @@ import { JsonPointer, parseText } from '../utilities/index';
       </li>
     </ul>
 
-    <div *ngFor="let item of layoutNode?.items; let i = index; trackBy: item?.dataPointer"
+    <div *ngFor="let layoutItem of layoutNode?.items; let i = index; trackBy: layoutItem?.dataPointer"
       [class]="options?.htmlClass">
       <select-framework-widget *ngIf="selectedItem === i"
         [class]="options?.fieldHtmlClass + ' ' + options?.activeClass"
-        [layoutNode]="item"
+        [layoutNode]="layoutItem"
         [formSettings]="formSettings"
-        [dataIndex]="layoutNode?.type === 'tabarray' ? dataIndex.concat(i) : dataIndex"
+        [dataIndex]="layoutNode?.type?.slice(-5) === 'array' ? dataIndex.concat(i) : dataIndex"
         [layoutIndex]="layoutIndex.concat(i)"></select-framework-widget>
     </div>`,
   styles: [`a { cursor: pointer; }`],
 })
 export class TabsComponent implements OnInit {
-  private formControl: any;
-  private boundControl: boolean = false;
   private options: any;
-  private value: any = null;
   private selectedItem: number = 0;
   @Input() layoutNode: any;
   @Input() formSettings: any;
@@ -43,12 +39,6 @@ export class TabsComponent implements OnInit {
 
   ngOnInit() {
     this.options = this.layoutNode.options;
-    this.boundControl = this.formSettings.isControlBound(this);
-    if (this.boundControl) {
-      this.formControl = this.formSettings.getControl(this);
-      this.value = this.formControl.value;
-      this.formControl.valueChanges.subscribe(v => this.value = v);
-    }
   }
 
   private setTitle(

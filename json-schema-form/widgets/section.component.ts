@@ -1,5 +1,4 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'section-widget',
@@ -8,18 +7,19 @@ import { FormGroup } from '@angular/forms';
       [class]="options?.htmlClass"
       [class.expandable]="options?.expandable && !expanded"
       [class.expanded]="options?.expandable && expanded">
-      <label *ngIf="options?.title" [attr.for]="layoutNode?.dataPointer"
-        [class]="options?.labelHtmlClass" [class.sr-only]="options?.notitle"
-        [innerHTML]="options?.title"></label>
+      <label *ngIf="options?.title"
+        [attr.for]="layoutNode?.dataPointer"
+        [class]="options?.labelHtmlClass"
+        [class.sr-only]="options?.notitle"
+        [innerHTML]="options?.title"
+        (click)="expand()"></label>
 
-      <div *ngIf="expanded">
-        <root-widget
+        <root-widget *ngIf="expanded"
           [layout]="layoutNode.items"
           [formSettings]="formSettings"
           [dataIndex]="dataIndex"
           [layoutIndex]="layoutIndex"
           [incrementDataIndex]="layoutNode?.type?.slice(-5) === 'array'"></root-widget>
-      </div>
 
     </div>`,
   styles: [`

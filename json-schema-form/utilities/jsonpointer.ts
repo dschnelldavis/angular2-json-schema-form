@@ -238,9 +238,13 @@ export class JsonPointer {
     let keyArray: any[] = this.parse(pointer);
     if (keyArray !== null && keyArray.length) {
       let lastKey = keyArray.pop();
-      let parentObject = keyArray ? this.get(object, keyArray) : object;
-      if (isArray(parentObject) && lastKey === '-') lastKey = parentObject.length - 1;
-      if (parentObject) delete parentObject[lastKey];
+      let parentObject = this.get(object, keyArray);
+      if (isArray(parentObject)) {
+        if (lastKey === '-') lastKey = parentObject.length - 1;
+        parentObject.splice(lastKey, 1);
+      } else if (isObject(parentObject)) {
+        delete parentObject[lastKey];
+      }
       return object;
     }
     console.error('remove error: Invalid JSON Pointer: ' + pointer);

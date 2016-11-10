@@ -12,11 +12,9 @@ import { NoneComponent } from './none.component';
 import { NumberComponent } from './number.component';
 import { MessageComponent } from './message.component';
 import { RadiosComponent } from './radios.component';
-import { RadiosInlineComponent } from './radios-inline.component';
 import { RootComponent } from './root.component';
 import { SectionComponent } from './section.component';
 import { SelectComponent } from './select.component';
-import { SelectComponentComponent } from './select-component.component';
 import { SelectFrameworkComponent } from './select-framework.component';
 import { SelectWidgetComponent } from './select-widget.component';
 import { SubmitComponent } from './submit.component';
@@ -34,7 +32,6 @@ export class WidgetLibraryService {
   // Angular 2 JSON Schema Form administrative widgets
     'none': NoneComponent, // Placeholder for development, displays nothing
     // 'root': RootComponent, // Form root, renders a complete layout
-    // 'select-component': SelectComponentComponent, // Displays a specified component
     // 'select-framework': SelectFrameworkComponent, // Applies the selected framework to a specified widget
     // 'select-widget': SelectWidgetComponent, // Displays a specified widget
     '$ref': AddReferenceComponent, // Button, adds new array item or $ref element
@@ -81,8 +78,8 @@ export class WidgetLibraryService {
     'checkboxes-inline': CheckboxesComponent, // Checkboxes in one line
     'checkboxbuttons': CheckboxesComponent, // Checkboxes as html buttons
     'radios': RadiosComponent, // Grouped list of radio buttons
-    'radios-inline': RadiosInlineComponent, // Radio buttons in one line
-    'radiobuttons': RadiosInlineComponent, // Radio control as html buttons
+    'radios-inline': RadiosComponent, // Radio buttons in one line
+    'radiobuttons': RadiosComponent, // Radio control as html buttons
 
   // HTML Layout widgets
     // 'label': automatically added to data widgets
@@ -100,7 +97,7 @@ export class WidgetLibraryService {
     'html': MessageComponent, // Insert arbitrary html
     'template': TemplateComponent, // Insert a custom Angular 2 component
 
-  // Widgets included for backward-compatibility with JSON Form API
+  // Widgets included for compatibility with JSON Form API
     'tagsinput': InputComponent, // For entering short text tags
     // See: http://ulion.github.io/jsonform/playground/?example=fields-checkboxbuttons
     'advancedfieldset': FieldsetComponent, // Adds 'Advanced settings' title
@@ -108,18 +105,22 @@ export class WidgetLibraryService {
     'selectfieldset': FieldsetComponent, // Select control, displays selected array sub-item
     'optionfieldset': FieldsetComponent, // Option control, displays selected array sub-item
 
-  // Widgets included for backward-compatibility with React JSON Schema Form API
+  // Widgets included for compatibility with React JSON Schema Form API
     'updown': NumberComponent,
     'date-time': InputComponent,
     'alt-datetime': InputComponent,
     'alt-date': InputComponent,
 
-  // Widgets included for backward-compatibility with Angular Schema Form API
+  // Widgets included for compatibility with Angular Schema Form API
     'actions': SectionComponent, // Horizontal button list, can only submit, uses buttons as items
     'section': SectionComponent, // Just a div
     'conditional': SectionComponent, // Identical to 'section' (depeciated)
 
+  // Widgets included for compatibility with Angular 2 Schema Form API
+    'wizard': SectionComponent, // Sequential panels with "Next" and "Previous" buttons
+
   // Recommended 3rd-party add-on widgets
+    // 'ng2-select': Select control replacement - http://valor-software.com/ng2-select/
     // 'pikaday': Pikaday date picker - https://github.com/dbushell/Pikaday
     // 'spectrum': Spectrum color picker - http://bgrins.github.io/spectrum
     // 'bootstrap-slider': Bootstrap Slider range control - https://github.com/seiyria/bootstrap-slider

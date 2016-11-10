@@ -1,16 +1,16 @@
-import { Component, Input, OnChanges, OnInit } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import {
+  ChangeDetectorRef, Component, Input, OnChanges, OnInit
+} from '@angular/core';
 
 import {
-  addClasses, getControl, inArray, isNumber, JsonPointer, parseText,
-  toIndexedPointer
+  addClasses, inArray, JsonPointer, parseText, toTitleCase
 } from '../utilities/index';
 
 @Component({
   moduleId: module.id,
-  selector: 'bootstrap3-framework',
-  templateUrl: 'bootstrap3.component.html',
-  styleUrls: ['bootstrap3.component.css'],
+  selector: 'bootstrap-3-framework',
+  templateUrl: 'bootstrap-3.component.html',
+  styleUrls: ['bootstrap-3.component.css'],
 })
 export class Bootstrap3Component implements OnInit, OnChanges {
   private controlInitialized: boolean = false;
@@ -18,15 +18,27 @@ export class Bootstrap3Component implements OnInit, OnChanges {
   private widgetOptions: any; // Options passed to child widget
   private layoutPointer: string;
   private formControl: any = null;
-  private formControlName: string;
   private debugOutput: any = '';
   @Input() layoutNode: any;
   @Input() formSettings: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
 
+  constructor(
+    public changeDetector: ChangeDetectorRef
+  ) { }
+
   ngOnInit() {
-    if (this.layoutNode) {
+    this.initializeControl();
+  }
+
+  ngOnChanges() {
+    this.updateArrayItems();
+    if (!this.controlInitialized) this.initializeControl();
+  }
+
+  private initializeControl() {
+    if (this.layoutNode && this.formSettings) {
       this.options = Object.assign({}, this.layoutNode.options);
       this.widgetOptions = this.layoutNode.options;
       this.layoutPointer = this.formSettings.getLayoutPointer(this);
@@ -41,14 +53,14 @@ export class Bootstrap3Component implements OnInit, OnChanges {
         'select', 'submit', 'tel', 'text', 'textarea', 'time', 'url', 'week'
       ]);
 
-      this.options.title = this.setTitle(this.layoutNode.type);
+      this.options.title = this.setTitle();
 
       this.options.htmlClass =
         addClasses(this.options.htmlClass, 'schema-form-' + this.layoutNode.type);
       if (this.layoutNode.type === 'array') {
         this.options.htmlClass =
           addClasses(this.options.htmlClass, 'list-group');
-      } else if (this.options.isArrayItem && this.layoutNode.type !== '$ref') {
+      } else if (this.layoutNode.arrayItem && this.layoutNode.type !== '$ref') {
         this.options.htmlClass =
           addClasses(this.options.htmlClass, 'list-group-item');
       } else {
@@ -56,11 +68,11 @@ export class Bootstrap3Component implements OnInit, OnChanges {
           addClasses(this.options.htmlClass, 'form-group');
       }
       this.widgetOptions.htmlClass = '';
-
       this.options.labelHtmlClass =
         addClasses(this.options.labelHtmlClass, 'control-label');
 
-      this.widgetOptions.activeClass = 'active';
+      this.widgetOptions.activeClass =
+        addClasses(this.widgetOptions.activeClass, 'active');
 
       this.options.fieldAddonLeft =
         this.options.fieldAddonLeft || this.options.prepend;
@@ -143,8 +155,7 @@ export class Bootstrap3Component implements OnInit, OnChanges {
             this.widgetOptions.fieldHtmlClass, 'form-control');
       }
 
-      if (this.formControl && this.controlInitialized) {
-        this.controlInitialized = true;
+      if (this.formControl) {
         this.formControl.statusChanges.subscribe(value => {
           if (!this.options.disableErrorState &&
             this.options.feedback && value === 'INVALID' &&
@@ -168,15 +179,12 @@ export class Bootstrap3Component implements OnInit, OnChanges {
           this.debugOutput = _.map(vars, thisVar => JSON.stringify(thisVar, null, 2)).join('\n');
         }
       }
+      this.controlInitialized = true;
     }
   }
 
-  ngOnChanges() {
-    this.updateArrayItems();
-  }
-
   private updateArrayItems() {
-    if (this.options.isArrayItem) {
+    if (this.formSettings && this.layoutNode.arrayItem) {
       const arrayIndex = this.dataIndex[this.dataIndex.length - 1];
       const arrayPointer = JsonPointer.parse(this.layoutPointer).slice(0, -2);
       const parentArray = JsonPointer.get(this.formSettings.layout, arrayPointer);
@@ -192,7 +200,7 @@ export class Bootstrap3Component implements OnInit, OnChanges {
     }
   }
 
-  private setTitle(type: string): string {
+  private setTitle(): string {
     switch (this.layoutNode.type) {
       case 'array': case 'button': case 'checkbox': case 'conditional':
       case 'fieldset': case 'help': case 'msg': case 'message':
@@ -208,8 +216,8 @@ export class Bootstrap3Component implements OnInit, OnChanges {
         return null;
       default:
         let thisTitle = this.options.title || (
-          !isNumber(this.layoutNode.name) && this.layoutNode.name !== '-' ?
-          this.layoutNode.name : null
+          isNaN(this.layoutNode.name) && this.layoutNode.name !== '-' ?
+          toTitleCase(this.layoutNode.name) : null
         );
         this.widgetOptions.title = null;
         return parseText(thisTitle, this.formControl.value,

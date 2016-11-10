@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { AbstractControl } from '@angular/forms';
 
-import { buildTitleMap, getControl } from '../utilities/index';
+import { buildTitleMap } from '../utilities/index';
 
 @Component({
   selector: 'radios-widget',
@@ -11,53 +11,63 @@ import { buildTitleMap, getControl } from '../utilities/index';
       [class]="options?.labelHtmlClass"
       [class.sr-only]="options?.notitle"
       [innerHTML]="options?.title"></label>
-    <div *ngIf="boundControl"
-      [class]="options?.htmlClass"
-      [formGroup]="formControlGroup">
-      <div *ngFor="let radioItem of radiosList"
-        [class]="options?.htmlClass">
-        <label
-          [attr.for]="layoutNode?.dataPointer + '/' + radioItem?.value"
-          [class]="options?.itemLabelHtmlClass +
-            (formControl?.value === radioItem?.value ?
-            ' ' + options?.activeClass : '')">
-          <input type="radio"
-            [formControlName]="formControlName"
-            [id]="layoutNode?.dataPointer + '/' + radioItem?.value"
-            [class]="options?.fieldHtmlClass"
-            [value]="radioItem?.value"
-            [attr.readonly]="options?.readonly ? 'readonly' : null"
-            [attr.required]="options?.required">
-          <span [innerHTML]="radioItem?.name"></span>
-        </label>
-      </div>
-    </div>
-    <div *ngIf="!boundControl"
-      [class]="options?.htmlClass">
-      <div *ngFor="let radioItem of radiosList"
-        [class]="options?.htmlClass">
-        <label
-          [attr.for]="radioItem?.value"
-          [class]="options?.itemLabelHtmlClass +
-            (formControl?.value === radioItem?.value ?
-            ' ' + options?.activeClass : '')">
-          <input type="radio"
-            [id]="radioItem?.value"
-            [class]="options?.fieldHtmlClass"
-            [value]="radioItem?.value"
-            [attr.readonly]="options?.readonly ? 'readonly' : null"
-            [attr.required]="options?.required">
-          <span [innerHTML]="radioItem?.name"></span>
-        </label>
-      </div>
-    </div>`,
+      <div [ngSwitch]="layoutOrientation">
+
+        <!-- 'horizontal' = radios-inline or radiobuttons -->
+        <div *ngSwitchCase="'horizontal'"
+          [class]="options?.htmlClass">
+          <label *ngFor="let radioItem of radiosList"
+            [attr.for]="layoutNode?.dataPointer + '/' + radioItem?.value"
+            [class]="options?.itemLabelHtmlClass +
+              (formControl?.value === radioItem?.value ?
+              ' ' + options?.activeClass : '')">
+            <input type="radio"
+              [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
+              [attr.readonly]="options?.readonly ? 'readonly' : null"
+              [attr.required]="options?.required"
+              [checked]="radioItem?.value === controlValue"
+              [class]="options?.fieldHtmlClass"
+              [id]="layoutNode?.dataPointer + '/' + radioItem?.value"
+              [name]="controlName"
+              [value]="radioItem?.value"
+              (change)="updateValue($event)">
+            <span [innerHTML]="radioItem?.name"></span>
+          </label>
+        </div>
+
+        <!-- 'vertical' = regular radios -->
+        <div *ngSwitchDefault>
+          <div *ngFor="let radioItem of radiosList"
+            [class]="options?.htmlClass">
+            <label
+              [attr.for]="layoutNode?.dataPointer + '/' + radioItem?.value"
+              [class]="options?.itemLabelHtmlClass +
+                (formControl?.value === radioItem?.value ?
+                ' ' + options?.activeClass : '')">
+              <input type="radio"
+                [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
+                [attr.readonly]="options?.readonly ? 'readonly' : null"
+                [attr.required]="options?.required"
+                [checked]="radioItem?.value === controlValue"
+                [class]="options?.fieldHtmlClass"
+                [id]="layoutNode?.dataPointer + '/' + radioItem?.value"
+                [name]="controlName"
+                [value]="radioItem?.value"
+                (change)="updateValue($event)">
+              <span [innerHTML]="radioItem?.name"></span>
+            </label>
+          </div>
+        </div>
+
+      </div>`,
 })
 export class RadiosComponent implements OnInit {
-  private formControlGroup: any;
-  private formControl: any;
-  private formControlName: string;
+  private formControl: AbstractControl;
+  private controlName: string;
+  private controlValue: any;
   private boundControl: boolean = false;
   private options: any;
+  private layoutOrientation: string = 'vertical';
   private radiosList: any[] = [];
   @Input() layoutNode: any;
   @Input() formSettings: any;
@@ -66,20 +76,19 @@ export class RadiosComponent implements OnInit {
 
   ngOnInit() {
     this.options = this.layoutNode.options;
-    this.formControlGroup = this.formSettings.getControlGroup(this);
-    this.formControlName = this.formSettings.getControlName(this);
-    this.boundControl = this.formSettings.isControlBound(this);
-    if (this.boundControl) {
-      this.formControl = this.formSettings.getControl(this);
-    } else {
-      console.error(
-        'RadiosComponent warning: control "' + this.formSettings.getDataPointer(this) +
-        '" is not bound to the Angular 2 FormGroup.'
-      );
-    }
+      if (this.layoutNode.type === 'radios-inline' ||
+        this.layoutNode.type === 'radiobuttons'
+      ) {
+        this.layoutOrientation = 'horizontal';
+      }
     this.radiosList = buildTitleMap(
       this.options.titleMap || this.options.enumNames,
       this.options.enum, true
     );
+    this.formSettings.initializeControl(this);
+  }
+
+  private updateValue(event) {
+    this.formSettings.updateValue(this, event);
   }
 }

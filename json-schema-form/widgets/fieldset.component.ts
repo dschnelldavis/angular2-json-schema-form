@@ -1,5 +1,4 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'fieldset-widget',
@@ -15,14 +14,12 @@ import { FormGroup } from '@angular/forms';
         [innerHTML]="options?.title"
         (click)="expand()"></legend>
 
-      <div *ngIf="expanded">
-        <root-widget
+        <root-widget *ngIf="expanded"
           [layout]="layoutNode.items"
           [formSettings]="formSettings"
           [dataIndex]="dataIndex"
           [layoutIndex]="layoutIndex"
           [incrementDataIndex]="layoutNode?.type?.slice(-5) === 'array'"></root-widget>
-      </div>
 
     </fieldset>`,
   styles: [`

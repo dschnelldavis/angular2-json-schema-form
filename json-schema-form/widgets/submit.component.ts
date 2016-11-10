@@ -1,34 +1,27 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { AbstractControl } from '@angular/forms';
 
 @Component({
   selector: 'submit-widget',
   template: `
     <div *ngIf="boundControl"
-      [formGroup]="formControlGroup"
       [class]="options?.htmlClass">
       <input
         [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
+        [attr.readonly]="options?.readonly ? 'readonly' : null"
+        [attr.required]="options?.required"
         [class]="options?.fieldHtmlClass"
-        [disabled]="options?.readonly"
-        [formControlName]="formControlName"
+        [id]="layoutNode?.dataPointer"
+        [name]="controlName"
         [type]="layoutNode?.type"
-        [value]="options?.title">
-    </div>
-    <div *ngIf="!boundControl"
-      [class]="options?.htmlClass">
-      <input
-        [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
-        [class]="options?.fieldHtmlClass"
-        [disabled]="options?.readonly"
-        [type]="layoutNode?.type"
-        [value]="options?.title">
-    </div>
-`,
+        [value]="controlValue"
+        (click)="updateValue($event)">
+    </div>`,
 })
 export class SubmitComponent implements OnInit {
-  private formControlGroup: any;
-  private formControlName: string;
+  private formControl: AbstractControl;
+  private controlName: string;
+  private controlValue: any;
   private boundControl: boolean = false;
   private options: any;
   @Input() layoutNode: any;
@@ -38,8 +31,13 @@ export class SubmitComponent implements OnInit {
 
   ngOnInit() {
     this.options = this.layoutNode.options;
-    this.formControlGroup = this.formSettings.getControlGroup(this);
-    this.formControlName = this.formSettings.getControlName(this);
-    this.boundControl = this.formSettings.isControlBound(this);
+    this.formSettings.initializeControl(this);
+    if (this.controlValue === null || this.controlValue === undefined) {
+      this.controlValue = this.options.title;
+    }
+  }
+
+  private updateValue(event) {
+    this.formSettings.updateValue(this, event);
   }
 }

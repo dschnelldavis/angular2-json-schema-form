@@ -1,38 +1,12 @@
-import { Component, Input, OnChanges, OnInit } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { Component, Input, OnInit } from '@angular/core';
+import { AbstractControl } from '@angular/forms';
 
 import { getControl, inArray, isDefined } from '../utilities/index';
 
 @Component({
   selector: 'number-widget',
   template: `
-    <div *ngIf="boundControl"
-      [class]="options?.htmlClass"
-      [formGroup]="formControlGroup">
-      <label *ngIf="options?.title"
-        [attr.for]="layoutNode?.dataPointer"
-        [class]="options?.labelHtmlClass"
-        [class.sr-only]="options?.notitle"
-        [innerHTML]="options?.title"></label>
-      <input
-        [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
-        [attr.max]="options?.maximum"
-        [attr.min]="options?.minimum"
-        [attr.placeholder]="options?.placeholder"
-        [attr.required]="options?.required"
-        [attr.readonly]="options?.readonly ? 'readonly' : null"
-        [attr.step]="step"
-        [class]="options?.fieldHtmlClass"
-        [formControlName]="formControlName"
-        [id]="layoutNode?.dataPointer"
-        [name]="formControlName"
-        [title]="lastValidNumber"
-        [type]="layoutNode?.type === 'range' ? 'range' : 'number'"
-        (input)="updateInput($event)"
-        (keydown)="validateInput($event)"
-        (keyup)="validateNumber($event)">
-    </div>
-    <div *ngIf="!boundControl"
+    <div
       [class]="options?.htmlClass">
       <label *ngIf="options?.title"
         [attr.for]="layoutNode?.dataPointer"
@@ -44,23 +18,24 @@ import { getControl, inArray, isDefined } from '../utilities/index';
         [attr.max]="options?.maximum"
         [attr.min]="options?.minimum"
         [attr.placeholder]="options?.placeholder"
-        [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.required]="options?.required"
+        [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.step]="step"
         [class]="options?.fieldHtmlClass"
-        [id]="formControlName"
-        [name]="formControlName"
+        [id]="layoutNode?.dataPointer"
+        [name]="controlName"
         [title]="lastValidNumber"
         [type]="layoutNode?.type === 'range' ? 'range' : 'number'"
-        [value]="layoutNode?.value"
-        (input)="updateInput($event)"
+        [value]="controlValue"
+        (input)="updateValue($event)"
         (keydown)="validateInput($event)"
         (keyup)="validateNumber($event)">
     </div>`,
 })
-export class NumberComponent implements OnChanges, OnInit {
-  private formControlGroup: any;
-  private formControlName: string;
+export class NumberComponent implements OnInit {
+  private formControl: AbstractControl;
+  private controlName: string;
+  private controlValue: any;
   private boundControl: boolean = false;
   private options: any;
   private allowNegative: boolean = true;
@@ -75,41 +50,11 @@ export class NumberComponent implements OnChanges, OnInit {
 
   ngOnInit() {
     this.options = this.layoutNode.options;
-    this.initializeControl();
+    this.formSettings.initializeControl(this);
   }
 
-  ngOnChanges() {
-    this.initializeControl();
-  }
-
-  private initializeControl() {
-    this.formControlGroup = this.formSettings.getControlGroup(this);
-    this.formControlName = this.formSettings.getControlName(this);
-    this.boundControl = this.formSettings.isControlBound(this);
-    if (this.boundControl) {
-      this.lastValidNumber = this.formSettings.getControl(this).value;
-    } else {
-      console.error(
-        'NumberComponent warning: control "' + this.formSettings.getDataPointer(this) +
-        '" is not bound to the Angular 2 FormGroup.'
-      );
-    }
-    this.step = this.options.multipleOf || this.options.step ||
-      (this.layoutNode.dataType === 'integer' ? '1' : 'any');
-    if (this.layoutNode.dataType === 'integer') {
-      this.allowDecimal = false;
-      this.allowExponents = false;
-    } else {
-      this.allowExponents = !!this.options.allowExponents;
-    }
-    if (isDefined(this.options.minimum)) {
-      this.allowNegative = this.options.minimum < 0;
-    }
-  }
-
-  private updateInput(event) {
-    if (this.layoutNode.type !== 'range') return;
-    if (!isNaN(event.target.value)) this.lastValidNumber = event.target.value;
+  private updateValue(event) {
+    this.formSettings.updateValue(this, event);
   }
 
   private validateInput(event) {
@@ -133,7 +78,7 @@ export class NumberComponent implements OnChanges, OnInit {
     } else if (this.allowNegative && event.key === '-' && val.indexOf('-') === -1) {
       return true;
     }
-    // TODO: Display feedback for rejected key
+    // TODO: Display feedback for rejected keystroke, clear on next valid keystroke
     return false;
   }
 

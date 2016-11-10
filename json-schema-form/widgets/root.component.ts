@@ -1,5 +1,4 @@
 import { Component, Input } from '@angular/core';
-import { FormGroup } from '@angular/forms';
 
 @Component({
   moduleId: module.id,
@@ -11,8 +10,7 @@ import { FormGroup } from '@angular/forms';
         [formSettings]="formSettings"
         [dataIndex]="incrementDataIndex ? (dataIndex || []).concat(i) : (dataIndex || [])"
         [layoutIndex]="(layoutIndex || []).concat(i)"></select-framework-widget>
-    </div>
-  `,
+    </div>`,
 })
 export class RootComponent {
   @Input() layout: any;

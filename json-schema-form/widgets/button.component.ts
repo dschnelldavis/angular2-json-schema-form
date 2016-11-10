@@ -1,30 +1,19 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { AbstractControl } from '@angular/forms';
 
 @Component({
   selector: 'button-widget',
   template: `
-    <div *ngIf="boundControl"
-      [class]="options?.htmlClass"
-      [formGroup]="formControlGroup">
-      <button
-        [attr.aria-describedby]="formControlName + 'Status'"
-        [class]="options?.fieldHtmlClass"
-        [disabled]="options?.readonly"
-        [formControlName]="formControlName"
-        [type]="layoutNode?.type">
-        <span *ngIf="options?.icon || options?.title"
-          [class]="options?.icon"
-          [innerHTML]="options?.title"></span>
-      </button>
-    </div>
-    <div *ngIf="!boundControl"
+    <div
       [class]="options?.htmlClass">
       <button
-        [attr.aria-describedby]="formControlName + 'Status'"
+        [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
         [class]="options?.fieldHtmlClass"
         [disabled]="options?.readonly"
-        [type]="layoutNode?.type">
+        [name]="controlName"
+        [type]="layoutNode?.type"
+        [value]="controlValue"
+        (click)="updateValue($event)">
         <span *ngIf="options?.icon || options?.title"
           [class]="options?.icon"
           [innerHTML]="options?.title"></span>
@@ -32,8 +21,9 @@ import { FormGroup } from '@angular/forms';
     </div>`,
 })
 export class ButtonComponent implements OnInit {
-  private formControlGroup: any;
-  private formControlName: string;
+  private formControl: AbstractControl;
+  private controlName: string;
+  private controlValue: any;
   private boundControl: boolean = false;
   private options: any;
   @Input() layoutNode: any;
@@ -43,8 +33,10 @@ export class ButtonComponent implements OnInit {
 
   ngOnInit() {
     this.options = this.layoutNode.options;
-    this.formControlGroup = this.formSettings.getControlGroup(this);
-    this.formControlName = this.formSettings.getControlName(this);
-    this.boundControl = this.formSettings.isControlBound(this);
+    this.formSettings.initializeControl(this);
+  }
+
+  private updateValue(event) {
+    this.formSettings.updateValue(this, event);
   }
 }

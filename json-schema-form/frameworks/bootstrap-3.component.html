@@ -58,7 +58,7 @@
   </div>
 
   <span *ngIf="options?.feedback && options?.isInputWidget &&
-    !options?.fieldAddonRight && !options.isArrayItem && formControl?.dirty"
+    !options?.fieldAddonRight && !layoutNode.arrayItem && formControl?.dirty"
     [class.glyphicon-ok]="!options?.disableSuccessState && !formControl?.errors"
     [class.glyphicon-remove]="!options?.disableErrorState && formControl?.errors"
     aria-hidden="true"
