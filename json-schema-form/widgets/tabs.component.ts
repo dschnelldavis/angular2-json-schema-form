@@ -12,7 +12,7 @@ import { JsonPointer, parseText } from '../utilities/index';
           (selectedItem === i ? ' ' + options?.activeClass : '')"
         role="presentation"
         data-tabs>
-        <a
+        <a *ngIf="showAddTab || item.type !== '$ref'"
           [innerHTML]="setTitle(item, layoutNode, value, i)"
           (click)="select(i)"></a>
       </li>
@@ -20,18 +20,22 @@ import { JsonPointer, parseText } from '../utilities/index';
 
     <div *ngFor="let layoutItem of layoutNode?.items; let i = index; trackBy: layoutItem?.dataPointer"
       [class]="options?.htmlClass">
+
       <select-framework-widget *ngIf="selectedItem === i"
         [class]="options?.fieldHtmlClass + ' ' + options?.activeClass"
         [layoutNode]="layoutItem"
         [formSettings]="formSettings"
         [dataIndex]="layoutNode?.dataType === 'array' ? dataIndex?.concat(i) : dataIndex"
         [layoutIndex]="layoutIndex?.concat(i)"></select-framework-widget>
+
     </div>`,
   styles: [`a { cursor: pointer; }`],
 })
 export class TabsComponent implements OnInit {
   private options: any;
+  private itemCount: number;
   private selectedItem: number = 0;
+  private showAddTab: boolean = true;
   @Input() layoutNode: any;
   @Input() formSettings: any;
   @Input() layoutIndex: number[];
@@ -39,6 +43,31 @@ export class TabsComponent implements OnInit {
 
   ngOnInit() {
     this.options = this.layoutNode.options;
+    this.itemCount = this.layoutNode.items.length - 1;
+    this.updateControl();
+  }
+
+  private select(index) {
+    if (this.layoutNode.items[index].type === '$ref') {
+      this.itemCount = this.layoutNode.items.length;
+      this.formSettings.addItem({
+        layoutNode: this.layoutNode.items[index],
+        formSettings: this.formSettings,
+        layoutIndex: this.layoutIndex.concat(index),
+        dataIndex: this.dataIndex.concat(index)
+      });
+      this.updateControl();
+    };
+    this.selectedItem = index;
+  }
+
+  private updateControl() {
+    const lastItem = this.layoutNode.items[this.layoutNode.items.length - 1];
+    if (lastItem.type === '$ref' &&
+      this.itemCount >= (lastItem.options.maxItems || 1000000)
+    ) {
+      this.showAddTab = false;
+    }
   }
 
   private setTitle(
@@ -70,9 +99,5 @@ export class TabsComponent implements OnInit {
       value = value[index];
     }
     return parseText(text, value, this.formSettings.formGroup.value, index);
-  }
-
-  private select(index) {
-    this.selectedItem = index;
   }
 }

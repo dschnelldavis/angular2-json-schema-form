@@ -168,9 +168,7 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
     getControlName: (ctx): string => {
       if (!ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex) return null;
       return JsonPointer.toKey(toIndexedPointer(
-        ctx.layoutNode.dataPointer,
-        ctx.dataIndex,
-        this.formSettings.arrayMap
+        ctx.layoutNode.dataPointer, ctx.dataIndex, this.formSettings.arrayMap
       ));
     },
 
@@ -222,7 +220,9 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
     },
 
     moveArrayItem: (ctx, oldIndex: number, newIndex: number): boolean => {
-      if (!ctx || !isDefined(oldIndex) || !isDefined(newIndex)) return false;
+      if (!ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex ||
+        !ctx.layoutNode.layoutPointer || !ctx.layoutIndex ||
+        !isDefined(oldIndex) || !isDefined(newIndex)) return false;
       // Move item in the formArray
       let formArray = this.formSettings.getControlGroup(ctx);
       formArray.controls.splice(newIndex, 0, formArray.controls.splice(oldIndex, 1)[0]);
@@ -530,10 +530,10 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
           this.isValid.emit(isValid);
           this.validationErrors.emit(this.validateFormData.errors);
         }
-console.log(formSettings.formGroupTemplate);
+// console.log(formSettings.formGroupTemplate);
 // console.log(formSettings.templateRefLibrary);
 // console.log(formSettings.layoutRefLibrary);
-// console.log(formSettings.layout);
+console.log(formSettings.layout);
       } else {
         // TODO: Output error message
       }

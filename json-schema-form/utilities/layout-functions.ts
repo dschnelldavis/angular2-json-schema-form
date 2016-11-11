@@ -59,7 +59,6 @@ export function buildLayout(formSettings: any): any[] {
     newNode.options = {};
     newNode.layoutPointer = layoutPointer.replace(/\/\d+/g, '/-');
     let itemSchema: any = null;
-    // let schemaDefaultValue: any = null;
 
     // If newNode does not have a dataPointer, try to find an equivalent
     if (!hasOwn(newNode, 'dataPointer')) {
@@ -161,7 +160,6 @@ export function buildLayout(formSettings: any): any[] {
           newNode.options.required = true;
           formSettings.fieldsRequired = true;
         }
-        // schemaDefaultValue = itemSchema.default;
       } else {
         // TODO: create item in FormGroup model from layout key (?)
         updateInputOptions(newNode, {}, formSettings);
@@ -170,7 +168,7 @@ export function buildLayout(formSettings: any): any[] {
       formSettings.dataMap.get(newNode.dataPointer).set('inputType', newNode.type);
       formSettings.dataMap.get(newNode.dataPointer).set('widget', newNode.widget);
 
-      if (newNode.type.slice(-5) === 'array' && hasOwn(newNode, 'items')) {
+      if (newNode.dataType === 'array' && hasOwn(newNode, 'items')) {
         if (newNode.options.required && !newNode.minItems) newNode.minItems = 1;
         let arrayPointer: string = newNode.dataPointer + '/-';
         if (!formSettings.dataMap.has(arrayPointer)) {
@@ -202,6 +200,9 @@ export function buildLayout(formSettings: any): any[] {
               newIndex++;
             } else {
               subItem.arrayItem = true;
+              // TODO: Check schema to get arrayItemType and removable
+              subItem.arrayItemType = 'list';
+              subItem.removable = newNode.options.removable || !newNode.options.minItems;
             }
           }
           if (arrayItemGroup.length) {
@@ -210,7 +211,10 @@ export function buildLayout(formSettings: any): any[] {
               items: arrayItemGroup,
               layoutPointer: newNode.layoutPointer + '/items/-',
               options: {
-                removable: newNode.options.removable || !newNode.options.minItems,
+                arrayItemType: newNode.tupleItems > newNode.items.length ?
+                  'tuple' : 'list',
+                removable: newNode.options.removable !== false &&
+                  (newNode.options.minItems || 0) <= newNode.items.length,
               },
               dataPointer: newNode.dataPointer + '/-',
               type: 'fieldset',
@@ -218,11 +222,18 @@ export function buildLayout(formSettings: any): any[] {
             });
           }
         } else {
-          // TODO: check minItems to verify removing item is OK
           newNode.items[0].arrayItem = true;
-          if (!JsonPointer.has(newNode, '/items/0/options/removable')) {
+          if (!newNode.items[0].dataPointer) {
+            newNode.items[0].dataPointer =
+              toGenericPointer(arrayPointer, formSettings.arrayMap);
+          }
+          if (newNode.options.minItems) {
+            newNode.items[0].options.removable = false;
+          } else if (!JsonPointer.has(newNode, '/items/0/options/removable')) {
             newNode.items[0].options.removable = true;
           }
+          newNode.items[0].options.arrayItemType =
+            newNode.tupleItems ? 'tuple' : 'list';
         }
 
         // TODO: check maxItems to verify adding new items is OK, and check
@@ -230,12 +241,14 @@ export function buildLayout(formSettings: any): any[] {
         if (newNode.options.addable !== false) {
           formSettings.layoutRefLibrary[arrayPointer] =
             _.cloneDeep(newNode.items[newNode.items.length - 1]);
-          const initialNodeData = JsonPointer.get(formSettings.initialValues, newNode.dataPointer);
+          const initialNodeData =
+            JsonPointer.get(formSettings.initialValues, newNode.dataPointer);
           if (isArray(initialNodeData) &&
             initialNodeData.length > newNode.items.length
           ) {
             for (let i = newNode.items.length, l = initialNodeData.length; i < l; i++) {
-              newNode.items.push(_.cloneDeep(formSettings.layoutRefLibrary[arrayPointer]));
+              newNode.items
+                .push(_.cloneDeep(formSettings.layoutRefLibrary[arrayPointer]));
             }
           }
           let buttonText: string = 'Add ';
@@ -251,15 +264,20 @@ export function buildLayout(formSettings: any): any[] {
             arrayItem: true,
             dataPointer: toGenericPointer(arrayPointer, formSettings.arrayMap),
             layoutPointer: newNode.layoutPointer + '/items/-',
+            listItems: newNode.listItems,
             options: {
               arrayItemType: 'list',
               removable: !!newNode.options.removable,
               title: buttonText,
             },
+            tupleItems: newNode.tupleItems,
             type: '$ref',
             widget: widgetLibrary.getWidget('$ref'),
             '$refType': 'array',
           };
+          if (isDefined(newNode.options.maxItems)) {
+            newNodeRef.options.maxItems = newNode.options.maxItems;
+          }
           if (isString(JsonPointer.get(newNode, '/style/add'))) {
             newNodeRef.options.fieldStyle = newNode.style.add;
             delete newNode.style.add;
@@ -473,20 +491,26 @@ export function buildLayoutFromSchema(
         buttonText += 'to ' +
           toTitleCase(JsonPointer.toKey(dataPointer).replace(/_/g, ' '));
       }
-      newNode.items.push({
-        arrayItem: true,
-        dataPointer: dataPointer + '/-',
-        layoutPointer: newNode.layoutPointer + '/items/-',
-        name: '-',
-        options: {
-          arrayItemType: 'list',
-          removable: false,
-          title: buttonText,
-        },
-        type: '$ref',
-        widget: widgetLibrary.getWidget('$ref'),
-        '$refType': 'array',
-      });
+      let newNodeRef: any = {
+         arrayItem: true,
+         dataPointer: dataPointer + '/-',
+         layoutPointer: newNode.layoutPointer + '/items/-',
+         listItems: newNode.listItems,
+         name: '-',
+         options: {
+           arrayItemType: 'list',
+           removable: false,
+           title: buttonText,
+         },
+         tupleItems: newNode.tupleItems,
+         type: '$ref',
+         widget: widgetLibrary.getWidget('$ref'),
+         '$refType': 'array',
+       };
+      if (isDefined(newNode.options.maxItems)) {
+        newNodeRef.options.maxItems = newNode.options.maxItems;
+      }
+      newNode.items.push(newNodeRef);
     }
   }
   return newNode;

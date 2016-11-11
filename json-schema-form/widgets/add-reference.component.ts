@@ -19,6 +19,7 @@ import {
 })
 export class AddReferenceComponent implements OnInit, OnChanges {
   private options: any;
+  private itemCount: number;
   private showAddButton: boolean = true;
   @Input() layoutNode: any;
   @Input() formSettings: any;
@@ -27,6 +28,7 @@ export class AddReferenceComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     this.options = this.layoutNode.options;
+    this.itemCount = this.layoutIndex[this.layoutIndex.length - 1];
     this.updateControl();
   }
 
@@ -34,20 +36,17 @@ export class AddReferenceComponent implements OnInit, OnChanges {
     this.updateControl();
   }
 
-  private updateControl() {
-    if (this.layoutNode.arrayItem) {
-      // TODO: Add 'maxItems' to $ref and remove complex lookup
-      const arrayIndex = this.layoutIndex[this.layoutIndex.length - 1];
-      const layoutPointer = this.formSettings.getLayoutPointer(this);
-      const parentArrayPointer = JsonPointer.parse(layoutPointer).slice(0, -2);
-      const parentArray = JsonPointer.get(this.formSettings.layout, parentArrayPointer);
-      const maxItems = parentArray.maxItems || 1000000;
-      if (arrayIndex >= maxItems) this.showAddButton = false;
-    }
-  }
-
   private addItem(event) {
     event.preventDefault();
+    this.itemCount = this.layoutIndex[this.layoutIndex.length - 1] + 1;
     this.formSettings.addItem(this);
+    this.updateControl();
+  }
+
+  private updateControl() {
+    const maxItems = this.layoutNode.options.maxItems || 1000000;
+    if (this.layoutNode.arrayItem && this.itemCount >= maxItems) {
+      this.showAddButton = false;
+    }
   }
 }

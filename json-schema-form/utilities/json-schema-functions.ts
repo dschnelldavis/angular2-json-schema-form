@@ -338,7 +338,8 @@ export function updateInputOptions(layoutNode: any, schema: any, formSettings: a
     ['items', 'options'], false, fixUiKeys);
   // JsonPointer.remove(schema, ['x-schema-form']);
   mergeFilteredObject(newOptions, layoutNode, ['arrayItem', 'dataPointer',
-    'dataType', 'items', 'layoutPointer', 'name', 'options', 'type', 'widget'],
+    'dataType', 'items', 'layoutPointer', 'listItems', 'name', 'options',
+    'tupleItems', 'type', 'widget'],
     false, fixUiKeys);
   mergeFilteredObject(newOptions, layoutNode.options, [], false, fixUiKeys);
   layoutNode.options = newOptions;

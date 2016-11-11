@@ -11,6 +11,7 @@ import { Component, Input } from '@angular/core';
       [layoutIndex]="(layoutIndex || []).concat(i)"
       [orderable]="isOrderable !== false && layoutItem?.type !== '$ref' &&
         layoutItem?.arrayItem && layoutItem?.options?.arrayItemType === 'list'">
+      <!-- && (layout[layout.length - 1].tupleItems || 0 < (layout.length - 2)) -->
 
       <select-framework-widget
         [layoutNode]="layoutItem"
