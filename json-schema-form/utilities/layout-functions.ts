@@ -132,7 +132,7 @@ export function buildLayout(formSettings: any): any[] {
         } else {
           newNode.type = checkInlineType(newNode.type, itemSchema, newNode);
         }
-        if (!hasOwn(newNode, 'dataType')) newNode.dataType = itemSchema.type;
+        newNode.dataType = itemSchema.type;
         updateInputOptions(newNode, itemSchema, formSettings);
 
         // Present checkboxes as single control, rather than array
@@ -169,6 +169,7 @@ export function buildLayout(formSettings: any): any[] {
       newNode.widget = widgetLibrary.getWidget(newNode.type);
       formSettings.dataMap.get(newNode.dataPointer).set('inputType', newNode.type);
       formSettings.dataMap.get(newNode.dataPointer).set('widget', newNode.widget);
+
       if (newNode.type.slice(-5) === 'array' && hasOwn(newNode, 'items')) {
         if (newNode.options.required && !newNode.minItems) newNode.minItems = 1;
         let arrayPointer: string = newNode.dataPointer + '/-';
@@ -250,7 +251,6 @@ export function buildLayout(formSettings: any): any[] {
             arrayItem: true,
             dataPointer: toGenericPointer(arrayPointer, formSettings.arrayMap),
             layoutPointer: newNode.layoutPointer + '/items/-',
-            name: '-',
             options: {
               arrayItemType: 'list',
               removable: !!newNode.options.removable,
@@ -343,7 +343,6 @@ export function buildLayoutFromSchema(
     }
     for (let key of newKeys) {
       if (hasOwn(schema[subObject], key)) {
-        // let item = schema[subObject][key];
         const newLayoutPointer = newNode.layoutPointer === '' ?
           '/-'  : newNode.layoutPointer + '/items/-';
         let innerItem = buildLayoutFromSchema(

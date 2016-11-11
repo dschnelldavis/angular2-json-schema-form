@@ -344,34 +344,8 @@ export function updateInputOptions(layoutNode: any, schema: any, formSettings: a
   layoutNode.options = newOptions;
 
   // If schema type is integer, enforce by setting multipleOf = 1
-  if (inArray(schema.type, ['integer']) &&
-    !JsonPointer.has(layoutNode, '/options/multipleOf')
-  ) {
+  if (schema.type === 'integer' && !hasValue(layoutNode.options.multipleOf)) {
     layoutNode.options.multipleOf = 1;
-
-  // // If schema type is array, save controlTemplate in layoutNode
-  // } else if (templatePointer && schema.type === 'array') {
-  //   if (JsonPointer.has(schema, '/items/$ref')) {
-  //     layoutNode.controlTemplate = buildFormGroupTemplate(
-  //       formSettings, schema.items.$ref
-  //     );
-  //   } else {
-  //     layoutNode.controlTemplate = _.cloneDeep(JsonPointer.get(
-  //       formSettings.formGroupTemplate, templatePointer + '/controls/-'
-  //     ));
-  //   }
-  //   JsonPointer.remove(layoutNode, '/controlTemplate/value');
-
-  // // If schema is an object with a $ref link, save controlTemplate in layoutNode
-  // } else if (hasOwn(schema, '$ref')) {
-  //   layoutNode.controlTemplate = buildFormGroupTemplate(
-  //     formSettings, schema.$ref
-  //   );
-  // } else if (JsonPointer.has(schema, '/additionalProperties/$ref')) {
-  //   layoutNode.controlTemplate = buildFormGroupTemplate(
-  //     formSettings, schema.additionalProperties.$ref
-  //   );
-
   }
 
   // If field value is set in layoutNode, and no input data, update template value

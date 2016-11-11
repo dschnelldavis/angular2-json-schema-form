@@ -24,8 +24,8 @@ import { JsonPointer, parseText } from '../utilities/index';
         [class]="options?.fieldHtmlClass + ' ' + options?.activeClass"
         [layoutNode]="layoutItem"
         [formSettings]="formSettings"
-        [dataIndex]="layoutNode?.type?.slice(-5) === 'array' ? dataIndex.concat(i) : dataIndex"
-        [layoutIndex]="layoutIndex.concat(i)"></select-framework-widget>
+        [dataIndex]="layoutNode?.dataType === 'array' ? dataIndex?.concat(i) : dataIndex"
+        [layoutIndex]="layoutIndex?.concat(i)"></select-framework-widget>
     </div>`,
   styles: [`a { cursor: pointer; }`],
 })

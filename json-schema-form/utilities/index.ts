@@ -4,5 +4,6 @@ export * from './json-validators';
 export * from './jsonpointer';
 export * from './json-schema-functions';
 export * from './layout-functions';
+export * from './orderable.directive';
 export * from './utility-functions';
 export * from './validator-functions';

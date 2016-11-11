@@ -52,7 +52,8 @@ import {
   template: `<form (ngSubmit)="submitForm()">
     <root-widget *ngIf="formInitialized"
       [layout]="formSettings.layout"
-      [formSettings]="formSettings">
+      [formSettings]="formSettings"
+      [isOrderable]="true">
     </root-widget>
   </form>
   <div *ngIf="debug">Debug output: <pre>{{debugOutput}}</pre></div>`,
@@ -70,7 +71,6 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
   private formSettings: any = { // Form options and control structures
 
     // Default global form options
-    // Note: Unset boolean options default to false
     globalOptions: {
       addSubmit: true, // Add a submit button if layout does not have one?
       debug: false, // Show debugging output?
@@ -80,6 +80,9 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
       setSchemaDefaults: true,
       // validateOnRender: false,
       formDefaults: { // Default options for individual form controls
+        // addable: true, // Allow adding items to an array?
+        // orderable: true, // Allow reordering items within an array?
+        // removable: true, // Allow removing items from an array?
         // allowExponents: false, // Allow exponent entry in number fields?
         // disableErrorState: false, // Don't apply 'has-error' class when field fails validation?
         // disableSuccessState: false, // Don't apply 'has-success' class when field validates?
@@ -137,28 +140,45 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
     getControl: (ctx): AbstractControl => {
       if (!ctx.layoutNode || !ctx.layoutNode.dataPointer ||
         ctx.layoutNode.type === '$ref') return null;
-      return getControl(this.formSettings.formGroup,
-        this.formSettings.getDataPointer(ctx));
+      return getControl(
+        this.formSettings.formGroup,
+        this.formSettings.getDataPointer(ctx)
+      );
     },
 
     getControlValue: (ctx): AbstractControl => {
       if (!ctx.layoutNode || !ctx.layoutNode.dataPointer ||
         ctx.layoutNode.type === '$ref') return null;
-      const control = getControl(this.formSettings.formGroup,
-        this.formSettings.getDataPointer(ctx));
+      const control = getControl(
+        this.formSettings.formGroup,
+        this.formSettings.getDataPointer(ctx)
+      );
       return control ? control.value : null;
     },
 
     getControlGroup: (ctx): FormGroup => {
       if (!ctx.layoutNode || !ctx.layoutNode.dataPointer) return null;
-      return getControl(this.formSettings.formGroup,
-        this.formSettings.getDataPointer(ctx), true);
+      return getControl(
+        this.formSettings.formGroup,
+        this.formSettings.getDataPointer(ctx),
+        true
+      );
     },
 
     getControlName: (ctx): string => {
       if (!ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex) return null;
-      return JsonPointer.toKey(toIndexedPointer(ctx.layoutNode.dataPointer,
-        ctx.dataIndex, this.formSettings.arrayMap));
+      return JsonPointer.toKey(toIndexedPointer(
+        ctx.layoutNode.dataPointer,
+        ctx.dataIndex,
+        this.formSettings.arrayMap
+      ));
+    },
+
+    getLayoutArray: (ctx): any[] => {
+      return JsonPointer.get(
+        this.formSettings.layout,
+        JsonPointer.parse(this.formSettings.getLayoutPointer(ctx)).slice(0, -1)
+      );
     },
 
     getDataPointer: (ctx): string => {
@@ -192,24 +212,24 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
       let formArray =
         getControl(this.formSettings.formGroup, indexedDataPointer, true);
       formArray.push(newFormGroup);
-// console.log('adding data to ' + indexedDataPointer);
       // Add new display node to layout
       const layoutPointer = this.formSettings.getLayoutPointer(ctx);
       const newLayoutNode = _.cloneDeep(JsonPointer.get(
         this.formSettings.layoutRefLibrary, [genericDataPointer]
       ));
       JsonPointer.insert(this.formSettings.layout, layoutPointer, newLayoutNode);
-// console.log('adding layout to ' + layoutPointer);
       return true;
     },
 
-    moveArrayItem: (formArray, layoutArray, oldIndex: number, newIndex: number): boolean => {
-      if (!formArray || !isDefined(oldIndex) || !isDefined(newIndex)) return false;
+    moveArrayItem: (ctx, oldIndex: number, newIndex: number): boolean => {
+      if (!ctx || !isDefined(oldIndex) || !isDefined(newIndex)) return false;
       // Move item in the formArray
+      let formArray = this.formSettings.getControlGroup(ctx);
       formArray.controls.splice(newIndex, 0, formArray.controls.splice(oldIndex, 1)[0]);
       formArray.updateValueAndValidity();
       formArray._onCollectionChange();
       // Move layout item
+      let layoutArray = this.formSettings.getLayoutArray(ctx);
       layoutArray.splice(newIndex, 0, layoutArray.splice(oldIndex, 1)[0]);
       return true;
     },

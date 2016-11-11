@@ -10,7 +10,7 @@ import { Component, Input, OnInit } from '@angular/core';
         [formSettings]="formSettings"
         [dataIndex]="dataIndex"
         [layoutIndex]="layoutIndex"
-        [incrementDataIndex]="layoutNode?.type?.slice(-5) === 'array'"></root-widget>
+        [isOrderable]="options?.orderable"></root-widget>
     </div>`,
 })
 export class TabComponent implements OnInit {

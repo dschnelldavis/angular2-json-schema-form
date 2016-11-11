@@ -8,7 +8,6 @@ import { Component, Input, OnInit } from '@angular/core';
       [class.expandable]="options?.expandable && !expanded"
       [class.expanded]="options?.expandable && expanded">
       <label *ngIf="options?.title"
-        [attr.for]="layoutNode?.dataPointer"
         [class]="options?.labelHtmlClass"
         [class.sr-only]="options?.notitle"
         [innerHTML]="options?.title"
@@ -19,7 +18,7 @@ import { Component, Input, OnInit } from '@angular/core';
           [formSettings]="formSettings"
           [dataIndex]="dataIndex"
           [layoutIndex]="layoutIndex"
-          [incrementDataIndex]="layoutNode?.type?.slice(-5) === 'array'"></root-widget>
+          [isOrderable]="options?.orderable"></root-widget>
 
     </div>`,
   styles: [`
