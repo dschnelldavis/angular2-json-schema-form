@@ -102,6 +102,8 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
 
     arrayMap: new Map, // Maps arrays in data object and number of tuple values
     dataMap: new Map, // Maps paths in data model to schema and formGroup paths
+    dataCircularRefMap: new Map, // Maps circular reference points in data model
+    schemaCircularRefMap: new Map, // Maps circular reference points in schema
     layoutRefLibrary: {}, // Library of layout nodes for adding to form
     schemaRefLibrary: {}, // Library of schemas for resolving schema $refs
     templateRefLibrary: {}, // Library of formGroup templates for adding to form
@@ -113,6 +115,10 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
         ctx.controlName = this.formSettings.getControlName(ctx);
         ctx.controlValue = ctx.formControl.value;
         ctx.formControl.valueChanges.subscribe(v => ctx.controlValue = v);
+        ctx.controlDisabled = ctx.formControl.disabled;
+        // TODO: subscribe to status changes
+        // TODO: emit / display error messages
+        // ctx.formControl.statusChanges.subscribe(v => );
       } else {
         ctx.controlName = ctx.layoutNode.name;
         ctx.controlValue = ctx.layoutNode.value;
@@ -132,9 +138,8 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
       if (ctx.boundControl) {
         ctx.formControl.setValue(event.target.value);
         ctx.formControl.markAsDirty();
-      } else {
-        ctx.layoutNode.value = event.target.value;
       }
+      ctx.layoutNode.value = event.target.value;
     },
 
     getControl: (ctx): AbstractControl => {
@@ -174,8 +179,7 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
 
     getLayoutArray: (ctx): any[] => {
       return JsonPointer.get(
-        this.formSettings.layout,
-        JsonPointer.parse(this.formSettings.getLayoutPointer(ctx)).slice(0, -1)
+        this.formSettings.layout, this.formSettings.getLayoutPointer(ctx), 0, -1
       );
     },
 
@@ -199,22 +203,29 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
     },
 
     addItem: (ctx): boolean => { // TODO: Change to also add circular reference items
-      if (!ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex ||
+      if (!ctx.layoutNode || !ctx.layoutNode.$ref || !ctx.dataIndex ||
         !ctx.layoutNode.layoutPointer || !ctx.layoutIndex) return false;
       // Add new data key to formGroup
-      const genericDataPointer = ctx.layoutNode.dataPointer;
-      const indexedDataPointer = this.formSettings.getDataPointer(ctx);
-      const templateLibrary = this.formSettings.templateRefLibrary;
-      const newFormGroup =
-        buildFormGroup(JsonPointer.get(templateLibrary, [genericDataPointer]));
-      let formArray =
-        getControl(this.formSettings.formGroup, indexedDataPointer, true);
-      formArray.push(newFormGroup);
+      const dataPointer = this.formSettings.getDataPointer(ctx);
+      const newFormGroup = buildFormGroup(JsonPointer.get(
+        this.formSettings.templateRefLibrary, [ctx.layoutNode.$ref]
+      ));
+      this.formSettings.getControlGroup(ctx).push(newFormGroup);
       // Add new display node to layout
       const layoutPointer = this.formSettings.getLayoutPointer(ctx);
       const newLayoutNode = _.cloneDeep(JsonPointer.get(
-        this.formSettings.layoutRefLibrary, [genericDataPointer]
+        this.formSettings.layoutRefLibrary, [ctx.layoutNode.$ref]
       ));
+      if (ctx.layoutNode.circularReference) {
+        JsonPointer.forEachDeep(newLayoutNode, (value, pointer) => {
+          if (hasOwn(value, 'dataPointer')) {
+            value.dataPointer = ctx.layoutNode.dataPointer + value.dataPointer;
+          }
+          if (hasOwn(value, 'layoutPointer')) {
+            value.layoutPointer = ctx.layoutNode.layoutPointer + value.layoutPointer;
+          }
+        });
+      }
       JsonPointer.insert(this.formSettings.layout, layoutPointer, newLayoutNode);
       return true;
     },
@@ -377,6 +388,8 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
                   value
                 )
               );
+            } else {
+              formSettings.schemaCircularRefMap.set(pointer, newReference);
             }
           }
         }, true);
@@ -484,7 +497,7 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
 
         // Build the Angular 2 FormGroup template from the schema
         formSettings.formGroupTemplate = buildFormGroupTemplate(
-          formSettings, '', '', '', true, formSettings.initialValues
+          formSettings, formSettings.initialValues, true
         );
 
       } else {
@@ -531,9 +544,14 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
           this.validationErrors.emit(this.validateFormData.errors);
         }
 // console.log(formSettings.formGroupTemplate);
+// console.log(formSettings.formGroup);
 // console.log(formSettings.templateRefLibrary);
 // console.log(formSettings.layoutRefLibrary);
-console.log(formSettings.layout);
+// console.log(formSettings.layout);
+// console.log(formSettings.schemaRefLibrary);
+// console.log(formSettings.dataMap);
+// console.log(formSettings.schemaCircularRefMap);
+// console.log(formSettings.dataCircularRefMap);
       } else {
         // TODO: Output error message
       }
@@ -548,12 +566,13 @@ console.log(formSettings.layout);
       // vars.push(this.formSettings.dataMap);
       // vars.push(this.formSettings.arrayMap);
       // vars.push(this.formSettings.formGroupTemplate);
-      vars.push(this.formSettings.layout);
+      // vars.push(this.formSettings.layout);
       // vars.push(this.formSettings.schemaRefLibrary);
       // vars.push(this.formSettings.initialValues);
       // vars.push(this.formSettings.formGroup);
       // vars.push(this.formSettings.formGroup.value);
       // vars.push(this.formSettings.layoutRefLibrary);
+      // vars.push(this.formSettings.templateRefLibrary);
       this.debugOutput = _.map(vars, thisVar => JSON.stringify(thisVar, null, 2)).join('\n');
     }
   }

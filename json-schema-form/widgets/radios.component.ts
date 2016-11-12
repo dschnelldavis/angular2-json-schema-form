@@ -19,14 +19,16 @@ import { buildTitleMap } from '../utilities/index';
           <label *ngFor="let radioItem of radiosList"
             [attr.for]="layoutNode?.dataPointer + '/' + radioItem?.value"
             [class]="options?.itemLabelHtmlClass +
-              (formControl?.value === radioItem?.value ?
-              ' ' + options?.activeClass : '')">
+              ((controlValue + '' === radioItem?.value + '') ?
+              (' ' + options?.activeClass + ' ' + options?.style?.selected) :
+              (' ' + options?.style?.unselected))">
             <input type="radio"
               [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
               [attr.readonly]="options?.readonly ? 'readonly' : null"
               [attr.required]="options?.required"
               [checked]="radioItem?.value === controlValue"
               [class]="options?.fieldHtmlClass"
+              [disabled]="controlDisabled"
               [id]="layoutNode?.dataPointer + '/' + radioItem?.value"
               [name]="controlName"
               [value]="radioItem?.value"
@@ -42,14 +44,16 @@ import { buildTitleMap } from '../utilities/index';
             <label
               [attr.for]="layoutNode?.dataPointer + '/' + radioItem?.value"
               [class]="options?.itemLabelHtmlClass +
-                (formControl?.value === radioItem?.value ?
-                ' ' + options?.activeClass : '')">
+                ((controlValue + '' === radioItem?.value + '') ?
+                (' ' + options?.activeClass + ' ' + options?.style?.selected) :
+                (' ' + options?.style?.unselected))">
               <input type="radio"
                 [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
                 [attr.readonly]="options?.readonly ? 'readonly' : null"
                 [attr.required]="options?.required"
                 [checked]="radioItem?.value === controlValue"
                 [class]="options?.fieldHtmlClass"
+                [disabled]="controlDisabled"
                 [id]="layoutNode?.dataPointer + '/' + radioItem?.value"
                 [name]="controlName"
                 [value]="radioItem?.value"
@@ -65,6 +69,7 @@ export class RadiosComponent implements OnInit {
   private formControl: AbstractControl;
   private controlName: string;
   private controlValue: any;
+  private controlDisabled: boolean = false;
   private boundControl: boolean = false;
   private options: any;
   private layoutOrientation: string = 'vertical';
@@ -76,11 +81,11 @@ export class RadiosComponent implements OnInit {
 
   ngOnInit() {
     this.options = this.layoutNode.options;
-      if (this.layoutNode.type === 'radios-inline' ||
-        this.layoutNode.type === 'radiobuttons'
-      ) {
-        this.layoutOrientation = 'horizontal';
-      }
+    if (this.layoutNode.type === 'radios-inline' ||
+      this.layoutNode.type === 'radiobuttons'
+    ) {
+      this.layoutOrientation = 'horizontal';
+    }
     this.radiosList = buildTitleMap(
       this.options.titleMap || this.options.enumNames,
       this.options.enum, true

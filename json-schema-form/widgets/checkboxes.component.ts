@@ -17,15 +17,17 @@ import { buildFormGroup, buildTitleMap, JsonPointer } from '../utilities/index';
         [class]="options?.htmlClass">
         <label *ngFor="let checkboxItem of checkboxList"
           [attr.for]="layoutNode?.dataPointer + '/' + checkboxItem.value"
-          [class]="options?.itemLabelHtmlClass +
-            (checkboxItem.checked ? ' ' + options?.activeClass : '')">
+          [class]="options?.itemLabelHtmlClass + (checkboxItem.checked ?
+            (' ' + options?.activeClass + ' ' + options?.style?.selected) :
+            (' ' + options?.style?.unselected))">
           <input type="checkbox"
-            [attr.readonly]="options?.readonly ? 'readonly' : null"
             [attr.required]="options?.required"
             [checked]="checkboxItem.checked"
             [class]="options?.fieldHtmlClass"
+            [disabled]="controlDisabled"
             [id]="layoutNode?.dataPointer + '/' + checkboxItem.value"
             [name]="formControlName"
+            [readonly]="options?.readonly ? 'readonly' : null"
             [value]="checkboxItem.value"
             (change)="updateValue($event)">
           <span [innerHTML]="checkboxItem.name"></span>
@@ -38,15 +40,17 @@ import { buildFormGroup, buildTitleMap, JsonPointer } from '../utilities/index';
           [class]="options?.htmlClass">
           <label
             [attr.for]="layoutNode?.dataPointer + '/' + checkboxItem.value"
-            [class]="options?.itemLabelHtmlClass +
-              (checkboxItem.checked ? ' ' + options?.activeClass : '')">
+            [class]="options?.itemLabelHtmlClass + (checkboxItem.checked ?
+              (' ' + options?.activeClass + ' ' + options?.style?.selected) :
+              (' ' + options?.style?.unselected))">
             <input type="checkbox"
-              [attr.readonly]="options?.readonly ? 'readonly' : null"
               [attr.required]="options?.required"
               [checked]="checkboxItem.checked"
               [class]="options?.fieldHtmlClass"
+              [disabled]="controlDisabled"
               [id]="options?.name + '/' + checkboxItem.value"
               [name]="options?.name"
+              [readonly]="options?.readonly ? 'readonly' : null"
               [value]="checkboxItem.value"
               (change)="updateValue($event)">
             <span [innerHTML]="checkboxItem?.name"></span>

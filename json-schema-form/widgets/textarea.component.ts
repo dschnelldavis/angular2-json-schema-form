@@ -20,6 +20,7 @@ import { AbstractControl } from '@angular/forms';
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.required]="options?.required"
         [class]="options?.fieldHtmlClass"
+        [disabled]="controlDisabled"
         [id]="layoutNode?.dataPointer"
         [name]="controlName"
         [value]="controlValue"
@@ -30,6 +31,7 @@ export class TextareaComponent implements OnInit {
   private formControl: AbstractControl;
   private controlName: string;
   private controlValue: any;
+  private controlDisabled: boolean = false;
   private boundControl: boolean = false;
   private options: any;
   @Input() layoutNode: any;

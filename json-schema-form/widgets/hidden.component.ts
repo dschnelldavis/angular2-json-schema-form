@@ -5,6 +5,7 @@ import { AbstractControl } from '@angular/forms';
   selector: 'hidden-widget',
   template: `
     <input
+      [disabled]="controlDisabled"
       [name]="controlName"
       [id]="layoutNode?.dataPointer"
       [type]="hidden"
@@ -14,6 +15,7 @@ export class HiddenComponent implements OnInit {
   private formControl: AbstractControl;
   private controlName: string;
   private controlValue: any;
+  private controlDisabled: boolean = false;
   private boundControl: boolean = false;
   @Input() layoutNode: any;
   @Input() formSettings: any;

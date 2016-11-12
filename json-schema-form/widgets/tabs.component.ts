@@ -8,12 +8,13 @@ import { JsonPointer, parseText } from '../utilities/index';
     <ul
       [class]="options?.labelHtmlClass">
       <li *ngFor="let item of layoutNode?.items; let i = index; trackBy: item?.dataPointer"
-        [class]="options?.itemLabelHtmlClass +
-          (selectedItem === i ? ' ' + options?.activeClass : '')"
+        [class]="options?.itemLabelHtmlClass + (selectedItem === i ?
+          (' ' + options?.activeClass + ' ' + options?.style?.selected) :
+          (' ' + options?.style?.unselected))"
         role="presentation"
         data-tabs>
         <a *ngIf="showAddTab || item.type !== '$ref'"
-          [innerHTML]="setTitle(item, layoutNode, value, i)"
+          [innerHTML]="setTitle(item, i)"
           (click)="select(i)"></a>
       </li>
     </ul>
@@ -22,7 +23,7 @@ import { JsonPointer, parseText } from '../utilities/index';
       [class]="options?.htmlClass">
 
       <select-framework-widget *ngIf="selectedItem === i"
-        [class]="options?.fieldHtmlClass + ' ' + options?.activeClass"
+        [class]="options?.fieldHtmlClass + ' ' + options?.activeClass + ' ' + options?.style?.selected"
         [layoutNode]="layoutItem"
         [formSettings]="formSettings"
         [dataIndex]="layoutNode?.dataType === 'array' ? dataIndex?.concat(i) : dataIndex"
@@ -71,33 +72,37 @@ export class TabsComponent implements OnInit {
   }
 
   private setTitle(
-    item: any = null, layoutNode: any, value: any, index: number = null
+    item: any = null, index: number = null
   ): string {
     let text: string;
-    if (layoutNode.type.slice(-5) === 'array' && item.type !== '$ref') {
+    let value: any;
+    let values: any = this.formSettings.getControlValue(this);
+    if (this.layoutNode.type.slice(-5) === 'array' && item.type !== '$ref') {
       text = JsonPointer.getFirst([
         [item, '/options/legend'],
         [item, '/options/title'],
         [item, '/title'],
-        [layoutNode, '/options/title'],
-        [layoutNode, '/options/legend'],
-        [layoutNode, '/title'],
+        [this.layoutNode, '/options/title'],
+        [this.layoutNode, '/options/legend'],
+        [this.layoutNode, '/title'],
       ]);
     } else {
       text = JsonPointer.getFirst([
         [item, '/title'],
         [item, '/options/title'],
         [item, '/options/legend'],
-        [layoutNode, '/title'],
-        [layoutNode, '/options/title'],
-        [layoutNode, '/options/legend']
+        [this.layoutNode, '/title'],
+        [this.layoutNode, '/options/title'],
+        [this.layoutNode, '/options/legend']
       ]);
       if (item.type === '$ref') text = '+ ' + text;
     }
     if (!text) return text;
-    if (layoutNode.type === 'tabarray' && Array.isArray(value)) {
-      value = value[index];
+    if (this.layoutNode.type === 'tabarray' && Array.isArray(values)) {
+      value = values[index];
+    } else {
+      value = values;
     }
-    return parseText(text, value, this.formSettings.formGroup.value, index);
+    return parseText(text, value, values, index);
   }
 }

@@ -1,11 +1,6 @@
 import { Component, Input, OnChanges, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
-import {
-  buildFormGroup, buildFormGroupTemplate, getControl, JsonPointer,
-  toGenericPointer, toIndexedPointer
-} from '../utilities/index';
-
 @Component({
   selector: 'add-reference-widget',
   template: `
@@ -44,7 +39,7 @@ export class AddReferenceComponent implements OnInit, OnChanges {
   }
 
   private updateControl() {
-    const maxItems = this.layoutNode.options.maxItems || 1000000;
+    const maxItems = this.options.maxItems || 1000000;
     if (this.layoutNode.arrayItem && this.itemCount >= maxItems) {
       this.showAddButton = false;
     }

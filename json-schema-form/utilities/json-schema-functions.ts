@@ -10,9 +10,9 @@ import * as _ from 'lodash';
 import * as Immutable from 'immutable';
 
 import {
-  buildFormGroupTemplate, forEach, hasOwn, inArray, isDefined,
-  hasValue, isString, isFunction, isObject, isArray, JsonPointer,
-  JsonValidators, mergeFilteredObject, Pointer, SchemaType,
+  forEach, hasOwn, inArray, hasValue, isString, isFunction, isObject, isArray,
+  JsonPointer, JsonValidators, mergeFilteredObject, Pointer, SchemaType,
+  toGenericPointer,
 } from './index';
 
 /**
@@ -145,6 +145,37 @@ export function getSchemaReference(
 }
 
 /**
+ * 'removeCircularReferences' function
+ *
+ * Checks a data pointer against a map of circular references and converts
+ * it to a pointer to the shallowest equivalent location.
+ *
+ * @param  {string} reference -
+ * @param  {Map<string, string>} dataCircularRefMap -
+ * @return {string} -
+ */
+export function removeCircularReferences(
+  thisPointer: string, formSettings: any
+): string {
+  const dataCircularRefMap: Map<string, string> = formSettings.dataCircularRefMap;
+  const arrayMap: Map<string, number> = formSettings.arrayMap;
+  let possibleReferences = true;
+  thisPointer = toGenericPointer(thisPointer, arrayMap);
+  while (possibleReferences) {
+    possibleReferences = false;
+    dataCircularRefMap.forEach((subPointer, superPointer) => {
+      if (thisPointer.slice(0, superPointer.length) === superPointer) {
+        thisPointer = toGenericPointer(
+          subPointer + thisPointer.slice(superPointer.length), arrayMap
+        );
+        possibleReferences = true;
+      }
+    });
+  }
+  return thisPointer;
+}
+
+/**
  * 'getInputType' function
  *
  * @param {any} schema
@@ -162,58 +193,60 @@ export function getInputType(schema: any, layoutNode: any = null): string {
   ]);
   if (isString(controlType)) return checkInlineType(controlType, schema, layoutNode);
   let schemaType = schema.type;
-  if (isArray(schemaType)) { // If multiple types listed, use most inclusive type
-    if (inArray('object', schemaType) && hasOwn(schema, 'properties')) {
-      schemaType = 'object';
-    } else if (inArray('array', schemaType) && hasOwn(schema, 'items')) {
-      schemaType = 'array';
-    } else if (inArray('string', schemaType)) {
-      schemaType = 'string';
-    } else if (inArray('number', schemaType)) {
-      schemaType = 'number';
-    } else if (inArray('integer', schemaType)) {
-      schemaType = 'integer';
-    } else if (inArray('boolean', schemaType)) {
-      schemaType = 'boolean';
-    } else {
-      schemaType = 'null';
+  if (schemaType) {
+    if (isArray(schemaType)) { // If multiple types listed, use most inclusive type
+      if (inArray('object', schemaType) && hasOwn(schema, 'properties')) {
+        schemaType = 'object';
+      } else if (inArray('array', schemaType) && hasOwn(schema, 'items')) {
+        schemaType = 'array';
+      } else if (inArray('string', schemaType)) {
+        schemaType = 'string';
+      } else if (inArray('number', schemaType)) {
+        schemaType = 'number';
+      } else if (inArray('integer', schemaType)) {
+        schemaType = 'integer';
+      } else if (inArray('boolean', schemaType)) {
+        schemaType = 'boolean';
+      } else {
+        schemaType = 'null';
+      }
     }
-  }
-  if (schemaType === 'boolean') return 'checkbox';
-  if (schemaType === 'object') {
-    if (hasOwn(schema, 'properties')) return 'fieldset';
-    if (hasOwn(schema, '$ref') ||
+    if (schemaType === 'boolean') return 'checkbox';
+    if (schemaType === 'object') {
+      if (hasOwn(schema, 'properties')) return 'fieldset';
+      if (hasOwn(schema, '$ref') ||
       JsonPointer.has(schema, '/additionalProperties/$ref')) return '$ref';
-    return null; // return 'textarea'; (?)
-  }
-  if (schemaType === 'array') {
-    let itemsObject = JsonPointer.getFirst([
-      [schema, '/items'],
-      [schema, '/additionalItems']
-    ]);
-    if (!itemsObject) return null;
-    if (hasOwn(itemsObject, 'enum')) {
-      return checkInlineType('checkboxes', schema, layoutNode);
-    } else {
-      return 'array';
+      return null; // return 'textarea'; (?)
     }
-  }
-  if (schemaType === 'null') return 'hidden';
-  if (hasOwn(schema, 'enum')) return 'select';
-  if (schemaType === 'number' || schemaType === 'integer') {
-    if (hasOwn(schema, 'maximum') && hasOwn(schema, 'minimum') &&
+    if (schemaType === 'array') {
+      let itemsObject = JsonPointer.getFirst([
+        [schema, '/items'],
+        [schema, '/additionalItems']
+      ]);
+      if (!itemsObject) return null;
+      if (hasOwn(itemsObject, 'enum')) {
+        return checkInlineType('checkboxes', schema, layoutNode);
+      } else {
+        return 'array';
+      }
+    }
+    if (schemaType === 'null') return 'hidden';
+    if (hasOwn(schema, 'enum')) return 'select';
+    if (schemaType === 'number' || schemaType === 'integer') {
+      if (hasOwn(schema, 'maximum') && hasOwn(schema, 'minimum') &&
       (schemaType === 'integer' || hasOwn(schema, 'multipleOf'))) return 'range';
-    return schemaType;
-  }
-  if (schemaType === 'string') {
-    if (hasOwn(schema, 'format')) {
-      if (schema.format === 'color') return 'color';
-      if (schema.format === 'date') return 'date';
-      if (schema.format === 'date-time') return 'datetime-local';
-      if (schema.format === 'email') return 'email';
-      if (schema.format === 'uri') return 'url';
+      return schemaType;
     }
-    return 'text';
+    if (schemaType === 'string') {
+      if (hasOwn(schema, 'format')) {
+        if (schema.format === 'color') return 'color';
+        if (schema.format === 'date') return 'date';
+        if (schema.format === 'date-time') return 'datetime-local';
+        if (schema.format === 'email') return 'email';
+        if (schema.format === 'uri') return 'url';
+      }
+      return 'text';
+    }
   }
   if (hasOwn(schema, '$ref')) return '$ref';
   return 'text';
@@ -321,32 +354,37 @@ export function updateInputOptions(layoutNode: any, schema: any, formSettings: a
   let newOptions: any = {};
   const fixUiKeys = (key) => key.slice(0, 3) === 'ui:' ? key.slice(3) : key;
   mergeFilteredObject(newOptions, formSettings.globalOptions.formDefaults,
-    [], false, fixUiKeys);
+    [], fixUiKeys);
   if (JsonPointer.has(schema, '/items/enum')) newOptions.enum = schema.items.enum;
   if (JsonPointer.has(schema, '/items/titleMap')) newOptions.enum = schema.items.titleMap;
-  mergeFilteredObject(newOptions, JsonPointer.get(schema, ['ui:widget', 'options']),
-    [], false, fixUiKeys);
-  // JsonPointer.remove(schema, ['ui:widget', 'options']);
-  mergeFilteredObject(newOptions, JsonPointer.get(schema, ['ui:widget']),
-    [], false, fixUiKeys);
-  // JsonPointer.remove(schema, ['ui:widget']);
-  mergeFilteredObject(newOptions, schema,
-    ['properties', 'items', 'required', 'type', 'x-schema-form'], false, fixUiKeys);
-  mergeFilteredObject(newOptions, JsonPointer.get(schema, ['x-schema-form', 'options']),
-    [], false, fixUiKeys);
-  mergeFilteredObject(newOptions, JsonPointer.get(schema, ['x-schema-form']),
-    ['items', 'options'], false, fixUiKeys);
-  // JsonPointer.remove(schema, ['x-schema-form']);
+  mergeFilteredObject(newOptions, JsonPointer.get(schema, '/ui:widget/options'),
+    [], fixUiKeys);
+  mergeFilteredObject(newOptions, JsonPointer.get(schema, '/ui:widget'),
+    [], fixUiKeys);
+  mergeFilteredObject(newOptions, schema, ['properties', 'items', 'required',
+    'type', 'x-schema-form', '$ref'], fixUiKeys);
+  mergeFilteredObject(newOptions, JsonPointer.get(schema, '/x-schema-form/options'),
+    [], fixUiKeys);
+  mergeFilteredObject(newOptions, JsonPointer.get(schema, '/x-schema-form'),
+    ['items', 'options'], fixUiKeys);
   mergeFilteredObject(newOptions, layoutNode, ['arrayItem', 'dataPointer',
     'dataType', 'items', 'layoutPointer', 'listItems', 'name', 'options',
-    'tupleItems', 'type', 'widget'],
-    false, fixUiKeys);
-  mergeFilteredObject(newOptions, layoutNode.options, [], false, fixUiKeys);
+    'tupleItems', 'type', 'widget', '$ref'], fixUiKeys);
+  mergeFilteredObject(newOptions, layoutNode.options, [], fixUiKeys);
   layoutNode.options = newOptions;
 
   // If schema type is integer, enforce by setting multipleOf = 1
   if (schema.type === 'integer' && !hasValue(layoutNode.options.multipleOf)) {
     layoutNode.options.multipleOf = 1;
+  }
+
+  // Copy any typeahead word lists to options.typeahead.source
+  if (JsonPointer.has(newOptions, '/autocomplete/source')) {
+    newOptions.typeahead = newOptions.autocomplete;
+  } else if (JsonPointer.has(newOptions, '/tagsinput/source')) {
+    newOptions.typeahead = newOptions.tagsinput;
+  } else if (JsonPointer.has(newOptions, '/tagsinput/typeahead/source')) {
+    newOptions.typeahead = newOptions.tagsinput.typeahead;
   }
 
   // If field value is set in layoutNode, and no input data, update template value

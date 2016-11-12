@@ -18,6 +18,7 @@ import { buildTitleMap } from '../utilities/index';
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.required]="options?.required"
         [class]="options?.fieldHtmlClass"
+        [disabled]="controlDisabled"
         [id]="layoutNode?.dataPointer"
         [name]="controlName"
         (input)="updateValue($event)">
@@ -31,6 +32,7 @@ export class SelectComponent implements OnInit {
   private formControl: AbstractControl;
   private controlName: string;
   private controlValue: any;
+  private controlDisabled: boolean = false;
   private boundControl: boolean = false;
   private options: any;
   private selectList: any[] = [];

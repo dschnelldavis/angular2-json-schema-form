@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { copy, isEmpty, isObject, isArray, isMap } from './index';
+import { copy, hasOwn, isDefined, isEmpty, isObject, isArray, isMap } from './index';
 
 /**
  * 'JsonPointer' class
@@ -27,22 +27,30 @@ export class JsonPointer {
    *
    * @param {object} object - Object to get value from
    * @param {Pointer} pointer - JSON Pointer (string or array)
+   * @param {number = 0} startSlice - Zero-based index of first Pointer key to use
+   * @param {number} endSlice - Zero-based index of last Pointer key to use
    * @param {boolean = false} getBoolean - Return only true or false?
    * @param {boolean = true} errors - Show error if not found?
    * @return {object} - Located value (or true or false if getBoolean = true)
    */
   static get(
-    object: any, pointer: Pointer, getBoolean: boolean = false, errors: boolean = false
+    object: any, pointer: Pointer, startSlice: number = 0,
+    endSlice: number = null, getBoolean: boolean = false, errors: boolean = false
   ): any {
-    let subObject = object;
+    if (object === null) return getBoolean ? false : undefined;
     let keyArray: any[] = this.parse(pointer);
-    if (keyArray !== null) {
+    if (typeof object === 'object' && keyArray !== null) {
+      let subObject = object;
+      if (startSlice >= keyArray.length || endSlice <= -keyArray.length) return object;
+      if (startSlice <= -keyArray.length) startSlice = 0;
+      if (!isDefined(endSlice) || endSlice >= keyArray.length) endSlice = keyArray.length;
+      keyArray = keyArray.slice(startSlice, endSlice);
       for (let key of keyArray) {
         if (key === '-' && isArray(subObject) && subObject.length) {
           key = subObject.length - 1;
         }
         if (typeof subObject === 'object' && subObject !== null &&
-          subObject.hasOwnProperty(key)
+          hasOwn(subObject, key)
         ) {
           subObject = subObject[key];
         } else if (isMap(subObject) && subObject.has(key)) {
@@ -56,7 +64,11 @@ export class JsonPointer {
       }
       return getBoolean ? true : subObject;
     }
-    if (errors) console.error('get error: Invalid JSON Pointer: ' + pointer);
+    if (errors && keyArray === null) console.error('get error: Invalid JSON Pointer: ' + pointer);
+    if (errors && typeof object !== 'object') {
+      console.error('get error: Invalid object:=');
+      console.error(object);
+    }
     return getBoolean ? false : undefined;
   }
 
@@ -75,7 +87,7 @@ export class JsonPointer {
     if (isArray(items)) {
       for (let item of items) {
         if (isEmpty(item)) continue;
-        if (isArray(item) && item.length === 2) {
+        if (isArray(item) && item.length >= 2) {
           if (isEmpty(item[0]) || isEmpty(item[1])) continue;
           const value: any = this.get(item[0], item[1]);
           if (value) return value;
@@ -125,7 +137,7 @@ export class JsonPointer {
         if (isMap(subObject) && subObject.has(key)) {
           subObject = subObject.get(key);
         } else {
-          if (!(subObject.hasOwnProperty(key))) {
+          if (!hasOwn(subObject, key)) {
             subObject[key] = (keyArray[i + 1].match(/^(\d+|-)$/)) ? [] : {};
           }
           subObject = subObject[key];
@@ -175,7 +187,7 @@ export class JsonPointer {
           subObject.set(key, copy(subObject.get(key)));
           subObject = subObject.get(key);
         } else {
-          if (!(subObject.hasOwnProperty(key))) {
+          if (!hasOwn(subObject, key)) {
             subObject[key] = (keyArray[i + 1].match(/^(\d+|-)$/)) ? [] : {};
           }
           subObject[key] = copy(subObject[key]);
@@ -260,7 +272,7 @@ export class JsonPointer {
    * @return {boolean}
    */
   static has(object: any, pointer: Pointer): boolean {
-    return this.get(object, pointer, true);
+    return this.get(object, pointer, 0, null, true);
   }
 
   /**

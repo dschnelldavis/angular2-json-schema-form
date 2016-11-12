@@ -39,7 +39,7 @@ import {
  * @return {any[]}
  */
 export function buildLayout(formSettings: any): any[] {
-  let hasSubmitButton = !formSettings.addSubmit;
+  let hasSubmitButton = !JsonPointer.get(formSettings, '/globalOptions/addSubmit');
   let formLayout =
     mapLayout(formSettings.layout, (layoutItem, index, layoutPointer) => {
 
@@ -104,8 +104,9 @@ export function buildLayout(formSettings: any): any[] {
 
     if (hasOwn(newNode, 'dataPointer')) {
       if (newNode.dataPointer === '*') {
-        return buildLayoutFromSchema(formSettings, currentIndex,
-          newNode.layoutPointer.slice(0, -2));
+        return buildLayoutFromSchema(
+          formSettings, newNode.layoutPointer.slice(0, -2)
+        );
       }
       newNode.dataPointer =
         toGenericPointer(newNode.dataPointer, formSettings.arrayMap);
@@ -113,10 +114,13 @@ export function buildLayout(formSettings: any): any[] {
       if (isString(LastKey) && LastKey !== '-') newNode.name = LastKey;
       if (!formSettings.dataMap.has(newNode.dataPointer)) {
         formSettings.dataMap.set(newNode.dataPointer, new Map);
-      };
-      if (formSettings.dataMap.get(newNode.dataPointer).has('schemaPointer')) {
-        itemSchema = JsonPointer.get(formSettings.schema,
-          formSettings.dataMap.get(newNode.dataPointer).get('schemaPointer'));
+      } else if (
+        formSettings.dataMap.get(newNode.dataPointer).has('schemaPointer')
+      ) {
+        itemSchema = JsonPointer.get(
+          formSettings.schema,
+          formSettings.dataMap.get(newNode.dataPointer).get('schemaPointer')
+        );
       } else {
         itemSchema = getFromSchema(formSettings.schema, newNode.dataPointer);
       }
@@ -164,6 +168,7 @@ export function buildLayout(formSettings: any): any[] {
         // TODO: create item in FormGroup model from layout key (?)
         updateInputOptions(newNode, {}, formSettings);
       }
+
       newNode.widget = widgetLibrary.getWidget(newNode.type);
       formSettings.dataMap.get(newNode.dataPointer).set('inputType', newNode.type);
       formSettings.dataMap.get(newNode.dataPointer).set('widget', newNode.widget);
@@ -251,18 +256,23 @@ export function buildLayout(formSettings: any): any[] {
                 .push(_.cloneDeep(formSettings.layoutRefLibrary[arrayPointer]));
             }
           }
-          let buttonText: string = 'Add ';
+          let buttonText: string = 'Add';
           if (newNode.options.title) {
-            buttonText += newNode.options.title;
+            buttonText += ' ' + newNode.options.title;
           } else if (newNode.name) {
-            buttonText += toTitleCase(newNode.name.replace(/_/g, ' '));
+            buttonText += ' ' + toTitleCase(newNode.name.replace(/_/g, ' '));
           // If newNode doesn't have a title, look for title of parent array item
-          } else if (formSettings.schema.title) {
-            buttonText += 'to ' + formSettings.schema.title;
+          } else {
+            const parentSchema =
+              getFromSchema(formSettings.schema, newNode.dataPointer, true);
+            if (hasOwn(parentSchema, 'title')) {
+              buttonText += ' to ' + parentSchema.title;
+            }
           }
+          const dataPointer = toGenericPointer(arrayPointer, formSettings.arrayMap);
           let newNodeRef: any = {
             arrayItem: true,
-            dataPointer: toGenericPointer(arrayPointer, formSettings.arrayMap),
+            dataPointer: dataPointer,
             layoutPointer: newNode.layoutPointer + '/items/-',
             listItems: newNode.listItems,
             options: {
@@ -273,7 +283,7 @@ export function buildLayout(formSettings: any): any[] {
             tupleItems: newNode.tupleItems,
             type: '$ref',
             widget: widgetLibrary.getWidget('$ref'),
-            '$refType': 'array',
+            $ref: dataPointer,
           };
           if (isDefined(newNode.options.maxItems)) {
             newNodeRef.options.maxItems = newNode.options.maxItems;
@@ -293,10 +303,17 @@ export function buildLayout(formSettings: any): any[] {
       newNode.widget = widgetLibrary.getWidget(newNode.type);
       updateInputOptions(newNode, {}, formSettings);
     }
+    if (newNode.type === 'submit') hasSubmitButton = true;
     return newNode;
   });
   if (!hasSubmitButton) {
-    formLayout.push(buildLayout({ type: 'submit', title: 'Submit' }));
+    formLayout.push({
+      options: {
+        title: 'Submit',
+      },
+      type: 'submit',
+      widget: widgetLibrary.getWidget('submit'),
+    });
   }
   return formLayout;
 }
@@ -304,18 +321,22 @@ export function buildLayout(formSettings: any): any[] {
 /**
  * 'buildLayoutFromSchema' function
  *
- * @param {any} formSettings
- * @param {number = 0} layoutIndex
- * @param {string = ''} layoutPointer
- * @param {string = ''} schemaPointer
- * @param {string = ''} dataPointer
+ * @param {any} formSettings -
+ * @param {number = 0} layoutIndex -
+ * @param {string = ''} layoutPointer -
+ * @param {string = ''} schemaPointer -
+ * @param {string = ''} dataPointer -
+ * @param {boolean = false} arrayItem -
+ * @param {string = null} arrayItemType -
+ * @param {boolean = null} removable -
+ * @param {boolean = true} forRefLibrary -
  * @return {any}
  */
 export function buildLayoutFromSchema(
-  formSettings: any, layoutIndex: number = 0, layoutPointer: string = '',
+  formSettings: any, layoutPointer: string = '',
   schemaPointer: string = '', dataPointer: string = '',
   arrayItem: boolean = false, arrayItemType: string = null,
-  removable: boolean = null
+  removable: boolean = null, forRefLibrary: boolean = false
 ): any {
   const schema = JsonPointer.get(formSettings.schema, schemaPointer);
   if (!hasOwn(schema, 'type') && !hasOwn(schema, 'x-schema-form') &&
@@ -323,10 +344,10 @@ export function buildLayoutFromSchema(
   let newNode: any = { options: {} };
   newNode.dataPointer = toGenericPointer(dataPointer, formSettings.arrayMap);
   newNode.layoutPointer = layoutPointer.replace(/\/\d+/g, '/-');
-  const newName = JsonPointer.toKey(newNode.dataPointer);
-  if (newName !== '-') newNode.name = newName;
+  const lastDataKey = JsonPointer.toKey(newNode.dataPointer);
+  if (lastDataKey !== '-') newNode.name = lastDataKey;
   newNode.type = getInputType(schema);
-  newNode.dataType = schema.type;
+  newNode.dataType = schema.type || (hasOwn(schema, '$ref') ? '$ref' : null);
   newNode.arrayItem = arrayItem;
   if (newNode.arrayItem) {
     newNode.options.arrayItemType = arrayItemType;
@@ -349,7 +370,6 @@ export function buildLayoutFromSchema(
   }
   if (newNode.dataType === 'object') {
     let newFieldset: any[] = [];
-    let index: number = dataPointer === '' ? layoutIndex : 0;
     let newKeys: string[];
     let subObject: string = 'properties';
     if (hasOwn(schema, 'properties')) {
@@ -361,13 +381,18 @@ export function buildLayoutFromSchema(
     }
     for (let key of newKeys) {
       if (hasOwn(schema[subObject], key)) {
-        const newLayoutPointer = newNode.layoutPointer === '' ?
-          '/-'  : newNode.layoutPointer + '/items/-';
+        let newLayoutPointer: string;
+        if (newNode.layoutPointer === '' && !forRefLibrary) {
+          newLayoutPointer = '/-';
+        } else {
+          newLayoutPointer = newNode.layoutPointer + '/items/-';
+        }
         let innerItem = buildLayoutFromSchema(
-          formSettings, index,
+          formSettings,
           newLayoutPointer,
           schemaPointer + '/properties/' + key,
-          dataPointer + '/' + key, false
+          dataPointer + '/' + key,
+          false, null, null, forRefLibrary
         );
         if (innerItem) {
           if (isInputRequired(schema, '/' + key)) {
@@ -375,11 +400,10 @@ export function buildLayoutFromSchema(
             formSettings.fieldsRequired = true;
           }
           newFieldset.push(innerItem);
-          index++;
         }
       }
     }
-    if (dataPointer === '') {
+    if (dataPointer === '' && !forRefLibrary) {
       newNode = newFieldset;
     } else {
       newNode.items = newFieldset;
@@ -387,10 +411,12 @@ export function buildLayoutFromSchema(
   } else if (newNode.dataType === 'array') {
     newNode.items = [];
     let templateArray: any[] = [];
-    const templateControl: any =
-      getControl(formSettings.formGroupTemplate, dataPointer);
-    if (hasOwn(templateControl, 'controls')) {
-      templateArray = templateControl['controls'];
+    if (!forRefLibrary) {
+      const templateControl: any =
+        getControl(formSettings.formGroupTemplate, dataPointer);
+      if (hasOwn(templateControl, 'controls')) {
+        templateArray = templateControl['controls'];
+      }
     }
     if (!newNode.minItems && isInputRequired(formSettings.schema, schemaPointer)) {
       newNode.minItems = 1;
@@ -403,7 +429,7 @@ export function buildLayoutFromSchema(
       removable = true;
     }
     let additionalItems: any = null;
-    if (isArray(schema.items)) {
+    if (isArray(schema.items)) { // 'items' is an array = tuple items
       newNode.tupleItems = schema.items.length;
       if (hasOwn(schema, 'additionalItems')) {
         newNode.listItems = hasOwn(schema, 'maxItems') ?
@@ -413,66 +439,69 @@ export function buildLayoutFromSchema(
       }
       newNode.items = _.filter(_.map(schema.items, (item: any, i) => {
         return buildLayoutFromSchema(
-          formSettings, i,
+          formSettings,
           newNode.layoutPointer + '/items/-',
           schemaPointer + '/items/' + i,
           dataPointer + '/' + i,
-          true, 'tuple', removable && i >= minItems
+          true, 'tuple', removable && i >= minItems, forRefLibrary
         );
       }));
       if (newNode.items.length < maxItems &&
-        hasOwn(schema, 'additionalItems') && schema.additionalItems !== false
-      ) {
+        hasOwn(schema, 'additionalItems') && isObject(schema.additionalItems)
+      ) { // 'additionalItems' is an object = additional list items
         if (newNode.items.length < templateArray.length) {
           for (let i = newNode.items.length, l = templateArray.length; i < l; i++) {
             newNode.items.push(buildLayoutFromSchema(
-              formSettings, i,
+              formSettings,
               newNode.layoutPointer + '/items/-',
               schemaPointer + '/additionalItems',
               dataPointer + '/' + i,
-              true, 'list', removable && i >= minItems
+              true, 'list', removable && i >= minItems, forRefLibrary
             ));
           }
         } else if (newNode.items.length > templateArray.length) {
           for (let i = templateArray.length, l = newNode.items.length; i < l; i++) {
             templateArray.push(buildFormGroupTemplate(
-              formSettings,
+              formSettings, null, false,
               schemaPointer + '/additionalItems',
               dataPointer + '/' + i,
-              toControlPointer(formSettings.formGroupTemplate, dataPointer + '/' + i),
-              false, null
+              toControlPointer(formSettings.formGroupTemplate, dataPointer + '/' + i)
             ));
           }
         }
-        if (newNode.items.length < maxItems && newNode.options.addable !== false) {
+        if (newNode.items.length < maxItems && newNode.options.addable !== false &&
+          JsonPointer.get(newNode.items[newNode.items.length - 1], '/type') !== '$ref'
+        ) {
           additionalItems = buildLayoutFromSchema(
-            formSettings, -1,
+            formSettings,
             newNode.layoutPointer + '/items/-',
             schemaPointer + '/additionalItems',
             dataPointer + '/-',
-            true, 'list', removable
+            true, 'list', removable, forRefLibrary
           );
         }
       }
-    } else {
+    } else { // 'items' is an object = list items only (no tuple items)
       newNode.tupleItems = false;
       newNode.listItems = schema.maxItems || true;
       for (let i = 0, l = Math.max(templateArray.length, minItems, 1); i < l; i++) {
         newNode.items.push(buildLayoutFromSchema(
-          formSettings, i,
+          formSettings,
           newNode.layoutPointer + '/items/-',
           schemaPointer + '/items',
           dataPointer + '/' + i,
-          true, 'list', removable && i >= minItems
+          true, 'list', removable && i >= minItems, forRefLibrary
         ));
       }
-      if (newNode.items.length < maxItems && newNode.options.addable !== false) {
+      if (newNode.items.length < maxItems && newNode.options.addable !== false &&
+        JsonPointer.get(newNode.items[newNode.items.length - 1], '/type') !== '$ref'
+      ) {
         additionalItems = buildLayoutFromSchema(
-          formSettings, -1,
+          formSettings,
           newNode.layoutPointer + '/items/-',
           schemaPointer + '/items',
           dataPointer + '/-',
-          true, 'list', removable
+          true, 'list', removable, forRefLibrary
         );
       }
     }
@@ -492,25 +521,96 @@ export function buildLayoutFromSchema(
           toTitleCase(JsonPointer.toKey(dataPointer).replace(/_/g, ' '));
       }
       let newNodeRef: any = {
-         arrayItem: true,
-         dataPointer: dataPointer + '/-',
-         layoutPointer: newNode.layoutPointer + '/items/-',
-         listItems: newNode.listItems,
-         name: '-',
-         options: {
-           arrayItemType: 'list',
-           removable: false,
-           title: buttonText,
-         },
-         tupleItems: newNode.tupleItems,
-         type: '$ref',
-         widget: widgetLibrary.getWidget('$ref'),
-         '$refType': 'array',
-       };
+        arrayItem: true,
+        dataPointer: dataPointer + '/-',
+        layoutPointer: newNode.layoutPointer + '/items/-',
+        listItems: newNode.listItems,
+        options: {
+          arrayItemType: 'list',
+          removable: false,
+          title: buttonText,
+        },
+        tupleItems: newNode.tupleItems,
+        type: '$ref',
+        widget: widgetLibrary.getWidget('$ref'),
+        $ref: dataPointer + '/-',
+      };
       if (isDefined(newNode.options.maxItems)) {
         newNodeRef.options.maxItems = newNode.options.maxItems;
       }
       newNode.items.push(newNodeRef);
+    } else if (
+      JsonPointer.get(newNode.items[newNode.items.length - 1], '/type') === '$ref'
+    ) {
+      Object.assign(newNode.items[newNode.items.length - 1], {
+        listItems: newNode.listItems,
+        tupleItems: newNode.tupleItems,
+      });
+      if (
+        isNumber(JsonPointer.get(formSettings.schema, schemaPointer, 0, -1).maxItems)
+      ) {
+        newNode.items[newNode.items.length - 1].options.maxItems =
+          JsonPointer.get(formSettings.schema, schemaPointer, 0, -1).maxItems;
+      }
+    }
+  } else if (newNode.dataType === '$ref') {
+    let buttonText: string = 'Add';
+    if (newNode.options.title) {
+      buttonText += ' ' + newNode.options.title;
+    } else if (newNode.name) {
+      buttonText += ' ' + toTitleCase(newNode.name.replace(/_/g, ' '));
+    // If newNode doesn't have a title, look for title of parent array item
+    } else if (
+      hasOwn(JsonPointer.get(formSettings.schema, schemaPointer, 0, -1), 'title')
+    ) {
+      buttonText += ' to ' +
+        JsonPointer.get(formSettings.schema, schemaPointer, 0, -1).title;
+    }
+    Object.assign(newNode, {
+      circularReference: true,
+      widget: widgetLibrary.getWidget('$ref'),
+      $ref: schema.$ref,
+    });
+    Object.assign(newNode.options, {
+      removable: false,
+      title: buttonText,
+    });
+    if (isNumber(JsonPointer.get(formSettings.schema, schemaPointer, 0, -1).maxItems)) {
+      newNode.options.maxItems =
+        JsonPointer.get(formSettings.schema, schemaPointer, 0, -1).maxItems;
+    }
+
+    // Build dataCircularRefMap
+    if (!forRefLibrary) {
+      // Temporary entry with schema $ref
+      formSettings.dataCircularRefMap.set(schema.$ref, newNode.dataPointer);
+    } else if (formSettings.dataCircularRefMap.has(schema.$ref) &&
+      !formSettings.dataCircularRefMap.has(formSettings.dataCircularRefMap.get(schema.$ref))
+    ) {
+      // If temporary entry already exists, map current and previous dataPointers
+      if (newNode.dataPointer === formSettings.dataCircularRefMap
+        .get(schema.$ref).slice(-newNode.dataPointer.length)
+      ) {
+        formSettings.dataCircularRefMap.set(
+          formSettings.dataCircularRefMap.get(schema.$ref),
+          formSettings.dataCircularRefMap.get(schema.$ref).slice(0, -newNode.dataPointer.length)
+        );
+      } else {
+        formSettings.dataCircularRefMap.set(
+          formSettings.dataCircularRefMap.get(schema.ref) + newNode.dataPointer,
+          formSettings.dataCircularRefMap.get(schema.$ref)
+        );
+      }
+    }
+
+    // Add layout template to layoutRefLibrary
+    if (!hasOwn(formSettings.layoutRefLibrary, schema.$ref)) {
+      // Set to null first to prevent circular reference from causing endless loop
+      formSettings.layoutRefLibrary[schema.$ref] = null;
+      formSettings.layoutRefLibrary[schema.$ref] = buildLayoutFromSchema(
+        formSettings, '', JsonPointer.compile(schema.$ref), '',
+        newNode.arrayItem, newNode.arrayItemType, true, true
+      );
     }
   }
   return newNode;
@@ -582,8 +682,8 @@ export function mapLayout(
  */
 export function buildTitleMap(
   titleMap: any, enumList: any, fieldRequired: boolean = true
-): { name: string, value: any}[] {
-  let newTitleMap: { name: string, value: any}[] = [];
+): { name: string, value: any }[] {
+  let newTitleMap: { name: string, value: any }[] = [];
   let hasEmptyValue: boolean = false;
   if (titleMap) {
     if (isArray(titleMap)) {

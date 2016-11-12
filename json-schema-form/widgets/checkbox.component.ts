@@ -10,10 +10,13 @@ import { AbstractControl } from '@angular/forms';
       <input
         [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
         [checked]="isChecked ? 'checked' : null"
-        [class]="options?.fieldHtmlClass"
+        [class]="options?.fieldHtmlClass + (isChecked ?
+          (' ' + options?.activeClass + ' ' + options?.style?.selected) :
+          (' ' + options?.style?.unselected))"
+        [disabled]="controlDisabled"
         [id]="layoutNode?.dataPointer"
         [name]="controlName"
-        [readonly]="options?.readonly ? 'readonly' : false"
+        [readonly]="options?.readonly ? 'readonly' : null"
         [value]="controlValue"
         type="checkbox">
       <span *ngIf="options?.title"
@@ -25,6 +28,7 @@ export class CheckboxComponent implements OnInit {
   private formControl: AbstractControl;
   private controlName: string;
   private controlValue: any;
+  private controlDisabled: boolean = false;
   private boundControl: boolean = false;
   private options: any;
   @Input() layoutNode: any;

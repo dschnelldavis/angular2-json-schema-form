@@ -7,9 +7,10 @@ import { AbstractControl } from '@angular/forms';
     <div
       [class]="options?.htmlClass">
       <button
+        [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
         [class]="options?.fieldHtmlClass"
-        [disabled]="options?.readonly"
+        [disabled]="controlDisabled"
         [name]="controlName"
         [type]="layoutNode?.type"
         [value]="controlValue"
@@ -24,6 +25,7 @@ export class ButtonComponent implements OnInit {
   private formControl: AbstractControl;
   private controlName: string;
   private controlValue: any;
+  private controlDisabled: boolean = false;
   private boundControl: boolean = false;
   private options: any;
   @Input() layoutNode: any;

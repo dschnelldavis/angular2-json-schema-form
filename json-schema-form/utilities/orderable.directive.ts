@@ -76,10 +76,10 @@ export class OrderableDirective implements OnInit {
    *
    * dragenter: add 'drag-target-...' class to element
    * dragleave: remove 'drag-target-...' class from element
-   * drop: remove 'drag-target-...' class from element, and move array item
+   * drop: remove 'drag-target-...' class from element, move dropped array item
    */
   @HostListener('dragenter', ['$event']) onDragEnter(event) {
-    // Part 1 of a hack, inspired by dragster, to simulate mouseover and mouseout
+    // Part 1 of a hack, inspired by Dragster, to simulate mouseover and mouseout
     // behavior while dragging items - http://bensmithett.github.io/dragster/
     if (this.overParentElement) return this.overChildElement = true;
     this.overParentElement = true;

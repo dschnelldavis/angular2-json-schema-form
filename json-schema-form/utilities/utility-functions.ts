@@ -26,7 +26,10 @@ import {
  * @param {string | string[] | Set<string>} newClasses
  * @return {string | string[] | Set<string>} - Combined classes
  */
-export function addClasses(oldClasses, newClasses) {
+export function addClasses(
+  oldClasses: string | string[] | Set<string>,
+  newClasses: string | string[] | Set<string>
+): string | string[] | Set<string> {
   const badType = i => !isSet(i) && !isArray(i) && !isString(i);
   if (badType(newClasses)) return oldClasses;
   if (badType(oldClasses)) oldClasses = '';
@@ -171,8 +174,8 @@ export function inArray(
  * @param {string} property - the property to look for
  * @return {boolean} - true if object has property, false if not
  */
-export function hasOwn(object: PlainObject, property: string): boolean {
-  if (typeof object !== 'object') return false;
+export function hasOwn(object: any, property: string): boolean {
+  if (!isObject(object) && !isArray(object)) return false;
   return object.hasOwnProperty(property);
 }
 
@@ -182,26 +185,25 @@ export function hasOwn(object: PlainObject, property: string): boolean {
  * Shallowly merges two objects, setting key and values from source object
  * in target object, excluding specified keys.
  *
+ * Optionally, it can also use functions to transform the key names and/or
+ * the values of the merging object.
+ *
  * @param {PlainObject} targetObject - Target object to add keys and values to
  * @param {PlainObject} sourceObject - Source object to copy keys and values from
  * @param {string[]} excludeKeys - Array of keys to exclude
- * @param {boolean = false} deleteCopiedKeys - Delete copied keys from source?
  * @param {(string) => string = (k) => k} keyFn - Function to apply to keys
  * @param {(any) => any = (v) => v} valueFn - Function to apply to values
  * @return {PlainObject} - Returns targetObject
  */
 export function mergeFilteredObject(
-  targetObject: PlainObject, sourceObject: PlainObject,
-  excludeKeys: string[] = [], deleteCopiedKeys: boolean = false,
-  keyFn: (string) => string = (k) => k,
-  valueFn: (any) => any = (v) => v
+  targetObject: PlainObject, sourceObject: PlainObject, excludeKeys: any[] = [],
+  keyFn: (string) => string = (k) => k, valueFn: (any) => any = (v) => v
 ): PlainObject {
   if (!isObject(sourceObject)) return targetObject;
   if (!isObject(targetObject)) targetObject = {};
   for (let key of Object.keys(sourceObject)) {
     if (!inArray(key, excludeKeys) && isDefined(sourceObject[key])) {
       targetObject[keyFn(key)] = valueFn(sourceObject[key]);
-      if (deleteCopiedKeys) delete sourceObject[key];
     }
   }
   return targetObject;

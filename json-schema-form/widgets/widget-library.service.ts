@@ -98,12 +98,15 @@ export class WidgetLibraryService {
     'template': TemplateComponent, // Insert a custom Angular 2 component
 
   // Widgets included for compatibility with JSON Form API
-    'tagsinput': InputComponent, // For entering short text tags
-    // See: http://ulion.github.io/jsonform/playground/?example=fields-checkboxbuttons
     'advancedfieldset': FieldsetComponent, // Adds 'Advanced settings' title
     'authfieldset': FieldsetComponent, // Adds 'Authentication settings' title
-    'selectfieldset': FieldsetComponent, // Select control, displays selected array sub-item
-    'optionfieldset': FieldsetComponent, // Option control, displays selected array sub-item
+    'optionfieldset': FieldsetComponent, // Option control, displays selected sub-item
+    'selectfieldset': FieldsetComponent, // Select control, displays selected sub-item
+    'section': SectionComponent, // Just a div
+    'conditional': SectionComponent, // Identical to 'section' (depeciated)
+    'actions': SectionComponent, // Horizontal button list, can only submit, uses buttons as items
+    'tagsinput': SectionComponent, // For entering short text tags
+    // See: http://ulion.github.io/jsonform/playground/?example=fields-checkboxbuttons
 
   // Widgets included for compatibility with React JSON Schema Form API
     'updown': NumberComponent,
@@ -111,15 +114,10 @@ export class WidgetLibraryService {
     'alt-datetime': InputComponent,
     'alt-date': InputComponent,
 
-  // Widgets included for compatibility with Angular Schema Form API
-    'actions': SectionComponent, // Horizontal button list, can only submit, uses buttons as items
-    'section': SectionComponent, // Just a div
-    'conditional': SectionComponent, // Identical to 'section' (depeciated)
-
   // Widgets included for compatibility with Angular 2 Schema Form API
     'wizard': SectionComponent, // Sequential panels with "Next" and "Previous" buttons
 
-  // Recommended 3rd-party add-on widgets
+  // Recommended 3rd-party add-on widgets (TODO: add wrappers for these...)
     // 'ng2-select': Select control replacement - http://valor-software.com/ng2-select/
     // 'pikaday': Pikaday date picker - https://github.com/dbushell/Pikaday
     // 'spectrum': Spectrum color picker - http://bgrins.github.io/spectrum

@@ -184,18 +184,19 @@ export class Bootstrap3Component implements OnInit, OnChanges {
   }
 
   private updateArrayItems() {
-    if (this.formSettings && this.layoutNode.arrayItem) {
+    if (this.formSettings && this.layoutNode.arrayItem && this.options.removable) {
       const arrayIndex = this.dataIndex[this.dataIndex.length - 1];
-      const arrayPointer = JsonPointer.parse(this.layoutPointer).slice(0, -2);
-      const parentArray = JsonPointer.get(this.formSettings.layout, arrayPointer);
-      const minItems = parentArray.minItems || 0;
-      const lastArrayItem = parentArray.items.length - 2;
-      const tupleItems = parentArray.tupleItems;
-      if (this.options.type !== '$ref' && this.options.removable &&
-        arrayIndex >= minItems &&
-        (arrayIndex >= tupleItems || arrayIndex === lastArrayItem)
-      ) {
-        this.options.removable = true;
+      const parentArray =
+        JsonPointer.get(this.formSettings.layout, this.layoutPointer, 0, -2);
+      if (parentArray) {
+        const minItems = parentArray.minItems || 0;
+        const lastArrayItem = parentArray.items.length - 2;
+        const tupleItems = parentArray.tupleItems;
+        if (arrayIndex >= minItems && this.options.type !== '$ref' &&
+          (arrayIndex >= tupleItems || arrayIndex === lastArrayItem)
+        ) {
+          this.options.removable = true;
+        }
       }
     }
   }
@@ -220,9 +221,16 @@ export class Bootstrap3Component implements OnInit, OnChanges {
           toTitleCase(this.layoutNode.name) : null
         );
         this.widgetOptions.title = null;
-        return parseText(thisTitle, this.formControl.value,
-          this.formSettings.formGroup.value,
-          this.dataIndex[this.dataIndex.length - 1]);
+        if (!thisTitle) return null;
+        if (thisTitle.indexOf('{') === -1 || !this.formControl || !this.dataIndex) {
+          return thisTitle;
+        }
+        return parseText(
+          thisTitle,
+          this.formSettings.getControlValue(this),
+          this.formSettings.getControlGroup(this).value,
+          this.dataIndex[this.dataIndex.length - 1]
+        );
     }
   }
 

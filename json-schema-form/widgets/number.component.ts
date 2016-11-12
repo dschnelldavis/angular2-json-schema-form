@@ -20,29 +20,32 @@ import { getControl, inArray, isDefined } from '../utilities/index';
         [attr.placeholder]="options?.placeholder"
         [attr.required]="options?.required"
         [attr.readonly]="options?.readonly ? 'readonly' : null"
-        [attr.step]="step"
+        [attr.step]="options?.multipleOf || options?.step || 'any'"
         [class]="options?.fieldHtmlClass"
+        [disabled]="controlDisabled"
         [id]="layoutNode?.dataPointer"
         [name]="controlName"
+        [readonly]="options?.readonly ? 'readonly' : null"
         [title]="lastValidNumber"
         [type]="layoutNode?.type === 'range' ? 'range' : 'number'"
         [value]="controlValue"
         (input)="updateValue($event)"
         (keydown)="validateInput($event)"
         (keyup)="validateNumber($event)">
+        {{layoutNode?.type === 'range' ? controlValue : ''}}
     </div>`,
 })
 export class NumberComponent implements OnInit {
   private formControl: AbstractControl;
   private controlName: string;
   private controlValue: any;
+  private controlDisabled: boolean = false;
   private boundControl: boolean = false;
   private options: any;
   private allowNegative: boolean = true;
   private allowDecimal: boolean = true;
   private allowExponents: boolean = false;
   private lastValidNumber: string = '';
-  private step: string;
   @Input() layoutNode: any;
   @Input() formSettings: any;
   @Input() layoutIndex: number[];
@@ -51,6 +54,7 @@ export class NumberComponent implements OnInit {
   ngOnInit() {
     this.options = this.layoutNode.options;
     this.formSettings.initializeControl(this);
+    if (this.layoutNode.dataType === 'integer') this.allowDecimal = false;
   }
 
   private updateValue(event) {
@@ -78,7 +82,8 @@ export class NumberComponent implements OnInit {
     } else if (this.allowNegative && event.key === '-' && val.indexOf('-') === -1) {
       return true;
     }
-    // TODO: Display feedback for rejected keystroke, clear on next valid keystroke
+    // TODO: Display feedback for rejected keystroke,
+    // and clear feedback on next valid keystroke
     return false;
   }
 

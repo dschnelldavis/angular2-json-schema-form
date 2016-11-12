@@ -28,7 +28,7 @@ import { inArray, xor } from './index';
  * Note: 'IValidatorFn' is short for 'invertable validator function',
  *   which is a validator functions that accepts an optional second
  *   argument which, if set to TRUE, causes the validator to perform
- *   the opposite of its original finction.
+ *   the opposite of its original function.
  */
 
 export type SchemaPrimitiveType =
@@ -40,7 +40,7 @@ export type JavaScriptPrimitiveType =
 export type JavaScriptType =
   'string' | 'number' | 'boolean' | 'null' | 'undefined' | 'object' | 'array' |
   'map' | 'set' | 'arguments' | 'date' | 'error' | 'function' | 'json' |
-  'math' | 'regexp'
+  'math' | 'regexp' // Note: this list is incomplete
 export type PrimitiveValue = string | number | boolean | null | undefined;
 export type PlainObject = { [k: string]: any };
 
@@ -397,8 +397,8 @@ export function toJavaScriptType(
  * Converts an input (probably string) value to the "best" JavaScript
  * equivalent available from an allowed list of JSON Schema types, which may
  * contain 'string', 'number', 'integer', 'boolean', and/or 'null'.
- * If necssary, does progressively agressive type coersion.
- * Will not return null unless null is in the list of allowed types.
+ * If necssary, it does progressively agressive type coersion.
+ * It will not return null unless null is in the list of allowed types.
  *
  * Number conversion examples:
  * toSchemaType('10', ['number','integer','string']) = 10 // integer

@@ -4,13 +4,14 @@ import { AbstractControl } from '@angular/forms';
 @Component({
   selector: 'submit-widget',
   template: `
-    <div *ngIf="boundControl"
+    <div
       [class]="options?.htmlClass">
       <input
         [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.required]="options?.required"
         [class]="options?.fieldHtmlClass"
+        [disabled]="controlDisabled"
         [id]="layoutNode?.dataPointer"
         [name]="controlName"
         [type]="layoutNode?.type"
@@ -22,6 +23,7 @@ export class SubmitComponent implements OnInit {
   private formControl: AbstractControl;
   private controlName: string;
   private controlValue: any;
+  private controlDisabled: boolean = false;
   private boundControl: boolean = false;
   private options: any;
   @Input() layoutNode: any;
