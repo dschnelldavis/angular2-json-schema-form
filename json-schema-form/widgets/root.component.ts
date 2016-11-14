@@ -5,19 +5,17 @@ import { Component, Input } from '@angular/core';
   selector: 'root-widget',
   template: `
     <div *ngFor="let layoutItem of layout; let i = index; trackBy: item?.dataPointer"
-      [layoutNode]="layoutItem"
-      [formSettings]="formSettings"
       [dataIndex]="(dataIndex || []).concat(i)"
       [layoutIndex]="(layoutIndex || []).concat(i)"
+      [layoutNode]="layoutItem"
       [orderable]="isOrderable !== false && layoutItem?.type !== '$ref' &&
         layoutItem?.arrayItem && layoutItem?.options?.arrayItemType === 'list'">
       <!-- && (layout[layout.length - 1].tupleItems || 0 < (layout.length - 2)) -->
 
       <select-framework-widget
-        [layoutNode]="layoutItem"
-        [formSettings]="formSettings"
         [dataIndex]="layoutItem?.arrayItem ? (dataIndex || []).concat(i) : (dataIndex || [])"
-        [layoutIndex]="(layoutIndex || []).concat(i)"></select-framework-widget>
+        [layoutIndex]="(layoutIndex || []).concat(i)"
+        [layoutNode]="layoutItem"></select-framework-widget>
 
     </div>`,
   styles: [`
@@ -35,9 +33,8 @@ import { Component, Input } from '@angular/core';
 })
 export class RootComponent {
   private options: any;
-  @Input() layout: any;
-  @Input() formSettings: any;
-  @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
+  @Input() layoutIndex: number[];
+  @Input() layout: any[];
   @Input() isOrderable: boolean;
 }

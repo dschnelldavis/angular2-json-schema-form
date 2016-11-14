@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 
+import { JsonSchemaFormService } from '../json-schema-form.service';
 import { buildTitleMap } from '../utilities/index';
 
 @Component({
@@ -37,9 +38,12 @@ export class SelectComponent implements OnInit {
   private options: any;
   private selectList: any[] = [];
   @Input() layoutNode: any;
-  @Input() formSettings: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
+
+  constructor(
+    private jsf: JsonSchemaFormService
+  ) { }
 
   ngOnInit() {
     this.options = this.layoutNode.options;
@@ -48,10 +52,10 @@ export class SelectComponent implements OnInit {
       this.options.enum,
       !!this.options.required
     );
-    this.formSettings.initializeControl(this);
+    this.jsf.initializeControl(this);
   }
 
   private updateValue(event) {
-    this.formSettings.updateValue(this, event);
+    this.jsf.updateValue(this, event);
   }
 }

@@ -38,7 +38,7 @@
   <strong *ngIf="options?.title && options?.required"
     class="text-danger">*</strong>
   <p *ngIf="layoutNode?.type === 'submit' &&
-    formSettings?.globalOptions?.fieldsRequired">
+    jsf?.globalOptions?.fieldsRequired">
     <strong class="text-danger">*</strong> = required fields
   </p>
   <div [class.input-group]="options?.fieldAddonLeft || options?.fieldAddonRight">
@@ -48,7 +48,6 @@
 
     <select-widget-widget
       [layoutNode]="layoutNode"
-      [formSettings]="formSettings"
       [dataIndex]="dataIndex"
       [layoutIndex]="layoutIndex"></select-widget-widget>
 

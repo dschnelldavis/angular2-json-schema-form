@@ -1,25 +1,29 @@
-import { BrowserModule } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
+import { JsonSchemaFormService } from './json-schema-form.service';
 
 import { frameworkList } from './frameworks/index';
 import { widgetList } from './widgets/index';
 const widgetsAndFrameworks = [].concat(widgetList).concat(frameworkList);
 
-import { OrderableDirective } from './utilities/index';
-import { JsonSchemaFormComponent } from './json-schema-form.component';
-const allComponents = [
-  JsonSchemaFormComponent, OrderableDirective
-].concat(widgetsAndFrameworks);
+import { FrameworkLibraryService } from './frameworks/framework-library.service';
+import { WidgetLibraryService } from './widgets/widget-library.service';
 
-import { FrameworkLibraryService } from './frameworks/index';
-import { WidgetLibraryService } from './widgets/index';
+import { OrderableDirective } from './orderable.directive';
+import { JsonSchemaFormComponent } from './json-schema-form.component';
+const allComponents = widgetsAndFrameworks.concat([
+  JsonSchemaFormComponent, OrderableDirective
+]);
 
 @NgModule({
-  imports: [ BrowserModule, FormsModule, ReactiveFormsModule ],
+  imports: [ CommonModule, FormsModule, ReactiveFormsModule ],
   declarations: allComponents,
   entryComponents: widgetsAndFrameworks,
-  exports: allComponents,
-  providers: [ WidgetLibraryService, FrameworkLibraryService ]
+  exports: [ JsonSchemaFormComponent ],
+  providers: [
+    FrameworkLibraryService, WidgetLibraryService, JsonSchemaFormService
+  ],
 })
 export class JsonSchemaFormModule { }

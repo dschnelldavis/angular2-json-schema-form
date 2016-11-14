@@ -1,6 +1,8 @@
 import { Component, Input, OnChanges, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
+import { JsonSchemaFormService } from '../json-schema-form.service';
+
 @Component({
   selector: 'add-reference-widget',
   template: `
@@ -17,9 +19,12 @@ export class AddReferenceComponent implements OnInit, OnChanges {
   private itemCount: number;
   private showAddButton: boolean = true;
   @Input() layoutNode: any;
-  @Input() formSettings: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
+
+  constructor(
+    private jsf: JsonSchemaFormService
+  ) { }
 
   ngOnInit() {
     this.options = this.layoutNode.options;
@@ -34,7 +39,7 @@ export class AddReferenceComponent implements OnInit, OnChanges {
   private addItem(event) {
     event.preventDefault();
     this.itemCount = this.layoutIndex[this.layoutIndex.length - 1] + 1;
-    this.formSettings.addItem(this);
+    this.jsf.addItem(this);
     this.updateControl();
   }
 

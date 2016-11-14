@@ -2,6 +2,7 @@ import {
   ChangeDetectorRef, Component, Input, OnChanges, OnInit
 } from '@angular/core';
 
+import { JsonSchemaFormService } from '../json-schema-form.service';
 import {
   addClasses, inArray, JsonPointer, parseText, toTitleCase
 } from '../utilities/index';
@@ -20,12 +21,12 @@ export class Bootstrap3Component implements OnInit, OnChanges {
   private formControl: any = null;
   private debugOutput: any = '';
   @Input() layoutNode: any;
-  @Input() formSettings: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
 
   constructor(
-    public changeDetector: ChangeDetectorRef
+    public changeDetector: ChangeDetectorRef,
+    private jsf: JsonSchemaFormService
   ) { }
 
   ngOnInit() {
@@ -38,11 +39,11 @@ export class Bootstrap3Component implements OnInit, OnChanges {
   }
 
   private initializeControl() {
-    if (this.layoutNode && this.formSettings) {
+    if (this.layoutNode) {
       this.options = Object.assign({}, this.layoutNode.options);
       this.widgetOptions = this.layoutNode.options;
-      this.layoutPointer = this.formSettings.getLayoutPointer(this);
-      this.formControl = this.formSettings.getControl(this);
+      this.layoutPointer = this.jsf.getLayoutPointer(this);
+      this.formControl = this.jsf.getControl(this);
       this.updateArrayItems();
 
       this.options.isInputWidget = inArray(this.layoutNode.type, [
@@ -174,8 +175,8 @@ export class Bootstrap3Component implements OnInit, OnChanges {
 
         if (this.options.debug) {
           let vars: any[] = [];
-          // vars.push(this.formSettings.formGroup.value[this.options.name]);
-          // vars.push(this.formSettings.formGroup.controls[this.options.name]['errors']);
+          // vars.push(this.jsf.formGroup.value[this.options.name]);
+          // vars.push(this.jsf.formGroup.controls[this.options.name]['errors']);
           this.debugOutput = _.map(vars, thisVar => JSON.stringify(thisVar, null, 2)).join('\n');
         }
       }
@@ -184,10 +185,10 @@ export class Bootstrap3Component implements OnInit, OnChanges {
   }
 
   private updateArrayItems() {
-    if (this.formSettings && this.layoutNode.arrayItem && this.options.removable) {
+    if (this.jsf && this.layoutNode.arrayItem && this.options.removable) {
       const arrayIndex = this.dataIndex[this.dataIndex.length - 1];
       const parentArray =
-        JsonPointer.get(this.formSettings.layout, this.layoutPointer, 0, -2);
+        JsonPointer.get(this.jsf.layout, this.layoutPointer, 0, -2);
       if (parentArray) {
         const minItems = parentArray.minItems || 0;
         const lastArrayItem = parentArray.items.length - 2;
@@ -227,14 +228,14 @@ export class Bootstrap3Component implements OnInit, OnChanges {
         }
         return parseText(
           thisTitle,
-          this.formSettings.getControlValue(this),
-          this.formSettings.getControlGroup(this).value,
+          this.jsf.getControlValue(this),
+          this.jsf.getControlGroup(this).value,
           this.dataIndex[this.dataIndex.length - 1]
         );
     }
   }
 
   private removeItem() {
-    this.formSettings.removeItem(this);
+    this.jsf.removeItem(this);
   }
 }

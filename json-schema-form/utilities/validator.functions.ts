@@ -1,10 +1,6 @@
 import { AbstractControl } from '@angular/forms';
 import { toPromise } from 'rxjs/operator/toPromise';
 
-import * as Immutable from 'immutable';
-
-import { inArray, xor } from './index';
-
 /**
  * Validator utility function library:
  *
@@ -20,6 +16,9 @@ import { inArray, xor } from './index';
  *
  * Multiple type checking and fixing:
  *   getType, isType, isPrimitive, toJavaScriptType, toSchemaType, _convertToPromise
+ *
+ * Utility functions:
+ *   inArray, xor
  *
  * Typescript types and interfaces:
  *   SchemaPrimitiveType, SchemaType, JavaScriptPrimitiveType, JavaScriptType,
@@ -512,4 +511,47 @@ export function isPromise(object: any): object is Promise<any> {
  */
 export function _convertToPromise(object: any): Promise<any> {
   return isPromise(object) ? object : toPromise.call(object);
+}
+
+/**
+ * 'inArray' function
+ *
+ * Searches an array for an item, or one of a list of items, and returns true
+ * as soon as a match is found, or false if no match.
+ *
+ * If the optional third parameter allIn is set to TRUE, and the item to find
+ * is an array, then the function returns true only if all elements from item
+ * are found in the list, and false if any element is not found. If the item to
+ * find is not an array, setting allIn to TRUE has no effect.
+ *
+ * @param {any|any[]} item - the item to search for
+ * @param {any[]} array - the array to search
+ * @param {boolean = false} allIn - if TRUE, all items must be in array
+ * @return {boolean} - true if item(s) in array, false otherwise
+ */
+export function inArray(
+  item: any|any[], array: any[], allIn: boolean = false
+): boolean {
+  if (!isDefined(item) || !isArray(array)) return false;
+  if (isArray(item)) {
+    for (let subItem of item) {
+      if (xor(array.indexOf(subItem) !== -1, allIn)) return !allIn;
+    }
+    return allIn;
+  } else {
+    return array.indexOf(item) !== -1;
+  }
+}
+
+/**
+ * 'xor' utility function - exclusive or
+ *
+ * Returns true if exactly one of two values is truthy.
+ *
+ * @param {any} value1 - first value to check
+ * @param {any} value2 - second value to check
+ * @return {boolean} - true if exactly one input value is truthy, false if not
+ */
+export function xor(value1: any, value2: any): boolean {
+  return (!!value1 && !value2) || (!value1 && !!value2);
 }

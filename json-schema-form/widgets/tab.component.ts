@@ -1,24 +1,27 @@
 import { Component, Input, OnInit } from '@angular/core';
 
+import { JsonSchemaFormService } from '../json-schema-form.service';
+
 @Component({
   selector: 'tab-widget',
   template: `
     <div
       [class]="options?.htmlClass">
-      <root-widget *ngIf="expanded"
+      <root-widget
         [layout]="layoutNode.items"
-        [formSettings]="formSettings"
         [dataIndex]="dataIndex"
-        [layoutIndex]="layoutIndex"
-        [isOrderable]="options?.orderable"></root-widget>
+        [layoutIndex]="layoutIndex"></root-widget>
     </div>`,
 })
 export class TabComponent implements OnInit {
   private options: any;
   @Input() layoutNode: any;
-  @Input() formSettings: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
+
+  constructor(
+    private jsf: JsonSchemaFormService
+  ) { }
 
   ngOnInit() {
     this.options = this.layoutNode.options;

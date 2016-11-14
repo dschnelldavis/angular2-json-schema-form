@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 
+import { JsonSchemaFormService } from '../json-schema-form.service';
 import { getControl, inArray, isDefined } from '../utilities/index';
 
 @Component({
@@ -47,18 +48,21 @@ export class NumberComponent implements OnInit {
   private allowExponents: boolean = false;
   private lastValidNumber: string = '';
   @Input() layoutNode: any;
-  @Input() formSettings: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
 
+  constructor(
+    private jsf: JsonSchemaFormService
+  ) { }
+
   ngOnInit() {
     this.options = this.layoutNode.options;
-    this.formSettings.initializeControl(this);
+    this.jsf.initializeControl(this);
     if (this.layoutNode.dataType === 'integer') this.allowDecimal = false;
   }
 
   private updateValue(event) {
-    this.formSettings.updateValue(this, event);
+    this.jsf.updateValue(this, event);
   }
 
   private validateInput(event) {
@@ -97,7 +101,7 @@ export class NumberComponent implements OnInit {
       this.lastValidNumber = val;
     } else {
       // TODO: Display feedback for rejected key
-      this.formSettings.getControl(this).setValue(this.lastValidNumber);
+      this.jsf.getControl(this).setValue(this.lastValidNumber);
     }
   }
 }

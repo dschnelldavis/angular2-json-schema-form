@@ -3,6 +3,8 @@ import {
   OnChanges, OnInit, ViewChild, ViewContainerRef
 } from '@angular/core';
 
+import { JsonSchemaFormService } from '../json-schema-form.service';
+
 @Component({
   moduleId: module.id,
   selector: 'select-framework-widget',
@@ -11,7 +13,6 @@ import {
 export class SelectFrameworkComponent implements OnChanges, OnInit {
   private newComponent: ComponentRef<any> = null;
   @Input() layoutNode: any;
-  @Input() formSettings: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
   @ViewChild('widgetContainer', { read: ViewContainerRef })
@@ -19,6 +20,7 @@ export class SelectFrameworkComponent implements OnChanges, OnInit {
 
   constructor(
     private componentFactory: ComponentFactoryResolver,
+    private jsf: JsonSchemaFormService
   ) { }
 
   ngOnInit() {
@@ -30,13 +32,13 @@ export class SelectFrameworkComponent implements OnChanges, OnInit {
   }
 
   private updateComponent() {
-    if (!this.newComponent && this.formSettings.framework) {
+    if (!this.newComponent && this.jsf.framework) {
       this.newComponent = this.widgetContainer.createComponent(
-        this.componentFactory.resolveComponentFactory(this.formSettings.framework)
+        this.componentFactory.resolveComponentFactory(this.jsf.framework)
       );
     }
     if (this.newComponent) {
-      for (let input of ['layoutNode', 'formSettings', 'layoutIndex', 'dataIndex']) {
+      for (let input of ['layoutNode', 'layoutIndex', 'dataIndex']) {
         this.newComponent.instance[input] = this[input];
       }
     }

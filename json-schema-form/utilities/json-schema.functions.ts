@@ -7,13 +7,13 @@ import { toPromise } from 'rxjs/operator/toPromise';
 import 'rxjs/add/operator/map';
 
 import * as _ from 'lodash';
-import * as Immutable from 'immutable';
 
 import {
-  forEach, hasOwn, inArray, hasValue, isString, isFunction, isObject, isArray,
-  JsonPointer, JsonValidators, mergeFilteredObject, Pointer, SchemaType,
-  toGenericPointer,
-} from './index';
+  inArray, hasValue, isString, isFunction, isObject, isArray, SchemaType
+} from './validator.functions';
+import { forEach, hasOwn, mergeFilteredObject } from './utility.functions';
+import { JsonPointer, Pointer } from './jsonpointer.functions';
+import { JsonValidators } from './json.validators';
 
 /**
  * JSON Schema function library:
@@ -147,25 +147,30 @@ export function getSchemaReference(
 /**
  * 'removeCircularReferences' function
  *
- * Checks a data pointer against a map of circular references and converts
- * it to a pointer to the shallowest equivalent location.
+ * Checks a JSON Pointer against a map of circular references and returns
+ * a JSON Pointer to the shallowest equivalent location in the same object.
+ *
+ * Using this functions enables an object to be constructed with unlimited
+ * recursion, while maintaing a fixed set of metadata, such as field data types.
+ * The object can grow as large as it wants, and deeply recursed nodes can
+ * just refer to the metadata for their shallow equivalents, instead of having
+ * to add additional redundant metadata for each recursively added node.
  *
  * @param  {string} reference -
- * @param  {Map<string, string>} dataCircularRefMap -
+ * @param  {Map<string, string>} circularRefMap -
+ * @param  {Map<string, number>} arrayMap -
  * @return {string} -
  */
 export function removeCircularReferences(
-  thisPointer: string, formSettings: any
+  thisPointer: string, circularRefMap: Map<string, string>, arrayMap: Map<string, number>
 ): string {
-  const dataCircularRefMap: Map<string, string> = formSettings.dataCircularRefMap;
-  const arrayMap: Map<string, number> = formSettings.arrayMap;
   let possibleReferences = true;
-  thisPointer = toGenericPointer(thisPointer, arrayMap);
+  thisPointer = JsonPointer.toGenericPointer(thisPointer, arrayMap);
   while (possibleReferences) {
     possibleReferences = false;
-    dataCircularRefMap.forEach((subPointer, superPointer) => {
+    circularRefMap.forEach((subPointer, superPointer) => {
       if (thisPointer.slice(0, superPointer.length) === superPointer) {
-        thisPointer = toGenericPointer(
+        thisPointer = JsonPointer.toGenericPointer(
           subPointer + thisPointer.slice(superPointer.length), arrayMap
         );
         possibleReferences = true;
@@ -329,9 +334,9 @@ export function isInputRequired(schema: any, pointer: string): boolean {
  * @param {any} schema
  * @return {void}
  */
-export function updateInputOptions(layoutNode: any, schema: any, formSettings: any) {
+export function updateInputOptions(layoutNode: any, schema: any, jsf: any) {
   if (!isObject(layoutNode)) return;
-  const templatePointer = JsonPointer.get(formSettings,
+  const templatePointer = JsonPointer.get(jsf,
     ['dataMap', layoutNode.dataPointer, 'templatePointer']);
 
   // If a validator is available for a layout option,
@@ -344,8 +349,8 @@ export function updateInputOptions(layoutNode: any, schema: any, formSettings: a
       )
     )) {
       const validatorPointer = templatePointer + '/validators/' + option;
-      formSettings.formGroupTemplate = JsonPointer.set(
-        formSettings.formGroupTemplate, validatorPointer, [layoutNode[option]]
+      jsf.formGroupTemplate = JsonPointer.set(
+        jsf.formGroupTemplate, validatorPointer, [layoutNode[option]]
       );
     }
   });
@@ -353,7 +358,7 @@ export function updateInputOptions(layoutNode: any, schema: any, formSettings: a
   // Set all option values in layoutNode.options
   let newOptions: any = {};
   const fixUiKeys = (key) => key.slice(0, 3) === 'ui:' ? key.slice(3) : key;
-  mergeFilteredObject(newOptions, formSettings.globalOptions.formDefaults,
+  mergeFilteredObject(newOptions, jsf.globalOptions.formDefaults,
     [], fixUiKeys);
   if (JsonPointer.has(schema, '/items/enum')) newOptions.enum = schema.items.enum;
   if (JsonPointer.has(schema, '/items/titleMap')) newOptions.enum = schema.items.titleMap;
@@ -390,16 +395,16 @@ export function updateInputOptions(layoutNode: any, schema: any, formSettings: a
   // If field value is set in layoutNode, and no input data, update template value
   if (templatePointer && schema.type !== 'array' && schema.type !== 'object') {
     let layoutNodeValue: any = JsonPointer.getFirst([
-      [ formSettings.defaultValues, layoutNode.dataPointer ],
+      [ jsf.defaultValues, layoutNode.dataPointer ],
       [ layoutNode, '/value' ],
       [ layoutNode, '/default' ]
     ]);
     let templateValue: any = JsonPointer.get(
-      formSettings.formGroupTemplate, templatePointer + '/value/value'
+      jsf.formGroupTemplate, templatePointer + '/value/value'
     );
     if (hasValue(layoutNodeValue) && layoutNodeValue !== templateValue) {
-      formSettings.formGroupTemplate = JsonPointer.set(
-        formSettings.formGroupTemplate, templatePointer + '/value/value', layoutNodeValue
+      jsf.formGroupTemplate = JsonPointer.set(
+        jsf.formGroupTemplate, templatePointer + '/value/value', layoutNodeValue
       );
     }
     delete layoutNode.value;

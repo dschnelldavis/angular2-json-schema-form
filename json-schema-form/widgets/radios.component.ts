@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 
+import { JsonSchemaFormService } from '../json-schema-form.service';
 import { buildTitleMap } from '../utilities/index';
 
 @Component({
@@ -75,9 +76,12 @@ export class RadiosComponent implements OnInit {
   private layoutOrientation: string = 'vertical';
   private radiosList: any[] = [];
   @Input() layoutNode: any;
-  @Input() formSettings: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
+
+  constructor(
+    private jsf: JsonSchemaFormService
+  ) { }
 
   ngOnInit() {
     this.options = this.layoutNode.options;
@@ -90,10 +94,10 @@ export class RadiosComponent implements OnInit {
       this.options.titleMap || this.options.enumNames,
       this.options.enum, true
     );
-    this.formSettings.initializeControl(this);
+    this.jsf.initializeControl(this);
   }
 
   private updateValue(event) {
-    this.formSettings.updateValue(this, event);
+    this.jsf.updateValue(this, event);
   }
 }

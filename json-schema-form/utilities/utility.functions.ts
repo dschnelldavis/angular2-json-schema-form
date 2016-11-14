@@ -5,18 +5,16 @@ import { Http } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 
-import * as Immutable from 'immutable';
-
 import {
-  hasValue, isArray, isDefined, isObject, isEmpty, isMap, isSet,
-  isString, JsonPointer, PlainObject,
-} from './index';
+  hasValue, inArray, isArray, isDefined, isObject, isEmpty, isMap, isSet,
+  isString, PlainObject
+} from './validator.functions';
 
 /**
  * Utility function library:
  *
- * addClasses, copy, forEach, forEachCopy, hasOwn, inArray,
- * mergeFilteredObject, parseText, toTitleCase, xor
+ * addClasses, copy, forEach, forEachCopy, hasOwn,
+ * mergeFilteredObject, parseText, toTitleCase
 */
 
 /**
@@ -132,36 +130,6 @@ export function forEachCopy(
   } else {
     console.error('forEachCopy error: Input object must be an object or array.');
     console.error(object);
-  }
-}
-
-/**
- * 'inArray' function
- *
- * Searches an array for an item, or one of a list of items, and returns true
- * as soon as a match is found, or false if no match.
- *
- * If the optional third parameter allIn is set to TRUE, and the item to find
- * is an array, then the function returns true only if all elements from item
- * are found in the list, and false if any element is not found. If the item to
- * find is not an array, setting allIn to TRUE has no effect.
- *
- * @param {any|any[]} item - the item to search for
- * @param {any[]} array - the array to search
- * @param {boolean = false} allIn - if TRUE, all items must be in array
- * @return {boolean} - true if item(s) in array, false otherwise
- */
-export function inArray(
-  item: any|any[], array: any[], allIn: boolean = false
-): boolean {
-  if (!isDefined(item) || !isArray(array)) return false;
-  if (isArray(item)) {
-    for (let subItem of item) {
-      if (xor(array.indexOf(subItem) !== -1, allIn)) return !allIn;
-    }
-    return allIn;
-  } else {
-    return array.indexOf(item) !== -1;
   }
 }
 
@@ -293,16 +261,3 @@ export function toTitleCase(input: string, forceWords?: string|string[]): string
     }
   });
 };
-
-/**
- * 'xor' utility function - exclusive or
- *
- * Returns true if exactly one of two values is truthy.
- *
- * @param {any} value1 - first value to check
- * @param {any} value2 - second value to check
- * @return {boolean} - true if exactly one input value is truthy, false if not
- */
-export function xor(value1: any, value2: any): boolean {
-  return (!!value1 && !value2) || (!value1 && !!value2);
-}

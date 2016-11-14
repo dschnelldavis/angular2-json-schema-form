@@ -1,6 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 
+import { JsonSchemaFormService } from '../json-schema-form.service';
+
 @Component({
   selector: 'textarea-widget',
   template: `
@@ -35,16 +37,19 @@ export class TextareaComponent implements OnInit {
   private boundControl: boolean = false;
   private options: any;
   @Input() layoutNode: any;
-  @Input() formSettings: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
 
+  constructor(
+    private jsf: JsonSchemaFormService,
+  ) { }
+
   ngOnInit() {
     this.options = this.layoutNode.options;
-    this.formSettings.initializeControl(this);
+    this.jsf.initializeControl(this);
   }
 
   private updateValue(event) {
-    this.formSettings.updateValue(this, event);
+    this.jsf.updateValue(this, event);
   }
 }

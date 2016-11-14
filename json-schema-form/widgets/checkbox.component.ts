@@ -1,6 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 
+import { JsonSchemaFormService } from '../json-schema-form.service';
+
 @Component({
   selector: 'checkbox-widget',
   template: `
@@ -32,13 +34,16 @@ export class CheckboxComponent implements OnInit {
   private boundControl: boolean = false;
   private options: any;
   @Input() layoutNode: any;
-  @Input() formSettings: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
 
+  constructor(
+    private jsf: JsonSchemaFormService
+  ) { }
+
   ngOnInit() {
     this.options = this.layoutNode.options;
-    this.formSettings.initializeControl(this);
+    this.jsf.initializeControl(this);
     if (this.controlValue === null || this.controlValue === undefined) {
       this.controlValue = this.options.title;
     }
@@ -46,10 +51,10 @@ export class CheckboxComponent implements OnInit {
 
   private updateValue(event) {
     event.preventDefault;
-    this.formSettings.updateValue(this, event);
+    this.jsf.updateValue(this, event);
   }
 
   private get isChecked() {
-    return this.formSettings.getControlValue(this);
+    return this.jsf.getControlValue(this);
   }
 }

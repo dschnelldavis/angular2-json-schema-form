@@ -8,9 +8,9 @@ import { FieldsetComponent } from './fieldset.component';
 import { FileComponent } from './file.component';
 import { HiddenComponent } from './hidden.component';
 import { InputComponent } from './input.component';
+import { MessageComponent } from './message.component';
 import { NoneComponent } from './none.component';
 import { NumberComponent } from './number.component';
-import { MessageComponent } from './message.component';
 import { RadiosComponent } from './radios.component';
 import { RootComponent } from './root.component';
 import { SectionComponent } from './section.component';
@@ -130,18 +130,18 @@ export class WidgetLibraryService {
     // 'quill': Quill HTML / rich text editor (?) - https://quilljs.com
   };
 
-  public setDefaultWidget(type: string) {
+  public setDefaultWidget(type: string): boolean {
     if (!this.hasWidget(type)) return false;
     this.defaultWidget = type;
     return true;
   }
 
-  public hasWidget(type: string) {
+  public hasWidget(type: string): boolean {
     if (!type || typeof type !== 'string') return false;
     return this.widgets.hasOwnProperty(type);
   }
 
-  public registerWidget(type: string, widget: any) {
+  public registerWidget(type: string, widget: any): boolean {
     if (!type || !widget || typeof type !== 'string') return false;
     this.widgets[type] = widget;
     return true;

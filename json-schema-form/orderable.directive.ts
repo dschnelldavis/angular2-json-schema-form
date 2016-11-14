@@ -2,10 +2,11 @@ import {
   Directive, ElementRef, HostListener, Input, OnInit
 } from '@angular/core';
 
-import { JsonPointer } from './index';
+import { JsonSchemaFormService } from './json-schema-form.service';
+import { JsonPointer } from './utilities/index';
 
 @Directive({
-  selector: '[orderable]'
+  selector: '[orderable]',
 })
 export class OrderableDirective implements OnInit {
   private arrayPointer: string;
@@ -15,23 +16,21 @@ export class OrderableDirective implements OnInit {
   private overChildElement: boolean = false;
   @Input() orderable: boolean;
   @Input() layoutNode: any;
-  @Input() formSettings: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
 
   constructor(
-    private elementRef: ElementRef
+    private elementRef: ElementRef,
+    private jsf: JsonSchemaFormService
   ) { }
 
   ngOnInit() {
-    if (this.orderable && this.layoutNode && this.formSettings &&
-      this.layoutIndex && this.dataIndex
-    ) {
+    if (this.orderable && this.layoutNode && this.layoutIndex && this.dataIndex) {
       this.element = this.elementRef.nativeElement;
       this.element.draggable = true;
-      this.arrayPointer = JsonPointer.compile(JsonPointer.parse(
-        this.formSettings.getLayoutPointer(this)
-      ).slice(0, -1));
+      this.arrayPointer = JsonPointer.compile(
+        JsonPointer.parse(this.jsf.getLayoutPointer(this)).slice(0, -1)
+      );
       this.listen = true;
     }
   }
@@ -81,8 +80,11 @@ export class OrderableDirective implements OnInit {
   @HostListener('dragenter', ['$event']) onDragEnter(event) {
     // Part 1 of a hack, inspired by Dragster, to simulate mouseover and mouseout
     // behavior while dragging items - http://bensmithett.github.io/dragster/
-    if (this.overParentElement) return this.overChildElement = true;
-    this.overParentElement = true;
+    if (this.overParentElement) {
+      return this.overChildElement = true;
+    } else {
+      this.overParentElement = true;
+    }
 
     if (this.listen) {
       let sourceArrayIndex = sessionStorage.getItem(this.arrayPointer);
@@ -118,10 +120,8 @@ export class OrderableDirective implements OnInit {
       const sourceArrayIndex: number = +sessionStorage.getItem(this.arrayPointer);
       if (sourceArrayIndex !== this.dataIndex[this.dataIndex.length - 1]) {
         // Move array item
-        this.formSettings.moveArrayItem(
-          this,
-          sourceArrayIndex,
-          this.dataIndex[this.dataIndex.length - 1]
+        this.jsf.moveArrayItem(
+          this, sourceArrayIndex, this.dataIndex[this.dataIndex.length - 1]
         );
       }
       sessionStorage.removeItem(this.arrayPointer);

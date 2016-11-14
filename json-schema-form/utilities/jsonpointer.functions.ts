@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 
-import { copy, hasOwn, isDefined, isEmpty, isObject, isArray, isMap } from './index';
+import { isDefined, isEmpty, isObject, isArray, isMap } from './validator.functions';
+import { hasOwn, copy } from './utility.functions';
 
 /**
  * 'JsonPointer' class
@@ -10,7 +11,8 @@ import { copy, hasOwn, isDefined, isEmpty, isObject, isArray, isMap } from './in
  *
  * get, getFirst, set, setCopy, insert, insertCopy, remove, has, dict,
  * forEachDeep, forEachDeepCopy, escape, unescape, parse, compile, toKey,
- * isJsonPointer, isSubPointer, parseObjectPath
+ * isJsonPointer, isSubPointer, toIndexedPointer, toGenericPointer,
+ * toControlPointer, parseObjectPath
  *
  * Partly based on manuelstofer's json-pointer utilities
  * https://github.com/manuelstofer/json-pointer
@@ -326,7 +328,7 @@ export class JsonPointer {
       if (!bottomUp) fn(object, pointer, rootObject);
       if (isObject(object) || isArray(object)) {
         for (let key of Object.keys(object)) {
-          const newPointer: string = pointer + '/' + JsonPointer.escape(key);
+          const newPointer: string = pointer + '/' + this.escape(key);
           this.forEachDeep(object[key], fn, bottomUp, newPointer, rootObject);
         }
       }
@@ -358,7 +360,7 @@ export class JsonPointer {
         let newObject = Object.assign(isArray(object) ? [] : {}, object);
         if (!bottomUp) fn(newObject, pointer, rootObject);
         for (let key of Object.keys(newObject)) {
-          const newPointer: string = pointer + '/' + JsonPointer.escape(key);
+          const newPointer: string = pointer + '/' + this.escape(key);
           newObject[key] = this.forEachDeepCopy(object[key], fn, bottomUp, newPointer, rootObject);
         }
         if (bottomUp) fn(newObject, pointer, rootObject);
@@ -506,6 +508,120 @@ export class JsonPointer {
       if (shortArray[i] !== longArray[i]) return false;
     }
     return true;
+  }
+
+  /**
+   * 'toIndexedPointer' function
+   *
+   * Merges an array of numeric indexes and a generic pointer to create an
+   * indexed pointer for a specific item.
+   *
+   * For example, merging the generic pointer '/foo/-/bar/-/baz' and
+   * the array [4, 2] would result in the indexed pointer '/foo/4/bar/2/baz'
+   *
+   * @function
+   * @param {string | string[]} genericPointer - The generic pointer
+   * @param {number[]} indexArray - The array of numeric indexes
+   * @param {Map<string, number>} arrayMap - An optional array map
+   * @return {string} - The merged pointer with indexes
+  **/
+  static toIndexedPointer(
+    genericPointer: string, indexArray: number[], arrayMap: Map<string, number> = null
+  ) {
+    if (this.isJsonPointer(genericPointer) && isArray(indexArray)) {
+      if (isMap(arrayMap)) {
+        let arrayIndex: number = 0;
+        return genericPointer.replace(/\/\-(?=\/|$)/g, (key, stringIndex) => {
+          const subPointer = genericPointer.slice(0, stringIndex);
+          if (arrayMap.has(subPointer)) return '/' + indexArray[arrayIndex++];
+        });
+      } else {
+        let indexedPointer = genericPointer;
+        for (let pointerIndex of indexArray) {
+          indexedPointer = indexedPointer.replace('/-', '/' + pointerIndex);
+        }
+        return indexedPointer;
+      }
+    }
+    console.error('toIndexedPointer error: genericPointer must be ' +
+      'a JSON Pointer and indexArray must be an array.');
+    console.error(genericPointer);
+    console.error(indexArray);
+  };
+
+  /**
+   * 'toGenericPointer' function
+   *
+   * Compares an indexed pointer to an array map and removes list array
+   * indexes (but leaves tuple arrray indexes and all object keys, including
+   * numeric keys) to create a generic pointer.
+   *
+   * For example, comparing the indexed pointer '/foo/1/bar/2/baz/3' and
+   * the arrayMap [['/foo', 0], ['/foo/-/bar', 3], ['/foo/-/bar/2/baz', 0]]
+   * would result in the generic pointer '/foo/-/bar/2/baz/-'
+   *
+   * The structure of the arrayMap is: ['path to array', number of tuple items]
+   *
+   * @function
+   * @param {string} indexedPointer - The indexed pointer
+   * @param {Map<string, number>} arrayMap - The array map
+   * @return {string} - The merged pointer with indexes
+  **/
+  static toGenericPointer(
+    indexedPointer: string, arrayMap: Map<string, number>
+  ) {
+    if (this.isJsonPointer(indexedPointer) && isMap(arrayMap)) {
+      let pointerArray = this.parse(indexedPointer);
+      for (let i = 1, l = pointerArray.length; i < l; i++) {
+        const subPointer = this.compile(pointerArray.slice(0, i));
+        if (arrayMap.has(subPointer) && arrayMap.get(subPointer) <= +pointerArray[i]) {
+          pointerArray[i] = '-';
+        }
+      }
+      return this.compile(pointerArray);
+    }
+    console.error('toGenericPointer error: indexedPointer must be ' +
+      'a JSON Pointer and arrayMap must be a Map.');
+    console.error(indexedPointer);
+    console.error(arrayMap);
+  };
+
+  /**
+   * 'toControlPointer' function
+   *
+   * Accepts a JSON Pointer for a data object and returns a JSON Pointer for the
+   * matching control in an Angular 2 FormGroup.
+   *
+   * @param {FormGroup} formGroup - Angular 2 FormGroup to get value from
+   * @param {Pointer} dataPointer - JSON Pointer (string or array) to a data object
+   * @return {Pointer} - JSON Pointer (string) to the formGroup object
+   */
+  static toControlPointer(formGroup: any, dataPointer: Pointer): string {
+    const dataPointerArray: string[] = this.parse(dataPointer);
+    let controlPointerArray: string[] = [];
+    let subGroup = formGroup;
+    if (dataPointerArray !== null) {
+      for (let key of dataPointerArray) {
+        if (subGroup.hasOwnProperty('controls')) {
+          controlPointerArray.push('controls');
+          subGroup = subGroup.controls;
+        }
+        if (isArray(subGroup) && (key === '-')) {
+          controlPointerArray.push((subGroup.length - 1).toString());
+          subGroup = subGroup[subGroup.length - 1];
+        } else if (subGroup.hasOwnProperty(key)) {
+          controlPointerArray.push(key);
+          subGroup = subGroup[key];
+        } else {
+          console.error('toControlPointer error: Unable to find "' + key + '" item in FormGroup.');
+          console.error(dataPointer);
+          console.error(formGroup);
+          return;
+        }
+      }
+      return this.compile(controlPointerArray);
+    }
+    console.error('getControl error: Invalid JSON Pointer: ' + dataPointer);
   }
 
   /**

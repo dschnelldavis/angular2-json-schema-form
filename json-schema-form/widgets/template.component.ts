@@ -3,6 +3,8 @@ import {
   OnChanges, OnInit, ViewChild, ViewContainerRef
 } from '@angular/core';
 
+import { JsonSchemaFormService } from '../json-schema-form.service';
+
 @Component({
   moduleId: module.id,
   selector: 'template-widget',
@@ -11,7 +13,6 @@ import {
 export class TemplateComponent implements OnInit, OnChanges {
   private newComponent: ComponentRef<any> = null;
   @Input() layoutNode: any;
-  @Input() formSettings: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
   @ViewChild('widgetContainer', { read: ViewContainerRef })
@@ -19,6 +20,7 @@ export class TemplateComponent implements OnInit, OnChanges {
 
   constructor(
     private componentFactory: ComponentFactoryResolver,
+    private jsf: JsonSchemaFormService
   ) { }
 
   ngOnInit() {
@@ -36,7 +38,7 @@ export class TemplateComponent implements OnInit, OnChanges {
       );
     }
     if (this.newComponent) {
-      for (let input of ['layoutNode', 'formSettings', 'layoutIndex', 'dataIndex']) {
+      for (let input of ['layoutNode', 'layoutIndex', 'dataIndex']) {
         this.newComponent.instance[input] = this[input];
       }
     }

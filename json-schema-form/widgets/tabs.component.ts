@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 
+import { JsonSchemaFormService } from '../json-schema-form.service';
 import { JsonPointer, parseText } from '../utilities/index';
 
 @Component({
@@ -24,10 +25,9 @@ import { JsonPointer, parseText } from '../utilities/index';
 
       <select-framework-widget *ngIf="selectedItem === i"
         [class]="options?.fieldHtmlClass + ' ' + options?.activeClass + ' ' + options?.style?.selected"
-        [layoutNode]="layoutItem"
-        [formSettings]="formSettings"
         [dataIndex]="layoutNode?.dataType === 'array' ? dataIndex?.concat(i) : dataIndex"
-        [layoutIndex]="layoutIndex?.concat(i)"></select-framework-widget>
+        [layoutIndex]="layoutIndex?.concat(i)"
+        [layoutNode]="layoutItem"></select-framework-widget>
 
     </div>`,
   styles: [`a { cursor: pointer; }`],
@@ -38,9 +38,12 @@ export class TabsComponent implements OnInit {
   private selectedItem: number = 0;
   private showAddTab: boolean = true;
   @Input() layoutNode: any;
-  @Input() formSettings: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
+
+  constructor(
+    private jsf: JsonSchemaFormService
+  ) { }
 
   ngOnInit() {
     this.options = this.layoutNode.options;
@@ -51,9 +54,8 @@ export class TabsComponent implements OnInit {
   private select(index) {
     if (this.layoutNode.items[index].type === '$ref') {
       this.itemCount = this.layoutNode.items.length;
-      this.formSettings.addItem({
+      this.jsf.addItem({
         layoutNode: this.layoutNode.items[index],
-        formSettings: this.formSettings,
         layoutIndex: this.layoutIndex.concat(index),
         dataIndex: this.dataIndex.concat(index)
       });
@@ -76,7 +78,7 @@ export class TabsComponent implements OnInit {
   ): string {
     let text: string;
     let value: any;
-    let values: any = this.formSettings.getControlValue(this);
+    let values: any = this.jsf.getControlValue(this);
     if (this.layoutNode.type.slice(-5) === 'array' && item.type !== '$ref') {
       text = JsonPointer.getFirst([
         [item, '/options/legend'],

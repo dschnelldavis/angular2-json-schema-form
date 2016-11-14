@@ -31,7 +31,6 @@
       'dot':                       'npm:dot',
       'foreach':                   'npm:foreach',
       'ieee754':                   'npm:ieee754',
-      'immutable':                 'npm:immutable/dist/immutable.min.js',
       'isarray':                   'npm:isarray',
       'lodash':                    'npm:lodash',
       'validator':                 'npm:validator',

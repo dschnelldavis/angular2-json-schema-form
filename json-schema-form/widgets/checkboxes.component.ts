@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormArray, AbstractControl } from '@angular/forms';
 
+import { JsonSchemaFormService } from '../json-schema-form.service';
 import { buildFormGroup, buildTitleMap, JsonPointer } from '../utilities/index';
 
 @Component({
@@ -67,12 +68,15 @@ export class CheckboxesComponent implements OnInit {
   private boundControl: boolean = false;
   private options: any;
   private layoutOrientation: string = 'vertical';
-  private formArray: FormArray;
+  private formArray: AbstractControl;
   private checkboxList: any[] = [];
   @Input() layoutNode: any;
-  @Input() formSettings: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
+
+  constructor(
+    private jsf: JsonSchemaFormService
+  ) { }
 
   ngOnInit() {
     this.options = this.layoutNode.options;
@@ -81,13 +85,13 @@ export class CheckboxesComponent implements OnInit {
   ) {
     this.layoutOrientation = 'horizontal';
   }
-    this.formSettings.initializeControl(this);
+    this.jsf.initializeControl(this);
     this.checkboxList = buildTitleMap(
       this.options.titleMap || this.options.enumNames,
       this.options.enum, true
     );
     if (this.boundControl) {
-      this.formArray = this.formSettings.getControl(this);
+      this.formArray = this.jsf.getControl(this);
       for (let checkboxItem of this.checkboxList) {
         checkboxItem.checked = this.formArray.value.length ?
           this.formArray.value.indexOf(checkboxItem.value) !== -1 : false;
@@ -97,18 +101,20 @@ export class CheckboxesComponent implements OnInit {
 
   updateValue(event) {
     if (this.boundControl) {
-      const templateLibrary = this.formSettings.templateRefLibrary;
-      const dataPointer = this.layoutNode.dataPointer;
-      while (this.formArray.value.length) this.formArray.removeAt(0);
+      // Remove all existing items
+      while (this.formArray.value.length) (<FormArray>this.formArray).removeAt(0);
+      // Re-add an item for each checked box
       for (let checkboxItem of this.checkboxList) {
         if (event.target.value === checkboxItem.value) {
           checkboxItem.checked = event.target.checked;
         }
         if (checkboxItem.checked) {
           let newFormControl =
-            buildFormGroup(JsonPointer.get(templateLibrary, [dataPointer + '/-']));
+            buildFormGroup(JsonPointer.get(
+              this.jsf.templateRefLibrary, [this.layoutNode.dataPointer + '/-']
+            ));
           newFormControl.setValue(checkboxItem.value);
-          this.formArray.push(newFormControl);
+          (<FormArray>this.formArray).push(newFormControl);
         }
       }
     }

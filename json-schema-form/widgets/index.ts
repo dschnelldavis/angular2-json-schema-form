@@ -6,9 +6,9 @@ import { FieldsetComponent } from './fieldset.component';
 import { FileComponent } from './file.component';
 import { HiddenComponent } from './hidden.component';
 import { InputComponent } from './input.component';
+import { MessageComponent } from './message.component';
 import { NoneComponent } from './none.component';
 import { NumberComponent } from './number.component';
-import { MessageComponent } from './message.component';
 import { RadiosComponent } from './radios.component';
 import { RootComponent } from './root.component';
 import { SectionComponent } from './section.component';
@@ -21,12 +21,12 @@ import { TabsComponent } from './tabs.component';
 import { TemplateComponent } from './template.component';
 import { TextareaComponent } from './textarea.component';
 
-export { WidgetLibraryService } from './widget-library.service';
+// export { WidgetLibraryService } from './widget-library.service';
 
 export let widgetList: any[] = [
   AddReferenceComponent, ButtonComponent, CheckboxComponent,
   CheckboxesComponent, FieldsetComponent, FileComponent, HiddenComponent,
-  InputComponent, NoneComponent, NumberComponent, MessageComponent,
+  InputComponent, MessageComponent, NoneComponent, NumberComponent,
   RadiosComponent, RootComponent, SectionComponent, SelectComponent,
   SelectFrameworkComponent, SelectWidgetComponent, SubmitComponent,
   TabComponent, TabsComponent, TemplateComponent, TextareaComponent

@@ -3,17 +3,18 @@ import { Injectable } from '@angular/core';
 import { NoFrameworkComponent } from './no-framework.component';
 // No framework - just displays unmodified controls
 import { MaterialDesignComponent } from './material-design.component';
-// Uses https://github.com/angular/material2
+// https://github.com/angular/material2
 // https://www.muicss.com/docs/v1/css-js/forms
 // http://materializecss.com/forms.html
 import { Bootstrap3Component } from './bootstrap-3.component';
-// Uses https://github.com/valor-software/ng2-bootstrap
+// https://github.com/valor-software/ng2-bootstrap
 import { Bootstrap4Component } from './bootstrap-4.component';
-// Uses https://github.com/ng-bootstrap/ng-bootstrap
+// https://github.com/ng-bootstrap/ng-bootstrap
+// http://v4-alpha.getbootstrap.com/components/forms/
 import { Foundation6Component } from './foundation-6.component';
-// Uses https://github.com/zurb/foundation-sites
+// https://github.com/zurb/foundation-sites
 import { SemanticUIComponent } from './semantic-ui.component';
-// Uses https://github.com/vladotesanovic/ngSemantic
+// https://github.com/vladotesanovic/ngSemantic
 
 @Injectable()
 export class FrameworkLibraryService {
@@ -28,18 +29,18 @@ export class FrameworkLibraryService {
     'smanticui': SemanticUIComponent,
   };
 
-  public setDefaultFramework(type: string) {
+  public setDefaultFramework(type: string): boolean {
     if (!this.hasFramework(type)) return false;
     this.defaultFramework = type;
     return true;
   }
 
-  public hasFramework(type: string) {
+  public hasFramework(type: string): boolean {
     if (!type || typeof type !== 'string') return false;
     return this.frameworks.hasOwnProperty(type);
   }
 
-  public registerFramework(type: string, framework: any) {
+  public registerFramework(type: string, framework: any): boolean {
     if (!type || !framework || typeof type !== 'string') return false;
     this.frameworks[type] = framework;
     return true;

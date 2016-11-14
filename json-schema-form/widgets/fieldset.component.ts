@@ -1,5 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 
+import { JsonSchemaFormService } from '../json-schema-form.service';
+
 @Component({
   selector: 'fieldset-widget',
   template: `
@@ -16,7 +18,6 @@ import { Component, Input, OnInit } from '@angular/core';
 
         <root-widget *ngIf="expanded"
           [layout]="layoutNode.items"
-          [formSettings]="formSettings"
           [dataIndex]="dataIndex"
           [layoutIndex]="layoutIndex"
           [isOrderable]="options?.orderable"></root-widget>
@@ -31,9 +32,12 @@ export class FieldsetComponent implements OnInit {
   private options: any;
   private expanded: boolean = true;
   @Input() layoutNode: any;
-  @Input() formSettings: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
+
+  constructor(
+    private jsf: JsonSchemaFormService
+  ) { }
 
   ngOnInit() {
     this.options = this.layoutNode.options;
