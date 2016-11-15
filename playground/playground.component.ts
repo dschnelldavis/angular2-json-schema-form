@@ -189,7 +189,7 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
         },
       },
     },
-    frameworkList: [ 'bootstrap-3', 'no-framework' ], // , 'material-design'
+    frameworkList: [ 'bootstrap-3', 'material-design', 'no-framework' ],
     frameworks: {
       'bootstrap-3': 'Bootstrap 3 framework',
       'material-design': 'Material Design framework',
@@ -231,12 +231,13 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
       params => {
         if (params['set']) this.selectedSet = params['set'];
         if (params['example']) this.selectedExample = params['example'];
-        if (params['framework']) this.selectedExample = params['framework'];
+        if (params['framework']) this.selectedFramework = params['framework'];
       }
     );
   }
 
   ngAfterViewInit() {
+    this.frameworkLibrary.setDefaultFramework(this.selectedFramework);
     this.loadSelectedExample();
   }
 

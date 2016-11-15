@@ -17,12 +17,7 @@
       '@angular/upgrade':          'npm:@angular/upgrade/bundles/upgrade.umd.js',
       'rxjs':                      'npm:rxjs',
       'angular-in-memory-web-api': 'npm:angular-in-memory-web-api',
-      // ngrx bundles
-      '@ngrx/core':                'npm:@ngrx/core/bundles/core.umd.js',
-      '@ngrx/effects':             'npm:@ngrx/effects/bundles/effects.umd.js',
-      '@ngrx/router-store':        'npm:@ngrx/router-store/bundles/router-store.umd.js',
-      '@ngrx/store':               'npm:@ngrx/store/bundles/store.umd.js',
-      '@ngrx/store-devtools':      'npm:@ngrx/store-devtools/bundles/store-devtools.umd.js',
+      '@angular/material':          'npm:@angular/material/material.umd.js',
       // other libraries
       'ajv':                       'npm:ajv/dist/ajv.min.js',
       'base64-js':                 'npm:base64-js',

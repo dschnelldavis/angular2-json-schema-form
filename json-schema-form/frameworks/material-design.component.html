@@ -1,0 +1,40 @@
+<div [ngSwitch]="controlType">
+
+  <div *ngSwitchCase="'input'">
+    <md-input
+      [dividerColor]="options?.dividerColor || 'primary'"
+      [placeholder]="options?.title"
+      [type]="inputType"></md-input>
+  </div>
+
+  <div *ngSwitchCase="'checkbox'">
+    <md-checkbox
+      [color]="options?.color || 'primary'"
+      [id]="options?.dataPointer"></md-checkbox>
+    <label for="options?.dataPointer">{{options?.title}}</label>
+  </div>
+
+  <div *ngSwitchCase="'button'">
+    <button md-raised-button>{{options?.title}}</button>
+  </div>
+
+  <div *ngSwitchCase="'fieldset'">
+    <md-card>
+      <md-card-title>{{options.title}}</md-card-title>
+      <md-card-content>
+        <select-widget-widget
+          [layoutNode]="layoutNode"
+          [dataIndex]="dataIndex"
+          [layoutIndex]="layoutIndex"></select-widget-widget>
+      </md-card-content>
+    </md-card>
+  </div>
+
+  <div *ngSwitchDefault> -{{controlType}}-
+    <select-widget-widget
+      [layoutNode]="layoutNode"
+      [dataIndex]="dataIndex"
+      [layoutIndex]="layoutIndex"></select-widget-widget>
+  </div>
+
+</div>

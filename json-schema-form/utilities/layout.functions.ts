@@ -398,11 +398,11 @@ export function buildLayoutFromSchema(
         }
       }
     }
-    if (dataPointer === '' && !forRefLibrary) {
-      newNode = newFieldset;
-    } else {
+    // if (dataPointer === '' && !forRefLibrary) {
+    //   newNode = newFieldset;
+    // } else {
       newNode.items = newFieldset;
-    }
+    // }
   } else if (newNode.dataType === 'array') {
     newNode.items = [];
     let templateArray: any[] = [];

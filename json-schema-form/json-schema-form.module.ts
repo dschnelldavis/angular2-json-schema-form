@@ -2,6 +2,8 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
+import { MaterialModule } from '@angular/material';
+
 import { JsonSchemaFormService } from './json-schema-form.service';
 
 import { frameworkList } from './frameworks/index';
@@ -18,7 +20,9 @@ const allComponents = widgetsAndFrameworks.concat([
 ]);
 
 @NgModule({
-  imports: [ CommonModule, FormsModule, ReactiveFormsModule ],
+  imports: [
+    CommonModule, FormsModule, ReactiveFormsModule, MaterialModule.forRoot()
+  ],
   declarations: allComponents,
   entryComponents: widgetsAndFrameworks,
   exports: [ JsonSchemaFormComponent ],
