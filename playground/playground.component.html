@@ -66,6 +66,23 @@
     <div class="clearfix visible-sm-block"></div>
   </div>
 
+  <div class="row">
+    <div class="col-sm-2">
+      <label for="example">Framework:</label>
+    </div>
+    <div class="col-sm-6">
+      <select id="example" class="form-control"
+        (change)="loadSelectedFramework($event.target.value)">
+        <option *ngFor="let framework of examples.frameworkList"
+          [value]="framework" [selected]="selectedFramework === framework">
+          {{examples.frameworks[framework]}}
+        </option>
+      </select>
+    </div>
+    <div class="col-sm-4"></div>
+    <div class="clearfix visible-sm-block"></div>
+  </div>
+
 </div>
 
   <div class="row">

@@ -365,17 +365,17 @@ export function buildLayoutFromSchema(
   }
   if (newNode.dataType === 'object') {
     let newFieldset: any[] = [];
-    let newKeys: string[];
-    let subObject: string = 'properties';
-    if (hasOwn(schema, 'properties')) {
-      newKeys = hasOwn(schema.properties, 'ui:order') ?
+    let newKeys: string[] = [];
+    if (isObject(schema.properties)) {
+      newKeys = isArray(schema.properties['ui:order']) ?
         schema['properties']['ui:order'] : Object.keys(schema['properties']);
     } else if (hasOwn(schema, 'additionalProperties')) {
-      subObject = 'additionalProperties';
-      newKeys = Object.keys(schema['additionalProperties']);
+      return null;
+      // TODO: Figure out what to do with additionalProperties
+      // ... possibly provide a way to enter both key names and values?
     }
     for (let key of newKeys) {
-      if (hasOwn(schema[subObject], key)) {
+      if (hasOwn(schema.properties, key)) {
         let newLayoutPointer: string;
         if (newNode.layoutPointer === '' && !forRefLibrary) {
           newLayoutPointer = '/-';
@@ -577,12 +577,22 @@ export function buildLayoutFromSchema(
 
     // Build dataCircularRefMap
     if (!forRefLibrary) {
-      // Temporary entry with schema $ref
-      jsf.dataCircularRefMap.set(schema.$ref, newNode.dataPointer);
+      const schemaRef: string = JsonPointer.compile(schema.$ref);
+      // Is schema $ref a subset of dataPointer?
+      if (JsonPointer.isSubPointer(schemaRef, newNode.dataPointer)) {
+        // If yes, map dataPointer and compiled schema $ref as a circular reference
+        jsf.dataCircularRefMap.set(newNode.dataPointer, schemaRef);
+      } else {
+        // If no, create a temporary entry now with a raw schema $ref,
+        // so a circular reference can be created later if a sub-node is
+        // found with a matching schema $ref
+        jsf.dataCircularRefMap.set(schema.$ref, newNode.dataPointer);
+      }
     } else if (jsf.dataCircularRefMap.has(schema.$ref) &&
       !jsf.dataCircularRefMap.has(jsf.dataCircularRefMap.get(schema.$ref))
     ) {
-      // If temporary entry already exists, map current and previous dataPointers
+      // If temporary entry with a raw schema $ref already exists,
+      // map current and previous dataPointers as a circular reference
       if (newNode.dataPointer === jsf.dataCircularRefMap
         .get(schema.$ref).slice(-newNode.dataPointer.length)
       ) {

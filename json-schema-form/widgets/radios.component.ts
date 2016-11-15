@@ -98,6 +98,6 @@ export class RadiosComponent implements OnInit {
   }
 
   private updateValue(event) {
-    this.jsf.updateValue(this, event);
+    this.jsf.updateValue(this, event.target.value);
   }
 }

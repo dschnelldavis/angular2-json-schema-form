@@ -78,13 +78,13 @@ export class JsonSchemaFormService {
     return ctx.boundControl;
   }
 
-  public updateValue(ctx, event): void {
-    ctx.controlValue = event.target.value;
+  public updateValue(ctx, value): void {
+    ctx.controlValue = value;
     if (ctx.boundControl) {
-      ctx.formControl.setValue(event.target.value);
+      ctx.formControl.setValue(value);
       ctx.formControl.markAsDirty();
     }
-    ctx.layoutNode.value = event.target.value;
+    ctx.layoutNode.value = value;
   }
 
   public getControl(ctx): AbstractControl {
@@ -120,7 +120,7 @@ export class JsonSchemaFormService {
 
   public getDataPointer(ctx): string {
     if (!ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex) return null;
-    return JsonPointer.toIndexedPointer(ctx.layoutNode.dataPointer, ctx.dataIndex);
+    return JsonPointer.toIndexedPointer(ctx.layoutNode.dataPointer, ctx.dataIndex, this.arrayMap);
   }
 
   public getLayoutPointer(ctx): string {
@@ -138,26 +138,25 @@ export class JsonSchemaFormService {
   public addItem(ctx): boolean {
     if (!ctx.layoutNode || !ctx.layoutNode.$ref || !ctx.dataIndex ||
       !ctx.layoutNode.layoutPointer || !ctx.layoutIndex) return false;
-    // Add new data key to formGroup
-    const dataPointer = this.getDataPointer(ctx);
-console.log(dataPointer);
-console.log(this.templateRefLibrary);
-console.log(ctx.layoutNode.$ref);
+    // Create a new Angular 2 form control from a template in templateRefLibrary
     const newFormGroup = buildFormGroup(JsonPointer.get(
       this.templateRefLibrary, [ctx.layoutNode.$ref]
     ));
-console.log(newFormGroup);
-    if (ctx.layoutNode.arrayItem) { // Add new array item
+    // Add the new form control to the parent formArray or formGroup
+    if (ctx.layoutNode.arrayItem) { // Add new array item to formArray
       (<FormArray>this.getControlGroup(ctx)).push(newFormGroup);
-    } else { // Add new $ref item
-      // TODO: Add $ref item to formGroup
+    } else { // Add new $ref item to formGroup
+      (<FormGroup>this.getControlGroup(ctx)).addControl(
+        this.getControlName(ctx), newFormGroup
+      );
     }
-    // Add new display node to layout
-    const layoutPointer = this.getLayoutPointer(ctx);
+    // Copy a new layoutNode from layoutRefLibrary
     const newLayoutNode = _.cloneDeep(JsonPointer.get(
       this.layoutRefLibrary, [ctx.layoutNode.$ref]
     ));
-    if (ctx.layoutNode.circularReference) {
+    // If adding a recursive item, prefix current dataPointer and layoutPointer
+    // to all pointers in new layoutNode
+    if (!ctx.layoutNode.arrayItem || ctx.layoutNode.circularReference) {
       JsonPointer.forEachDeep(newLayoutNode, (value, pointer) => {
         if (hasOwn(value, 'dataPointer')) {
           value.dataPointer = ctx.layoutNode.dataPointer + value.dataPointer;
@@ -167,11 +166,8 @@ console.log(newFormGroup);
         }
       });
     }
-    if (ctx.layoutNode.arrayItem) { // Add new array item
-      JsonPointer.insert(this.layout, layoutPointer, newLayoutNode);
-    } else { // Add new $ref item
-      // TODO: Add $ref item to layout
-    }
+    // Add the new layoutNode to the layout
+    JsonPointer.insert(this.layout, this.getLayoutPointer(ctx), newLayoutNode);
     return true;
   }
 
@@ -190,12 +186,16 @@ console.log(newFormGroup);
     return true;
   }
 
-  public removeItem(ctx): boolean { // TODO: Change to also remove circular reference items
+  public removeItem(ctx): boolean {
     if (!ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex ||
       !ctx.layoutNode.layoutPointer || !ctx.layoutIndex) return false;
-    // Remove data key from formGroup
-    (<FormArray>this.getControlGroup(ctx)).removeAt(ctx.dataIndex[ctx.dataIndex.length - 1]);
-    // Remove display node from layout
+    // Remove the Angular 2 form control from the parent formArray or formGroup
+    if (ctx.layoutNode.arrayItem) { // Remove array item from formArray
+      (<FormArray>this.getControlGroup(ctx)).removeAt(ctx.dataIndex[ctx.dataIndex.length - 1]);
+    } else { // Remove $ref item from formGroup
+      (<FormGroup>this.getControlGroup(ctx)).removeControl(this.getControlName(ctx));
+    }
+    // Remove layoutNode from layout
     let layoutPointer = this.getLayoutPointer(ctx);
     JsonPointer.remove(this.layout, layoutPointer);
     return true;

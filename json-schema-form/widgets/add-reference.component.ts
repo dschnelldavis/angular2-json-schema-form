@@ -41,12 +41,15 @@ export class AddReferenceComponent implements OnInit, OnChanges {
     this.itemCount = this.layoutIndex[this.layoutIndex.length - 1] + 1;
     this.jsf.addItem(this);
     this.updateControl();
+console.log(this.layoutNode);
   }
 
   private updateControl() {
     const maxItems = this.options.maxItems || 1000000;
     if (this.layoutNode.arrayItem && this.itemCount >= maxItems) {
       this.showAddButton = false;
+    } else {
+      this.showAddButton = true;
     }
   }
 }

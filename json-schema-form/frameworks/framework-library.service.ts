@@ -21,12 +21,12 @@ export class FrameworkLibraryService {
 
   private defaultFramework: string = 'bootstrap-3';
   private frameworks: { [type: string]: any } = {
-    'none': NoFrameworkComponent,
+    'no-framework': NoFrameworkComponent,
     'bootstrap-3': Bootstrap3Component,
     'bootstrap-4': Bootstrap4Component,
     'foundation-6': Foundation6Component,
-    'materialdesign': MaterialDesignComponent,
-    'smanticui': SemanticUIComponent,
+    'material-design': MaterialDesignComponent,
+    'smantic-ui': SemanticUIComponent,
   };
 
   public setDefaultFramework(type: string): boolean {

@@ -4,6 +4,10 @@ import { Http } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 
+import {
+  FrameworkLibraryService
+} from '../json-schema-form/frameworks/framework-library.service';
+
 @Component({
   moduleId: module.id,
   selector: 'playground',
@@ -127,11 +131,11 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
         'jsf-previousvalues': 'Using previously submitted values',
         'jsf-previousvalues-multidimensional': 'Using previously submitted values - Multidimensional arrays',
       },
-        'ng2jsf': {
-          'ng2jsf-simple-array': 'Simple Array',
-          'ng2jsf-json-schema-draft04': 'JSON Meta-Schema - Version 4',
-          'ng2jsf-json-schema-draft03': 'JSON Meta-Schema - Version3',
-        },
+      'ng2jsf': {
+        'ng2jsf-simple-array': 'Simple Array',
+        'ng2jsf-json-schema-draft04': 'JSON Meta-Schema - Version 4',
+        'ng2jsf-json-schema-draft03': 'JSON Meta-Schema - Version3',
+      },
     },
     links: {
       'asf': { 'url': 'http://schemaform.io/examples/bootstrap-example.html', },
@@ -185,9 +189,16 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
         },
       },
     },
+    frameworkList: [ 'bootstrap-3', 'no-framework' ], // , 'material-design'
+    frameworks: {
+      'bootstrap-3': 'Bootstrap 3 framework',
+      'material-design': 'Material Design framework',
+      'no-framework': 'No Framework (bare controls + styles from layout)',
+    },
   };
   private selectedSet: string = 'asf';
   private selectedExample: string = 'asf-basic-json-schema-type';
+  private selectedFramework: string = 'bootstrap-3';
 
   private formActive: boolean = false;
   private aceHeight: number = 600;
@@ -208,6 +219,7 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
   };
 
   constructor(
+    private frameworkLibrary: FrameworkLibraryService,
     private route: ActivatedRoute,
     private router: Router,
     private http: Http,
@@ -219,6 +231,7 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
       params => {
         if (params['set']) this.selectedSet = params['set'];
         if (params['example']) this.selectedExample = params['example'];
+        if (params['framework']) this.selectedExample = params['framework'];
       }
     );
   }
@@ -269,7 +282,7 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
     if (selectedSet && selectedSet !== this.selectedSet) {
       this.selectedSet = selectedSet;
       this.selectedExample = this.examples.exampleList[selectedSet][0];
-      this.router.navigateByUrl('/?set=' + selectedSet + '&example=' + this.selectedExample);
+      this.router.navigateByUrl('/?set=' + selectedSet + '&example=' + this.selectedExample + '&framework=' + this.selectedFramework);
       this.loadSelectedExample();
     }
   }
@@ -280,19 +293,25 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
     if (selectedExample && selectedExample !== this.selectedExample) {
       this.selectedSet = selectedSet;
       this.selectedExample = selectedExample;
-      this.router.navigateByUrl('/?set=' + selectedSet + '&example=' + selectedExample);
+      this.router.navigateByUrl('/?set=' + selectedSet + '&example=' + selectedExample + '&framework=' + this.selectedFramework);
       this.liveFormData = {};
       this.submittedFormData = {};
       this.formIsValid = null;
       this.formValidationErrors = null;
     }
-    this.http.get(
-      'playground/examples/' + this.selectedExample + '.json'
-    ).map(schema => schema.text()).subscribe(schema => {
-      this.jsonFormSchema = schema;
-      this.generateForm(this.jsonFormSchema);
-    });
-  };
+    this.http
+      .get('playground/examples/' + this.selectedExample + '.json')
+      .map(schema => schema.text()).subscribe(schema => {
+        this.jsonFormSchema = schema;
+        this.generateForm(this.jsonFormSchema);
+      });
+  }
+
+  private loadSelectedFramework(selectedFramework: string) {
+    this.frameworkLibrary.setDefaultFramework(selectedFramework);
+    this.router.navigateByUrl('/?set=' + this.selectedSet + '&example=' + this.selectedExample + '&framework=' + selectedFramework);
+    this.generateForm(this.jsonFormSchema);
+  }
 
   // Display the form entered by the user
   // (runs whenever the user changes the jsonform object in the ACE input field)
@@ -330,5 +349,5 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
       }
     }
     this.formActive = true;
-  };
+  }
 }

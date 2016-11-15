@@ -2,11 +2,17 @@ import {
   ChangeDetectorRef, Component, Input, OnChanges, OnInit
 } from '@angular/core';
 
+import * as _ from 'lodash';
+
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import {
   addClasses, inArray, JsonPointer, parseText, toTitleCase
 } from '../utilities/index';
 
+/**
+ * Bootstrap 3 framework for Angular 2 JSON Schema Form.
+ *
+ */
 @Component({
   moduleId: module.id,
   selector: 'bootstrap-3-framework',
@@ -15,7 +21,8 @@ import {
 })
 export class Bootstrap3Component implements OnInit, OnChanges {
   private controlInitialized: boolean = false;
-  private options: any; // Options used by framework
+  private options: any; // Options used in this framework
+  private widgetLayoutNode: any; // layoutNode passed to child widget
   private widgetOptions: any; // Options passed to child widget
   private layoutPointer: string;
   private formControl: any = null;
@@ -40,8 +47,11 @@ export class Bootstrap3Component implements OnInit, OnChanges {
 
   private initializeControl() {
     if (this.layoutNode) {
-      this.options = Object.assign({}, this.layoutNode.options);
-      this.widgetOptions = this.layoutNode.options;
+      this.options = _.cloneDeep(this.layoutNode.options);
+      this.widgetLayoutNode = Object.assign(
+        {}, this.layoutNode, { options: _.cloneDeep(this.layoutNode.options) }
+      );
+      this.widgetOptions = this.widgetLayoutNode.options;
       this.layoutPointer = this.jsf.getLayoutPointer(this);
       this.formControl = this.jsf.getControl(this);
       this.updateArrayItems();
@@ -185,11 +195,13 @@ export class Bootstrap3Component implements OnInit, OnChanges {
   }
 
   private updateArrayItems() {
-    if (this.jsf && this.layoutNode.arrayItem && this.options.removable) {
+    if (this.layoutNode.arrayItem && this.options.removable &&
+      this.dataIndex && this.dataIndex.length
+    ) {
       const arrayIndex = this.dataIndex[this.dataIndex.length - 1];
       const parentArray =
         JsonPointer.get(this.jsf.layout, this.layoutPointer, 0, -2);
-      if (parentArray) {
+      if (parentArray && parentArray.items && parentArray.items.length >= 2) {
         const minItems = parentArray.minItems || 0;
         const lastArrayItem = parentArray.items.length - 2;
         const tupleItems = parentArray.tupleItems;

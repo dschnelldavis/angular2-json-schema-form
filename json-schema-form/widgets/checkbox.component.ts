@@ -20,7 +20,8 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
         [name]="controlName"
         [readonly]="options?.readonly ? 'readonly' : null"
         [value]="controlValue"
-        type="checkbox">
+        type="checkbox"
+        (change)="updateValue($event)">
       <span *ngIf="options?.title"
         [class.sr-only]="options?.notitle"
         [innerHTML]="options?.title"></span>
@@ -33,6 +34,8 @@ export class CheckboxComponent implements OnInit {
   private controlDisabled: boolean = false;
   private boundControl: boolean = false;
   private options: any;
+  private trueValue: any = true;
+  private falseValue: any = false;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
@@ -51,7 +54,7 @@ export class CheckboxComponent implements OnInit {
 
   private updateValue(event) {
     event.preventDefault;
-    this.jsf.updateValue(this, event);
+    this.jsf.updateValue(this, event.target.checked ? this.trueValue : this.falseValue);
   }
 
   private get isChecked() {

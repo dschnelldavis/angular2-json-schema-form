@@ -358,10 +358,12 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
           this.isValid.emit(isValid);
           this.validationErrors.emit(this.validateFormData.errors);
         }
+// Debug info:
 // console.log(this.jsf.formGroupTemplate);
 // console.log(this.jsf.formGroup);
-console.log(this.jsf.templateRefLibrary);
+// console.log(this.jsf.templateRefLibrary);
 // console.log(this.jsf.layoutRefLibrary);
+// console.log(this.jsf.schema);
 // console.log(this.jsf.layout);
 // console.log(this.jsf.schemaRefLibrary);
 // console.log(this.jsf.dataMap);
@@ -393,7 +395,6 @@ console.log(this.jsf.templateRefLibrary);
   }
 
   private submitForm() {
-console.log(this.jsf.templateRefLibrary);
     this.onSubmit.emit(formatFormData(
       this.jsf.formGroup.value, this.jsf.dataMap,
       this.jsf.dataCircularRefMap, this.jsf.arrayMap, true
