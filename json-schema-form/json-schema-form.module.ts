@@ -1,31 +1,32 @@
-import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-
 import { MaterialModule } from '@angular/material';
 
-import { JsonSchemaFormService } from './json-schema-form.service';
+import { JsonSchemaFormComponent } from './json-schema-form.component';
+import { OrderableDirective } from './orderable.directive';
 
-import { frameworkList } from './frameworks/index';
-import { widgetList } from './widgets/index';
-const widgetsAndFrameworks = [].concat(widgetList).concat(frameworkList);
+import { ALL_FRAMEWORKS } from './frameworks/index';
+import { ALL_WIDGETS } from './widgets/index';
 
 import { FrameworkLibraryService } from './frameworks/framework-library.service';
 import { WidgetLibraryService } from './widgets/widget-library.service';
-
-import { OrderableDirective } from './orderable.directive';
-import { JsonSchemaFormComponent } from './json-schema-form.component';
-const allComponents = widgetsAndFrameworks.concat([
-  JsonSchemaFormComponent, OrderableDirective
-]);
+import { JsonSchemaFormService } from './json-schema-form.service';
 
 @NgModule({
   imports: [
     CommonModule, FormsModule, ReactiveFormsModule, MaterialModule.forRoot()
   ],
-  declarations: allComponents,
-  entryComponents: widgetsAndFrameworks,
-  exports: [ JsonSchemaFormComponent ],
+  declarations: [
+    JsonSchemaFormComponent, OrderableDirective,
+    ...ALL_FRAMEWORKS, ...ALL_WIDGETS
+  ],
+  entryComponents: [
+    ...ALL_FRAMEWORKS, ...ALL_WIDGETS
+  ],
+  exports: [
+    JsonSchemaFormComponent
+  ],
   providers: [
     FrameworkLibraryService, WidgetLibraryService, JsonSchemaFormService
   ],

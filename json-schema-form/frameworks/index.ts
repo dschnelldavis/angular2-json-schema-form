@@ -5,9 +5,7 @@ import { Foundation6Component } from './foundation-6.component';
 import { MaterialDesignComponent } from './material-design.component';
 import { SemanticUIComponent } from './semantic-ui.component';
 
-// export { FrameworkLibraryService } from './framework-library.service';
-
-export let frameworkList = [
+export let ALL_FRAMEWORKS = [
   NoFrameworkComponent, Bootstrap3Component, Bootstrap4Component,
   Foundation6Component, MaterialDesignComponent, SemanticUIComponent
 ];

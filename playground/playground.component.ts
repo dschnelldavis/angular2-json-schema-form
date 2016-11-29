@@ -193,7 +193,7 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
     frameworks: {
       'bootstrap-3': 'Bootstrap 3 framework',
       'material-design': 'Material Design framework',
-      'no-framework': 'No Framework (bare controls + styles from layout)',
+      'no-framework': 'No Framework (bare controls + styles from layout only)',
     },
   };
   private selectedSet: string = 'asf';

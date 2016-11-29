@@ -21,9 +21,7 @@ import { TabsComponent } from './tabs.component';
 import { TemplateComponent } from './template.component';
 import { TextareaComponent } from './textarea.component';
 
-// export { WidgetLibraryService } from './widget-library.service';
-
-export let widgetList: any[] = [
+export let ALL_WIDGETS: any[] = [
   AddReferenceComponent, ButtonComponent, CheckboxComponent,
   CheckboxesComponent, FieldsetComponent, FileComponent, HiddenComponent,
   InputComponent, MessageComponent, NoneComponent, NumberComponent,
