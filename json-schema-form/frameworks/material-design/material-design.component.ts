@@ -2,12 +2,12 @@ import {
   ChangeDetectorRef, Component, Input, OnChanges, OnInit
 } from '@angular/core';
 
-import { MaterialModule } from '@angular/material';
+import * as _ from 'lodash';
 
-import { JsonSchemaFormService } from '../json-schema-form.service';
+import { JsonSchemaFormService } from '../../json-schema-form.service';
 import {
   addClasses, inArray, JsonPointer, parseText, toTitleCase
-} from '../utilities/index';
+} from '../../utilities/index';
 
 @Component({
   moduleId: module.id,
@@ -123,7 +123,6 @@ export class MaterialDesignComponent implements OnInit, OnChanges {
 
         default:
           this.controlType = this.layoutNode.type;
-
       }
       this.controlInitialized = true;
     }

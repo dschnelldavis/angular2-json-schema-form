@@ -16,23 +16,23 @@ import {
 })
 export class PlaygroundComponent implements OnInit, AfterViewInit {
   private examples: any = {
-    exampleSetList: [ 'ng2jsf', 'jsf', 'rjsf', 'asf' ],
+    exampleSetList: [ 'asf', 'rjsf', 'jsf', 'ng2jsf' ],
     exampleSets: {
-      'rjsf': 'React JSON Schema Form compatibility examples',
       'asf': 'Angular Schema Form compatibility examples',
+      'rjsf': 'React JSON Schema Form compatibility examples',
       'jsf': 'JSONForm compatibility examples',
       'ng2jsf': 'Other examples',
     },
     exampleList: {
-      'rjsf': [
-        'rjsf-simple', 'rjsf-nested', 'rjsf-arrays', 'rjsf-numbers', 'rjsf-widgets',
-        'rjsf-ordering', 'rjsf-references', 'rjsf-errors', 'rjsf-large',
-        'rjsf-date-and-time', 'rjsf-validation', 'rjsf-files', 'rjsf-custom',
-      ],
       'asf': [
         'asf-simple', 'asf-basic-json-schema-type', 'asf-bootstrap-grid',
         'asf-complex-key-support', 'asf-array', 'asf-tab-array',
         'asf-titlemap-examples', 'asf-kitchen-sink', 'asf-hack-conditional-required',
+      ],
+      'rjsf': [
+        'rjsf-simple', 'rjsf-nested', 'rjsf-arrays', 'rjsf-numbers', 'rjsf-widgets',
+        'rjsf-ordering', 'rjsf-references', 'rjsf-errors', 'rjsf-large',
+        'rjsf-date-and-time', 'rjsf-validation', 'rjsf-files', 'rjsf-custom',
       ],
       'jsf': [
         'jsf-gettingstarted',
@@ -58,6 +58,17 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
       ],
     },
     examples: {
+      'asf': {
+        'asf-simple': 'Simple',
+        'asf-basic-json-schema-type': 'Basic JSON Schema Type',
+        'asf-bootstrap-grid': 'Bootstrap Grid',
+        'asf-complex-key-support': 'Complex Key Support',
+        'asf-array': 'Array',
+        'asf-tab-array': 'Tab Array',
+        'asf-titlemap-examples': 'TitleMap Examples',
+        'asf-kitchen-sink': 'Kitchen Sink',
+        'asf-hack-conditional-required': 'Hack: Conditional Required',
+      },
       'rjsf': {
         'rjsf-simple': 'Simple',
         'rjsf-nested': 'Nested',
@@ -72,17 +83,6 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
         'rjsf-date-and-time': 'Date & Time',
         'rjsf-validation': 'Validation',
         'rjsf-files': 'Files',
-      },
-      'asf': {
-        'asf-simple': 'Simple',
-        'asf-basic-json-schema-type': 'Basic JSON Schema Type',
-        'asf-bootstrap-grid': 'Bootstrap Grid',
-        'asf-complex-key-support': 'Complex Key Support',
-        'asf-array': 'Array',
-        'asf-tab-array': 'Tab Array',
-        'asf-titlemap-examples': 'TitleMap Examples',
-        'asf-kitchen-sink': 'Kitchen Sink',
-        'asf-hack-conditional-required': 'Hack: Conditional Required',
       },
       'jsf': {
         'jsf-gettingstarted': 'Getting started',
@@ -302,7 +302,8 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
     }
     this.http
       .get('playground/examples/' + this.selectedExample + '.json')
-      .map(schema => schema.text()).subscribe(schema => {
+      .map(schema => schema.text())
+      .subscribe(schema => {
         this.jsonFormSchema = schema;
         this.generateForm(this.jsonFormSchema);
       });

@@ -23,26 +23,27 @@ import {
  * an Angular 2 library which generates an HTML form from a JSON schema
  * structured data model and/or a JSON Schema Form layout description.
  *
- * This library also validates inputs data by the user, both using individual
+ * This library also validates input data by the user, both using individual
  * validators which provide real-time feedback while the user is filling out
  * the form, and then using the entire schema when the form is submitted,
  * to make sure the returned JSON data object is valid.
  *
  * This library is similar to, and mostly API compatible with:
  *
- * - Joshfire's JSON Form library for jQuery
- *   https://github.com/joshfire/jsonform
- *   http://ulion.github.io/jsonform/playground (examples)
- *
  * - JSON Schema Form's Angular Schema Form library for AngularJs
  *   http://schemaform.io
  *   http://schemaform.io/examples/bootstrap-example.html (examples)
+ *
+ * - Joshfire's JSON Form library for jQuery
+ *   https://github.com/joshfire/jsonform
+ *   http://ulion.github.io/jsonform/playground (examples)
  *
  * - Mozilla's react-jsonschema-form library for React
  *   https://github.com/mozilla-services/react-jsonschema-form
  *   https://mozilla-services.github.io/react-jsonschema-form (examples)
  *
  * This library depends on:
+ *  - Angular 2 (obviously)                https://angular.io
  *  - lodash, JavaScript utility library   https://github.com/lodash/lodash
  *  - ajv, Another JSON Schema validator   https://github.com/epoberezkin/ajv
  */
@@ -85,11 +86,11 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
     private jsf: JsonSchemaFormService
   ) { }
 
-  ngOnInit() { }
+  ngOnInit() {
+    this.initializeForm();
+  }
 
   ngOnChanges() {
-    this.jsf.framework = this.frameworkLibrary.getFramework();
-    if (isObject(this.options)) Object.assign(this.jsf.globalOptions, this.options);
     this.initializeForm();
   }
 
@@ -102,15 +103,15 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
    *
    * - Create 'schemaRefLibrary' to resolve schema $ref links.
    *
-   * - Create 'layoutRefLibrary' to use when adding components to form
-   *   arrays and circular $ref points.
+   * - Create 'layoutRefLibrary' to use when dynamically adding
+   *   form components to arrays and circular $ref points.
    *
    * - Create 'formGroupTemplate', then from it 'formGroup',
    *   the Angular 2 formGroup used to control the reactive form.
    *
    * @return {void}
    */
-  public initializeForm() {
+  public initializeForm(): void {
     if (
       this.schema || this.layout || this.form || this.JSONSchema || this.UISchema
     ) {
@@ -124,6 +125,9 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
       this.jsf.formGroupTemplate = {};
       this.jsf.formGroup = null;
       this.jsf.framework = this.frameworkLibrary.getFramework();
+      if (isObject(this.options)) {
+        Object.assign(this.jsf.globalOptions, this.options);
+      }
       this.jsf.globalOptions.debug = !!this.debug;
 
       // Initialize 'schema'
@@ -132,8 +136,8 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
       // 2. form.schema - Single input / JSON Form style
       // 3. JSONSchema - React JSON Schema Form style
       // 4. form.JSONSchema - For testing single input React JSON Schema Forms
-      // 5. form - For easier testing
-      // 6. (none) no schema - construct form entirely from layout instead
+      // 5. form - For testing single schema-only inputs
+      // TODO: 6. (none) no schema - construct form entirely from layout instead
       if (isObject(this.schema)) {
         this.jsf.AngularSchemaFormCompatibility = true;
         this.jsf.schema = this.schema;
@@ -244,6 +248,7 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
         fixJsonFormOptions(this.form.customFormItems);
         alternateLayout = this.form.customFormItems;
       }
+
       // if alternate layout found, copy options into schema
       if (alternateLayout) {
         JsonPointer.forEachDeep(alternateLayout, (value, pointer) => {
@@ -304,9 +309,8 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
       if (!isEmpty(this.jsf.schema)) {
 
         // Build the Angular 2 FormGroup template from the schema
-        this.jsf.formGroupTemplate = buildFormGroupTemplate(
-          this.jsf, this.jsf.initialValues, true
-        );
+        this.jsf.formGroupTemplate =
+          buildFormGroupTemplate(this.jsf, this.jsf.initialValues, true);
 
       } else {
 
@@ -326,7 +330,7 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
 
       if (this.jsf.formGroup) {
 
-        // Display the template to render form
+        // Display the template, to render the form
         this.formInitialized = true;
 
         // Subscribe to form value changes to output live data, validation, and errors
@@ -335,6 +339,7 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
             const formattedData = formatFormData(
               value, this.jsf.dataMap, this.jsf.dataCircularRefMap, this.jsf.arrayMap
             );
+            // Note: Only emit ONE of the following two options:
             this.onChanges.emit(formattedData); // Formatted output
             // this.onChanges.emit(value); // Non-formatted output
             const isValid = this.validateFormData(formattedData);
@@ -358,7 +363,7 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
           this.isValid.emit(isValid);
           this.validationErrors.emit(this.validateFormData.errors);
         }
-// Debug info:
+// Uncomment to output debugging information to console:
 // console.log(this.jsf.formGroupTemplate);
 // console.log(this.jsf.formGroup);
 // console.log(this.jsf.templateRefLibrary);
@@ -370,12 +375,12 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
 // console.log(this.jsf.schemaCircularRefMap);
 // console.log(this.jsf.dataCircularRefMap);
       } else {
-        // TODO: Output error message
+        // TODO: Display error message
       }
     }
   }
 
-  // Output debugging information
+  // Uncomment to output debugging information to browser:
   ngDoCheck() {
     if (this.debug) {
       const vars: any[] = [];
@@ -390,7 +395,8 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
       // vars.push(this.jsf.formGroup.value);
       // vars.push(this.jsf.layoutRefLibrary);
       // vars.push(this.jsf.templateRefLibrary);
-      this.debugOutput = _.map(vars, thisVar => JSON.stringify(thisVar, null, 2)).join('\n');
+      this.debugOutput =
+        _.map(vars, thisVar => JSON.stringify(thisVar, null, 2)).join('\n');
     }
   }
 
