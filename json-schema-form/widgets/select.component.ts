@@ -10,17 +10,17 @@ import { buildTitleMap } from '../utilities/index';
     <div
       [class]="options?.htmlClass">
       <label *ngIf="options?.title"
-        [attr.for]="layoutNode?.dataPointer"
+        [attr.for]="'control' + layoutNode?._id"
         [class]="options?.labelHtmlClass"
         [class.sr-only]="options?.notitle"
         [innerHTML]="options?.title"></label>
       <select
-        [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
+        [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.required]="options?.required"
         [class]="options?.fieldHtmlClass"
         [disabled]="controlDisabled"
-        [id]="layoutNode?.dataPointer"
+        [id]="'control' + layoutNode?._id"
         [name]="controlName"
         (input)="updateValue($event)">
         <option *ngFor="let selectItem of selectList"

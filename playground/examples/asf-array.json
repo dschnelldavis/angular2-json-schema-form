@@ -34,10 +34,7 @@
               "validationMessage": "Don't be greedy!"
             }
           },
-          "required": [
-            "name",
-            "comment"
-          ]
+          "required": ["name", "comment"]
         }
       }
     }
@@ -50,9 +47,7 @@
     {
       "key": "comments",
       "add": "New",
-      "style": {
-        "add": "btn-success"
-      },
+      "style": { "add": "btn-success" },
       "items": [
         "comments[].name",
         "comments[].email",

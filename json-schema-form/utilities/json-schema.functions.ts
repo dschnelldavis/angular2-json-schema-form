@@ -9,7 +9,7 @@ import 'rxjs/add/operator/map';
 import * as _ from 'lodash';
 
 import {
-  inArray, hasValue, isString, isFunction, isObject, isArray, SchemaType
+  getType, hasValue, inArray, isString, isFunction, isObject, isArray, SchemaType
 } from './validator.functions';
 import { forEach, hasOwn, mergeFilteredObject } from './utility.functions';
 import { JsonPointer, Pointer } from './jsonpointer.functions';
@@ -17,6 +17,10 @@ import { JsonValidators } from './json.validators';
 
 /**
  * JSON Schema function library:
+ *
+ * buildSchemaFromLayout:   TODO: Write this function
+ *
+ * buildSchemaFromData:
  *
  * getFromSchema:
  *
@@ -32,15 +36,97 @@ import { JsonValidators } from './json.validators';
  */
 
 /**
+ * 'buildSchemaFromLayout' function
+ *
+ * Build a JSON Schema from a JSON Form layout
+ *
+ * @param {any[]} layout - The JSON Form layout
+ * @return {JSON Schema} - The new JSON Schema
+ */
+export function buildSchemaFromLayout(layout: any[]): any {
+  return;
+  // let newSchema: any = {};
+  // const walkLayout = (layoutItems: any[], callback: Function): any[] => {
+  //   let returnArray: any[] = [];
+  //   for (let layoutItem of layoutItems) {
+  //     const returnItem: any = callback(layoutItem);
+  //     if (returnItem) returnArray = returnArray.concat(callback(layoutItem));
+  //     if (layoutItem.items) {
+  //       returnArray = returnArray.concat(walkLayout(layoutItem.items, callback));
+  //     }
+  //   }
+  //   return returnArray;
+  // };
+  // walkLayout(layout, layoutItem => {
+  //   let itemKey: string;
+  //   if (typeof layoutItem === 'string') {
+  //     itemKey = layoutItem;
+  //   } else if (layoutItem.key) {
+  //     itemKey = layoutItem.key;
+  //   }
+  //   if (!itemKey) return;
+  //   //
+  // });
+}
+
+/**
+ * 'buildSchemaFromData' function
+ *
+ * Build a JSON Schema from a data object
+ *
+ * @param {any} data - The data object
+ * @return {JSON Schema} - The new JSON Schema
+ */
+export function buildSchemaFromData(
+  data: any, isRoot: boolean = true
+): any {
+  let newSchema: any = {};
+  if (isRoot) newSchema.$schema = 'http://json-schema.org/draft-04/schema#';
+  const getSafeType = (value: any): string => {
+    let safeType = getType(value);
+    if (safeType === 'integer') {
+      safeType = 'number';
+    } else if (safeType === 'null') {
+      safeType = 'string';
+    }
+    return safeType;
+  };
+  newSchema.type = getSafeType(data);
+  if (newSchema.type === 'integer') {
+    newSchema.type = 'number';
+  } else if (newSchema.type === 'null') {
+    newSchema.type = 'string';
+  } else if (newSchema.type === 'object') {
+    newSchema.properties = {};
+    for (let key of Object.keys(data)) {
+      newSchema.properties[key] = buildSchemaFromData(data[key], false);
+    }
+  } else if (newSchema.type === 'array') {
+    let itemTypes: string[] = data.map(getSafeType).reduce(
+      (types, type) => types.concat(types.indexOf(type) === -1 ? type : [])
+    , []);
+    const buildSubSchemaFromData = (value) => buildSchemaFromData(value, false);
+    if (itemTypes.length === 1) {
+      newSchema.items = data.map(buildSubSchemaFromData).reduce(
+        (combined, item) => Object.assign(combined, item)
+      , {});
+    } else {
+      newSchema.items = data.map(buildSubSchemaFromData);
+    }
+  }
+  return newSchema;
+}
+
+/**
  * 'getFromSchema' function
  *
  * Uses a JSON Pointer for a data object to retrieve a sub-schema from
  * a JSON Schema which describes that data object
  *
- * @param {JSON Schema} schema - Tchema to get value from
+ * @param {JSON Schema} schema - The schema to get the sub-schema from
  * @param {Pointer} dataPointer - JSON Pointer (string or array)
  * @param {boolean = false} returnContainer - Return containing object instead?
- * @return {schema} - The located value or object
+ * @return {schema} - The located sub-schema
  */
 export function getFromSchema(
   schema: any, dataPointer: Pointer, returnContainer: boolean = false
@@ -374,7 +460,7 @@ export function updateInputOptions(layoutNode: any, schema: any, jsf: any) {
     ['items', 'options'], fixUiKeys);
   mergeFilteredObject(newOptions, layoutNode, ['arrayItem', 'dataPointer',
     'dataType', 'items', 'layoutPointer', 'listItems', 'name', 'options',
-    'tupleItems', 'type', 'widget', '$ref'], fixUiKeys);
+    'tupleItems', 'type', 'widget', '_id', '$ref'], fixUiKeys);
   mergeFilteredObject(newOptions, layoutNode.options, [], fixUiKeys);
   layoutNode.options = newOptions;
 

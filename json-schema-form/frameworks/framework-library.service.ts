@@ -10,16 +10,16 @@ import { NoFrameworkComponent } from './no-framework.component';
 // https://www.muicss.com/docs/v1/css-js/forms
 // http://materializecss.com/forms.html
 import { MaterialDesignComponent } from './material-design/material-design.component';
+import { MaterialAddReferenceComponent } from './material-design/material-add-reference.component';
 import { MaterialButtonComponent } from './material-design/material-button.component';
+import { MaterialCardComponent } from './material-design/material-card.component';
 import { MaterialCheckboxComponent } from './material-design/material-checkbox.component';
 import { MaterialCheckboxesComponent } from './material-design/material-checkboxes.component';
 import { MaterialFileComponent } from './material-design/material-file.component';
-import { MaterialFieldsetComponent } from './material-design/material-fieldset.component';
 import { MaterialInputComponent } from './material-design/material-input.component';
 import { MaterialNumberComponent } from './material-design/material-number.component';
 import { MaterialRadiosComponent } from './material-design/material-radios.component';
 import { MaterialSelectComponent } from './material-design/material-select.component';
-import { MaterialSubmitComponent } from './material-design/material-submit.component';
 import { MaterialTabsComponent } from './material-design/material-tabs.component';
 import { MaterialTextareaComponent } from './material-design/material-textarea.component';
 
@@ -38,81 +38,162 @@ import { Foundation6Component } from './foundation-6.component';
 // https://github.com/vladotesanovic/ngSemantic
 import { SemanticUIComponent } from './semantic-ui.component';
 
+export type Framework = {
+  framework: any,
+  widgets?: { [key: string]: any },
+  stylesheets?: string[],
+  scripts?: string[]
+};
+
+export type FrameworkLibrary = { [key: string]: Framework };
+
 @Injectable()
 export class FrameworkLibraryService {
-  private defaultFrameworkType: string = 'bootstrap-3';
-  private frameworks: { [type: string]: any } = {
+  private defaultFramework: string = 'bootstrap-3';
+  private frameworkLibrary: FrameworkLibrary = {
     'no-framework': { framework: NoFrameworkComponent },
-    'bootstrap-3': { framework: Bootstrap3Component },
-    'bootstrap-4': { framework: Bootstrap4Component },
-    'foundation-6': { framework: Foundation6Component },
     'material-design': {
       framework: MaterialDesignComponent,
       widgets: {
+        '$ref': MaterialAddReferenceComponent,
         'number': MaterialNumberComponent,
         'text': MaterialInputComponent,
-        'file': MaterialFileComponent,
+        'file': 'text',
         'checkbox': MaterialCheckboxComponent,
-        'submit': MaterialSubmitComponent,
+        'submit': 'button',
         'button': MaterialButtonComponent,
         'select': MaterialSelectComponent,
         'textarea': MaterialTextareaComponent,
         'checkboxes': MaterialCheckboxesComponent,
         'radios': MaterialRadiosComponent,
-        'fieldset': MaterialFieldsetComponent,
-        'tabs': MaterialTabsComponent
-      }
+        'fieldset': MaterialCardComponent,
+        'section': MaterialCardComponent,
+        'tabs': MaterialTabsComponent,
+      },
+      stylesheets: [
+        '//fonts.googleapis.com/icon?family=Material+Icons',
+        '//fonts.googleapis.com/css?family=Roboto:300,400,500,700',
+        // '//justindujardin.github.io/ng2-material/vendor/ng2-material/ng2-material.css',
+        // '//justindujardin.github.io/ng2-material/vendor/ng2-material/font/font.css',
+        // '//cdn.rawgit.com/urish/angular2-material-build/master/angular2_material.css',
+        // '//cdn.rawgit.com/justindujardin/ng2-material/gh-pages/v/0.2.5/dist/ng2-material.css',
+        // '//cdn.rawgit.com/justindujardin/ng2-material/gh-pages/v/0.2.5/dist/font.css',
+        '//cdn.rawgit.com/justindujardin/ng2-material/gh-pages/v/0.2.8/ng2-material/all.css',
+        '/json-schema-form/frameworks/material-design/material-indigo-pink.css',
+      ],
     },
-    'smantic-ui': { framework: SemanticUIComponent },
+    'bootstrap-3': {
+      framework: Bootstrap3Component,
+      stylesheets: [
+        '//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css',
+        '//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css',
+      ],
+      scripts: [
+        // '//code.jquery.com/jquery-3.1.1.min.js',
+        // '//code.jquery.com/jquery-2.1.1.min.js',
+        // '//code.jquery.com/ui/1.12.1/jquery-ui.min.js',
+        '//ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js',
+        '//ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js',
+        '//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js',
+      ],
+    },
+    'bootstrap-4': { framework: Bootstrap4Component, },
+    'foundation-6': { framework: Foundation6Component, },
+    'smantic-ui': { framework: SemanticUIComponent, },
   };
+  private activeFramework: Framework;
+  private stylesheets: (HTMLStyleElement|HTMLLinkElement)[]; // href
+  private scripts: HTMLScriptElement[]; // src
 
-  constructor(private widgetLibrary: WidgetLibraryService) {}
+  constructor(
+    private widgetLibrary: WidgetLibraryService
+  ) {
+    this.activeFramework = this.frameworkLibrary[this.defaultFramework];
+    this.registerFrameworkWidgets(this.activeFramework);
+  }
 
-  public setDefaultFramework(type: string): boolean {
-    if (!type || typeof type !== 'string' || !this.hasFramework(type)) return false;
-    if (type !== this.defaultFrameworkType) {
-      const newFramework = this.frameworks[type];
-      this.widgetLibrary.unRegisterFrameworkWidgets();
-      if (newFramework.widgets) {
-        this.widgetLibrary.registerFrameworkWidgets(newFramework.widgets);
-      }
-      this.defaultFrameworkType = type;
+  private registerFrameworkWidgets(framework: Framework): boolean {
+    if (framework.hasOwnProperty('widgets')) {
+      this.widgetLibrary.registerFrameworkWidgets(framework.widgets);
+      return true;
     }
-    return true;
+    this.widgetLibrary.unRegisterFrameworkWidgets();
+    return false;
+  }
+
+  private loadFrameworkExternalAssets(framework: Framework): boolean {
+    for (let node of [...(this.stylesheets || []), ...(this.scripts || [])]) {
+      node.parentNode.removeChild(node);
+    }
+    this.stylesheets = [];
+    if (framework.hasOwnProperty('stylesheets')) {
+      for (let stylesheet of framework.stylesheets) {
+        let newStylesheet: HTMLStyleElement|HTMLLinkElement;
+        if (stylesheet.slice(0, 1) === '/' || stylesheet.slice(0, 4) === 'http') {
+          newStylesheet = document.createElement('link');
+          (<HTMLLinkElement>newStylesheet).rel = 'stylesheet';
+          (<HTMLLinkElement>newStylesheet).href = stylesheet;
+        } else {
+          newStylesheet = document.createElement('style');
+          newStylesheet.innerHTML = stylesheet;
+        }
+        this.stylesheets.push(newStylesheet);
+        document.head.appendChild(newStylesheet);
+      }
+    }
+    this.scripts = [];
+    if (framework.hasOwnProperty('scripts')) {
+      for (let script of framework.scripts) {
+        let newScript: HTMLScriptElement = document.createElement('script');
+        if (script.slice(0, 2) === '//' || script.slice(0, 4) === 'http') {
+          newScript.src = script;
+        } else {
+          newScript.innerHTML = script;
+        }
+        this.scripts.push(newScript);
+        document.head.appendChild(newScript);
+      }
+    }
+    if (framework.stylesheets || framework.scripts) { return true; }
+    return false;
+  }
+
+  public setFramework(framework?: string|Framework): boolean {
+    let activeFramework: Framework = null;
+    if (!framework || framework === 'default') {
+      activeFramework = this.frameworkLibrary[this.defaultFramework];
+    } else if (typeof framework === 'string' && this.hasFramework(framework)) {
+      activeFramework = this.frameworkLibrary[framework];
+    } else if (typeof framework === 'object' && framework.hasOwnProperty('framework')) {
+      activeFramework = framework;
+    }
+    if (activeFramework) {
+      this.activeFramework = activeFramework;
+      this.registerFrameworkWidgets(this.activeFramework);
+      this.loadFrameworkExternalAssets(this.activeFramework);
+      return true;
+    }
+    return false;
   }
 
   public hasFramework(type: string): boolean {
     if (!type || typeof type !== 'string') return false;
-    return this.frameworks.hasOwnProperty(type);
+    return this.frameworkLibrary.hasOwnProperty(type);
   }
 
-  public registerFramework(
-    type: string, framework: any, setAsDefault: boolean = true
-  ): boolean {
-    if (!type || typeof type !== 'string' ||
-      typeof framework !== 'object' || !framework.framework
-    ) {
-      return false;
-    }
-    this.frameworks[type] = framework;
-    if (setAsDefault) { this.setDefaultFramework(type); }
-    return true;
+  public getFramework(): any {
+    return this.activeFramework.framework;
   }
 
-  public unRegisterFramework(type: string): boolean {
-    if (!type || typeof type !== 'string') return false;
-    if (type === this.defaultFrameworkType) {
-      this.defaultFrameworkType = 'bootstrap-3';
-    }
-    delete this.frameworks[type];
-    return true;
+  public getFrameworkWidgets(): any {
+    return this.activeFramework.widgets || {};
   }
 
-  public getFramework(type?: string): any {
-    if (!this.hasFramework(type)) {
-      if (type === 'all') return this.frameworks;
-      type = this.defaultFrameworkType;
-    }
-    return this.frameworks[type].framework;
+  public getFrameworkStylesheets(): string[] {
+    return this.activeFramework.stylesheets || [];
+  }
+
+  public getFrameworkScritps(): string[] {
+    return this.activeFramework.scripts || [];
   }
 }

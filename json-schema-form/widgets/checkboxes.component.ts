@@ -17,7 +17,7 @@ import { buildFormGroup, buildTitleMap, JsonPointer } from '../utilities/index';
       <div *ngSwitchCase="'horizontal'"
         [class]="options?.htmlClass">
         <label *ngFor="let checkboxItem of checkboxList"
-          [attr.for]="layoutNode?.dataPointer + '/' + checkboxItem.value"
+          [attr.for]="'control' + layoutNode?._id + '/' + checkboxItem.value"
           [class]="options?.itemLabelHtmlClass + (checkboxItem.checked ?
             (' ' + options?.activeClass + ' ' + options?.style?.selected) :
             (' ' + options?.style?.unselected))">
@@ -26,7 +26,7 @@ import { buildFormGroup, buildTitleMap, JsonPointer } from '../utilities/index';
             [checked]="checkboxItem.checked"
             [class]="options?.fieldHtmlClass"
             [disabled]="controlDisabled"
-            [id]="layoutNode?.dataPointer + '/' + checkboxItem.value"
+            [id]="'control' + layoutNode?._id + '/' + checkboxItem.value"
             [name]="formControlName"
             [readonly]="options?.readonly ? 'readonly' : null"
             [value]="checkboxItem.value"
@@ -40,7 +40,7 @@ import { buildFormGroup, buildTitleMap, JsonPointer } from '../utilities/index';
         <div *ngFor="let checkboxItem of checkboxList"
           [class]="options?.htmlClass">
           <label
-            [attr.for]="layoutNode?.dataPointer + '/' + checkboxItem.value"
+            [attr.for]="'control' + layoutNode?._id + '/' + checkboxItem.value"
             [class]="options?.itemLabelHtmlClass + (checkboxItem.checked ?
               (' ' + options?.activeClass + ' ' + options?.style?.selected) :
               (' ' + options?.style?.unselected))">

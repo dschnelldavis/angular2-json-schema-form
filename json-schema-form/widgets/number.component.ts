@@ -10,12 +10,12 @@ import { getControl, inArray, isDefined } from '../utilities/index';
     <div
       [class]="options?.htmlClass">
       <label *ngIf="options?.title"
-        [attr.for]="layoutNode?.dataPointer"
+        [attr.for]="'control' + layoutNode?._id"
         [class]="options?.labelHtmlClass"
         [class.sr-only]="options?.notitle"
         [innerHTML]="options?.title"></label>
       <input
-        [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
+        [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.max]="options?.maximum"
         [attr.min]="options?.minimum"
         [attr.placeholder]="options?.placeholder"
@@ -24,7 +24,7 @@ import { getControl, inArray, isDefined } from '../utilities/index';
         [attr.step]="options?.multipleOf || options?.step || 'any'"
         [class]="options?.fieldHtmlClass"
         [disabled]="controlDisabled"
-        [id]="layoutNode?.dataPointer"
+        [id]="'control' + layoutNode?._id"
         [name]="controlName"
         [readonly]="options?.readonly ? 'readonly' : null"
         [title]="lastValidNumber"

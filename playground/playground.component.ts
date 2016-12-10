@@ -53,8 +53,8 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
         'jsf-previousvalues', 'jsf-previousvalues-multidimensional',
       ],
       'ng2jsf': [
-        'ng2jsf-simple-array', 'ng2jsf-json-schema-draft04',
-        'ng2jsf-json-schema-draft03',
+        'ng2jsf-simple-array', 'ng2jsf-data-only', // 'ng2jsf-layout-only',
+        'ng2jsf-json-schema-draft04', 'ng2jsf-json-schema-draft03',
       ],
     },
     examples: {
@@ -133,6 +133,8 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
       },
       'ng2jsf': {
         'ng2jsf-simple-array': 'Simple Array',
+        'ng2jsf-data-only': 'Data Only (no Schema or Layout)',
+        'ng2jsf-layout-only': 'Layout Only (no Schema or Data)',
         'ng2jsf-json-schema-draft04': 'JSON Meta-Schema - Version 4',
         'ng2jsf-json-schema-draft03': 'JSON Meta-Schema - Version3',
       },
@@ -192,7 +194,7 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
     frameworkList: [ 'bootstrap-3', 'material-design', 'no-framework' ],
     frameworks: {
       'bootstrap-3': 'Bootstrap 3 framework',
-      'material-design': 'Material Design framework',
+      'material-design': 'Material Design framework (under construction)',
       'no-framework': 'No Framework (bare controls + styles from layout only)',
     },
   };
@@ -237,7 +239,7 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.frameworkLibrary.setDefaultFramework(this.selectedFramework);
+    this.frameworkLibrary.setFramework(this.selectedFramework);
     this.loadSelectedExample();
   }
 
@@ -310,7 +312,7 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
   }
 
   private loadSelectedFramework(selectedFramework: string) {
-    this.frameworkLibrary.setDefaultFramework(selectedFramework);
+    this.frameworkLibrary.setFramework(selectedFramework);
     this.router.navigateByUrl('/?set=' + this.selectedSet + '&example=' + this.selectedExample + '&framework=' + selectedFramework);
     this.generateForm(this.jsonFormSchema);
   }

@@ -8,18 +8,19 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
   template: `
     <div
       [class]="options?.htmlClass">
-      <button
+      <button md-raised-button
         [attr.readonly]="options?.readonly ? 'readonly' : null"
-        [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
+        [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [class]="options?.fieldHtmlClass"
+        [color]="options?.color || 'primary'"
         [disabled]="controlDisabled"
+        [id]="'control' + layoutNode?._id"
         [name]="controlName"
         [type]="layoutNode?.type"
         [value]="controlValue"
         (click)="updateValue($event)">
-        <span *ngIf="options?.icon || options?.title"
-          [class]="options?.icon"
-          [innerHTML]="options?.title"></span>
+        <md-icon *ngIf="options?.icon" class="md-24">{{options?.icon}}</md-icon>
+        <span *ngIf="options?.title" [innerHTML]="options?.title"></span>
       </button>
     </div>`,
 })

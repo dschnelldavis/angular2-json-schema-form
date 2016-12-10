@@ -9,12 +9,12 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
     <div
       [class]="options?.htmlClass">
       <input
-        [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
+        [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.required]="options?.required"
         [class]="options?.fieldHtmlClass"
         [disabled]="controlDisabled"
-        [id]="layoutNode?.dataPointer"
+        [id]="'control' + layoutNode?._id"
         [name]="controlName"
         [type]="layoutNode?.type"
         [value]="controlValue"

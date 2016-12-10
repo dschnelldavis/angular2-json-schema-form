@@ -11,9 +11,10 @@ import { JsonSchemaFormService } from './json-schema-form.service';
 import { FrameworkLibraryService } from './frameworks/framework-library.service';
 import { WidgetLibraryService } from './widgets/widget-library.service';
 import {
-  buildFormGroup, buildFormGroupTemplate, buildLayout, convertJsonSchema3to4,
-  fixJsonFormOptions, formatFormData, getSchemaReference, hasOwn,
-  hasValue, isArray, isEmpty, isObject, isString, JsonPointer
+  buildFormGroup, buildFormGroupTemplate, buildLayout, buildSchemaFromData,
+  buildSchemaFromLayout, convertJsonSchema3to4, fixJsonFormOptions,
+  formatFormData, getSchemaReference, hasOwn, hasValue, isArray, isEmpty,
+  isObject, isString, JsonPointer
 } from './utilities/index';
 
 /**
@@ -306,27 +307,37 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
         this.jsf.initialValues = this.form.formData;
       }
 
+      if (isEmpty(this.jsf.schema)) {
+
+        // If the schema does not exist, build a schema from the layout
+        if (this.jsf.layout.indexOf('*') === -1) {
+          this.jsf.schema = buildSchemaFromLayout(this.jsf.layout);
+
+        // If neither schema nor layout exists, build a schema from the data
+        } else if (!isEmpty(this.jsf.initialValues)) {
+          this.jsf.schema = buildSchemaFromData(this.jsf.initialValues);
+        }
+      }
+
       if (!isEmpty(this.jsf.schema)) {
+
+        // If not already initialized, initialize ajv and compile schema
+        if (!this.validateFormData) {
+          this.validateFormData = this.ajv.compile(this.jsf.schema);
+        }
 
         // Build the Angular 2 FormGroup template from the schema
         this.jsf.formGroupTemplate =
           buildFormGroupTemplate(this.jsf, this.jsf.initialValues, true);
 
-      } else {
+        // Update all layout elements, add values, widgets, and validators,
+        // replace any '*' with a layout built from all schema elements,
+        // and update the FormGroup template with any new validators
+        this.jsf.layout = buildLayout(this.jsf, this.widgetLibrary);
 
-        // TODO: (?) If the schema does not exist,
-        // build the Angular 2 FormGroup template from the layout instead
-        // this.formGroupTemplate =
-        //   this.buildFormGroupTemplateFromLayout(this.jsf.layout, this.jsf);
+        // Build the real Angular 2 FormGroup from the FormGroup template
+        this.jsf.formGroup = <FormGroup>buildFormGroup(this.jsf.formGroupTemplate);
       }
-
-      // Update all layout elements, set values, and add validators,
-      // replace any '*' with a layout built from all schema elements,
-      // and update the FormGroup template with any new validators
-      this.jsf.layout = buildLayout(this.jsf, this.widgetLibrary);
-
-      // Build the real Angular 2 FormGroup from the FormGroup template
-      this.jsf.formGroup = <FormGroup>buildFormGroup(this.jsf.formGroupTemplate);
 
       if (this.jsf.formGroup) {
 
@@ -363,6 +374,7 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
           this.isValid.emit(isValid);
           this.validationErrors.emit(this.validateFormData.errors);
         }
+
 // Uncomment to output debugging information to console:
 // console.log(this.jsf.formGroupTemplate);
 // console.log(this.jsf.formGroup);
@@ -374,6 +386,7 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
 // console.log(this.jsf.dataMap);
 // console.log(this.jsf.schemaCircularRefMap);
 // console.log(this.jsf.dataCircularRefMap);
+
       } else {
         // TODO: Display error message
       }

@@ -10,7 +10,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
       [class]="options?.htmlClass">
       <button
         [attr.readonly]="options?.readonly ? 'readonly' : null"
-        [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
+        [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [class]="options?.fieldHtmlClass"
         [disabled]="controlDisabled"
         [name]="controlName"

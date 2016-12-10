@@ -8,32 +8,32 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
   template: `
     <div
       [class]="options?.htmlClass">
-      <label *ngIf="options?.title"
-        [attr.for]="layoutNode?.dataPointer"
-        [class]="options?.labelHtmlClass"
-        [class.sr-only]="options?.notitle"
-        [innerHTML]="options?.title"></label>
-      <input #inputControl
-        [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
-        [attr.list]="layoutNode?.dataPointer + 'Autocomplete'"
+      <md-input #inputControl
+        [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
+        [attr.list]="'control' + layoutNode?._id + 'Autocomplete'"
         [attr.maxlength]="options?.maxLength"
         [attr.minlength]="options?.minLength"
         [attr.pattern]="options?.pattern"
-        [attr.placeholder]="options?.placeholder"
         [attr.required]="options?.required"
         [class]="options?.fieldHtmlClass"
         [disabled]="controlDisabled"
-        [id]="layoutNode?.dataPointer"
+        [id]="'control' + layoutNode?._id"
         [name]="controlName"
+        [placeholder]="options?.title"
         [readonly]="options?.readonly ? 'readonly' : null"
+        [style.width]="'100%'"
         [type]="layoutNode?.type"
         [value]="controlValue"
         (input)="updateValue($event)">
-        <datalist *ngIf="options?.typeahead?.source"
-          [id]="layoutNode?.dataPointer + 'Autocomplete'">
-          <option *ngFor="let word of options?.typeahead?.source"
-            [value]="word">
-        </datalist>
+        <span *ngIf="options?.fieldAddonLeft"
+          md-prefix>{{options?.fieldAddonLeft}}</span>
+        <span *ngIf="options?.fieldAddonRight"
+          md-suffix>{{options?.fieldAddonRight}}</span>
+        <md-hint *ngIf="options?.description"
+          align="end">{{options?.description}}</md-hint>
+        <md-hint *ngIf="options?.placeholder && !formControl?.dirty"
+          align="end">{{options?.placeholder}}</md-hint>
+      </md-input>
     </div>`,
 })
 export class MaterialInputComponent implements OnInit {

@@ -63,7 +63,7 @@ export class JsonSchemaFormService {
       ctx.controlDisabled = ctx.formControl.disabled;
       // TODO: subscribe to status changes
       // TODO: emit / display error messages
-      // ctx.formControl.statusChanges.subscribe(v => );
+      // ctx.formControl.statusChanges.subscribe(v => ...);
     } else {
       ctx.controlName = ctx.layoutNode.name;
       ctx.controlValue = ctx.layoutNode.value;
@@ -154,18 +154,20 @@ export class JsonSchemaFormService {
     const newLayoutNode = _.cloneDeep(JsonPointer.get(
       this.layoutRefLibrary, [ctx.layoutNode.$ref]
     ));
-    // If adding a recursive item, prefix current dataPointer and layoutPointer
-    // to all pointers in new layoutNode
-    if (!ctx.layoutNode.arrayItem || ctx.layoutNode.circularReference) {
-      JsonPointer.forEachDeep(newLayoutNode, (value, pointer) => {
+    JsonPointer.forEachDeep(newLayoutNode, (value, pointer) => {
+      // Reset all _id's in newLayoutNode to unique values
+      if (hasOwn(value, '_id')) value._id = _.uniqueId();
+      // If adding a recursive item, prefix current dataPointer
+      // and layoutPointer to all pointers in new layoutNode
+      if (!ctx.layoutNode.arrayItem || ctx.layoutNode.circularReference) {
         if (hasOwn(value, 'dataPointer')) {
           value.dataPointer = ctx.layoutNode.dataPointer + value.dataPointer;
         }
         if (hasOwn(value, 'layoutPointer')) {
           value.layoutPointer = ctx.layoutNode.layoutPointer + value.layoutPointer;
         }
-      });
-    }
+      }
+    });
     // Add the new layoutNode to the layout
     JsonPointer.insert(this.layout, this.getLayoutPointer(ctx), newLayoutNode);
     return true;

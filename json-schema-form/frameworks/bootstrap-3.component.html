@@ -20,7 +20,7 @@
       [innerHTML]="options?.errorMessage" class="help-block"></p>
     <p *ngIf="options?.feedback && formControl?.dirty"
       class="sr-only"
-      [id]="layoutNode?.dataPointer + 'Status'"
+      [id]="'control' + layoutNode?._id + 'Status'"
       [innerHTML]="options?.errorMessage ? '(error)' : '(success)'"></p>
     <p *ngIf="options?.description"
       class="help-block"
@@ -31,7 +31,7 @@
   </div>
 
   <label *ngIf="options?.title"
-    [attr.for]="layoutNode?.dataPointer"
+    [attr.for]="'control' + layoutNode?._id"
     [class]="options?.labelHtmlClass"
     [class.sr-only]="options?.notitle"
     [innerHTML]="options?.title"></label>
@@ -68,7 +68,7 @@
       [innerHTML]="options?.errorMessage"></p>
     <p *ngIf="options?.feedback && formControl?.dirty"
       class="sr-only"
-      [id]="layoutNode?.dataPointer + 'Status'"
+      [id]="'control' + layoutNode?._id + 'Status'"
       [innerHTML]="options?.errorMessage ? '(error)' : '(success)'"></p>
     <p *ngIf="options?.description"
       class="help-block"

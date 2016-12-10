@@ -7,15 +7,10 @@ import { getControl, inArray, isDefined } from '../../utilities/index';
 @Component({
   selector: 'material-number-widget',
   template: `
-    <div
-      [class]="options?.htmlClass">
-      <label *ngIf="options?.title"
-        [attr.for]="layoutNode?.dataPointer"
-        [class]="options?.labelHtmlClass"
-        [class.sr-only]="options?.notitle"
-        [innerHTML]="options?.title"></label>
-      <input
-        [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
+  <div
+    [class]="options?.htmlClass">
+    <md-input #inputControl
+        [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.max]="options?.maximum"
         [attr.min]="options?.minimum"
         [attr.placeholder]="options?.placeholder"
@@ -24,15 +19,26 @@ import { getControl, inArray, isDefined } from '../../utilities/index';
         [attr.step]="options?.multipleOf || options?.step || 'any'"
         [class]="options?.fieldHtmlClass"
         [disabled]="controlDisabled"
-        [id]="layoutNode?.dataPointer"
+        [id]="'control' + layoutNode?._id"
         [name]="controlName"
+        [placeholder]="options?.title"
         [readonly]="options?.readonly ? 'readonly' : null"
+        [style.width]="'100%'"
         [title]="lastValidNumber"
         [type]="layoutNode?.type === 'range' ? 'range' : 'number'"
         [value]="controlValue"
         (input)="updateValue($event)"
         (keydown)="validateInput($event)"
         (keyup)="validateNumber($event)">
+        <span *ngIf="options?.fieldAddonLeft"
+          md-prefix>{{options?.fieldAddonLeft}}</span>
+        <span *ngIf="options?.fieldAddonRight"
+          md-suffix>{{options?.fieldAddonRight}}</span>
+        <md-hint *ngIf="options?.description"
+          align="end">{{options?.description}}</md-hint>
+        <md-hint *ngIf="options?.placeholder && !formControl?.dirty"
+          align="end">{{options?.placeholder}}</md-hint>
+      </md-input>
         {{layoutNode?.type === 'range' ? controlValue : ''}}
     </div>`,
 })

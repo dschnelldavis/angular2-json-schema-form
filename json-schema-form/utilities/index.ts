@@ -1,4 +1,4 @@
-// Note: Changing the following import order may cause errors,
+// Warning: Changing the following import order may cause errors
 // if a library is imported before another library it depends on.
 export * from './convert-json-schema.functions';
 export * from './validator.functions';

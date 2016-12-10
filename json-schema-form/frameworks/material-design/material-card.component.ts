@@ -3,7 +3,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { JsonSchemaFormService } from '../../json-schema-form.service';
 
 @Component({
-  selector: 'material-fieldset-widget',
+  selector: 'material-card-widget',
   template: `
     <fieldset
       [class]="options?.htmlClass"
@@ -28,7 +28,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
     .expanded > legend:before { content: '\\25BE'; padding-right: .2em; }
   `],
 })
-export class MaterialFieldsetComponent implements OnInit {
+export class MaterialCardComponent implements OnInit {
   private options: any;
   private expanded: boolean = true;
   @Input() layoutNode: any;

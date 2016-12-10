@@ -9,12 +9,12 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
     <div
       [class]="options?.htmlClass">
       <label *ngIf="options?.title"
-        [attr.for]="layoutNode?.dataPointer"
+        [attr.for]="'control' + layoutNode?._id"
         [class]="options?.labelHtmlClass"
         [class.sr-only]="options?.notitle"
         [innerHTML]="options?.title"></label>
       <textarea
-        [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
+        [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.maxlength]="options?.maxLength"
         [attr.minlength]="options?.minLength"
         [attr.pattern]="options?.pattern"
@@ -23,7 +23,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
         [attr.required]="options?.required"
         [class]="options?.fieldHtmlClass"
         [disabled]="controlDisabled"
-        [id]="layoutNode?.dataPointer"
+        [id]="'control' + layoutNode?._id"
         [name]="controlName"
         [value]="controlValue"
         (input)="updateValue($event)"></textarea>

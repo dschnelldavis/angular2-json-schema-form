@@ -51,8 +51,11 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
       console.error(layoutItem);
       return null;
     }
-    newNode.options = {};
-    newNode.layoutPointer = layoutPointer.replace(/\/\d+/g, '/-');
+    Object.assign(newNode, {
+      _id: _.uniqueId(),
+      layoutPointer: layoutPointer.replace(/\/\d+/g, '/-'),
+      options: {},
+    });
     let itemSchema: any = null;
 
     // If newNode does not have a dataPointer, try to find an equivalent
@@ -239,7 +242,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
         // TODO: check maxItems to verify adding new items is OK, and check
         // additionalItems for whether there is a different schema for new items
         if (newNode.options.addable !== false) {
-          jsf.layoutRefLibrary[arrayPointer] =
+          jsf.layoutRefLibrary['#' + arrayPointer] =
             _.cloneDeep(newNode.items[newNode.items.length - 1]);
           const initialNodeData =
             JsonPointer.get(jsf.initialValues, newNode.dataPointer);
@@ -248,7 +251,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
           ) {
             for (let i = newNode.items.length, l = initialNodeData.length; i < l; i++) {
               newNode.items
-                .push(_.cloneDeep(jsf.layoutRefLibrary[arrayPointer]));
+                .push(_.cloneDeep(jsf.layoutRefLibrary['#' + arrayPointer]));
             }
           }
           let buttonText: string = 'Add';
@@ -336,19 +339,23 @@ export function buildLayoutFromSchema(
   const schema = JsonPointer.get(jsf.schema, schemaPointer);
   if (!hasOwn(schema, 'type') && !hasOwn(schema, 'x-schema-form') &&
     !hasOwn(schema, '$ref')) return null;
-  let newNode: any = { options: {} };
-  newNode.dataPointer = JsonPointer.toGenericPointer(dataPointer, jsf.arrayMap);
-  newNode.layoutPointer = layoutPointer.replace(/\/\d+/g, '/-');
+  const newNodeType: string = getInputType(schema);
+  let newNode: any = {
+    _id: _.uniqueId(),
+    arrayItem: arrayItem,
+    dataPointer: JsonPointer.toGenericPointer(dataPointer, jsf.arrayMap),
+    dataType: schema.type || (hasOwn(schema, '$ref') ? '$ref' : null),
+    layoutPointer: layoutPointer.replace(/\/\d+/g, '/-') || '/-',
+    options: {},
+    type: newNodeType,
+    widget: widgetLibrary.getWidget(newNodeType),
+  };
   const lastDataKey = JsonPointer.toKey(newNode.dataPointer);
   if (lastDataKey !== '-') newNode.name = lastDataKey;
-  newNode.type = getInputType(schema);
-  newNode.dataType = schema.type || (hasOwn(schema, '$ref') ? '$ref' : null);
-  newNode.arrayItem = arrayItem;
   if (newNode.arrayItem) {
     newNode.options.arrayItemType = arrayItemType;
     newNode.options.removable = removable;
   }
-  newNode.widget = widgetLibrary.getWidget(newNode.type);
   if (dataPointer !== '') {
     if (!jsf.dataMap.has(newNode.dataPointer)) {
       jsf.dataMap.set(newNode.dataPointer, new Map);
@@ -503,9 +510,9 @@ export function buildLayoutFromSchema(
 
     // If addable items, save to layoutRefLibrary, and add $ref item to layout
     if (additionalItems) {
-      jsf.layoutRefLibrary[dataPointer + '/-'] = additionalItems;
-      delete jsf.layoutRefLibrary[dataPointer + '/-']['key'];
-      delete jsf.layoutRefLibrary[dataPointer + '/-']['name'];
+      jsf.layoutRefLibrary['#' + dataPointer + '/-'] = additionalItems;
+      delete jsf.layoutRefLibrary['#' + dataPointer + '/-']['key'];
+      delete jsf.layoutRefLibrary['#' + dataPointer + '/-']['name'];
       let buttonText: string = 'Add ';
       if (additionalItems.options.title) {
         buttonText += additionalItems.options.title;
@@ -639,8 +646,8 @@ export function buildLayoutFromSchema(
  * @param {any[]} layout - the layout to map
  * @param {(v: any, i?: number, l?: any, p?: string) => any}
  *   function - the funciton to invoke on each element
- * @param {any[] = layout} rootLayout - the root layout, which conatins layout
  * @param {any = ''} layoutPointer - the layoutPointer to layout, inside rootLayout
+ * @param {any[] = layout} rootLayout - the root layout, which conatins layout
  * @return {[type]}
  */
 export function mapLayout(
@@ -653,7 +660,7 @@ export function mapLayout(
   let newLayout: any[] = [];
   forEach(layout, (item, index) => {
     let realIndex = +index + indexPad;
-    let newPath = layoutPointer + '/' + realIndex;
+    let newLayoutPointer = layoutPointer + '/' + realIndex;
     let newNode: any = copy(item);
     let itemsArray: any[] = [];
     if (isObject(item)) {
@@ -664,9 +671,9 @@ export function mapLayout(
       }
     }
     if (itemsArray.length) {
-      newNode.items = mapLayout(itemsArray, fn, newPath + '/items', rootLayout);
+      newNode.items = mapLayout(itemsArray, fn, newLayoutPointer + '/items', rootLayout);
     }
-    newNode = fn(newNode, realIndex, newPath, rootLayout);
+    newNode = fn(newNode, realIndex, newLayoutPointer, rootLayout);
     if (!isDefined(newNode)) {
       indexPad--;
     } else {

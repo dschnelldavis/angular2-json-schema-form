@@ -80,6 +80,13 @@ export function buildFormGroupTemplate(
       jsf.dataMap.get(dataPointer).set('templatePointer', templatePointer);
       jsf.dataMap.get(dataPointer).set('templateType', controlType);
     }
+    const genericDataPointer =
+      JsonPointer.toGenericPointer(dataPointer, jsf.arrayMap);
+    if (!jsf.dataMap.has(genericDataPointer)) {
+      jsf.dataMap.set(genericDataPointer, new Map);
+      jsf.dataMap.get(genericDataPointer).set('schemaPointer', schemaPointer);
+      jsf.dataMap.get(genericDataPointer).set('schemaType', schema.type);
+    }
   }
   let controls: any;
   let validators: any = getControlValidators(schema);
@@ -385,6 +392,10 @@ export function formatFormData(
       } else {
         console.error('formatFormData error: Schema type not found ' +
           'for form value at "' + genericPointer + '".');
+        console.error(formData);
+        console.error(dataMap);
+        console.error(circularRefMap);
+        console.error(arrayMap);
       }
     }
   });

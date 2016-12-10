@@ -7,16 +7,16 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
   selector: 'material-checkbox-widget',
   template: `
     <label
-      [attr.for]="layoutNode?.dataPointer"
+      [attr.for]="'control' + layoutNode?._id"
       [class]="options?.itemLabelHtmlClass">
       <input
-        [attr.aria-describedby]="layoutNode?.dataPointer + 'Status'"
+        [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [checked]="isChecked ? 'checked' : null"
         [class]="options?.fieldHtmlClass + (isChecked ?
           (' ' + options?.activeClass + ' ' + options?.style?.selected) :
           (' ' + options?.style?.unselected))"
         [disabled]="controlDisabled"
-        [id]="layoutNode?.dataPointer"
+        [id]="'control' + layoutNode?._id"
         [name]="controlName"
         [readonly]="options?.readonly ? 'readonly' : null"
         [value]="controlValue"

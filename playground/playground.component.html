@@ -11,19 +11,19 @@
     <div class="col-sm-12">
       An Angular 2 <a href="http://json-schema.org/">JSON Schema</a> Form builder,
       similar to, and mostly API compatible with,
-        <!-- <a href="http://factory.joshfire.com/">Joshfire's</a> -->
-        <!-- http://github.com/joshfire/jsonform/wiki -->
-        <a href="http://ulion.github.io/jsonform/playground/">JSON Form</a>,
-        <span style="white-space: nowrap;">
-          <!-- <a href="https://github.com/mozilla-services/react-jsonschema-form">Mozilla's</a> -->
-          <a href="https://mozilla-services.github.io/react-jsonschema-form/">React JSON Schema Form</a>,
-          and
-          <!-- <a href="https://github.com/json-schema-form">JSON Schema Form's</a> -->
-          <!-- http://schemaform.io -->
-          <a href="http://schemaform.io/examples/bootstrap-example.html">Angular Schema Form</a>.
-        </span>
-      </div>
+      <!-- <a href="http://factory.joshfire.com/">Joshfire's</a> -->
+      <!-- http://github.com/joshfire/jsonform/wiki -->
+      <a href="http://ulion.github.io/jsonform/playground/">JSON Form</a>,
+      <span style="white-space: nowrap;">
+        <!-- <a href="https://github.com/mozilla-services/react-jsonschema-form">Mozilla's</a> -->
+        <a href="https://mozilla-services.github.io/react-jsonschema-form/">React JSON Schema Form</a>,
+        and
+        <!-- <a href="https://github.com/json-schema-form">JSON Schema Form's</a> -->
+        <!-- http://schemaform.io -->
+        <a href="http://schemaform.io/examples/bootstrap-example.html">Angular Schema Form</a>.
+      </span>
     </div>
+  </div>
 
   <div class="row">
     <div class="col-sm-12">
@@ -31,59 +31,59 @@
     </div>
   </div>
 
-<div class="form-group">
-  <div class="row">
-    <div class="col-sm-2">
-      <label for="exampleSet">Example Set:</label>
+  <div class="form-group">
+    <div class="row">
+      <div class="col-sm-2">
+        <label for="exampleSet">Example Set:</label>
+      </div>
+      <div class="col-sm-6">
+        <select id="exampleSet" class="form-control"
+          (change)="loadSelectedSet($event.target.value)">
+          <option *ngFor="let set of examples.exampleSetList"
+            [value]="set" [selected]="selectedSet === set">
+            {{examples.exampleSets[set]}}
+          </option>
+        </select>
+      </div>
+      <div class="col-sm-4"></div>
+      <div class="clearfix visible-sm-block"></div>
     </div>
-    <div class="col-sm-6">
-      <select id="exampleSet" class="form-control"
-        (change)="loadSelectedSet($event.target.value)">
-        <option *ngFor="let set of examples.exampleSetList"
-          [value]="set" [selected]="selectedSet === set">
-          {{examples.exampleSets[set]}}
-        </option>
-      </select>
-    </div>
-    <div class="col-sm-4"></div>
-    <div class="clearfix visible-sm-block"></div>
-  </div>
 
-  <div class="row">
-    <div class="col-sm-2">
-      <label for="example">Example:</label>
+    <div class="row">
+      <div class="col-sm-2">
+        <label for="example">Example:</label>
+      </div>
+      <div class="col-sm-6">
+        <select id="example" class="form-control"
+          (change)="loadSelectedExample(selectedSet, $event.target.value)">
+          <option *ngFor="let example of examples.exampleList[selectedSet]"
+            [value]="example" [selected]="selectedExample === example">
+            {{examples.examples[selectedSet][example]}}
+          </option>
+        </select>
+      </div>
+      <div class="col-sm-4"></div>
+      <div class="clearfix visible-sm-block"></div>
     </div>
-    <div class="col-sm-6">
-      <select id="example" class="form-control"
-        (change)="loadSelectedExample(selectedSet, $event.target.value)">
-        <option *ngFor="let example of examples.exampleList[selectedSet]"
-          [value]="example" [selected]="selectedExample === example">
-          {{examples.examples[selectedSet][example]}}
-        </option>
-      </select>
-    </div>
-    <div class="col-sm-4"></div>
-    <div class="clearfix visible-sm-block"></div>
-  </div>
 
-  <div class="row">
-    <div class="col-sm-2">
-      <label for="example">Framework:</label>
+    <div class="row">
+      <div class="col-sm-2">
+        <label for="example">Framework:</label>
+      </div>
+      <div class="col-sm-6">
+        <select id="example" class="form-control"
+          (change)="loadSelectedFramework($event.target.value)">
+          <option *ngFor="let framework of examples.frameworkList"
+            [value]="framework" [selected]="selectedFramework === framework">
+            {{examples.frameworks[framework]}}
+          </option>
+        </select>
+      </div>
+      <div class="col-sm-4"></div>
+      <div class="clearfix visible-sm-block"></div>
     </div>
-    <div class="col-sm-6">
-      <select id="example" class="form-control"
-        (change)="loadSelectedFramework($event.target.value)">
-        <option *ngFor="let framework of examples.frameworkList"
-          [value]="framework" [selected]="selectedFramework === framework">
-          {{examples.frameworks[framework]}}
-        </option>
-      </select>
-    </div>
-    <div class="col-sm-4"></div>
-    <div class="clearfix visible-sm-block"></div>
-  </div>
 
-</div>
+  </div>
 
   <div class="row">
     <div class="col-sm-5">
@@ -112,6 +112,8 @@
         (validationErrors)="validationErrors($event)"
         [debug]="false">
       </json-schema-form>
+
+      <hr>
 
       <p>
         Valid?:

@@ -9,7 +9,7 @@ import { AceEditorDirective } from './ace-editor.directive';
 import { routing, appRoutingProviders } from './playground.routing';
 
 import { JsonSchemaFormModule } from '../json-schema-form/json-schema-form.module';
-// Note - To include this module after downloading from NPM, use this instead:
+// To include JsonSchemaFormModule after downloading from NPM, use this instead:
 // import { JsonSchemaFormModule } from 'angular2-json-schema-form';
 
 @NgModule({

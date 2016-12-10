@@ -1,20 +1,22 @@
 import { Component, Input, OnChanges, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
-import { JsonSchemaFormService } from '../json-schema-form.service';
+import { JsonSchemaFormService } from '../../json-schema-form.service';
 
 @Component({
-  selector: 'add-reference-widget',
+  selector: 'material-add-reference-widget',
   template: `
-    <button *ngIf="showAddButton"
+    <button *ngIf="showAddButton" md-raised-button
       [class]="options?.fieldHtmlClass"
+      [color]="options?.color || 'accent'"
       [disabled]="options?.readonly"
+      style="float: right;"
       (click)="addItem($event)">
       <span *ngIf="options?.icon" [class]="options?.icon"></span>
       <span *ngIf="options?.title" [innerHTML]="options?.title"></span>
     </button>`,
 })
-export class AddReferenceComponent implements OnInit, OnChanges {
+export class MaterialAddReferenceComponent implements OnInit, OnChanges {
   private options: any;
   private itemCount: number;
   private showAddButton: boolean = true;

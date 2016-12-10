@@ -9,7 +9,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
     <input
       [disabled]="controlDisabled"
       [name]="controlName"
-      [id]="layoutNode?.dataPointer"
+      [id]="'control' + layoutNode?._id"
       [type]="hidden"
       [value]="controlValue">`,
 })
