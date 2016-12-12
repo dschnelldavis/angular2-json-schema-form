@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { enableProdMode } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 
@@ -12,6 +13,7 @@ import { JsonSchemaFormModule } from '../json-schema-form/json-schema-form.modul
 // To include JsonSchemaFormModule after downloading from NPM, use this instead:
 // import { JsonSchemaFormModule } from 'angular2-json-schema-form';
 
+enableProdMode();
 @NgModule({
   imports: [
     BrowserModule, HttpModule, ReactiveFormsModule,

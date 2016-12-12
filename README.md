@@ -1,152 +1,194 @@
-# Angular QuickStart Source
-[![Build Status][travis-badge]][travis-badge-url]
+# Angular 2 JSON Schema Form
 
-This repository holds the TypeScript source code of the [angular.io quickstart](https://angular.io/docs/ts/latest/quickstart.html),
-the foundation for most of the documentation samples and potentially a good starting point for your application.
+A [JSON Schema](http://json-schema.org) Form builder for Angular 2, similar to, and mostly API compatible with,
 
-It's been extended with testing support so you can start writing tests immediately.
+  * [JSON Schema Form](https://github.com/json-schema-form)'s [Angular Schema Form](http://schemaform.io) for [Angular 1](https://angularjs.org) ([examples](http://schemaform.io/examples/bootstrap-example.html))
+  * [Mozilla](https://blog.mozilla.org/services/)'s [React JSON Schema Form](https://github.com/mozilla-services/react-jsonschema-form) for [React](https://facebook.github.io/react/) ([examples](https://mozilla-services.github.io/react-jsonschema-form/)), and
+  * [Joshfire](http://www.joshfire.com)'s [JSON Form](http://github.com/joshfire/jsonform/wiki) for [jQuery](https://jquery.com) ([examples](http://ulion.github.io/jsonform/playground/))
 
-**This is not the perfect arrangement for your application. It is not designed for production.
-It exists primarily to get you started quickly with learning and prototyping in Angular**
+Note: This is a personal proof-of-concept project, and is NOT currently affiliated with any of the organizations listed above.
 
-We are unlikely to accept suggestions about how to grow this QuickStart into something it is not.
-Please keep that in mind before posting issues and PRs.
+## Installation
 
-## Prerequisites
+### To install from GitHub and play with the examples
 
-Node.js and npm are essential to Angular development. 
-    
-<a href="https://docs.npmjs.com/getting-started/installing-node" target="_blank" title="Installing Node.js and updating npm">
-Get it now</a> if it's not already installed on your machine.
- 
-**Verify that you are running at least node `v4.x.x` and npm `3.x.x`**
-by running `node -v` and `npm -v` in a terminal/console window.
-Older versions produce errors.
+The [GitHub](https://github.com) version of Angular 2 JSON Schema Form includes an example playground with over 70 different JSON Schemas (including all examples used by each of the three libraries listed above), and the ability to quickly view any example formatted using Bootstrap 3 or Material Design (or without formatting, which works, but is usually pretty ugly).
 
-We recommend [nvm](https://github.com/creationix/nvm) for managing multiple versions of node and npm.
+To install both the library and the example playground, clone `https://github.com/dschnelldavis/angular2-json-schema-form.git` with your favorite git program, or enter the following in your terminal:
 
-## Create a new project based on the QuickStart
-
-Clone this repo into new project folder (e.g., `my-proj`).
-```bash
-git clone  https://github.com/angular/quickstart  my-proj
-cd my-proj
 ```
-
-We have no intention of updating the source on `angular/quickstart`.
-Discard everything "git-like" by deleting the `.git` folder.
-```bash
-rm -rf .git  # non-Windows
-rd .git /S/Q # windows
-```
-
-### Create a new git repo
-You could [start writing code](#start-development) now and throw it all away when you're done.
-If you'd rather preserve your work under source control, consider taking the following steps.
-
-Initialize this project as a *local git repo* and make the first commit:
-```bash
-git init
-git add .
-git commit -m "Initial commit"
-```
-
-Create a *remote repository* for this project on the service of your choice.
-
-Grab its address (e.g. *`https://github.com/<my-org>/my-proj.git`*) and push the *local repo* to the *remote*.
-```bash
-git remote add origin <repo-address>
-git push -u origin master
-```
-## Install npm packages
-
-> See npm and nvm version notes above
-
-Install the npm packages described in the `package.json` and verify that it works:
-
-**Attention Windows Developers:  You must run all of these commands in administrator mode**.
-
-```bash
+git clone https://github.com/dschnelldavis/angular2-json-schema-form.git angular2-json-schema-form
+cd angular2-json-schema-form
 npm install
 npm start
 ```
 
-> If the `typings` folder doesn't show up after `npm install` please install them manually with:
+This should start the example playground locally and display it at `http://localhost:3000`
 
-> `npm run typings -- install`
+To explore the source code, you will find the example playground in the `/playground` folder (with the JSON Schema examples in `/playground/examples`), and the Angular 2 JSON Schema Form library itself in the `/json-schema-form` folder, with the widget library (described below) in `/json-schema-form/widgets` and the framework library in `/json-schema-form/frameworks`.
 
-The `npm start` command first compiles the application, 
-then simultaneously re-compiles and runs the `lite-server`.
-Both the compiler and the server watch for file changes.
+### To install from NPM and use in your own project
 
-Shut it down manually with Ctrl-C.
+If, after playing with the examples, you decide this library is functional enough to use in your own project, you can install it from [NPM](https://www.npmjs.com) with:
 
-You're ready to write your application.
+```
+npm i angular2-json-schema-form -save
+```
 
-### npm scripts
+Then, in your Angular 2 application module, add the lines:
 
-We've captured many of the most useful commands in npm scripts defined in the `package.json`:
+```javascript
+import { ReactiveFormsModule } from '@angular/forms';
+import { JsonSchemaFormModule } from 'angular2-json-schema-form';
+```
 
-* `npm start` - runs the compiler and a server at the same time, both in "watch mode".
-* `npm run tsc` - runs the TypeScript compiler once.
-* `npm run tsc:w` - runs the TypeScript compiler in watch mode; the process keeps running, awaiting changes to TypeScript files and re-compiling when it sees them.
-* `npm run lite` - runs the [lite-server](https://www.npmjs.com/package/lite-server), a light-weight, static file server, written and maintained by
-[John Papa](https://github.com/johnpapa) and
-[Christopher Martin](https://github.com/cgmartin)
-with excellent support for Angular apps that use routing.
-* `npm run typings` - runs the typings tool.
-* `npm run postinstall` - called by *npm* automatically *after* it successfully completes package installation. This script installs the TypeScript definition files this app requires.
-Here are the test related scripts:
-* `npm test` - compiles, runs and watches the karma unit tests
-* `npm run e2e` - run protractor e2e tests, written in JavaScript (*e2e-spec.js)
+And finally, add `'JsonSchemaFormModule'` to the 'imports' array in your @NgModule declaration.
 
-## Testing
+Also, if you use SystemJS, you may need to add the following to the 'map' section of your systemjs.config.js file:
 
-The QuickStart documentation doesn't discuss testing.
-This repo adds both karma/jasmine unit test and protractor end-to-end testing support.
+```javascript
+'angular2-json-schema-form': 'npm:angular2-json-schema-form',
+```
 
-These tools are configured for specific conventions described below.
+(For a complete example of how to install and use the library, clone the GitHub repository and look at how the library is imported into the example playground.)
 
-*It is unwise and rarely possible to run the application, the unit tests, and the e2e tests at the same time.
-We recommend that you shut down one before starting another.*
+## Using Angular 2 JSON Schema Form
 
-### Unit Tests
-TypeScript unit-tests are usually in the `app` folder. Their filenames must end in `.spec`.
+### Basic use
 
-Look for the example `app/app.component.spec.ts`.
-Add more `.spec.ts` files as you wish; we configured karma to find them.
+For basic use, after loading the JsonSchemaFormModule as described above, to add a form to your Angular 2 component, simply add the following to that component's template:
 
-Run it with `npm test`
+```html
+<json-schema-form
+  [schema]="yourJsonSchema"
+  (onSubmit)="yourOnSubmitFn($event)">
+</json-schema-form>
+```
 
-That command first compiles the application, then simultaneously re-compiles and runs the karma test-runner.
-Both the compiler and the karma watch for (different) file changes.
+Where the 'schema' input is a valid JSON schema object (either v3 or v4), and the 'onSubmit' output is a function that will be called when the form is submitted, with the results of the form as a JSON object.
 
-Shut it down manually with Ctrl-C.
+### Advanced use
 
-Test-runner output appears in the terminal window.
-We can update our app and our tests in real-time, keeping a weather eye on the console for broken tests.
-Karma is occasionally confused and it is often necessary to shut down its browser or even shut the command down (Ctrl-C) and
-restart it. No worries; it's pretty quick.
+For more advanced cases, you may also provide three additional inputs:
 
-### End-to-end (E2E) Tests
+* 'layout' with a custom form layout (see Angular Schema Form's [form definitions](https://github.com/json-schema-form/angular-schema-form/blob/master/docs/index.md#form-definitions) for information about how to construct a form layout)
+* 'initialValues' to populate the form with defaults or previously submitted values, and
+* 'options' to set any global options for the form.
 
-E2E tests are in the `e2e` directory, side by side with the `app` folder.
-Their filenames must end in `.e2e-spec.ts`.
+If you want more detailed output, you may provide additional functions for 'onChanges' to read the form values in real time (including before the completed form has been submitted) and you may implement your own custom validation from the boolean 'isValid' or the detailed 'validationErrors' outputs.
 
-Look for the example `e2e/app.e2e-spec.ts`.
-Add more `.e2e-spec.js` files as you wish (although one usually suffices for small projects);
-we configured protractor to find them.
+Here is an example:
 
-Thereafter, run them with `npm run e2e`.
+```html
+<json-schema-form
+  [schema]="yourJsonSchema"
+  [layout]="yourJsonFormLayout"
+  [initialValues]="yourData"
+  [options]="yourGlobalOptionSettings"
+  (onChanges)="yourOnChangesFn($event)"
+  (onSubmit)="yourOnSubmitFn($event)"
+  (isValid)="yourIsValidFn($event)"
+  (validationErrors)="yourValidationErrorsFn($event)">
+</json-schema-form>
+```
 
-That command first compiles, then simultaneously starts the Http-Server at `localhost:8080`
-and launches protractor.  
+Alternately, you may also combine all your inputs into one compound object and include it as a 'form' input, like so:
 
-The pass/fail test results appear at the bottom of the terminal window.
-A custom reporter (see `protractor.config.js`) generates a  `./_test-output/protractor-results.txt` file
-which is easier to read; this file is excluded from source control.
+```javascript
+let yourCompoundInputObject = {
+  schema: {...}, // required
+  layout: [...], // optional
+  initialValues: {...}, // optional
+  options: {...} // optional
+}
+```
 
-Shut it down manually with Ctrl-C.
+```html
+<json-schema-form
+  [form]="yourCompoundInputObject"
+  (onSubmit)="yourOnSubmitFn($event)">
+</json-schema-form>
+```
 
-[travis-badge]: https://travis-ci.org/angular/quickstart.svg?branch=master
-[travis-badge-url]: https://travis-ci.org/angular/quickstart
+Finally, Angular 2 JSON Schema Form also includes an experimental feature to create a form entirely from a JSON object (with no schema), like so:
+
+```javascript
+let exampleJsonObject = {
+  "first_name": "Jane", "last_name": "Doe",
+  "age": 25, "is_company": false,
+  "address": {
+    "street_1": "123 Main St.", "street_2": null,
+    "city": "Las Vegas", "state": "NV", "zip_code": "89123"
+  },
+  "phone_numbers": [
+    { "number": "702-123-4567", "type": "cell" },
+    { "number": "702-987-6543", "type": "work" }
+  ],
+  "notes": ""
+}
+```
+
+```html
+<json-schema-form
+  [initialValues]="exampleJsonObject"
+  (onSubmit)="yourOnSubmitFn($event)">
+</json-schema-form>
+```
+
+## Customizing
+
+Angular 2 JSON Schema Form has two built-in features designed to make it easy to customize at run-time: a widget library and a framework library. All forms are constructed from these basic components. The default widget library includes all standard HTML 5 form controls, as well as several common layout patterns, such as multiple checkboxes and tab sets. And the default framework library includes templates to style forms using either Bootstrap 3 or Material Design.
+
+### Changing or adding widgets
+
+To add a new widget or override an existing widget, load the `WidgetLibraryService` and call `registerWidget(widgetType, widgetComponent)`, with a string type name and an Angular 2 component to be used whenever a form needs that widget type.
+
+Example:
+
+```javascript
+import { WidgetLibraryService } from 'angular2-json-schema-form';
+
+import { YourInputWidgetComponent } from './your-input-widget.component';
+import { YourCustomWidgetComponent } from './your-custom-widget.component';
+...
+constructor(private widgetLibrary: WidgetLibraryService) {}
+...
+// Replace existing 'input' widget:
+widgetLibrary.registerWidget('input', YourInputWidgetComponent);
+// Add new 'custom-control' widget:
+widgetLibrary.registerWidget('custom-control', YourCustomWidgetComponent);
+```
+
+To see many examples of widgets, explore the source code, or call `getAllWidgets()` to see all widgets currently available in the library. All default widget components are in the `/widgets` folder, and all custom Material Design widget components are in the `/frameworks/material-design` folder.
+
+### Changing or adding frameworks
+
+To change the active framework, load the `FrameworkLibraryService` and call `setFramework(yourCustomFramework)` with either the name of an available framework (by default 'no-framework', 'bootstrap-3' or 'material-design'), or with your own custom framework object in the following format:
+
+```javascript
+import { FrameworkLibraryService } from 'angular2-json-schema-form';
+...
+constructor(private frameworkLibrary: FrameworkLibraryService) {}
+...
+let yourCustomFramework = {
+  framework: YourFrameworkComponent, // required
+  widgets: { 'your-widget-name': YourWidgetComponent }, // optional
+  stylesheets: [ '//url-to-your-external-style-sheet' ], // optional
+  scripts: [ '//url-to-your-external-script' ] // optional
+}
+frameworkLibrary.setFramework(yourCustomFramework);
+```
+
+The value of the required 'framework' key is an Angular 2 component which will be called to format each widget before it is displayed. The optional 'widgets' object contains any custom widgets which will override or supplement the built-in widgets, and the 'stylesheets' and 'scripts' arrays contain URLs to any supplemental external style sheets and JavaScript libraries to load.
+
+The two built-in frameworks (both in the `/frameworks` folder) demonstrate different strategies for how frameworks can style form elements. The Bootstrap 3 framework is very lightweight and includes no additional widgets (though it does load some external stylesheets and scripts) and works entirely by adding styles to the default widgets. In contrast, the Material Design framework makes much more drastic changes, and uses the [Material Design for Angular 2](https://github.com/angular/material2) library (which must be loaded separately in the Angular 2 application module) to replace most of the default form control widgets with custom widgets from that library.
+
+## Contributions and future development
+
+I wrote this library because I needed a JSON Schema Form builder to use in a large Angular 2 project I am currently working on. Though I found excellent libraries for Angular 1, React, and jQuery (all linked above), I could not find anything similar for Angular 2—so I wrote this library to fill that gap.
+
+The current version is mostly functional, and even includes a few enhancements not available in some other libraries, such as supporting less common JSON Schema features like 'oneOf', 'allOf', and '$ref' links (including circular links). However, it still has several bugs, such as not dynamically enabling and disabling conditionally required fields inside objects, and is very fragile because it does not yet include any testing framework at all.
+
+So if you find this library useful, I encourage you to fork it and send back pull requests for any improvements you make. (I would _love_ some tests...) You are also welcome to submit bug reports, however, as I am just a single busy developer, I can't guarantee how long it might take to fix any individual bugs. So if you want a change or fix to be implemented quickly, your best bet is to do it yourself and send a pull request.
+
+Thanks! I hope you enjoy using this library as much as I enjoyed writing it. :-)

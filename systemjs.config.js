@@ -14,10 +14,9 @@
       '@angular/http':             'npm:@angular/http/bundles/http.umd.js',
       '@angular/router':           'npm:@angular/router/bundles/router.umd.js',
       '@angular/forms':            'npm:@angular/forms/bundles/forms.umd.js',
-      '@angular/upgrade':          'npm:@angular/upgrade/bundles/upgrade.umd.js',
       'rxjs':                      'npm:rxjs',
       'angular-in-memory-web-api': 'npm:angular-in-memory-web-api',
-      '@angular/material':          'npm:@angular/material/material.umd.js',
+      '@angular/material':         'npm:@angular/material/material.umd.js',
       // other libraries
       'ajv':                       'npm:ajv/dist/ajv.min.js',
       'base64-js':                 'npm:base64-js',

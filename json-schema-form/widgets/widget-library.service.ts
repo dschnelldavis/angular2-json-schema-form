@@ -218,6 +218,11 @@ export class WidgetLibraryService {
   }
 
   public getAllWidgets(): any {
-    return this.activeWidgets;
+    return {
+      widgetLibrary: this.widgetLibrary,
+      registeredWidgets: this.registeredWidgets,
+      frameworkWidgets: this.frameworkWidgets,
+      activeWidgets: this.activeWidgets,
+    };
   }
 }

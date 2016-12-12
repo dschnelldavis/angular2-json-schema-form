@@ -5,24 +5,27 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
 @Component({
   selector: 'material-card-widget',
   template: `
-    <fieldset
+    <md-card
+      [attr.disabled]="options?.readonly"
       [class]="options?.htmlClass"
       [class.expandable]="options?.expandable && !expanded"
-      [class.expanded]="options?.expandable && expanded"
-      [disabled]="options?.readonly">
-      <legend *ngIf="options?.title"
+      [class.expanded]="options?.expandable && expanded">
+      <md-card-title-group *ngIf="options?.title || options?.description"
         [class]="options?.labelHtmlClass"
-        [class.sr-only]="options?.notitle"
-        [innerHTML]="options?.title"
-        (click)="expand()"></legend>
-
+        (click)="expand()">
+        <md-card-title *ngIf="options?.title"
+          [class.sr-only]="options?.notitle"
+          [innerHTML]="options?.title">{{options?.title}}</md-card-title>
+        <md-card-subtitle *ngIf="options?.description">{{options?.description}}</md-card-subtitle>
+      </md-card-title-group>
+      <md-card-content>
         <root-widget *ngIf="expanded"
           [layout]="layoutNode.items"
           [dataIndex]="dataIndex"
           [layoutIndex]="layoutIndex"
           [isOrderable]="options?.orderable"></root-widget>
-
-    </fieldset>`,
+      </md-card-content>
+    </md-card>`,
   styles: [`
     .expandable > legend:before { content: '\\25B8'; padding-right: .3em; }
     .expanded > legend:before { content: '\\25BE'; padding-right: .2em; }

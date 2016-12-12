@@ -6,15 +6,16 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
 @Component({
   selector: 'material-add-reference-widget',
   template: `
-    <button *ngIf="showAddButton" md-raised-button
-      [class]="options?.fieldHtmlClass"
-      [color]="options?.color || 'accent'"
-      [disabled]="options?.readonly"
-      style="float: right;"
-      (click)="addItem($event)">
-      <span *ngIf="options?.icon" [class]="options?.icon"></span>
-      <span *ngIf="options?.title" [innerHTML]="options?.title"></span>
-    </button>`,
+    <md-card-actions [class]="options?.htmlClass" align="end">
+      <button *ngIf="showAddButton" md-raised-button
+        [class]="options?.fieldHtmlClass"
+        [color]="options?.color || 'accent'"
+        [disabled]="options?.readonly"
+        (click)="addItem($event)">
+        <span *ngIf="options?.icon" [class]="options?.icon"></span>
+        <span *ngIf="options?.title" [innerHTML]="options?.title"></span>
+      </button>
+    </md-card-actions>`,
 })
 export class MaterialAddReferenceComponent implements OnInit, OnChanges {
   private options: any;

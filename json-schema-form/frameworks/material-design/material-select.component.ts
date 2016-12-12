@@ -24,8 +24,8 @@ import { buildTitleMap } from '../../utilities/index';
         [name]="controlName"
         (input)="updateValue($event)">
         <option *ngFor="let selectItem of selectList"
-           [value]="selectItem.value"
-           [selected]="selectItem.value === controlValue">{{selectItem.name}}</option>
+          [value]="selectItem.value"
+          [selected]="selectItem.value === controlValue">{{selectItem.name}}</option>
       </select>
     </div>`,
 })

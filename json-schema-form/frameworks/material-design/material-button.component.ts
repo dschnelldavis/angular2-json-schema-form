@@ -6,8 +6,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
 @Component({
   selector: 'material-button-widget',
   template: `
-    <div
-      [class]="options?.htmlClass">
+    <md-card-actions [class]="options?.htmlClass">
       <button md-raised-button
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
@@ -22,7 +21,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
         <md-icon *ngIf="options?.icon" class="md-24">{{options?.icon}}</md-icon>
         <span *ngIf="options?.title" [innerHTML]="options?.title"></span>
       </button>
-    </div>`,
+    </md-card-actions>`,
 })
 export class MaterialButtonComponent implements OnInit {
   private formControl: AbstractControl;

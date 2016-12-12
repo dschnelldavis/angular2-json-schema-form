@@ -67,7 +67,6 @@ export class FrameworkLibraryService {
         'checkboxes': MaterialCheckboxesComponent,
         'radios': MaterialRadiosComponent,
         'fieldset': MaterialCardComponent,
-        'section': MaterialCardComponent,
         'tabs': MaterialTabsComponent,
       },
       stylesheets: [

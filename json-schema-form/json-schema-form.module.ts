@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { enableProdMode } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MaterialModule } from '@angular/material';
 
@@ -14,6 +15,7 @@ import { FrameworkLibraryService } from './frameworks/framework-library.service'
 import { WidgetLibraryService } from './widgets/widget-library.service';
 import { JsonSchemaFormService } from './json-schema-form.service';
 
+enableProdMode();
 @NgModule({
   imports: [
     CommonModule, FormsModule, ReactiveFormsModule, MaterialModule.forRoot()
