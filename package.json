@@ -2,16 +2,15 @@
   "name": "angular2-json-schema-form",
   "description": "Angular 2 JSON Schema Form builder",
   "author": "David Schnell-Davis",
-  "keywords": [
-    "Angular 2",
-    "JSON Schema",
-    "Form builder"
-  ],
+  "keywords": [ "Angular 2", "JSON Schema", "Form builder" ],
   "version": "0.1.0-alpha.1",
   "license": "MIT",
   "homepage": "",
   "bugs": "",
-  "repository": {},
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/dschnelldavis/angular2-json-schema-form.git"
+  },
   "scripts": {
     "start": "tsc && concurrently \"tsc -w\" \"lite-server\" ",
     "docker-build": "docker build -t ng2-quickstart .",
