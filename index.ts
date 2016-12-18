@@ -1,4 +1,5 @@
-export { JsonSchemaFormModule } from './json-schema-form/json-schema-form.module';
-export { JsonSchemaFormService } from './json-schema-form/json-schema-form.service';
-export { WidgetLibraryService } from './json-schema-form/widgets/widget-library.service';
-export { FrameworkLibraryService } from './json-schema-form/frameworks/framework-library.service';
+export { WidgetLibraryService } from './src/widgets/widget-library.service';
+export { FrameworkLibraryService } from './src/frameworks/framework-library.service';
+export { JsonSchemaFormComponent } from './src/library/json-schema-form.component';
+export { JsonSchemaFormService } from './src/library/json-schema-form.service';
+export { JsonSchemaFormModule } from './src/library/json-schema-form.module';

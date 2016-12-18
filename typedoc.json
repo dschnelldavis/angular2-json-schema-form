@@ -1,0 +1,16 @@
+{
+  "name": "Angular 2 JSON Schema Form Library",
+  "mode": "modules",
+  "out": "docs/",
+  "theme": "default",
+  "ignoreCompilerErrors": "true",
+  "experimentalDecorators": "true",
+  "emitDecoratorMetadata": "true",
+  "target": "es5",
+  "moduleResolution": "node",
+  "preserveConstEnums": "true",
+  "stripInternal": "true",
+  "suppressExcessPropertyErrors": "true",
+  "suppressImplicitAnyIndexErrors": "true",
+  "module": "commonjs"
+}

@@ -25,30 +25,46 @@ npm start
 
 This should start the example playground locally and display it at `http://localhost:3000`
 
-To explore the source code, you will find the example playground in the `/playground` folder (with the JSON Schema examples in `/playground/examples`), and the Angular 2 JSON Schema Form library itself in the `/json-schema-form` folder, with the widget library (described below) in `/json-schema-form/widgets` and the framework library in `/json-schema-form/frameworks`.
+All the source code is in the `/src` folder. Inside that folder, you will find the following sub-folders:
+
+* `library` contains the Angular 2 JSON Schema Form library.
+* `playground` contains the example playground.
+* `playground/examples` contains the JSON Schema examples.
+* `frameworks` contains the widget library (described below).
+* `widgets` contains the framework library.
+
+If you want additional documentation describing the individual functions used in this library, run `npm run docs` to generate TypeDoc documentation, and then look in the newly generated `/docs` folder.
 
 ### To install from NPM and use in your own project
 
 If, after playing with the examples, you decide this library is functional enough to use in your own project, you can install it from [NPM](https://www.npmjs.com) with:
 
 ```
-npm i angular2-json-schema-form -save
+npm install angular2-json-schema-form -save
 ```
 
-Then, in your Angular 2 application module, add the lines:
-
+Then add these two lines to your main application module:
 ```javascript
 import { ReactiveFormsModule } from '@angular/forms';
 import { JsonSchemaFormModule } from 'angular2-json-schema-form';
 ```
 
-And finally, add `'JsonSchemaFormModule'` to the 'imports' array in your @NgModule declaration.
+And finally, add `'ReactiveFormsModule'` and `'JsonSchemaFormModule'` to the 'imports' array in your @NgModule declaration.
 
-Also, if you use SystemJS, you may need to add the following to the 'map' section of your systemjs.config.js file:
+Also, if you use SystemJS, you will also need to make the following changes to your systemjs.config.js file.
 
+Add three lines to the 'map' section:
 ```javascript
 'angular2-json-schema-form': 'npm:angular2-json-schema-form',
+'ajv': 'npm:ajv/dist/ajv.min.js',
+'lodash': 'npm:lodash/lodash.min.js',
 ```
+
+And add one line to the 'packages' section:
+```javascript
+'angular2-json-schema-form': { main: './index.js', defaultExtension: 'js' },
+```
+
 
 (For a complete example of how to install and use the library, clone the GitHub repository and look at how the library is imported into the example playground.)
 
@@ -72,7 +88,7 @@ Where the 'schema' input is a valid JSON schema object (either v3 or v4), and th
 For more advanced cases, you may also provide three additional inputs:
 
 * 'layout' with a custom form layout (see Angular Schema Form's [form definitions](https://github.com/json-schema-form/angular-schema-form/blob/master/docs/index.md#form-definitions) for information about how to construct a form layout)
-* 'initialValues' to populate the form with defaults or previously submitted values, and
+* 'data' to populate the form with defaults or previously submitted values, and
 * 'options' to set any global options for the form.
 
 If you want more detailed output, you may provide additional functions for 'onChanges' to read the form values in real time (including before the completed form has been submitted) and you may implement your own custom validation from the boolean 'isValid' or the detailed 'validationErrors' outputs.
@@ -83,7 +99,7 @@ Here is an example:
 <json-schema-form
   [schema]="yourJsonSchema"
   [layout]="yourJsonFormLayout"
-  [initialValues]="yourData"
+  [data]="yourData"
   [options]="yourGlobalOptionSettings"
   (onChanges)="yourOnChangesFn($event)"
   (onSubmit)="yourOnSubmitFn($event)"
@@ -98,7 +114,7 @@ Alternately, you may also combine all your inputs into one compound object and i
 let yourCompoundInputObject = {
   schema: {...}, // required
   layout: [...], // optional
-  initialValues: {...}, // optional
+  data: {...}, // optional
   options: {...} // optional
 }
 ```
@@ -130,7 +146,7 @@ let exampleJsonObject = {
 
 ```html
 <json-schema-form
-  [initialValues]="exampleJsonObject"
+  [data]="exampleJsonObject"
   (onSubmit)="yourOnSubmitFn($event)">
 </json-schema-form>
 ```
@@ -159,7 +175,7 @@ widgetLibrary.registerWidget('input', YourInputWidgetComponent);
 widgetLibrary.registerWidget('custom-control', YourCustomWidgetComponent);
 ```
 
-To see many examples of widgets, explore the source code, or call `getAllWidgets()` to see all widgets currently available in the library. All default widget components are in the `/widgets` folder, and all custom Material Design widget components are in the `/frameworks/material-design` folder.
+To see many examples of widgets, explore the source code, or call `getAllWidgets()` to see all widgets currently available in the library. All default widget components are in the `/src/widgets` folder, and all custom Material Design widget components are in the `/src/frameworks/material-design` folder.
 
 ### Changing or adding frameworks
 
@@ -181,7 +197,7 @@ frameworkLibrary.setFramework(yourCustomFramework);
 
 The value of the required 'framework' key is an Angular 2 component which will be called to format each widget before it is displayed. The optional 'widgets' object contains any custom widgets which will override or supplement the built-in widgets, and the 'stylesheets' and 'scripts' arrays contain URLs to any supplemental external style sheets and JavaScript libraries to load.
 
-The two built-in frameworks (both in the `/frameworks` folder) demonstrate different strategies for how frameworks can style form elements. The Bootstrap 3 framework is very lightweight and includes no additional widgets (though it does load some external stylesheets and scripts) and works entirely by adding styles to the default widgets. In contrast, the Material Design framework makes much more drastic changes, and uses the [Material Design for Angular 2](https://github.com/angular/material2) library (which must be loaded separately in the Angular 2 application module) to replace most of the default form control widgets with custom widgets from that library.
+The two built-in frameworks (both in the `/src/frameworks` folder) demonstrate different strategies for how frameworks can style form elements. The Bootstrap 3 framework is very lightweight and includes no additional widgets (though it does load some external stylesheets and scripts) and works entirely by adding styles to the default widgets. In contrast, the Material Design framework makes much more drastic changes, and uses the [Material Design for Angular 2](https://github.com/angular/material2) library (which must be loaded separately in the Angular 2 application module) to replace most of the default form control widgets with custom widgets from that library.
 
 ## Contributions and future development
 
@@ -192,3 +208,7 @@ The current version is mostly functional, and even includes a few enhancements n
 So if you find this library useful, I encourage you to fork it and send back pull requests for any improvements you make. (I would _love_ some tests...) You are also welcome to submit bug reports, however, as I am just a single busy developer, I can't guarantee how long it might take to fix any individual bugs. So if you want a change or fix to be implemented quickly, your best bet is to do it yourself and send a pull request.
 
 Thanks! I hope you enjoy using this library as much as I enjoyed writing it. :-)
+
+# License
+
+[MIT](/LICENSE)
