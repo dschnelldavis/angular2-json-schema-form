@@ -1,16 +1,16 @@
 # Node
 node_modules/*
-dist/*
+# dist/*
 docs/*
 npm-debug.log
 
-# TypeScript
-*.js
-!./index.js
-!./systemjs.config.js
-*.map
-*.d.ts
-!./typings/*.ts
+# Include compiled TypeScript files in NPM bundle
+# *.js
+# !index.js
+# !systemjs.config.js
+# *.map
+# *.d.ts
+# !typings/*.ts
 
 # JetBrains
 .idea
