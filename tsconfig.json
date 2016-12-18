@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
+    "lib": [ "es6", "dom" ],
     "module": "commonjs",
     "declaration": true,
     "moduleResolution": "node",
@@ -11,18 +12,20 @@
     "newLine": "LF",
     "noImplicitAny": false,
     "noEmitOnError": false,
-    "allowUnreachableCode": true
+    "allowUnreachableCode": true,
+    "outDir": "./dist"
   },
+  "files": [
+    "typings/index.d.ts",
+    "src/playground/main.ts",
+    "index.ts"
+  ],
   "filesGlob": [
-    "main.ts",
-    "typings.d.ts",
     "typings/**/*",
-    "json-schema-form/**/*.ts",
-    "playground/**/*.ts",
+    "src/**/*.ts",
     "node_modules/@types/**/*.ts",
     "node_modules/**/*.d.ts",
-    "!json-schema-form/**/*.spec.ts",
-    "!playground/**/*.spec.ts",
+    "!src/**/*.spec.ts",
     "!node_modules/**/*.ts"
   ]
 }
