@@ -91,7 +91,7 @@ export function _executeAsyncValidators(
  * @return {PlainObject} - merged object
  */
 export function _mergeObjects(...object: PlainObject[]): PlainObject {
-  let mergedObject: PlainObject = {};
+  let mergedObject: PlainObject = { };
   for (let i = 0, l = arguments.length; i < l; i++) {
     const currentObject = arguments[i];
     if (isObject(currentObject)) {
@@ -201,7 +201,7 @@ export function isString(value: any): value is string {
  */
 export function isNumber(value: any, strict: any = false): boolean {
   if (strict && typeof value !== 'number') return false;
-  return !isNaN(value) &&  value !== value / 0;
+  return !isNaN(value) && value !== value / 0;
 }
 
 /**
@@ -282,7 +282,7 @@ export function isSet(item: any): boolean {
  * getType('true') = 'string'
  * getType(true) = 'boolean'
  * getType(null) = 'null'
- * getType({}) = 'object'
+ * getType({ }) = 'object'
  * getType([]) = 'array'
  *
  * getType('10.5', 'strict') = 'string'

@@ -10,8 +10,8 @@ import {
 @Component({
   moduleId: module.id,
   selector: 'playground',
-  templateUrl: './playground.component.html',
-  styleUrls: [ './playground.component.css' ]
+  templateUrl: 'playground.component.html',
+  styleUrls: [ 'playground.component.css' ]
 })
 export class PlaygroundComponent implements OnInit, AfterViewInit {
 
@@ -222,10 +222,10 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
   private jsonFormValid: boolean = false;
   private jsonFormErrorMessage: string = 'Loading form...';
   private jsonFormObject: any;
-  private liveFormData: any = {};
+  private liveFormData: any = { };
   private formValidationErrors: any;
   private formIsValid: any;
-  private submittedFormData: any = {};
+  private submittedFormData: any = { };
   private aceEditorOptions: any = {
     highlightActiveLine: true,
     maxLines: 1000,
@@ -318,8 +318,8 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
         '&example=' + selectedExample +
         '&framework=' + this.selectedFramework
       );
-      this.liveFormData = {};
-      this.submittedFormData = {};
+      this.liveFormData = { };
+      this.submittedFormData = { };
       this.formIsValid = null;
       this.formValidationErrors = null;
     }
@@ -347,8 +347,8 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
   private generateForm(newFormString: string) {
     if (!newFormString) { return; }
     this.formActive = false;
-    this.liveFormData = {};
-    this.submittedFormData = {};
+    this.liveFormData = { };
+    this.submittedFormData = { };
 
     // Most examples should be written in pure JSON, but if a schema includes
     // a function, the playground will compile it as Javascript instead

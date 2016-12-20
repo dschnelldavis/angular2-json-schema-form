@@ -4,6 +4,7 @@ import { JsonSchemaFormService } from '../library/json-schema-form.service';
 import { JsonPointer, parseText } from '../library/utilities/index';
 
 @Component({
+  moduleId: module.id,
   selector: 'tabs-widget',
   template: `
     <ul
@@ -43,7 +44,7 @@ export class TabsComponent implements OnInit {
 
   constructor(
     private jsf: JsonSchemaFormService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.options = this.layoutNode.options;

@@ -88,7 +88,7 @@ export function buildFormGroupTemplate(
   let validators: any = getControlValidators(schema);
   switch (controlType) {
     case 'FormGroup':
-      controls = {};
+      controls = { };
       if (jsf.globalOptions.setSchemaDefaults) {
         useValues = mergeValues(
           JsonPointer.get(schema, '/properties/default'), useValues);
@@ -256,7 +256,7 @@ export function buildFormGroup(template: any): AbstractControl {
   if (hasOwn(template, 'controlType')) {
     switch (template.controlType) {
       case 'FormGroup':
-        let groupControls: { [key: string]: AbstractControl } = {};
+        let groupControls: { [key: string]: AbstractControl } = { };
         forEach(template.controls, (controls, key) => {
           let newControl: AbstractControl = buildFormGroup(controls);
           if (newControl) groupControls[key] = newControl;
@@ -290,7 +290,7 @@ export function mergeValues(...valuesToMerge) {
         if (isArray(currentValue)) {
           mergedValues = [].concat(currentValue);
         } else if (isObject(currentValue)) {
-          mergedValues = Object.assign({}, currentValue);
+          mergedValues = Object.assign({ }, currentValue);
         }
       } else if (typeof currentValue !== 'object') {
         mergedValues = currentValue;
@@ -364,7 +364,7 @@ export function formatFormData(
   formData: any, dataMap: Map<string, any>, circularRefMap: Map<string, string>,
   arrayMap: Map<string, number>, fixErrors: boolean = false
 ): any {
-  let formattedData = {};
+  let formattedData = { };
   JsonPointer.forEachDeep(formData, (value, dataPointer) => {
     if (typeof value !== 'object') {
       let genericPointer: string = dataPointer;

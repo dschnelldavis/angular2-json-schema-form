@@ -35,7 +35,7 @@ import { JsonValidators } from './json.validators';
  */
 export function buildSchemaFromLayout(layout: any[]): any {
   return;
-  // let newSchema: any = {};
+  // let newSchema: any = { };
   // const walkLayout = (layoutItems: any[], callback: Function): any[] => {
   //   let returnArray: any[] = [];
   //   for (let layoutItem of layoutItems) {
@@ -70,24 +70,17 @@ export function buildSchemaFromLayout(layout: any[]): any {
 export function buildSchemaFromData(
   data: any, isRoot: boolean = true
 ): any {
-  let newSchema: any = {};
+  let newSchema: any = { };
   if (isRoot) newSchema.$schema = 'http://json-schema.org/draft-04/schema#';
   const getSafeType = (value: any): string => {
-    let safeType = getType(value);
-    if (safeType === 'integer') {
-      safeType = 'number';
-    } else if (safeType === 'null') {
-      safeType = 'string';
-    }
+    let safeType = getType(value, 'strict');
+    if (safeType === 'integer') return 'number';
+    if (safeType === 'null') return 'string';
     return safeType;
   };
   newSchema.type = getSafeType(data);
-  if (newSchema.type === 'integer') {
-    newSchema.type = 'number';
-  } else if (newSchema.type === 'null') {
-    newSchema.type = 'string';
-  } else if (newSchema.type === 'object') {
-    newSchema.properties = {};
+  if (newSchema.type === 'object') {
+    newSchema.properties = { };
     for (let key of Object.keys(data)) {
       newSchema.properties[key] = buildSchemaFromData(data[key], false);
     }
@@ -99,7 +92,7 @@ export function buildSchemaFromData(
     if (itemTypes.length === 1) {
       newSchema.items = data.map(buildSubSchemaFromData).reduce(
         (combined, item) => Object.assign(combined, item)
-      , {});
+      , { });
     } else {
       newSchema.items = data.map(buildSubSchemaFromData);
     }
@@ -152,7 +145,7 @@ export function getFromSchema(
     if (!subSchemaArray || !subSchemaObject) {
       if (subSchemaArray && key === '-') {
         subSchema = (parentSchema.hasOwnProperty('additionalItems')) ?
-          parentSchema.additionalItems : {};
+          parentSchema.additionalItems : { };
       } else if (typeof subSchema === 'object' && subSchema.hasOwnProperty(key)) {
         subSchema = subSchema[key];
       } else {
@@ -215,7 +208,7 @@ export function getSchemaReference(
     ) {
       newSchema = newSchema.allOf
         .map(object => getSchemaReference(schema, object, schemaRefLibrary))
-        .reduce((schema1, schema2) => Object.assign(schema1, schema2), {});
+        .reduce((schema1, schema2) => Object.assign(schema1, schema2), { });
     }
     if (schemaRefLibrary) schemaRefLibrary[schemaPointer] = newSchema;
     return newSchema;
@@ -434,7 +427,7 @@ export function updateInputOptions(layoutNode: any, schema: any, jsf: any) {
   });
 
   // Set all option values in layoutNode.options
-  let newOptions: any = {};
+  let newOptions: any = { };
   const fixUiKeys = (key) => key.slice(0, 3) === 'ui:' ? key.slice(3) : key;
   mergeFilteredObject(newOptions, jsf.globalOptions.formDefaults,
     [], fixUiKeys);
@@ -498,7 +491,7 @@ export function updateInputOptions(layoutNode: any, schema: any, jsf: any) {
  */
 export function getControlValidators(schema: any) {
   if (!isObject(schema)) return null;
-  let validators: any = {};
+  let validators: any = { };
   if (hasOwn(schema, 'type')) {
     switch (schema.type) {
       case 'string':

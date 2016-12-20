@@ -81,7 +81,7 @@ export class RadiosComponent implements OnInit {
 
   constructor(
     private jsf: JsonSchemaFormService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.options = this.layoutNode.options;

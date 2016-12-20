@@ -14,10 +14,104 @@ import {
  *
  */
 @Component({
-  moduleId: module.id,
   selector: 'bootstrap-3-framework',
-  templateUrl: './bootstrap-3.component.html',
-  styleUrls: ['./bootstrap-3.component.css'],
+  template: `
+    <div
+      [class]="options?.htmlClass"
+      [class.has-feedback]="options?.feedback &&
+        options?.isInputWidget && formControl?.dirty"
+      [class.has-error]="!options?.disableErrorState &&
+        formControl?.errors && formControl?.dirty"
+      [class.has-success]="!options?.disableSuccessState &&
+        !formControl?.errors && formControl?.dirty">
+
+      <button *ngIf="options?.removable"
+        class="close pull-right"
+        style="position: relative; z-index: 20;"
+        type="button"
+        (click)="removeItem()">
+        <span aria-hidden="true">&times;</span>
+        <span class="sr-only">Close</span>
+      </button>
+      <div *ngIf="options?.messageLocation === 'top'">
+        <p *ngIf="options?.errorMessage"
+          [innerHTML]="options?.errorMessage" class="help-block"></p>
+        <p *ngIf="options?.feedback && formControl?.dirty"
+          class="sr-only"
+          [id]="'control' + layoutNode?._id + 'Status'"
+          [innerHTML]="options?.errorMessage ? '(error)' : '(success)'"></p>
+        <p *ngIf="options?.description"
+          class="help-block"
+          [innerHTML]="options?.description"></p>
+        <p *ngIf="options?.help"
+          class="help-block"
+          [innerHTML]="options?.help"></p>
+      </div>
+
+      <label *ngIf="options?.title"
+        [attr.for]="'control' + layoutNode?._id"
+        [class]="options?.labelHtmlClass"
+        [class.sr-only]="options?.notitle"
+        [innerHTML]="options?.title"></label>
+      <strong *ngIf="options?.title && options?.required"
+        class="text-danger">*</strong>
+      <p *ngIf="layoutNode?.type === 'submit' &&
+        jsf?.globalOptions?.fieldsRequired">
+        <strong class="text-danger">*</strong> = required fields
+      </p>
+      <div [class.input-group]="options?.fieldAddonLeft || options?.fieldAddonRight">
+        <span *ngIf="options?.fieldAddonLeft"
+          class="input-group-addon"
+          [innerHTML]="options?.fieldAddonLeft"></span>
+
+        <select-widget-widget
+          [layoutNode]="widgetLayoutNode"
+          [dataIndex]="dataIndex"
+          [layoutIndex]="layoutIndex"></select-widget-widget>
+
+        <span *ngIf="options?.fieldAddonRight"
+          class="input-group-addon"
+          [innerHTML]="options?.fieldAddonRight"></span>
+      </div>
+
+      <span *ngIf="options?.feedback && options?.isInputWidget &&
+        !options?.fieldAddonRight && !layoutNode.arrayItem && formControl?.dirty"
+        [class.glyphicon-ok]="!options?.disableSuccessState && !formControl?.errors"
+        [class.glyphicon-remove]="!options?.disableErrorState && formControl?.errors"
+        aria-hidden="true"
+        class="form-control-feedback glyphicon"></span>
+      <div *ngIf="options?.messageLocation !== 'top'">
+        <p *ngIf="!options?.errorMessage"
+          class="help-block"
+          [innerHTML]="options?.errorMessage"></p>
+        <p *ngIf="options?.feedback && formControl?.dirty"
+          class="sr-only"
+          [id]="'control' + layoutNode?._id + 'Status'"
+          [innerHTML]="options?.errorMessage ? '(error)' : '(success)'"></p>
+        <p *ngIf="options?.description"
+          class="help-block"
+          [innerHTML]="options?.description"></p>
+        <p *ngIf="options?.help"
+          class="help-block"
+          [innerHTML]="options?.help"></p>
+      </div>
+    </div>
+
+    <div *ngIf="debug && debugOutput">debug: <pre>{{debugOutput}}</pre></div>
+  `,
+  styleUrls: [`
+    :host /deep/ .list-group-item .form-control-feedback { top: 40; }
+    :host /deep/ .checkbox,
+    :host /deep/ .radio { margin-top: 0; margin-bottom: 0; }
+    :host /deep/ .checkbox-inline,
+    :host /deep/ .checkbox-inline + .checkbox-inline,
+    :host /deep/ .checkbox-inline + .radio-inline,
+    :host /deep/ .radio-inline,
+    :host /deep/ .radio-inline + .radio-inline,
+    :host /deep/ .radio-inline + .checkbox-inline { margin-left: 0; margin-right: 10px; }
+    :host /deep/ .checkbox-inline:last-child,
+    :host /deep/ .radio-inline:last-child { margin-right: 0; }
+  `],
 })
 export class Bootstrap3Component implements OnInit, OnChanges {
   private controlInitialized: boolean = false;
@@ -34,7 +128,7 @@ export class Bootstrap3Component implements OnInit, OnChanges {
   constructor(
     public changeDetector: ChangeDetectorRef,
     private jsf: JsonSchemaFormService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.initializeControl();
@@ -49,7 +143,7 @@ export class Bootstrap3Component implements OnInit, OnChanges {
     if (this.layoutNode) {
       this.options = _.cloneDeep(this.layoutNode.options);
       this.widgetLayoutNode = Object.assign(
-        {}, this.layoutNode, { options: _.cloneDeep(this.layoutNode.options) }
+        { }, this.layoutNode, { options: _.cloneDeep(this.layoutNode.options) }
       );
       this.widgetOptions = this.widgetLayoutNode.options;
       this.layoutPointer = this.jsf.getLayoutPointer(this);

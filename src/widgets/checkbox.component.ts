@@ -42,7 +42,7 @@ export class CheckboxComponent implements OnInit {
 
   constructor(
     private jsf: JsonSchemaFormService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.options = this.layoutNode.options;
@@ -53,7 +53,7 @@ export class CheckboxComponent implements OnInit {
   }
 
   private updateValue(event) {
-    event.preventDefault;
+    event.preventDefault();
     this.jsf.updateValue(this, event.target.checked ? this.trueValue : this.falseValue);
   }
 

@@ -131,9 +131,9 @@ export class WidgetLibraryService {
     // 'wysihtml5': HTML editor - http://jhollingworth.github.io/bootstrap-wysihtml5
     // 'quill': Quill HTML / rich text editor (?) - https://quilljs.com
   };
-  private registeredWidgets: any = {};
-  private frameworkWidgets: any = {};
-  private activeWidgets: any = {};
+  private registeredWidgets: any = { };
+  private frameworkWidgets: any = { };
+  private activeWidgets: any = { };
 
   constructor() {
     this.setActiveWidgets();
@@ -141,7 +141,7 @@ export class WidgetLibraryService {
 
   private setActiveWidgets() {
     this.activeWidgets = Object.assign(
-      {}, this.widgetLibrary, this.frameworkWidgets, this.registeredWidgets
+      { }, this.widgetLibrary, this.frameworkWidgets, this.registeredWidgets
     );
     for (let widgetName of Object.keys(this.activeWidgets)) {
       let widget: any = this.activeWidgets[widgetName];
@@ -190,8 +190,8 @@ export class WidgetLibraryService {
   }
 
   public unRegisterAllWidgets(unRegisterFrameworkWidgets: boolean = true): boolean {
-    this.registeredWidgets = {};
-    if (unRegisterFrameworkWidgets) this.frameworkWidgets = {};
+    this.registeredWidgets = { };
+    if (unRegisterFrameworkWidgets) this.frameworkWidgets = { };
     this.setActiveWidgets();
     return true;
   }
@@ -205,7 +205,7 @@ export class WidgetLibraryService {
 
   public unRegisterFrameworkWidgets(): boolean {
     if (Object.keys(this.frameworkWidgets).length) {
-      this.frameworkWidgets = {};
+      this.frameworkWidgets = { };
       this.setActiveWidgets();
     }
     return true;

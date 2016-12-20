@@ -140,7 +140,7 @@ export class JsonPointer {
           subObject = subObject.get(key);
         } else {
           if (!hasOwn(subObject, key)) {
-            subObject[key] = (keyArray[i + 1].match(/^(\d+|-)$/)) ? [] : {};
+            subObject[key] = (keyArray[i + 1].match(/^(\d+|-)$/)) ? [] : { };
           }
           subObject = subObject[key];
         }
@@ -190,7 +190,7 @@ export class JsonPointer {
           subObject = subObject.get(key);
         } else {
           if (!hasOwn(subObject, key)) {
-            subObject[key] = (keyArray[i + 1].match(/^(\d+|-)$/)) ? [] : {};
+            subObject[key] = (keyArray[i + 1].match(/^(\d+|-)$/)) ? [] : { };
           }
           subObject[key] = copy(subObject[key]);
           subObject = subObject[key];
@@ -286,7 +286,7 @@ export class JsonPointer {
    * @return {Object} - The resulting dictionary object
    */
   static dict(object: any): any {
-    let results: any = {};
+    let results: any = { };
     this.forEachDeep(object, (value, pointer) => {
       if (typeof value !== 'object') results[pointer] = value;
     });
@@ -357,7 +357,7 @@ export class JsonPointer {
   ): void {
     if (typeof fn === 'function') {
       if (isObject(object) || isArray(object)) {
-        let newObject = Object.assign(isArray(object) ? [] : {}, object);
+        let newObject = Object.assign(isArray(object) ? [] : { }, object);
         if (!bottomUp) fn(newObject, pointer, rootObject);
         for (let key of Object.keys(newObject)) {
           const newPointer: string = pointer + '/' + this.escape(key);

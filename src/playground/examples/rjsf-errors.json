@@ -32,7 +32,7 @@
       }
     }
   },
-  "UISchema": {},
+  "UISchema": { },
   "formData": {
     "firstName": "Chuck",
     "active": "wrong",

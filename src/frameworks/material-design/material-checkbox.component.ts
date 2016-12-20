@@ -42,7 +42,7 @@ export class MaterialCheckboxComponent implements OnInit {
 
   constructor(
     private jsf: JsonSchemaFormService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.options = this.layoutNode.options;

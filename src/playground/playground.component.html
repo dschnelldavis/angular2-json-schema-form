@@ -129,11 +129,11 @@
       <pre *ngIf="prettyValidationErrors" class="bg-danger">{{prettyValidationErrors}}</pre>
 
       Live data — from onChanges():
-      <pre [class.bg-success]="!prettyValidationErrors && prettyLiveFormData !== '{}'"
+      <pre [class.bg-success]="!prettyValidationErrors && prettyLiveFormData !== '{ }'"
         [class.bg-danger]="prettyValidationErrors">{{prettyLiveFormData}}</pre>
 
       Submitted data — from onSubmit():
-      <pre [class.bg-success]="prettySubmittedFormData !== '{}'">{{prettySubmittedFormData}}</pre>
+      <pre [class.bg-success]="prettySubmittedFormData !== '{ }'">{{prettySubmittedFormData}}</pre>
 
     </div>
   </div>

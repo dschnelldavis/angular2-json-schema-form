@@ -1,31 +1,26 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": [ "es6", "dom" ],
     "module": "commonjs",
-    "declaration": true,
     "moduleResolution": "node",
-    "sourceMap": true,
+    "lib": [ "es6", "dom" ],
+    "target": "es5",
+    "rootDir": "src",
+    "outDir": "dist",
+    "declaration": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "removeComments": true,
     "newLine": "LF",
     "noImplicitAny": false,
-    "noEmitOnError": false,
-    "allowUnreachableCode": true,
-    "outDir": "./dist"
+    "removeComments": true,
+    "sourceMap": true
   },
-  "files": [
-    "typings/index.d.ts",
-    "src/playground/main.ts",
-    "index.ts"
+  "exclude": [
+    "compiled",
+    "dist",
+    "docs",
+    "node_modules"
   ],
-  "filesGlob": [
-    "typings/**/*",
-    "src/**/*.ts",
-    "node_modules/@types/**/*.ts",
-    "node_modules/**/*.d.ts",
-    "!src/**/*.spec.ts",
-    "!node_modules/**/*.ts"
-  ]
+  "angularCompilerOptions": {
+    "genDir": "compiled"
+  }
 }

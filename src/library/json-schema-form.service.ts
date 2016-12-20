@@ -35,10 +35,10 @@ export class JsonSchemaFormService {
     },
   };
 
-  public initialValues: any = {}; // The initial data model (e.g. previously submitted data)
-  public schema: any = {}; // The internal JSON Schema
+  public initialValues: any = { }; // The initial data model (e.g. previously submitted data)
+  public schema: any = { }; // The internal JSON Schema
   public layout: any[] = []; // The internal Form layout
-  public formGroupTemplate: any = {}; // The template used to create formGroup
+  public formGroupTemplate: any = { }; // The template used to create formGroup
   public formGroup: any = null; // The Angular 2 formGroup, which powers the reactive form
 
   public framework: any = null; // The active framework component
@@ -47,11 +47,11 @@ export class JsonSchemaFormService {
   public dataMap: Map<string, any> = new Map<string, any>(); // Maps paths in data model to schema and formGroup paths
   public dataCircularRefMap: Map<string, string> = new Map<string, string>(); // Maps circular reference points in data model
   public schemaCircularRefMap: Map<string, string> = new Map<string, string>(); // Maps circular reference points in schema
-  public layoutRefLibrary: any = {}; // Library of layout nodes for adding to form
-  public schemaRefLibrary: any = {}; // Library of schemas for resolving schema $refs
-  public templateRefLibrary: any = {}; // Library of formGroup templates for adding to form
+  public layoutRefLibrary: any = { }; // Library of layout nodes for adding to form
+  public schemaRefLibrary: any = { }; // Library of schemas for resolving schema $refs
+  public templateRefLibrary: any = { }; // Library of formGroup templates for adding to form
 
-  constructor() {}
+  constructor() { }
 
   public initializeControl(ctx): boolean {
     ctx.formControl = this.getControl(ctx);

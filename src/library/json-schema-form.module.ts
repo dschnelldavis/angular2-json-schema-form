@@ -1,4 +1,4 @@
-import { enableProdMode, NgModule, ModuleWithProviders } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MaterialModule } from '@angular/material';
@@ -17,7 +17,13 @@ import { JsonSchemaFormService } from './json-schema-form.service';
 import 'ajv';
 import 'lodash';
 
-enableProdMode();
+export {
+  WidgetLibraryService,
+  FrameworkLibraryService,
+  JsonSchemaFormService,
+  JsonSchemaFormComponent
+};
+
 @NgModule({
   imports: [
     CommonModule, FormsModule, ReactiveFormsModule, MaterialModule.forRoot()
@@ -36,11 +42,5 @@ enableProdMode();
     FrameworkLibraryService, WidgetLibraryService, JsonSchemaFormService
   ],
 })
-export class JsonSchemaFormModule {
-  static forRoot(): ModuleWithProviders { return {
-    ngModule: JsonSchemaFormModule,
-    providers: [
-      FrameworkLibraryService, WidgetLibraryService, JsonSchemaFormService
-    ]
-  }; }
-}
+export class JsonSchemaFormModule { }
+export default JsonSchemaFormModule;

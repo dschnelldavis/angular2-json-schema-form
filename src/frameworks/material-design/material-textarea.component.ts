@@ -67,7 +67,7 @@ export class MaterialTextareaComponent implements OnInit {
 
   constructor(
     private jsf: JsonSchemaFormService,
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.options = this.layoutNode.options;

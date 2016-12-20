@@ -59,7 +59,7 @@ export class MaterialNumberComponent implements OnInit {
 
   constructor(
     private jsf: JsonSchemaFormService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.options = this.layoutNode.options;

@@ -8,10 +8,13 @@ import { JsonSchemaFormService } from '../../library/json-schema-form.service';
 import { parseText, toTitleCase } from '../../library/utilities/index';
 
 @Component({
-  moduleId: module.id,
   selector: 'material-design-framework',
-  templateUrl: './material-design.component.html',
-  styleUrls: ['./material-design.component.css'],
+  template: `
+    <select-widget-widget
+      [layoutNode]="layoutNode"
+      [dataIndex]="dataIndex"
+      [layoutIndex]="layoutIndex"></select-widget-widget>
+  `
 })
 export class MaterialDesignComponent implements OnInit, OnChanges {
   private controlInitialized: boolean = false;
@@ -29,7 +32,7 @@ export class MaterialDesignComponent implements OnInit, OnChanges {
   constructor(
     private changeDetector: ChangeDetectorRef,
     private jsf: JsonSchemaFormService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.initializeControl();
@@ -43,7 +46,7 @@ export class MaterialDesignComponent implements OnInit, OnChanges {
     if (this.layoutNode) {
       this.options = _.cloneDeep(this.layoutNode.options);
       this.widgetLayoutNode = Object.assign(
-        {}, this.layoutNode, { options: _.cloneDeep(this.layoutNode.options) }
+        { }, this.layoutNode, { options: _.cloneDeep(this.layoutNode.options) }
       );
       this.widgetOptions = this.widgetLayoutNode.options;
       this.layoutPointer = this.jsf.getLayoutPointer(this);

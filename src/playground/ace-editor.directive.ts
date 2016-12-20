@@ -13,7 +13,7 @@ declare var ace: any;
   selector: '[ace-editor]'
 })
 export class AceEditorDirective {
-  private _options: any = {};
+  private _options: any = { };
   private _readOnly: boolean = false;
   private _theme: string = 'chrome';
   private _mode: string = 'javascript';
@@ -52,7 +52,7 @@ export class AceEditorDirective {
 
   @Input() set options( options: any ) {
     this._options = options;
-    this.editor.setOptions( options || {} );
+    this.editor.setOptions( options || { } );
   }
 
   @Input() set readOnly( readOnly: any ) {

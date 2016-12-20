@@ -20,9 +20,9 @@ export class SemanticUIComponent implements OnInit, OnChanges {
   constructor(
     private changeDetector: ChangeDetectorRef,
     private jsf: JsonSchemaFormService
-  ) {}
+  ) { }
 
-  ngOnInit() {}
+  ngOnInit() { }
 
-  ngOnChanges() {}
+  ngOnChanges() { }
 }

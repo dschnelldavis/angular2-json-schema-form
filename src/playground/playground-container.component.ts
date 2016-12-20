@@ -4,4 +4,4 @@ import { Component } from '@angular/core';
   selector: 'playground-container',
   template: `<router-outlet></router-outlet>`
 })
-export class PlaygroundContainerComponent {}
+export class PlaygroundContainerComponent { }

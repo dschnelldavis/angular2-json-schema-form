@@ -34,7 +34,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
     mapLayout(jsf.layout, (layoutItem, index, layoutPointer) => {
 
     let currentIndex: number = index;
-    let newNode: any = {};
+    let newNode: any = { };
     if (isObject(layoutItem)) {
       newNode = layoutItem;
     } else if (JsonPointer.isJsonPointer(layoutItem)) {
@@ -49,7 +49,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
     Object.assign(newNode, {
       _id: _.uniqueId(),
       layoutPointer: layoutPointer.replace(/\/\d+/g, '/-'),
-      options: {},
+      options: { },
     });
     let itemSchema: any = null;
 
@@ -159,7 +159,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
         }
       } else {
         // TODO: create item in FormGroup model from layout key (?)
-        updateInputOptions(newNode, {}, jsf);
+        updateInputOptions(newNode, { }, jsf);
       }
 
       newNode.widget = widgetLibrary.getWidget(newNode.type);
@@ -294,7 +294,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
     } else if (hasOwn(newNode, 'type')) {
       newNode.arrayItem = false;
       newNode.widget = widgetLibrary.getWidget(newNode.type);
-      updateInputOptions(newNode, {}, jsf);
+      updateInputOptions(newNode, { }, jsf);
     }
     if (newNode.type === 'submit') hasSubmitButton = true;
     return newNode;
@@ -341,7 +341,7 @@ export function buildLayoutFromSchema(
     dataPointer: JsonPointer.toGenericPointer(dataPointer, jsf.arrayMap),
     dataType: schema.type || (hasOwn(schema, '$ref') ? '$ref' : null),
     layoutPointer: layoutPointer.replace(/\/\d+/g, '/-') || '/-',
-    options: {},
+    options: { },
     type: newNodeType,
     widget: widgetLibrary.getWidget(newNodeType),
   };

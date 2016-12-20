@@ -41,6 +41,6 @@
       "choice10": { "$ref": "#/definitions/largeEnum" }
     }
   },
-  "UISchema": {},
-  "formData": {}
+  "UISchema": { },
+  "formData": { }
 }

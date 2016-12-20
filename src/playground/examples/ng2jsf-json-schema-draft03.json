@@ -12,25 +12,25 @@
     "properties": {
       "type": "object",
       "additionalProperties": { "$ref": "#" },
-      "default": {}
+      "default": { }
     },
     "patternProperties": {
       "type": "object",
       "additionalProperties": { "$ref": "#" },
-      "default": {}
+      "default": { }
     },
     "additionalProperties": {
       "type": [ { "$ref": "#" }, "boolean" ],
-      "default": {}
+      "default": { }
     },
     "items": {
       "type": [ { "$ref": "#" }, "array" ],
       "items": { "$ref": "#" },
-      "default": {}
+      "default": { }
     },
     "additionalItems": {
       "type": [ { "$ref": "#" }, "boolean" ],
-      "default": {}
+      "default": { }
     },
     "required": { "type": "boolean", "default": false },
     "dependencies": {
@@ -39,7 +39,7 @@
         "type": [ "string", "array", { "$ref": "#" } ],
         "items": { "type": "string" }
       },
-      "default": {}
+      "default": { }
     },
     "minimum": { "type": "number" },
     "maximum": { "type": "number" },
@@ -70,7 +70,7 @@
     "extends": {
       "type": [ { "$ref": "#" }, "array" ],
       "items": { "$ref": "#" },
-      "default": {}
+      "default": { }
     },
     "id": { "type": "string", "format": "uri" },
     "$ref": { "type": "string", "format": "uri" },
@@ -80,5 +80,5 @@
     "exclusiveMinimum": "minimum",
     "exclusiveMaximum": "maximum"
   },
-  "default": {}
+  "default": { }
 }

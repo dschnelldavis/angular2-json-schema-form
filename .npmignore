@@ -1,28 +1,31 @@
+# Development
+compiled
+dist/playground
+docs
+src
+
+# TypeScript
+tsconfig.json
+tslint.json
+typedoc.json
+typings.json
+typings
+*.ts
+!*.d.ts
+
 # Node
-node_modules/*
-# dist/*
-docs/*
+node_modules
 npm-debug.log
 
-# Include compiled TypeScript files in NPM bundle
-# *.js
-# !index.js
-# !systemjs.config.js
-# *.map
-# *.d.ts
-# !typings/*.ts
-
-# JetBrains
+# IDE
 .idea
 .project
 .settings
 .idea/*
 *.iml
+*.swp
 
-# Windows
+# OS
 Thumbs.db
 Desktop.ini
-
-# Mac
 .DS_Store
-**/.DS_Store

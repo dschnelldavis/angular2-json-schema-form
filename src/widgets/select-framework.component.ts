@@ -20,7 +20,7 @@ export class SelectFrameworkComponent implements OnChanges, OnInit {
   constructor(
     private componentFactory: ComponentFactoryResolver,
     private jsf: JsonSchemaFormService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.updateComponent();

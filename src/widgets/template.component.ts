@@ -6,6 +6,7 @@ import {
 import { JsonSchemaFormService } from '../library/json-schema-form.service';
 
 @Component({
+  moduleId: module.id,
   selector: 'template-widget',
   template: `<div #widgetContainer></div>`,
 })
@@ -20,7 +21,7 @@ export class TemplateComponent implements OnInit, OnChanges {
   constructor(
     private componentFactory: ComponentFactoryResolver,
     private jsf: JsonSchemaFormService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.updateComponent();

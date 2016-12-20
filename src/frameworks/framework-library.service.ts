@@ -118,18 +118,35 @@ export class FrameworkLibraryService {
   }
 
   private loadFrameworkExternalAssets(framework: Framework): boolean {
-    for (let node of [...(this.stylesheets || []), ...(this.scripts || [])]) {
+    for (let node of [...(this.scripts || []), ...(this.stylesheets || [])]) {
       node.parentNode.removeChild(node);
     }
+    this.scripts = [];
     this.stylesheets = [];
+    if (framework.hasOwnProperty('scripts')) {
+      for (let script of framework.scripts) {
+        let newScript: HTMLScriptElement = document.createElement('script');
+        if (script.slice(0, 1) === '/' || script.slice(0, 2) === './'
+          || script.slice(0, 4) === 'http'
+        ) { // Attach URL to remote javascript
+          newScript.src = script;
+        } else { // Attach content of given javascript
+          newScript.innerHTML = script;
+        }
+        this.scripts.push(newScript);
+        document.head.appendChild(newScript);
+      }
+    }
     if (framework.hasOwnProperty('stylesheets')) {
       for (let stylesheet of framework.stylesheets) {
         let newStylesheet: HTMLStyleElement|HTMLLinkElement;
-        if (stylesheet.slice(0, 1) === '/' || stylesheet.slice(0, 4) === 'http') {
+        if (stylesheet.slice(0, 1) === '/' || stylesheet.slice(0, 2) === './'
+          || stylesheet.slice(0, 4) === 'http'
+        ) { // Attach URL to remote stylesheet
           newStylesheet = document.createElement('link');
           (<HTMLLinkElement>newStylesheet).rel = 'stylesheet';
           (<HTMLLinkElement>newStylesheet).href = stylesheet;
-        } else {
+        } else { // Attach content of given stylesheet
           newStylesheet = document.createElement('style');
           newStylesheet.innerHTML = stylesheet;
         }
@@ -137,21 +154,7 @@ export class FrameworkLibraryService {
         document.head.appendChild(newStylesheet);
       }
     }
-    this.scripts = [];
-    if (framework.hasOwnProperty('scripts')) {
-      for (let script of framework.scripts) {
-        let newScript: HTMLScriptElement = document.createElement('script');
-        if (script.slice(0, 2) === '//' || script.slice(0, 4) === 'http') {
-          newScript.src = script;
-        } else {
-          newScript.innerHTML = script;
-        }
-        this.scripts.push(newScript);
-        document.head.appendChild(newScript);
-      }
-    }
-    if (framework.stylesheets || framework.scripts) { return true; }
-    return false;
+    return !!(framework.stylesheets || framework.scripts);
   }
 
   public setFramework(framework?: string|Framework): boolean {
@@ -182,7 +185,7 @@ export class FrameworkLibraryService {
   }
 
   public getFrameworkWidgets(): any {
-    return this.activeFramework.widgets || {};
+    return this.activeFramework.widgets || { };
   }
 
   public getFrameworkStylesheets(): string[] {

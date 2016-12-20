@@ -1,28 +1,21 @@
+# Generated
+compiled
+dist
+docs
+
 # Node
-node_modules/*
-dist/*
-docs/*
+node_modules
 npm-debug.log
 
-# TypeScript
-*.js
-!./index.js
-!./systemjs.config.js
-*.map
-*.d.ts
-!./typings/*.ts
-
-# JetBrains
+# IDE
 .idea
 .project
 .settings
 .idea/*
 *.iml
+*.swp
 
-# Windows
+# OS
 Thumbs.db
 Desktop.ini
-
-# Mac
 .DS_Store
-**/.DS_Store

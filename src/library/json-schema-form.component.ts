@@ -47,11 +47,10 @@ import {
  *  - Angular 2 (obviously)                https://angular.io
  *  - lodash, JavaScript utility library   https://github.com/lodash/lodash
  *  - ajv, Another JSON Schema validator   https://github.com/epoberezkin/ajv
+ * In addition, the testing playground also depends on:
  *  - brace, Browserified Ace editor       http://thlorenz.github.io/brace
- *    note: brace is needed by the testing playground only, not the library itself
  */
 @Component({
-  moduleId: module.id,
   selector: 'json-schema-form',
   template: `
     <form (ngSubmit)="submitForm()">
@@ -87,7 +86,7 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
     private frameworkLibrary: FrameworkLibraryService,
     private widgetLibrary: WidgetLibraryService,
     private jsf: JsonSchemaFormService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.initializeForm();
@@ -120,13 +119,13 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
       this.form || this.JSONSchema || this.UISchema
     ) {
       this.formInitialized = false;
-      this.jsf.schema = {};
+      this.jsf.schema = { };
       this.jsf.layout = [];
-      this.jsf.initialValues = {};
+      this.jsf.initialValues = { };
       this.jsf.dataMap = new Map<string, any>();
-      this.jsf.schemaRefLibrary = {};
-      this.jsf.layoutRefLibrary = {};
-      this.jsf.formGroupTemplate = {};
+      this.jsf.schemaRefLibrary = { };
+      this.jsf.layoutRefLibrary = { };
+      this.jsf.formGroupTemplate = { };
       this.jsf.formGroup = null;
       this.jsf.framework = this.frameworkLibrary.getFramework();
       if (isObject(this.options)) {

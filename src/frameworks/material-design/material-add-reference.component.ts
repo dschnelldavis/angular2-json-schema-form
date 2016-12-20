@@ -27,7 +27,7 @@ export class MaterialAddReferenceComponent implements OnInit, OnChanges {
 
   constructor(
     private jsf: JsonSchemaFormService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.options = this.layoutNode.options;

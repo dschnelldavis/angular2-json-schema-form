@@ -20,9 +20,9 @@ export class Foundation6Component implements OnInit, OnChanges {
   constructor(
     private changeDetector: ChangeDetectorRef,
     private jsf: JsonSchemaFormService
-  ) {}
+  ) { }
 
-  ngOnInit() {}
+  ngOnInit() { }
 
-  ngOnChanges() {}
+  ngOnChanges() { }
 }

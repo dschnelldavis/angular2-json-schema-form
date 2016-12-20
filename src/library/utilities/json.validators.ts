@@ -455,14 +455,14 @@ export class JsonValidators {
       let allErrors: PlainObject = _mergeObjects(
         forEachCopy(dependencies, (value, requiringField) => {
           if (!hasValue(control.value[requiringField])) return null;
-          let requiringFieldErrors: PlainObject = {};
+          let requiringFieldErrors: PlainObject = { };
           let requiredFields: string[];
-          let properties: PlainObject = {};
+          let properties: PlainObject = { };
           if (getType(dependencies[requiringField]) === 'array') {
             requiredFields = dependencies[requiringField];
           } else if (getType(dependencies[requiringField]) === 'object') {
             requiredFields = dependencies[requiringField]['required'] || [];
-            properties = dependencies[requiringField]['properties'] || {};
+            properties = dependencies[requiringField]['properties'] || { };
           }
 
           // Validate property dependencies

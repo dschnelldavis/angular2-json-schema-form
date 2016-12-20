@@ -24,7 +24,7 @@
     "$schema": { "type": "string", "format": "uri" },
     "title": { "type": "string" },
     "description": { "type": "string" },
-    "default": {},
+    "default": { },
     "multipleOf": { "type": "number", "minimum": 0, "exclusiveMinimum": true },
     "maximum": { "type": "number" },
     "exclusiveMaximum": { "type": "boolean", "default": false },
@@ -34,11 +34,11 @@
     "minLength": { "$ref": "#/definitions/positiveIntegerDefault0" },
     "pattern": { "type": "string", "format": "regex" },
     "additionalItems": {
-      "anyOf": [ { "type": "boolean" }, { "$ref": "#" } ], "default": {}
+      "anyOf": [ { "type": "boolean" }, { "$ref": "#" } ], "default": { }
     },
     "items": {
       "anyOf": [ { "$ref": "#" }, { "$ref": "#/definitions/schemaArray" } ],
-      "default": {}
+      "default": { }
     },
     "maxItems": { "$ref": "#/definitions/positiveInteger" },
     "minItems": { "$ref": "#/definitions/positiveIntegerDefault0" },
@@ -47,16 +47,16 @@
     "minProperties": { "$ref": "#/definitions/positiveIntegerDefault0" },
     "required": { "$ref": "#/definitions/stringArray" },
     "additionalProperties": {
-      "anyOf": [ { "type": "boolean" }, { "$ref": "#" } ], "default": {}
+      "anyOf": [ { "type": "boolean" }, { "$ref": "#" } ], "default": { }
     },
     "definitions": {
-      "type": "object", "additionalProperties": { "$ref": "#" }, "default": {}
+      "type": "object", "additionalProperties": { "$ref": "#" }, "default": { }
     },
     "properties": {
-      "type": "object", "additionalProperties": { "$ref": "#" }, "default": {}
+      "type": "object", "additionalProperties": { "$ref": "#" }, "default": { }
     },
     "patternProperties": {
-      "type": "object", "additionalProperties": { "$ref": "#" }, "default": {}
+      "type": "object", "additionalProperties": { "$ref": "#" }, "default": { }
     },
     "dependencies": {
       "type": "object",
@@ -84,5 +84,5 @@
     "exclusiveMaximum": [ "maximum" ],
     "exclusiveMinimum": [ "minimum" ]
   },
-  "default": {}
+  "default": { }
 }

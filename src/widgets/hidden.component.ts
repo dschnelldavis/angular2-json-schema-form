@@ -25,7 +25,7 @@ export class HiddenComponent implements OnInit {
 
   constructor(
     private jsf: JsonSchemaFormService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.jsf.initializeControl(this);

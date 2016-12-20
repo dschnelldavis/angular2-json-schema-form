@@ -22,7 +22,7 @@ export class OrderableDirective implements OnInit {
   constructor(
     private elementRef: ElementRef,
     private jsf: JsonSchemaFormService
-  ) {}
+  ) { }
 
   ngOnInit() {
     if (this.orderable && this.layoutNode && this.layoutIndex && this.dataIndex) {

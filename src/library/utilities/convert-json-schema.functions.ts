@@ -28,7 +28,7 @@ export function convertJsonSchema3to4(schema: any): any {
   };
 
   if (typeof schema !== 'object') return schema;
-  let newSchema = isArray(schema) ? [].concat(schema) : Object.assign({}, schema);
+  let newSchema = isArray(schema) ? [].concat(schema) : Object.assign({ }, schema);
   let converted: boolean = false;
 
   // convert multiple types to anyOf

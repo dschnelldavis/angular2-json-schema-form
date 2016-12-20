@@ -1,27 +1,17 @@
 {
   "name": "angular2-json-schema-form",
+  "version": "0.3.0-alpha.1",
+  "author": {
+    "name": "dschnelldavis",
+    "email": "dschnelldavis@gmail.com"
+  },
   "description": "Angular 2 JSON Schema Form builder",
-  "author": "David Schnell-Davis",
   "keywords": [
     "Angular 2",
     "JSON Schema",
     "Form builder"
   ],
   "license": "MIT",
-  "version": "0.2.0-alpha.1",
-  "scripts": {
-    "start": "npm run cleandist && npm run syncassets && tsc && concurrently \"tsc -w\" \"lite-server\" \"npm run watchassets\" ",
-    "lint": "tslint src/**/*.ts",
-    "test": "tsc && karma start",
-    "postinstall": "typings install",
-    "prepublish": "tsc",
-    "tsc": "tsc",
-    "typings": "typings",
-    "docs": "typedoc --options typedoc.json index.ts",
-    "cleandist": "rm -rf dist/*",
-    "syncassets": "rsync -ar --include='*.css' --include='*.html' --include='*.json' --include='*/' --exclude='*' ./src/ ./dist/src/",
-    "watchassets": "onchange 'src/**/*.css' 'src/**/*.html' 'src/**/*.json' -e 'dist/src/*' -v -- rsync -ar --include='*.css' --include='*.html' --include='*.json' --include='*/' --exclude='*' --delete ./src/ ./dist/src/"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/dschnelldavis/angular2-json-schema-form"
@@ -29,39 +19,52 @@
   "bugs": {
     "url": "https://github.com/dschnelldavis/angular2-json-schema-form/issues"
   },
-  "main": "./dist/src/library/json-schema-form.module.js",
-  "types": "./dist/src/library/json-schema-form.module.d.ts",
+  "files": [
+    "dist/"
+  ],
+  "main": "dist/library/json-schema-form.module.js",
+  "typings": "dist/library/json-schema-form.module.d.ts",
+  "scripts": {
+    "clean:dist": "rimraf compiled && rimraf dist",
+    "clean:all": "npm run clean:dist && rimraf node_modules && npm cache clean",
+    "prepublish": "npm run clean:dist && ./node_modules/.bin/ngc && rimraf compiled && rimraf dist/playground",
+    "lint": "tslint src/**/*.ts",
+    "test": "tsc && karma start",
+    "ngc": "./node_modules/.bin/ngc",
+    "tsc": "tsc",
+    "typings": "typings",
+    "docs": "typedoc --options typedoc.json src/index.ts",
+    "start": "npm run clean:dist && npm run syncassets && tsc && concurrently \"tsc -w\" \"lite-server\" \"npm run watchassets\" ",
+    "syncassets": "rsync -ar --include='*.css' --include='*.html' --include='*.json' --include='*/' --exclude='*' ./src/ ./dist/",
+    "watchassets": "onchange 'src/**/*.css' 'src/**/*.html' 'src/**/*.json' -e 'dist/*' -v -- rsync -ar --include='*.css' --include='*.html' --include='*.json' --include='*/' --exclude='*' --delete ./src/ ./dist/"
+  },
   "dependencies": {
-    "@angular/common": "~2.2.4",
-    "@angular/compiler": "~2.2.4",
-    "@angular/core": "~2.2.4",
-    "@angular/forms": "~2.2.4",
-    "@angular/http": "~2.2.4",
-    "@angular/material": "^2.0.0-alpha.11-3",
-    "@angular/platform-browser": "~2.2.4",
-    "@angular/platform-browser-dynamic": "~2.2.4",
-    "@angular/router": "~3.2.4",
-    "ajv": "^4.7.7",
-    "bootstrap": "^3.3.7",
-    "brace": "^0.8.0",
-    "buffer": "^5.0.0",
-    "core-js": "^2.4.1",
-    "lodash": "^4.17.2",
-    "ng2-bootstrap": "^1.1.16",
-    "reflect-metadata": "^0.1.8",
-    "rxjs": "5.0.0-beta.12",
-    "systemjs": "0.19.38",
-    "zone.js": "~0.6.25"
+    "@angular/common": "^2.0.0",
+    "@angular/compiler": "^2.0.0",
+    "@angular/core": "^2.0.0",
+    "@angular/forms": "^2.0.0",
+    "@angular/material": "2.0.0-alpha.11-3",
+    "@angular/platform-browser": "^2.0.0",
+    "@angular/platform-browser-dynamic": "^2.0.0",
+    "ajv": "^4.7.0",
+    "lodash": "^4.17.0"
   },
   "devDependencies": {
-    "@types/ace": "0.0.32",
-    "@types/ajv": "0.0.3",
+    "@angular/compiler-cli": "^2.0.0",
+    "@angular/http": "^2.0.0",
+    "@angular/platform-server": "^2.0.0",
+    "@angular/router": "^3.0.0",
+    "@types/ace": "^0.0.32",
+    "@types/ajv": "^0.0.5",
     "@types/jasmine": "^2.5.38",
     "@types/lodash": "^4.14.42",
     "@types/node": "^6.0.51",
+    "brace": "^0.9.1",
+    "buffer": "^5.0.0",
     "canonical-path": "0.0.2",
     "codelyzer": "2.0.0-beta.3",
     "concurrently": "^3.0.0",
+    "core-js": "^2.4.1",
     "http-server": "^0.9.0",
     "jasmine-core": "~2.5.2",
     "karma": "^1.3.0",
@@ -72,11 +75,15 @@
     "karma-jasmine-html-reporter": "^0.2.2",
     "lite-server": "^2.2.2",
     "onchange": "^3.2.0",
-    "protractor": "^3.3.0",
+    "protractor": "^4.0.13",
+    "reflect-metadata": "^0.1.8",
     "rimraf": "^2.5.4",
-    "tslint": "^4.0.2",
+    "rxjs": "5.0.0-rc.4",
+    "systemjs": "^0.19.41",
+    "tslint": "~4.0.2",
     "typedoc": "^0.5.1",
-    "typescript": "^2.1.4",
-    "typings": "^1.3.1"
+    "typescript": "~2.0.10",
+    "typings": "^1.3.1",
+    "zone.js": "~0.7.2"
   }
 }

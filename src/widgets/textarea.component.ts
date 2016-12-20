@@ -4,6 +4,7 @@ import { AbstractControl } from '@angular/forms';
 import { JsonSchemaFormService } from '../library/json-schema-form.service';
 
 @Component({
+  moduleId: module.id,
   selector: 'textarea-widget',
   template: `
     <div
@@ -42,7 +43,7 @@ export class TextareaComponent implements OnInit {
 
   constructor(
     private jsf: JsonSchemaFormService,
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.options = this.layoutNode.options;
