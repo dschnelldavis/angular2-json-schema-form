@@ -74,38 +74,7 @@ export class TabsComponent implements OnInit {
     }
   }
 
-  private setTitle(
-    item: any = null, index: number = null
-  ): string {
-    let text: string;
-    let value: any;
-    let values: any = this.jsf.getControlValue(this);
-    if (this.layoutNode.type.slice(-5) === 'array' && item.type !== '$ref') {
-      text = JsonPointer.getFirst([
-        [item, '/options/legend'],
-        [item, '/options/title'],
-        [item, '/title'],
-        [this.layoutNode, '/options/title'],
-        [this.layoutNode, '/options/legend'],
-        [this.layoutNode, '/title'],
-      ]);
-    } else {
-      text = JsonPointer.getFirst([
-        [item, '/title'],
-        [item, '/options/title'],
-        [item, '/options/legend'],
-        [this.layoutNode, '/title'],
-        [this.layoutNode, '/options/title'],
-        [this.layoutNode, '/options/legend']
-      ]);
-      if (item.type === '$ref') text = '+ ' + text;
-    }
-    if (!text) return text;
-    if (this.layoutNode.type === 'tabarray' && Array.isArray(values)) {
-      value = values[index];
-    } else {
-      value = values;
-    }
-    return this.jsf.parseText(text, value, values, index);
+  private setTitle(item: any = null, index: number = null): string {
+    return this.jsf.setTitle(this, item, index);
   }
 }

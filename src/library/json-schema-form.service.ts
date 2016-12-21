@@ -44,7 +44,6 @@ export class JsonSchemaFormService {
   public layout: any[] = []; // The internal Form layout
   public formGroupTemplate: any = {}; // The template used to create formGroup
   public formGroup: any = null; // The Angular 2 formGroup, which powers the reactive form
-
   public framework: any = null; // The active framework component
 
   public arrayMap: Map<string, number> = new Map<string, number>(); // Maps arrays in data object and number of tuple values
@@ -73,11 +72,45 @@ export class JsonSchemaFormService {
     return parseText(text, value, values, key, this.tpldata);
   }
 
+  public setTitle(
+    parentCtx: any = {}, childNode: any = null, index: number = null
+  ): string {
+    const parentNode: any = parentCtx.layoutNode || {};
+    let text: string;
+    let childValue: any;
+    let parentValues: any = this.getControlValue(parentCtx);
+    const isArrayItem: boolean =
+      parentNode.type.slice(-5) === 'array' && isArray(parentValues);
+    if (isArrayItem && childNode.type !== '$ref') {
+      text = JsonPointer.getFirst([
+        [childNode, '/options/legend'],
+        [childNode, '/options/title'],
+        [childNode, '/title'],
+        [parentNode, '/options/title'],
+        [parentNode, '/options/legend'],
+        [parentNode, '/title'],
+      ]);
+    } else {
+      text = JsonPointer.getFirst([
+        [childNode, '/title'],
+        [childNode, '/options/title'],
+        [childNode, '/options/legend'],
+        [parentNode, '/title'],
+        [parentNode, '/options/title'],
+        [parentNode, '/options/legend']
+      ]);
+      if (childNode.type === '$ref') text = '+ ' + text;
+    }
+    if (!text) return text;
+    childValue = isArrayItem ? parentValues[index] : parentValues;
+    return this.parseText(text, childValue, parentValues, index);
+  }
+
   public convertJsonSchema3to4() {
     this.schema = convertJsonSchema3to4(this.schema);
   }
 
-  public initializeControl(ctx): boolean {
+  public initializeControl(ctx: any): boolean {
     ctx.formControl = this.getControl(ctx);
     ctx.boundControl = !!ctx.formControl;
     if (ctx.boundControl) {
@@ -102,7 +135,8 @@ export class JsonSchemaFormService {
     return ctx.boundControl;
   }
 
-  public updateValue(ctx, value): void {
+  public updateValue(ctx: any, value): void {
+
     // Set value of current control
     ctx.controlValue = value;
     if (ctx.boundControl) {
@@ -110,7 +144,8 @@ export class JsonSchemaFormService {
       ctx.formControl.markAsDirty();
     }
     ctx.layoutNode.value = value;
-    // Set values of any other controls in copyValueTo array
+
+    // Set values of any related controls in copyValueTo array
     if (isArray(ctx.options.copyValueTo)) {
       for (let item of ctx.options.copyValueTo) {
         let targetControl = getControl(this.formGroup, item);
@@ -122,55 +157,57 @@ export class JsonSchemaFormService {
     }
   }
 
-  public getControl(ctx): AbstractControl {
+  public getControl(ctx: any): AbstractControl {
     if (!ctx.layoutNode || !ctx.layoutNode.dataPointer ||
       ctx.layoutNode.type === '$ref') return null;
     return getControl(this.formGroup, this.getDataPointer(ctx));
   }
 
-  public getControlValue(ctx): AbstractControl {
+  public getControlValue(ctx: any): AbstractControl {
     if (!ctx.layoutNode || !ctx.layoutNode.dataPointer ||
       ctx.layoutNode.type === '$ref') return null;
     const control = getControl(this.formGroup, this.getDataPointer(ctx));
     return control ? control.value : null;
   }
 
-  public getControlGroup(ctx): FormArray | FormGroup {
+  public getControlGroup(ctx: any): FormArray | FormGroup {
     if (!ctx.layoutNode || !ctx.layoutNode.dataPointer) return null;
     return getControl(this.formGroup, this.getDataPointer(ctx), true);
   }
 
-  public getControlName(ctx): string {
+  public getControlName(ctx: any): string {
     if (!ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex) return null;
     return JsonPointer.toKey(JsonPointer.toIndexedPointer(
       ctx.layoutNode.dataPointer, ctx.dataIndex, this.arrayMap
     ));
   }
 
-  public getLayoutArray(ctx): any[] {
-    return JsonPointer.get(
-      this.layout, this.getLayoutPointer(ctx), 0, -1
-    );
+  public getLayoutArray(ctx: any): any[] {
+    return JsonPointer.get(this.layout, this.getLayoutPointer(ctx), 0, -1);
   }
 
-  public getDataPointer(ctx): string {
+  public getParentNode(ctx: any): any[] {
+    return JsonPointer.get(this.layout, this.getLayoutPointer(ctx), 0, -2);
+  }
+
+  public getDataPointer(ctx: any): string {
     if (!ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex) return null;
     return JsonPointer.toIndexedPointer(ctx.layoutNode.dataPointer, ctx.dataIndex, this.arrayMap);
   }
 
-  public getLayoutPointer(ctx): string {
+  public getLayoutPointer(ctx: any): string {
     if (!ctx.layoutNode || !ctx.layoutNode.layoutPointer || !ctx.layoutIndex) return null;
     return JsonPointer.toIndexedPointer(ctx.layoutNode.layoutPointer, ctx.layoutIndex);
   }
 
-  public isControlBound(ctx): boolean {
+  public isControlBound(ctx: any): boolean {
     if (!ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex) return false;
     const control = this.getControlGroup(ctx);
     if (!control) return false;
     return control.controls.hasOwnProperty(JsonPointer.toKey(this.getDataPointer(ctx)));
   }
 
-  public addItem(ctx): boolean {
+  public addItem(ctx: any): boolean {
     if (!ctx.layoutNode || !ctx.layoutNode.$ref || !ctx.dataIndex ||
       !ctx.layoutNode.layoutPointer || !ctx.layoutIndex) return false;
     // Create a new Angular 2 form control from a template in templateRefLibrary
@@ -208,7 +245,7 @@ export class JsonSchemaFormService {
     return true;
   }
 
-  public moveArrayItem(ctx, oldIndex: number, newIndex: number): boolean {
+  public moveArrayItem(ctx: any, oldIndex: number, newIndex: number): boolean {
     if (!ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex ||
       !ctx.layoutNode.layoutPointer || !ctx.layoutIndex ||
       !isDefined(oldIndex) || !isDefined(newIndex)) return false;
@@ -223,7 +260,7 @@ export class JsonSchemaFormService {
     return true;
   }
 
-  public removeItem(ctx): boolean {
+  public removeItem(ctx: any): boolean {
     if (!ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex ||
       !ctx.layoutNode.layoutPointer || !ctx.layoutIndex) return false;
     // Remove the Angular 2 form control from the parent formArray or formGroup

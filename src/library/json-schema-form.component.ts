@@ -68,6 +68,7 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
   private ajv: any = new Ajv({ allErrors: true }); // AJV: Another JSON Schema Validator
   private validateFormData: any; // Compiled AJV function to validate this form's schema
   private debugOutput: any; // Debug information, if requested
+  private formValueSubscription: any = null;
 
   // Recommended inputs
   @Input() schema: any; // The input JSON Schema
@@ -134,14 +135,19 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
       this.form || this.JSONSchema || this.UISchema
     ) {
       this.formInitialized = false;
+      this.jsf.initialValues = {};
       this.jsf.schema = {};
       this.jsf.layout = [];
-      this.jsf.initialValues = {};
-      this.jsf.dataMap = new Map<string, any>();
-      this.jsf.schemaRefLibrary = {};
-      this.jsf.layoutRefLibrary = {};
       this.jsf.formGroupTemplate = {};
       this.jsf.formGroup = null;
+      this.jsf.framework = null;
+      this.jsf.arrayMap = new Map<string, number>();
+      this.jsf.dataMap = new Map<string, any>();
+      this.jsf.dataCircularRefMap = new Map<string, string>();
+      this.jsf.schemaCircularRefMap = new Map<string, string>();
+      this.jsf.layoutRefLibrary = {};
+      this.jsf.schemaRefLibrary = {};
+      this.jsf.templateRefLibrary = {};
 
       // Initialize 'options' (global form options) and set framework
       // Combine available inputs:
@@ -214,11 +220,13 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
         // Initialize ajv and compile schema
         this.validateFormData = this.ajv.compile(this.jsf.schema);
 
-        // Resolve schema $ref links, and save them in schemaRefLibrary
+        // Resolve all schema $ref links
         JsonPointer.forEachDeep(this.jsf.schema, (value, pointer) => {
           if (hasOwn(value, '$ref') && isString(value['$ref'])) {
             const newReference: string = JsonPointer.compile(value['$ref']);
             const isCircular = JsonPointer.isSubPointer(newReference, pointer);
+
+            // Save target schema in schemaRefLibrary
             if (hasValue(newReference) &&
               !hasOwn(this.jsf.schemaRefLibrary, newReference)
             ) {
@@ -227,8 +235,8 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
               );
             }
 
-            // If a $ref link is not circular, remove it and replace
-            // it with a copy of the schema it links to
+            // If a $ref link is not circular,
+            // remove link and replace with copy of target schema
             if (!isCircular) {
               delete value['$ref'];
               this.jsf.schema = JsonPointer.set(
@@ -237,6 +245,8 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
                   value
                 )
               );
+
+            // If a $ref link is circular, save link in schemaCircularRefMap
             } else {
               this.jsf.schemaCircularRefMap.set(pointer, newReference);
             }
@@ -345,7 +355,7 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
 
       if (isEmpty(this.jsf.schema)) {
 
-        // If the schema does not exist, build a schema from the layout
+        // TODO: If the schema does not exist, build a schema from the layout
         if (this.jsf.layout.indexOf('*') === -1) {
           this.jsf.schema = buildSchemaFromLayout(this.jsf.layout);
 
@@ -392,7 +402,8 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
         this.formInitialized = true;
 
         // Subscribe to form value changes to output live data, validation, and errors
-        this.jsf.formGroup.valueChanges.subscribe(
+        if (this.formValueSubscription) this.formValueSubscription.unsubscribe();
+        this.formValueSubscription = this.jsf.formGroup.valueChanges.subscribe(
           value => {
             const formattedData = formatFormData(
               value, this.jsf.dataMap, this.jsf.dataCircularRefMap, this.jsf.arrayMap
