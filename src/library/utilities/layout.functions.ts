@@ -1,14 +1,11 @@
 import * as _ from 'lodash';
 
 import {
-  isArray, isEmpty, isNumber, isObject, isDefined, isString
-} from './validator.functions';
-import { copy, forEach, hasOwn, toTitleCase } from './utility.functions';
-import { JsonPointer } from './jsonpointer.functions';
-import {
-  checkInlineType, getFromSchema, getInputType, isInputRequired, updateInputOptions
-} from './json-schema.functions';
-import { buildFormGroupTemplate, getControl } from './form-group.functions';
+  buildFormGroupTemplate, checkInlineType, copy, forEach, getControl,
+  getFromSchema, getInputType, hasOwn, inArray, isArray, isEmpty,
+  isInputRequired, isNumber, isObject, isDefined, isString, JsonPointer,
+  toTitleCase, updateInputOptions
+} from './index';
 
 /**
  * Layout function library:
@@ -30,11 +27,9 @@ import { buildFormGroupTemplate, getControl } from './form-group.functions';
  */
 export function buildLayout(jsf: any, widgetLibrary: any): any[] {
   let hasSubmitButton = !JsonPointer.get(jsf, '/globalOptions/addSubmit');
-  let formLayout =
-    mapLayout(jsf.layout, (layoutItem, index, layoutPointer) => {
-
+  let formLayout = mapLayout(jsf.layout, (layoutItem, index, layoutPointer) => {
     let currentIndex: number = index;
-    let newNode: any = { };
+    let newNode: any = {};
     if (isObject(layoutItem)) {
       newNode = layoutItem;
     } else if (JsonPointer.isJsonPointer(layoutItem)) {
@@ -49,7 +44,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
     Object.assign(newNode, {
       _id: _.uniqueId(),
       layoutPointer: layoutPointer.replace(/\/\d+/g, '/-'),
-      options: { },
+      options: {},
     });
     let itemSchema: any = null;
 
@@ -68,7 +63,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
         }
         delete newNode.key;
 
-      // If newNode is an array, searh for dataPointer in child nodes
+      // If newNode is an array, search for dataPointer in child nodes
       } else if (hasOwn(newNode, 'type') && newNode.type.slice(-5) === 'array') {
         const findDataPointer = (items) => {
           if (items === null || typeof items !== 'object') return;
@@ -159,7 +154,20 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
         }
       } else {
         // TODO: create item in FormGroup model from layout key (?)
-        updateInputOptions(newNode, { }, jsf);
+        updateInputOptions(newNode, {}, jsf);
+      }
+
+      if (hasOwn(newNode.options, 'copyValueTo')) {
+        if (typeof newNode.options.copyValueTo === 'string') {
+          newNode.options.copyValueTo = [newNode.options.copyValueTo];
+        }
+        if (isArray(newNode.options.copyValueTo)) {
+          newNode.options.copyValueTo = newNode.options.copyValueTo.map(item =>
+            JsonPointer.isJsonPointer(item) ?
+              JsonPointer.compile(item) :
+              JsonPointer.compile(JsonPointer.parseObjectPath(item), '-')
+          );
+        }
       }
 
       newNode.widget = widgetLibrary.getWidget(newNode.type);
@@ -291,10 +299,16 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
       } else {
         newNode.arrayItem = false;
       }
-    } else if (hasOwn(newNode, 'type')) {
-      newNode.arrayItem = false;
+    } else if (hasOwn(newNode, 'type') || hasOwn(newNode, 'items')) {
+      const parentType: string =
+        JsonPointer.get(jsf.layout, layoutPointer, 0, -2).type;
+      if (!hasOwn(newNode, 'type')) {
+        newNode.type =
+          inArray(parentType, ['tabs', 'tabarray']) ? 'tab' : 'fieldset';
+      }
+      newNode.arrayItem = parentType === 'array';
       newNode.widget = widgetLibrary.getWidget(newNode.type);
-      updateInputOptions(newNode, { }, jsf);
+      updateInputOptions(newNode, {}, jsf);
     }
     if (newNode.type === 'submit') hasSubmitButton = true;
     return newNode;
@@ -341,7 +355,7 @@ export function buildLayoutFromSchema(
     dataPointer: JsonPointer.toGenericPointer(dataPointer, jsf.arrayMap),
     dataType: schema.type || (hasOwn(schema, '$ref') ? '$ref' : null),
     layoutPointer: layoutPointer.replace(/\/\d+/g, '/-') || '/-',
-    options: { },
+    options: {},
     type: newNodeType,
     widget: widgetLibrary.getWidget(newNodeType),
   };
@@ -659,10 +673,12 @@ export function mapLayout(
     let newNode: any = copy(item);
     let itemsArray: any[] = [];
     if (isObject(item)) {
+      if (hasOwn(item, 'tabs')) {
+        item.items = item.tabs;
+        delete item.tabs;
+      }
       if (hasOwn(item, 'items')) {
         itemsArray = isArray(item.items) ? item.items : [item.items];
-      } else if (hasOwn(item, 'tabs')) {
-        itemsArray = isArray(item.tabs) ? item.tabs : [item.tabs];
       }
     }
     if (itemsArray.length) {

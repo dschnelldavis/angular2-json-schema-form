@@ -12,9 +12,9 @@ import { FrameworkLibraryService } from '../frameworks/framework-library.service
 import { WidgetLibraryService } from '../widgets/widget-library.service';
 import {
   buildFormGroup, buildFormGroupTemplate, buildLayout, buildSchemaFromData,
-  buildSchemaFromLayout, convertJsonSchema3to4, fixJsonFormOptions,
-  formatFormData, getSchemaReference, hasOwn, hasValue, isArray, isEmpty,
-  isObject, isString, JsonPointer
+  buildSchemaFromLayout, fixJsonFormOptions, forEach, formatFormData,
+  getSchemaReference, hasOwn, hasValue, isArray, isEmpty, isObject, isString,
+  JsonPointer
 } from './utilities/index';
 
 /**
@@ -58,7 +58,9 @@ import {
         [layout]="jsf.layout">
       </root-widget>
     </form>
-    <div *ngIf="debug">Debug output: <pre>{{debugOutput}}</pre></div>`,
+    <div *ngIf="debug || jsf.globalOptions.debug">
+      Debug output: <pre>{{debugOutput}}</pre>
+    </div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
@@ -67,16 +69,29 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
   private validateFormData: any; // Compiled AJV function to validate this form's schema
   private debugOutput: any; // Debug information, if requested
 
+  // Recommended inputs
   @Input() schema: any; // The input JSON Schema
   @Input() layout: any[]; // The input Data model
   @Input() data: any; // The input Form layout
   @Input() options: any; // The input form global options
+
+  // Alternate combined single input
   @Input() form: any; // For testing, and JSON Schema Form API compatibility
+
+  // Angular Schema Form API compatibility inputs
   @Input() model: any; // For Angular Schema Form API compatibility
+
+  // React JSON Schema Form API compatibility inputs
   @Input() JSONSchema: any; // For React JSON Schema Form API compatibility
   @Input() UISchema: any; // For React JSON Schema Form API compatibility
   @Input() formData: any; // For React JSON Schema Form API compatibility
+
+  // Development inputs, for testing and debugging
+  @Input() framework: string; // Name of framework to load
+  @Input() loadExternalAssets: boolean; // Load external framework assets?
   @Input() debug: boolean; // Show debug information?
+
+  // Outputs
   @Output() onChanges = new EventEmitter<any>(); // Live unvalidated internal form data
   @Output() onSubmit = new EventEmitter<any>(); // Validated complete form data
   @Output() isValid = new EventEmitter<boolean>(); // Is current data valid?
@@ -119,19 +134,38 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
       this.form || this.JSONSchema || this.UISchema
     ) {
       this.formInitialized = false;
-      this.jsf.schema = { };
+      this.jsf.schema = {};
       this.jsf.layout = [];
-      this.jsf.initialValues = { };
+      this.jsf.initialValues = {};
       this.jsf.dataMap = new Map<string, any>();
-      this.jsf.schemaRefLibrary = { };
-      this.jsf.layoutRefLibrary = { };
-      this.jsf.formGroupTemplate = { };
+      this.jsf.schemaRefLibrary = {};
+      this.jsf.layoutRefLibrary = {};
+      this.jsf.formGroupTemplate = {};
       this.jsf.formGroup = null;
-      this.jsf.framework = this.frameworkLibrary.getFramework();
+
+      // Initialize 'options' (global form options) and set framework
+      // Combine available inputs:
+      // 1. options - recommended
+      // 2. form.options - Single input style
+      this.jsf.setOptions({ debug: !!this.debug });
+      let loadExternalAssets: boolean = this.loadExternalAssets || false;
+      let framework: any = this.framework || null;
       if (isObject(this.options)) {
-        Object.assign(this.jsf.globalOptions, this.options);
+        this.jsf.setOptions(this.options);
+        loadExternalAssets = this.options.loadExternalAssets || loadExternalAssets;
+        framework = this.options.framework || framework;
       }
-      this.jsf.globalOptions.debug = !!this.debug;
+      if (isObject(this.form) && isObject(this.form.options)) {
+        this.jsf.setOptions(this.form.options);
+        loadExternalAssets = this.form.options.loadExternalAssets || loadExternalAssets;
+        framework = this.form.options.framework || framework;
+      }
+      this.frameworkLibrary.setLoadExternalAssets(loadExternalAssets);
+      this.frameworkLibrary.setFramework(framework);
+      this.jsf.framework = this.frameworkLibrary.getFramework();
+      if (isObject(this.form) && isObject(this.form.tpldata)) {
+        this.jsf.setTpldata(this.form.tpldata);
+      }
 
       // Initialize 'schema'
       // Use first available input:
@@ -175,7 +209,7 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
         }
 
         // If JSON Schema is version 3 (JSON Form style), convert it to version 4
-        this.jsf.schema = convertJsonSchema3to4(this.jsf.schema);
+        this.jsf.convertJsonSchema3to4();
 
         // Initialize ajv and compile schema
         this.validateFormData = this.ajv.compile(this.jsf.schema);
@@ -343,6 +377,17 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
 
       if (this.jsf.formGroup) {
 
+        // // Calculate references to other fields
+        // if (!isEmpty(this.jsf.formGroup.value)) {
+        //   forEach(this.jsf.formGroup.value, (value, key, object, rootObject) => {
+        //     if (typeof value === 'string') {
+        //       object[key] = this.jsf.parseText(value, value, rootObject, key);
+        //     }
+        //   }, 'top-down');
+        // }
+        // // TODO: Figure out how to display calculated values without changing object data
+        // // See http://ulion.github.io/jsonform/playground/?example=templating-values
+
         // Display the template, to render the form
         this.formInitialized = true;
 
@@ -398,14 +443,14 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
 
   // Uncomment to output debugging information to browser:
   ngDoCheck() {
-    if (this.debug) {
+    if (this.debug || this.jsf.globalOptions.debug) {
       const vars: any[] = [];
       // vars.push(this.jsf.schema);
       // vars.push(this.jsf.initialValues);
       // vars.push(this.jsf.dataMap);
       // vars.push(this.jsf.arrayMap);
       // vars.push(this.jsf.formGroupTemplate);
-      // vars.push(this.jsf.layout);
+      vars.push(this.jsf.layout);
       // vars.push(this.jsf.schemaRefLibrary);
       // vars.push(this.jsf.initialValues);
       // vars.push(this.jsf.formGroup);

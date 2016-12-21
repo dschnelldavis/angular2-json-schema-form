@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 
 import { JsonSchemaFormService } from '../library/json-schema-form.service';
-import { JsonPointer, parseText } from '../library/utilities/index';
+import { JsonPointer } from '../library/utilities/index';
 
 @Component({
   moduleId: module.id,
@@ -106,6 +106,6 @@ export class TabsComponent implements OnInit {
     } else {
       value = values;
     }
-    return parseText(text, value, values, index);
+    return this.jsf.parseText(text, value, values, index);
   }
 }

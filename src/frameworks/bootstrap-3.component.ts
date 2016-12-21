@@ -6,7 +6,7 @@ import * as _ from 'lodash';
 
 import { JsonSchemaFormService } from '../library/json-schema-form.service';
 import {
-  addClasses, inArray, JsonPointer, parseText, toTitleCase
+  addClasses, inArray, JsonPointer, toTitleCase
 } from '../library/utilities/index';
 
 /**
@@ -48,7 +48,7 @@ import {
           [innerHTML]="options?.help"></p>
       </div>
 
-      <label *ngIf="options?.title"
+      <label *ngIf="options?.title && layoutNode?.type !== 'tab'"
         [attr.for]="'control' + layoutNode?._id"
         [class]="options?.labelHtmlClass"
         [class.sr-only]="options?.notitle"
@@ -143,7 +143,7 @@ export class Bootstrap3Component implements OnInit, OnChanges {
     if (this.layoutNode) {
       this.options = _.cloneDeep(this.layoutNode.options);
       this.widgetLayoutNode = Object.assign(
-        { }, this.layoutNode, { options: _.cloneDeep(this.layoutNode.options) }
+        {}, this.layoutNode, { options: _.cloneDeep(this.layoutNode.options) }
       );
       this.widgetOptions = this.widgetLayoutNode.options;
       this.layoutPointer = this.jsf.getLayoutPointer(this);
@@ -332,7 +332,7 @@ export class Bootstrap3Component implements OnInit, OnChanges {
         if (thisTitle.indexOf('{') === -1 || !this.formControl || !this.dataIndex) {
           return thisTitle;
         }
-        return parseText(
+        return this.jsf.parseText(
           thisTitle,
           this.jsf.getControlValue(this),
           this.jsf.getControlGroup(this).value,

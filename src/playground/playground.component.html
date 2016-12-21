@@ -106,11 +106,11 @@
       <json-schema-form
         *ngIf="formActive"
         [form]="jsonFormObject"
+        [options]="jsonFormOptions"
         (onChanges)="onChanges($event)"
         (onSubmit)="onSubmit($event)"
         (isValid)="isValid($event)"
-        (validationErrors)="validationErrors($event)"
-        [debug]="false">
+        (validationErrors)="validationErrors($event)">
       </json-schema-form>
 
       <hr>

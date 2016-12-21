@@ -45,7 +45,7 @@ export function addClasses(
  */
 export function copy(object: any): any {
   if (typeof object !== 'object' || object === null) return object;
-  if (isObject(object)) return Object.assign({ }, object);
+  if (isObject(object)) return Object.assign({}, object);
   if (isArray(object)) return [].concat(object);
   if (isMap(object)) return new Map(object);
   if (isSet(object)) return new Set(object);
@@ -57,6 +57,12 @@ export function copy(object: any): any {
  *
  * Iterates over all items in the first level of an object or array
  * and calls an iterator funciton on each item.
+ *
+ * The iterator function is called with four values:
+ * 1. The current item's value
+ * 2. The current item's key
+ * 3. The parent object, which contains the current item
+ * 4. The root object
  *
  * Setting the optional third parameter to 'top-down' or 'bottom-up' will cause
  * it to also recursively iterate over items in sub-objects or sub-arrays in the
@@ -111,7 +117,7 @@ export function forEachCopy(
 ): any {
   if (!hasValue(object)) return;
   if ((isObject(object) || isArray(object)) && typeof fn !== 'function') {
-    let newObject: any = isArray(object) ? [] : { };
+    let newObject: any = isArray(object) ? [] : {};
     for (let key of Object.keys(object)) {
       newObject[key] = fn(object[key], key, object);
     }
@@ -161,7 +167,7 @@ export function mergeFilteredObject(
   keyFn: (string) => string = (k) => k, valueFn: (any) => any = (v) => v
 ): PlainObject {
   if (!isObject(sourceObject)) return targetObject;
-  if (!isObject(targetObject)) targetObject = { };
+  if (!isObject(targetObject)) targetObject = {};
   for (let key of Object.keys(sourceObject)) {
     if (!inArray(key, excludeKeys) && isDefined(sourceObject[key])) {
       targetObject[keyFn(key)] = valueFn(sourceObject[key]);
@@ -174,17 +180,26 @@ export function mergeFilteredObject(
  * 'parseText' function
  *
  * @param  {string = ''} text -
- * @param  {any = { }} value -
+ * @param  {any = {}} value -
  * @param  {number = null} index -
  * @return {string} -
  */
 export function parseText(
-  text: string = '', value: any = { }, values: any = { }, index: number = null
+  text: string = '', value: any = {}, values: any = {},
+  key: number|string = null, tpldata: any = null
 ): string {
   if (!text) return text;
+  let idx: number = null; // For JSON Form API compatibility
+  let $index: number = null; // For Angular Schema Form API compatibility
+  if (typeof key === 'number') { idx = $index = key + 1; }
   try {
-    return text.replace(/{{.+?}}/g, exp => eval(exp.slice(2, -2)));
+      return text.replace(/{{.+?}}/g, exp => eval(exp.slice(2, -2)));
   } catch (error) {
+    try {
+      return (tpldata) ?
+        text.replace(/{{.+?}}/g, exp => eval('tpldata.' + exp.slice(2, -2))) :
+        text.replace(/{{.+?}}/g, exp => eval('this.' + exp.slice(2, -2)));
+    } catch (error) { }
     console.error('parseText error: ');
     console.error(error);
     return text;

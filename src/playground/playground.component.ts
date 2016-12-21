@@ -14,21 +14,6 @@ import {
   styleUrls: [ 'playground.component.css' ]
 })
 export class PlaygroundComponent implements OnInit, AfterViewInit {
-
-  exampleJsonObject = {
-    'first_name': 'Jane', 'last_name': 'Doe',
-    'age': 25, 'is_company': false,
-    'address': {
-      'street_1': '123 Main St.', 'street_2': null,
-      'city': 'Las Vegas', 'state': 'NV', 'zip_code': '89123'
-    },
-    'phone_numbers': [
-      { 'number': '702-123-4567', 'type': 'cell' },
-      { 'number': '702-987-6543', 'type': 'work' }
-    ],
-    'notes': ''
-  };
-
   private examples: any = {
     exampleSetList: [ 'asf', 'rjsf', 'jsf', 'ng2jsf' ],
     exampleSets: {
@@ -222,10 +207,16 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
   private jsonFormValid: boolean = false;
   private jsonFormErrorMessage: string = 'Loading form...';
   private jsonFormObject: any;
-  private liveFormData: any = { };
+  private jsonFormOptions: any = {
+    addSubmit: true, // Add a submit button if layout does not have one
+    loadExternalAssets: true, // Load external css and JavaScript for frameworks
+    formDefaults: { feedback: true }, // SHow inline feedback icons
+    debug: false,
+  };
+  private liveFormData: any = {};
   private formValidationErrors: any;
   private formIsValid: any;
-  private submittedFormData: any = { };
+  private submittedFormData: any = {};
   private aceEditorOptions: any = {
     highlightActiveLine: true,
     maxLines: 1000,
@@ -318,8 +309,8 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
         '&example=' + selectedExample +
         '&framework=' + this.selectedFramework
       );
-      this.liveFormData = { };
-      this.submittedFormData = { };
+      this.liveFormData = {};
+      this.submittedFormData = {};
       this.formIsValid = null;
       this.formValidationErrors = null;
     }
@@ -347,8 +338,8 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
   private generateForm(newFormString: string) {
     if (!newFormString) { return; }
     this.formActive = false;
-    this.liveFormData = { };
-    this.submittedFormData = { };
+    this.liveFormData = {};
+    this.submittedFormData = {};
 
     // Most examples should be written in pure JSON, but if a schema includes
     // a function, the playground will compile it as Javascript instead

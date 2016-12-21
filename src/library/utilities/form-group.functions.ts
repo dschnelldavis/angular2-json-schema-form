@@ -420,7 +420,7 @@ export function getControl(
   const dataPointerArray: string[] = JsonPointer.parse(dataPointer);
   let subGroup = formGroup;
   if (dataPointerArray !== null) {
-    let l = returnGroup ? dataPointerArray.length - 1 : dataPointerArray.length;
+    let l = dataPointerArray.length - (returnGroup ? 1 : 0);
     for (let i = 0; i < l; ++i) {
       let key = dataPointerArray[i];
       if (subGroup.hasOwnProperty('controls')) {

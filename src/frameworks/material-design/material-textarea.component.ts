@@ -6,29 +6,7 @@ import { JsonSchemaFormService } from '../../library/json-schema-form.service';
 @Component({
   selector: 'material-textarea-widget',
   template: `
-    <div
-      [class]="options?.htmlClass">
-      <label *ngIf="options?.title"
-        [attr.for]="'control' + layoutNode?._id"
-        [class]="options?.labelHtmlClass"
-        [class.sr-only]="options?.notitle"
-        [innerHTML]="options?.title"></label>
-      <textarea
-        [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
-        [attr.maxlength]="options?.maxLength"
-        [attr.minlength]="options?.minLength"
-        [attr.pattern]="options?.pattern"
-        [attr.placeholder]="options?.placeholder"
-        [attr.readonly]="options?.readonly ? 'readonly' : null"
-        [attr.required]="options?.required"
-        [class]="options?.fieldHtmlClass"
-        [disabled]="controlDisabled"
-        [id]="'control' + layoutNode?._id"
-        [name]="controlName"
-        [value]="controlValue"
-        (input)="updateValue($event)"></textarea>
-    </div>
-    <!-- md-textarea #inputControl
+    <md-textarea #inputControl
       [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
       [attr.list]="'control' + layoutNode?._id + 'Autocomplete'"
       [attr.maxlength]="options?.maxLength"
@@ -52,7 +30,7 @@ import { JsonSchemaFormService } from '../../library/json-schema-form.service';
         align="end">{{options?.description}}</md-hint>
       <md-hint *ngIf="options?.placeholder && !formControl?.dirty"
         align="end">{{options?.placeholder}}</md-hint>
-    </md-textarea -->`,
+    </md-textarea>`,
 })
 export class MaterialTextareaComponent implements OnInit {
   private formControl: AbstractControl;

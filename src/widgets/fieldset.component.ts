@@ -10,7 +10,7 @@ import { JsonSchemaFormService } from '../library/json-schema-form.service';
       [class.expandable]="options?.expandable && !expanded"
       [class.expanded]="options?.expandable && expanded"
       [disabled]="options?.readonly">
-      <legend *ngIf="options?.title"
+      <legend *ngIf="options?.title && layoutNode?.type !== 'tab'"
         [class]="options?.labelHtmlClass"
         [class.sr-only]="options?.notitle"
         [innerHTML]="options?.title"

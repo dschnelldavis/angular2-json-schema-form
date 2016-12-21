@@ -95,11 +95,14 @@ For basic use, after loading the JsonSchemaFormModule as described above, to add
 ```html
 <json-schema-form
   [schema]="yourJsonSchema"
+  loadExternalAssets="true"
   (onSubmit)="yourOnSubmitFn($event)">
 </json-schema-form>
 ```
 
 Where the `schema` input is a valid JSON schema object (either v3 or v4), and the `onSubmit` output is a function that will be called when the form is submitted, with the results of the form as a JSON object.
+
+(Note: The `loadExternalAssets` attribute is explained in more detail below, in the 'Changing or adding frameworks' section. For now just know that it is useful when you are first trying out this library, but you will usually want to remove it in your production site and instead separately load the external assets required by a particular display framework. For example, the above tag will use the default Bootstrap 3 display framework, so if your site already loads the style sheets and javascript libraries for Bootstrap 3, you should remove the `loadExternalAssets` attribute to prevent those assets from being loaded twice.)
 
 ### Advanced use
 
@@ -144,6 +147,8 @@ let yourCompoundInputObject = {
 </json-schema-form>
 ```
 
+All samples in example playground use the combined `form` input, which is why they do not require separate `schema`, `layout`, and `data` inputs.
+
 Finally, Angular 2 JSON Schema Form also includes an experimental feature to create a form entirely from a JSON object (with no schema), like so:
 
 ```javascript
@@ -165,6 +170,7 @@ let exampleJsonObject = {
 ```html
 <json-schema-form
   [data]="exampleJsonObject"
+  loadExternalAssets="true"
   (onSubmit)="yourOnSubmitFn($event)">
 </json-schema-form>
 ```
@@ -205,7 +211,7 @@ import { FrameworkLibraryService } from 'angular2-json-schema-form';
 constructor(private frameworkLibrary: FrameworkLibraryService) { }
 ...
 let yourCustomFramework = {
-  framework: YourFrameworkComponent, // required
+  framework: YourFrameworkComponent,                        // required
   widgets:     { 'your-widget-name': YourWidgetComponent }, // optional
   stylesheets: [ '//url-to-your-external-style-sheet' ],    // optional
   scripts:     [ '//url-to-your-external-script' ]          // optional
@@ -213,7 +219,13 @@ let yourCustomFramework = {
 frameworkLibrary.setFramework(yourCustomFramework);
 ```
 
-The value of the required `framework` key is an Angular 2 component which will be called to format each widget before it is displayed. The optional `widgets` object contains any custom widgets which will override or supplement the built-in widgets, and the `stylesheets` and `scripts` arrays contain URLs to any supplemental external style sheets and JavaScript libraries to load.
+The value of the required `framework` key is an Angular 2 component which will be called to format each widget before it is displayed. The optional `widgets` object contains any custom widgets which will override or supplement the built-in widgets. Also, and the `stylesheets` and `scripts` arrays may contain URLs to any supplemental external style sheets and JavaScript libraries to load.
+
+It is more reliable to load external stylesheets and scripts separately in your site, which is the recommended best practice. If you are unsure what scripts are required by a particular framework, you can call `getFrameworkStylesheets()` and `getFrameworkScritps()` to return the built-in URLs. During development, you may find it helpful to let Angular 2 JSON Schema Form load these resources for you, which you can do in several ways:
+
+* Call `setFramework` with a second parameter of `true` (e.g. `setFramework('material-design', true)`), or
+* Add `loadExternalAssets: true` to your `options` object, or
+* Add `loadExternalAssets="true"` to your `<json-schema-form>` tag, as shown above.
 
 The two built-in frameworks (both in the `/src/frameworks` folder) demonstrate different strategies for how frameworks can style form elements. The Bootstrap 3 framework is very lightweight and includes no additional widgets (though it does load some external stylesheets and scripts) and works entirely by adding styles to the default widgets. In contrast, the Material Design framework makes much more drastic changes, and uses the [Material Design for Angular 2](https://github.com/angular/material2) library to replace most of the default form control widgets with custom widgets from that library.
 

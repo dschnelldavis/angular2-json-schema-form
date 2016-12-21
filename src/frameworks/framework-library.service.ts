@@ -49,6 +49,10 @@ export type FrameworkLibrary = { [key: string]: Framework };
 
 @Injectable()
 export class FrameworkLibraryService {
+  private activeFramework: Framework = null;
+  private stylesheets: (HTMLStyleElement|HTMLLinkElement)[];
+  private scripts: HTMLScriptElement[];
+  private loadExternalAssets: boolean = false;
   private defaultFramework: string = 'bootstrap-3';
   private frameworkLibrary: FrameworkLibrary = {
     'no-framework': { framework: NoFrameworkComponent },
@@ -66,7 +70,7 @@ export class FrameworkLibraryService {
         'textarea': MaterialTextareaComponent,
         'checkboxes': MaterialCheckboxesComponent,
         'radios': MaterialRadiosComponent,
-        'fieldset': MaterialCardComponent,
+        'card': MaterialCardComponent,
         'tabs': MaterialTabsComponent,
       },
       stylesheets: [
@@ -98,15 +102,10 @@ export class FrameworkLibraryService {
     'foundation-6': { framework: Foundation6Component, },
     'smantic-ui': { framework: SemanticUIComponent, },
   };
-  private activeFramework: Framework;
-  private stylesheets: (HTMLStyleElement|HTMLLinkElement)[];
-  private scripts: HTMLScriptElement[];
 
   constructor(
     private widgetLibrary: WidgetLibraryService
-  ) {
-    this.setFramework();
-  }
+  ) { }
 
   private registerFrameworkWidgets(framework: Framework): boolean {
     if (framework.hasOwnProperty('widgets')) {
@@ -117,12 +116,16 @@ export class FrameworkLibraryService {
     return false;
   }
 
-  private loadFrameworkExternalAssets(framework: Framework): boolean {
+  private unloadFrameworkExternalAssets(): void {
     for (let node of [...(this.scripts || []), ...(this.stylesheets || [])]) {
       node.parentNode.removeChild(node);
     }
     this.scripts = [];
     this.stylesheets = [];
+  }
+
+  private loadFrameworkExternalAssets(framework: Framework): boolean {
+    this.unloadFrameworkExternalAssets();
     if (framework.hasOwnProperty('scripts')) {
       for (let script of framework.scripts) {
         let newScript: HTMLScriptElement = document.createElement('script');
@@ -157,7 +160,13 @@ export class FrameworkLibraryService {
     return !!(framework.stylesheets || framework.scripts);
   }
 
-  public setFramework(framework?: string|Framework): boolean {
+  public setLoadExternalAssets(loadExternalAssets: boolean = true): void {
+    this.loadExternalAssets = !!loadExternalAssets;
+  }
+
+  public setFramework(
+    framework?: string|Framework, loadExternalAssets: boolean = this.loadExternalAssets
+  ): boolean {
     let activeFramework: Framework = null;
     if (!framework || framework === 'default') {
       activeFramework = this.frameworkLibrary[this.defaultFramework];
@@ -169,7 +178,11 @@ export class FrameworkLibraryService {
     if (activeFramework) {
       this.activeFramework = activeFramework;
       this.registerFrameworkWidgets(this.activeFramework);
-      this.loadFrameworkExternalAssets(this.activeFramework);
+      if (loadExternalAssets) {
+        this.loadFrameworkExternalAssets(this.activeFramework);
+      } else {
+        this.unloadFrameworkExternalAssets();
+      }
       return true;
     }
     return false;
@@ -181,11 +194,12 @@ export class FrameworkLibraryService {
   }
 
   public getFramework(): any {
+    if (!this.activeFramework) this.setFramework('default', true);
     return this.activeFramework.framework;
   }
 
   public getFrameworkWidgets(): any {
-    return this.activeFramework.widgets || { };
+    return this.activeFramework.widgets || {};
   }
 
   public getFrameworkStylesheets(): string[] {

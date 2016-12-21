@@ -4,7 +4,8 @@ import { AbstractControl, FormArray, FormGroup } from '@angular/forms';
 import * as _ from 'lodash';
 
 import {
-  buildFormGroup, getControl, hasOwn, isDefined, JsonPointer
+  buildFormGroup, convertJsonSchema3to4, getControl, hasOwn, isArray,
+  isDefined, isObject, JsonPointer, parseText
 } from './utilities/index';
 
 @Injectable()
@@ -12,33 +13,36 @@ export class JsonSchemaFormService {
   public JsonFormCompatibility: boolean = false;
   public ReactJsonSchemaFormCompatibility: boolean = false;
   public AngularSchemaFormCompatibility: boolean = false;
+  public tpldata: any = {};
 
   // Default global form options
-  public globalOptions = {
-    addSubmit: true, // Add a submit button if layout does not have one?
-    debug: false, // Show debugging output?
-    fieldsRequired: false, // Are there any required fields in the form?
+  public globalOptions: any = {
+    // addSubmit: false, // Add a submit button if layout does not have one?
+    // debug: false, // Show debugging output?
+    // fieldsRequired: false, // Are there any required fields in the form?
+    // framework: 'bootstrap-3', // Display formating framework to use
+    // loadExternalAssets: false, // Load external css and JavaScript for framework?
     pristine: { errors: true, success: true },
     // supressPropertyTitles: false,
     setSchemaDefaults: true,
     // validateOnRender: false,
-    formDefaults: { // Default options for individual form controls
+    formDefaults: { // Default options for form controls
       // addable: true, // Allow adding items to an array or $ref point?
       // orderable: true, // Allow reordering items within an array?
       // removable: true, // Allow removing items from an array or $ref point?
       // allowExponents: false, // Allow exponent entry in number fields?
       // disableErrorState: false, // Don't apply 'has-error' class when field fails validation?
       // disableSuccessState: false, // Don't apply 'has-success' class when field validates?
-      feedback: true, // Show inline feedback icons?
+      // feedback: false, // Show inline feedback icons?
       // notitle: false, // Hide title?
       // readonly: false, // Set control as read only?
     },
   };
 
-  public initialValues: any = { }; // The initial data model (e.g. previously submitted data)
-  public schema: any = { }; // The internal JSON Schema
+  public initialValues: any = {}; // The initial data model (e.g. previously submitted data)
+  public schema: any = {}; // The internal JSON Schema
   public layout: any[] = []; // The internal Form layout
-  public formGroupTemplate: any = { }; // The template used to create formGroup
+  public formGroupTemplate: any = {}; // The template used to create formGroup
   public formGroup: any = null; // The Angular 2 formGroup, which powers the reactive form
 
   public framework: any = null; // The active framework component
@@ -47,11 +51,31 @@ export class JsonSchemaFormService {
   public dataMap: Map<string, any> = new Map<string, any>(); // Maps paths in data model to schema and formGroup paths
   public dataCircularRefMap: Map<string, string> = new Map<string, string>(); // Maps circular reference points in data model
   public schemaCircularRefMap: Map<string, string> = new Map<string, string>(); // Maps circular reference points in schema
-  public layoutRefLibrary: any = { }; // Library of layout nodes for adding to form
-  public schemaRefLibrary: any = { }; // Library of schemas for resolving schema $refs
-  public templateRefLibrary: any = { }; // Library of formGroup templates for adding to form
+  public layoutRefLibrary: any = {}; // Library of layout nodes for adding to form
+  public schemaRefLibrary: any = {}; // Library of schemas for resolving schema $refs
+  public templateRefLibrary: any = {}; // Library of formGroup templates for adding to form
 
   constructor() { }
+
+  public setOptions(newOptions: any): void {
+    if (typeof newOptions === 'object') {
+      Object.assign(this.globalOptions, newOptions);
+    }
+  }
+
+  public setTpldata(newTpldata: any = {}): void {
+    this.tpldata = newTpldata;
+  }
+
+  public parseText(
+    text: string = '', value: any = {}, values: any = {}, key: number|string = null
+  ): string {
+    return parseText(text, value, values, key, this.tpldata);
+  }
+
+  public convertJsonSchema3to4() {
+    this.schema = convertJsonSchema3to4(this.schema);
+  }
 
   public initializeControl(ctx): boolean {
     ctx.formControl = this.getControl(ctx);
@@ -79,12 +103,23 @@ export class JsonSchemaFormService {
   }
 
   public updateValue(ctx, value): void {
+    // Set value of current control
     ctx.controlValue = value;
     if (ctx.boundControl) {
       ctx.formControl.setValue(value);
       ctx.formControl.markAsDirty();
     }
     ctx.layoutNode.value = value;
+    // Set values of any other controls in copyValueTo array
+    if (isArray(ctx.options.copyValueTo)) {
+      for (let item of ctx.options.copyValueTo) {
+        let targetControl = getControl(this.formGroup, item);
+        if (isObject(targetControl) && typeof targetControl.setValue === 'function') {
+          targetControl.setValue(value);
+          targetControl.markAsDirty();
+        }
+      }
+    }
   }
 
   public getControl(ctx): AbstractControl {

@@ -5,7 +5,7 @@ import {
 import * as _ from 'lodash';
 
 import { JsonSchemaFormService } from '../../library/json-schema-form.service';
-import { parseText, toTitleCase } from '../../library/utilities/index';
+import { toTitleCase } from '../../library/utilities/index';
 
 @Component({
   selector: 'material-design-framework',
@@ -152,7 +152,7 @@ export class MaterialDesignComponent implements OnInit, OnChanges {
         if (thisTitle.indexOf('{') === -1 || !this.formControl || !this.dataIndex) {
           return thisTitle;
         }
-        return parseText(
+        return this.jsf.parseText(
           thisTitle,
           this.jsf.getControlValue(this),
           this.jsf.getControlGroup(this).value,
