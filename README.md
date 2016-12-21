@@ -1,6 +1,6 @@
 # Angular 2 JSON Schema Form
 
-[![npm version](https://badge.fury.io/js/angular2-json-schema-form.svg)](https://www.npmjs.com/package/angular2-json-schema-form) [![MIT Licence](https://img.shields.io/github/license/dschnelldavis/angular2-json-schema-form.svg)](https://opensource.org/licenses/mit-license.php)
+[![GitHub MIT License](https://img.shields.io/github/license/dschnelldavis/angular2-json-schema-form.svg?style=social)](https://github.com/dschnelldavis/angular2-json-schema-form) [![npm version](https://badge.fury.io/js/angular2-json-schema-form.svg)](https://www.npmjs.com/package/angular2-json-schema-form)
 
 A [JSON Schema](http://json-schema.org) Form builder for Angular 2, similar to, and mostly API compatible with,
 
@@ -16,7 +16,7 @@ Note: This is a personal proof-of-concept project, and is NOT currently affiliat
 
 The [GitHub](https://github.com) version of Angular 2 JSON Schema Form includes an example playground with over 70 different JSON Schemas (including all examples used by each of the three libraries listed above), and the ability to quickly view any example formatted using Bootstrap 3 or Material Design (or without formatting, which is functional, but usually pretty ugly).
 
-To install both the library and the example playground, clone `https://github.com/dschnelldavis/angular2-json-schema-form.git` with your favorite git program, or enter the following in your terminal:
+To install both the library and the example playground, clone `https://github.com/dschnelldavis/angular2-json-schema-form.git` with your favorite git program, or, assuming you have [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and [Node/NPM](https://nodejs.org/en/download/) installed, enter the following in your terminal:
 
 ```
 git clone https://github.com/dschnelldavis/angular2-json-schema-form.git angular2-json-schema-form
@@ -24,6 +24,8 @@ cd angular2-json-schema-form
 npm install
 npm start
 ```
+
+(Note for Windows users: To run `npm start`, you will also need an rsync program, such as [cwRsync](https://www.itefix.net/content/cwrsync-free-edition).)
 
 This should start the example playground locally and display it at `http://localhost:3000`
 
@@ -42,7 +44,7 @@ If you want additional documentation describing the individual functions used in
 If, after playing with the examples, you decide this library is functional enough to use in your own project, you can install it from [NPM](https://www.npmjs.com) by running the following from your terminal:
 
 ```
-npm install angular2-json-schema-form -save
+npm install angular2-json-schema-form --save
 ```
 
 Then add this line to your main application module:
@@ -90,7 +92,7 @@ And add this line to the 'packages' section:
 
 ### Basic use
 
-For basic use, after loading the JsonSchemaFormModule as described above, to add a form to your Angular 2 component, simply add the following to that component's template:
+For basic use, after loading the JsonSchemaFormModule as described above, to add a form to your Angular 2 component, simply add the following to your component's template:
 
 ```html
 <json-schema-form
@@ -100,9 +102,9 @@ For basic use, after loading the JsonSchemaFormModule as described above, to add
 </json-schema-form>
 ```
 
-Where the `schema` input is a valid JSON schema object (either v3 or v4), and the `onSubmit` output is a function that will be called when the form is submitted, with the results of the form as a JSON object.
+Where the `schema` input is a valid JSON schema object (either v3 or v4), and the `onSubmit` output is a function that will be called when the form is submitted, with the results of the form as a JSON object. If you don't already have your own schemas, you can find a whole bunch of samples to test with in the `src/playground/examples` folder, as described above.
 
-(Note: The `loadExternalAssets` attribute is explained in more detail below, in the 'Changing or adding frameworks' section. For now just know that it is useful when you are first trying out this library, but you will usually want to remove it in your production site and instead separately load the external assets required by a particular display framework. For example, the above tag will use the default Bootstrap 3 display framework, so if your site already loads the style sheets and javascript libraries for Bootstrap 3, you should remove the `loadExternalAssets` attribute to prevent those assets from being loaded twice.)
+(Note: The `loadExternalAssets` attribute is useful when you are first trying out this library, but you will usually want to remove it in your production sites. You can find more details about this in 'Changing or adding frameworks', below.)
 
 ### Advanced use
 
@@ -221,11 +223,21 @@ frameworkLibrary.setFramework(yourCustomFramework);
 
 The value of the required `framework` key is an Angular 2 component which will be called to format each widget before it is displayed. The optional `widgets` object contains any custom widgets which will override or supplement the built-in widgets. Also, and the `stylesheets` and `scripts` arrays may contain URLs to any supplemental external style sheets and JavaScript libraries to load.
 
-It is more reliable to load external stylesheets and scripts separately in your site, which is the recommended best practice. If you are unsure what scripts are required by a particular framework, you can call `getFrameworkStylesheets()` and `getFrameworkScritps()` to return the built-in URLs. During development, you may find it helpful to let Angular 2 JSON Schema Form load these resources for you, which you can do in several ways:
+#### Loading external assets required by a framework
+
+Most large framework libraries (including both Bootstrap and Material Design) need additional external JavaScript and/or CSS assets loaded in order to work properly. The best practice is to load these assets separately in your site, before calling Angular 2 JSON Schema Form. Follow these links for information about installing [Bootstrap](http://getbootstrap.com/getting-started/) and [Material Design](https://github.com/angular/material2/blob/master/GETTING_STARTED.md).
+
+Alternately, during development, you may find it helpful to let Angular 2 JSON Schema Form load these resources for you (as wed did in the 'Basic use' example, above), which you can do in several ways:
 
 * Call `setFramework` with a second parameter of `true` (e.g. `setFramework('material-design', true)`), or
 * Add `loadExternalAssets: true` to your `options` object, or
 * Add `loadExternalAssets="true"` to your `<json-schema-form>` tag, as shown above.
+
+Finally, if you want to find what scripts a particular framework will automatically load, you can call `getFrameworkStylesheets()` and `getFrameworkScritps()` to return the built-in arrays of URLs.
+
+However, once you start developing more complex sites, you should load these assets separately and remove all references to `loadExternalAssets` to prevent the assets from being loaded twice.
+
+#### Two strategies for writing your own frameworks
 
 The two built-in frameworks (both in the `/src/frameworks` folder) demonstrate different strategies for how frameworks can style form elements. The Bootstrap 3 framework is very lightweight and includes no additional widgets (though it does load some external stylesheets and scripts) and works entirely by adding styles to the default widgets. In contrast, the Material Design framework makes much more drastic changes, and uses the [Material Design for Angular 2](https://github.com/angular/material2) library to replace most of the default form control widgets with custom widgets from that library.
 
@@ -235,7 +247,7 @@ I wrote this library because I needed a JSON Schema Form builder to use in a lar
 
 The current version is mostly functional, and even includes a few enhancements not available in some other libraries, such as supporting less common JSON Schema features like `oneOf`, `allOf`, and `$ref` links (including circular links). However, it still has several bugs, such as not dynamically enabling and disabling conditionally required fields inside objects, and is very fragile because it does not yet include any testing framework at all.
 
-So if you find this library useful, I encourage you to fork it and send back pull requests for any improvements you make. (I would _love_ some tests...) You are also welcome to submit bug reports, however, as I am just a single busy developer, I can't guarantee how long it might take to fix any individual bugs. So if you want a change or fix to be implemented quickly, your best bet is to do it yourself and send a pull request.
+So if you find this library useful, I encourage you to fork it and send back pull requests for any improvements you make. (I would _love_ some tests...) I also encourage you to submit bug reports and feature requests, and I'll do my best to keep this library up-to-date. However, as I am just a single busy developer, I can't guarantee how long it might take to fix any individual bugs. So if you need a change or fix to be implemented fast, your best bet is to do it yourself and send a pull request.
 
 Thanks! I hope you enjoy using this library as much as I enjoyed writing it. :-)
 

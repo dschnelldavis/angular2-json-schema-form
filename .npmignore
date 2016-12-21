@@ -1,6 +1,5 @@
 # Development
 compiled
-dist/playground
 docs
 src
 
@@ -9,7 +8,6 @@ tsconfig.json
 tslint.json
 typedoc.json
 typings.json
-typings
 *.ts
 !*.d.ts
 
