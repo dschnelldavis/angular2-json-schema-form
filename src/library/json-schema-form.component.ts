@@ -4,17 +4,12 @@ import {
 } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
-import * as Ajv from 'ajv';
-import * as _ from 'lodash';
-
 import { JsonSchemaFormService } from './json-schema-form.service';
 import { FrameworkLibraryService } from '../frameworks/framework-library.service';
 import { WidgetLibraryService } from '../widgets/widget-library.service';
 import {
-  buildFormGroup, buildFormGroupTemplate, buildLayout, buildSchemaFromData,
-  buildSchemaFromLayout, fixJsonFormOptions, forEach, formatFormData,
-  getSchemaReference, hasOwn, hasValue, isArray, isEmpty, isObject, isString,
-  JsonPointer
+  fixJsonFormOptions, forEach, hasOwn, hasValue,
+  isArray, isEmpty, isObject, JsonPointer
 } from './utilities/index';
 
 /**
@@ -65,8 +60,6 @@ import {
 })
 export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
   private formInitialized: boolean = false; // Used to trigger form rendering
-  private ajv: any = new Ajv({ allErrors: true }); // AJV: Another JSON Schema Validator
-  private validateFormData: any; // Compiled AJV function to validate this form's schema
   private debugOutput: any; // Debug information, if requested
   private formValueSubscription: any = null;
 
@@ -148,6 +141,7 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
       this.jsf.layoutRefLibrary = {};
       this.jsf.schemaRefLibrary = {};
       this.jsf.templateRefLibrary = {};
+      this.jsf.resetAjvSchema();
 
       // Initialize 'options' (global form options) and set framework
       // Combine available inputs:
@@ -155,7 +149,7 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
       // 2. form.options - Single input style
       this.jsf.setOptions({ debug: !!this.debug });
       let loadExternalAssets: boolean = this.loadExternalAssets || false;
-      let framework: any = this.framework || null;
+      let framework: any = this.framework || 'default';
       if (isObject(this.options)) {
         this.jsf.setOptions(this.options);
         loadExternalAssets = this.options.loadExternalAssets || loadExternalAssets;
@@ -218,40 +212,10 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
         this.jsf.convertJsonSchema3to4();
 
         // Initialize ajv and compile schema
-        this.validateFormData = this.ajv.compile(this.jsf.schema);
+        this.jsf.compileAjvSchema();
 
         // Resolve all schema $ref links
-        JsonPointer.forEachDeep(this.jsf.schema, (value, pointer) => {
-          if (hasOwn(value, '$ref') && isString(value['$ref'])) {
-            const newReference: string = JsonPointer.compile(value['$ref']);
-            const isCircular = JsonPointer.isSubPointer(newReference, pointer);
-
-            // Save target schema in schemaRefLibrary
-            if (hasValue(newReference) &&
-              !hasOwn(this.jsf.schemaRefLibrary, newReference)
-            ) {
-              this.jsf.schemaRefLibrary[newReference] = getSchemaReference(
-                this.jsf.schema, newReference, this.jsf.schemaRefLibrary
-              );
-            }
-
-            // If a $ref link is not circular,
-            // remove link and replace with copy of target schema
-            if (!isCircular) {
-              delete value['$ref'];
-              this.jsf.schema = JsonPointer.set(
-                this.jsf.schema, pointer, Object.assign(
-                  _.cloneDeep(this.jsf.schemaRefLibrary[newReference]),
-                  value
-                )
-              );
-
-            // If a $ref link is circular, save link in schemaCircularRefMap
-            } else {
-              this.jsf.schemaCircularRefMap.set(pointer, newReference);
-            }
-          }
-        }, true);
+        this.jsf.resolveSchemaRefLinks();
       }
 
       // Initialize 'layout'
@@ -355,34 +319,31 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
 
       if (isEmpty(this.jsf.schema)) {
 
-        // TODO: If the schema does not exist, build a schema from the layout
+        // TODO: If layout, but no schema, build schema from layout
         if (this.jsf.layout.indexOf('*') === -1) {
-          this.jsf.schema = buildSchemaFromLayout(this.jsf.layout);
+          this.jsf.buildSchemaFromLayout();
 
-        // If neither schema nor layout exists, build a schema from the data
+        // If no schema and no layout, build schema from data
         } else if (!isEmpty(this.jsf.initialValues)) {
-          this.jsf.schema = buildSchemaFromData(this.jsf.initialValues);
+          this.jsf.buildSchemaFromData();
         }
       }
 
       if (!isEmpty(this.jsf.schema)) {
 
         // If not already initialized, initialize ajv and compile schema
-        if (!this.validateFormData) {
-          this.validateFormData = this.ajv.compile(this.jsf.schema);
-        }
+        this.jsf.compileAjvSchema();
 
         // Build the Angular 2 FormGroup template from the schema
-        this.jsf.formGroupTemplate =
-          buildFormGroupTemplate(this.jsf, this.jsf.initialValues, true);
+        this.jsf.buildFormGroupTemplate();
 
         // Update all layout elements, add values, widgets, and validators,
         // replace any '*' with a layout built from all schema elements,
         // and update the FormGroup template with any new validators
-        this.jsf.layout = buildLayout(this.jsf, this.widgetLibrary);
+        this.jsf.buildLayout(this.widgetLibrary);
 
         // Build the real Angular 2 FormGroup from the FormGroup template
-        this.jsf.formGroup = <FormGroup>buildFormGroup(this.jsf.formGroupTemplate);
+        this.jsf.buildFormGroup();
       }
 
       if (this.jsf.formGroup) {
@@ -398,42 +359,25 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
         // // TODO: Figure out how to display calculated values without changing object data
         // // See http://ulion.github.io/jsonform/playground/?example=templating-values
 
-        // Display the template, to render the form
+        // Display the template to render the form
         this.formInitialized = true;
 
-        // Subscribe to form value changes to output live data, validation, and errors
-        if (this.formValueSubscription) this.formValueSubscription.unsubscribe();
-        this.formValueSubscription = this.jsf.formGroup.valueChanges.subscribe(
-          value => {
-            const formattedData = formatFormData(
-              value, this.jsf.dataMap, this.jsf.dataCircularRefMap, this.jsf.arrayMap
-            );
-            // Note: Only emit ONE of the following two options:
-            this.onChanges.emit(formattedData); // Formatted output
-            // this.onChanges.emit(value); // Non-formatted output
-            const isValid = this.validateFormData(formattedData);
-            this.isValid.emit(isValid);
-            this.validationErrors.emit(this.validateFormData.errors);
-          }
-        );
+        // Subscribe to form changes to output live data, validation, and errors
+        this.jsf.dataChanges.subscribe(data => this.onChanges.emit(data));
+        this.jsf.isValidChanges.subscribe(isValid => this.isValid.emit(isValid));
+        this.jsf.validationErrorChanges.subscribe(errors => this.validationErrors.emit(errors));
 
         // Output initial data
-        this.onChanges.emit(formatFormData(
-          this.jsf.formGroup.value, this.jsf.dataMap,
-          this.jsf.dataCircularRefMap, this.jsf.arrayMap
-        ));
+        this.onChanges.emit(this.jsf.data);
 
         // If 'validateOnRender' = true, output initial validation and any errors
         if (JsonPointer.get(this.jsf, '/globalOptions/validateOnRender')) {
-          const isValid = this.validateFormData(formatFormData(
-            this.jsf.formGroup.value, this.jsf.dataMap,
-            this.jsf.dataCircularRefMap, this.jsf.arrayMap
-          ));
-          this.isValid.emit(isValid);
-          this.validationErrors.emit(this.validateFormData.errors);
+          this.isValid.emit(this.jsf.isValid);
+          this.validationErrors.emit(this.jsf.validationErrors);
         }
 
-// Uncomment to output debugging information to console:
+// Uncomment individual lines to output debugging information to console:
+// (These always work.)
 // console.log(this.jsf.formGroupTemplate);
 // console.log(this.jsf.formGroup);
 // console.log(this.jsf.initialValues);
@@ -452,7 +396,8 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
     }
   }
 
-  // Uncomment to output debugging information to browser:
+  // Uncomment individual lines to output debugging information to browser:
+  // (These only work if the 'debug' option has also been set to 'true'.)
   ngDoCheck() {
     if (this.debug || this.jsf.globalOptions.debug) {
       const vars: any[] = [];
@@ -461,22 +406,18 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
       // vars.push(this.jsf.dataMap);
       // vars.push(this.jsf.arrayMap);
       // vars.push(this.jsf.formGroupTemplate);
-      vars.push(this.jsf.layout);
+      // vars.push(this.jsf.layout);
       // vars.push(this.jsf.schemaRefLibrary);
       // vars.push(this.jsf.initialValues);
       // vars.push(this.jsf.formGroup);
       // vars.push(this.jsf.formGroup.value);
       // vars.push(this.jsf.layoutRefLibrary);
       // vars.push(this.jsf.templateRefLibrary);
-      this.debugOutput =
-        _.map(vars, thisVar => JSON.stringify(thisVar, null, 2)).join('\n');
+      this.debugOutput = vars.map(v => JSON.stringify(v, null, 2)).join('\n');
     }
   }
 
   private submitForm() {
-    this.onSubmit.emit(formatFormData(
-      this.jsf.formGroup.value, this.jsf.dataMap,
-      this.jsf.dataCircularRefMap, this.jsf.arrayMap, true
-    ));
+    this.onSubmit.emit(this.jsf.validData);
   }
 }

@@ -5,15 +5,10 @@ import {
 import * as _ from 'lodash';
 
 import {
-  inArray, isArray, isEmpty, isObject, isDefined, isPrimitive,
-  hasValue, toJavaScriptType, toSchemaType, SchemaPrimitiveType
-} from './validator.functions';
-import { forEach, hasOwn } from './utility.functions';
-import { JsonPointer, Pointer } from './jsonpointer.functions';
-import { JsonValidators } from './json.validators';
-import {
-  getControlValidators, removeCircularReferences
-} from './json-schema.functions';
+  forEach, getControlValidators, hasOwn, hasValue, inArray, isArray, isEmpty,
+  isObject, isDefined, isPrimitive, JsonPointer, JsonValidators, Pointer,
+  toJavaScriptType, toSchemaType, removeCircularReferences, SchemaPrimitiveType
+} from './index';
 
 /**
  * FormGroup function library:
@@ -88,7 +83,7 @@ export function buildFormGroupTemplate(
   let validators: any = getControlValidators(schema);
   switch (controlType) {
     case 'FormGroup':
-      controls = { };
+      controls = {};
       if (jsf.globalOptions.setSchemaDefaults) {
         useValues = mergeValues(
           JsonPointer.get(schema, '/properties/default'), useValues);
@@ -116,9 +111,9 @@ export function buildFormGroupTemplate(
         controls = [];
         for (let i = 0, l = schema.items.length; i < l; i++) {
           if (i >= minItems &&
-            !JsonPointer.has(jsf.templateRefLibrary, ['#' + dataPointer + '/' + i])
+            !JsonPointer.has(jsf.templateRefLibrary, [dataPointer + '/' + i])
           ) {
-            jsf.templateRefLibrary['#' + dataPointer + '/' + i] =
+            jsf.templateRefLibrary[dataPointer + '/' + i] =
               buildFormGroupTemplate(
                 jsf, null, mapArrays,
                 schemaPointer + '/items/' + i,
@@ -154,9 +149,9 @@ export function buildFormGroupTemplate(
             if (isArray(useValues)) useValues = null;
           }
           if (
-            !JsonPointer.has(jsf, ['templateRefLibrary', '#' + dataPointer + '/-'])
+            !JsonPointer.has(jsf, ['templateRefLibrary', dataPointer + '/-'])
           ) {
-            jsf.templateRefLibrary['#' + dataPointer + '/-'] =
+            jsf.templateRefLibrary[dataPointer + '/-'] =
               buildFormGroupTemplate(
                 jsf, null, mapArrays,
                 schemaPointer + '/additionalItems',
@@ -170,9 +165,9 @@ export function buildFormGroupTemplate(
           jsf.arrayMap.set(dataPointer, 0);
         }
         if (
-          !JsonPointer.has(jsf.templateRefLibrary, ['#' + dataPointer + '/-'])
+          !JsonPointer.has(jsf.templateRefLibrary, [dataPointer + '/-'])
         ) {
-          jsf.templateRefLibrary['#' + dataPointer + '/-'] =
+          jsf.templateRefLibrary[dataPointer + '/-'] =
             buildFormGroupTemplate(
               jsf, null, mapArrays,
               schemaPointer + '/items',
@@ -219,10 +214,10 @@ export function buildFormGroupTemplate(
       return { controlType, value, validators };
     case '$ref':
       const schemaRef: string = JsonPointer.compile(schema.$ref);
-      if (!hasOwn(jsf.templateRefLibrary, schema.$ref)) {
+      if (!hasOwn(jsf.templateRefLibrary, schemaRef)) {
         // Set to null first to prevent circular reference from causing endless loop
-        jsf.templateRefLibrary[schema.$ref] = null;
-        jsf.templateRefLibrary[schema.$ref] =
+        jsf.templateRefLibrary[schemaRef] = null;
+        jsf.templateRefLibrary[schemaRef] =
           buildFormGroupTemplate(jsf, null, false, schemaRef);
       }
       return null;
@@ -256,7 +251,7 @@ export function buildFormGroup(template: any): AbstractControl {
   if (hasOwn(template, 'controlType')) {
     switch (template.controlType) {
       case 'FormGroup':
-        let groupControls: { [key: string]: AbstractControl } = { };
+        let groupControls: { [key: string]: AbstractControl } = {};
         forEach(template.controls, (controls, key) => {
           let newControl: AbstractControl = buildFormGroup(controls);
           if (newControl) groupControls[key] = newControl;
@@ -290,7 +285,7 @@ export function mergeValues(...valuesToMerge) {
         if (isArray(currentValue)) {
           mergedValues = [].concat(currentValue);
         } else if (isObject(currentValue)) {
-          mergedValues = Object.assign({ }, currentValue);
+          mergedValues = Object.assign({}, currentValue);
         }
       } else if (typeof currentValue !== 'object') {
         mergedValues = currentValue;
@@ -364,14 +359,13 @@ export function formatFormData(
   formData: any, dataMap: Map<string, any>, circularRefMap: Map<string, string>,
   arrayMap: Map<string, number>, fixErrors: boolean = false
 ): any {
-  let formattedData = { };
+  let formattedData = {};
   JsonPointer.forEachDeep(formData, (value, dataPointer) => {
     if (typeof value !== 'object') {
-      let genericPointer: string = dataPointer;
-      if (!JsonPointer.has(dataMap, [dataPointer, 'schemaType'])) {
-        genericPointer =
-          removeCircularReferences(dataPointer, circularRefMap, arrayMap);
-      }
+      let genericPointer: string =
+        JsonPointer.has(dataMap, [dataPointer, 'schemaType']) ?
+        dataPointer :
+        removeCircularReferences(dataPointer, circularRefMap, arrayMap);
       if (JsonPointer.has(dataMap, [genericPointer, 'schemaType'])) {
         const schemaType: SchemaPrimitiveType | SchemaPrimitiveType[] =
           dataMap.get(genericPointer).get('schemaType');
@@ -380,8 +374,9 @@ export function formatFormData(
         } else if ( hasValue(value) &&
           inArray(schemaType, ['string', 'integer', 'number', 'boolean'])
         ) {
-          const newValue = fixErrors ? toSchemaType(value, schemaType) :
-            toJavaScriptType(value, <SchemaPrimitiveType>schemaType);
+          const newValue = fixErrors ?
+            toSchemaType(value, schemaType) :
+            toJavaScriptType(value, schemaType);
           if (isDefined(newValue)) {
             JsonPointer.set(formattedData, dataPointer, newValue);
           }

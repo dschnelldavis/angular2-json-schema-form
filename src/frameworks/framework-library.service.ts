@@ -167,25 +167,27 @@ export class FrameworkLibraryService {
   public setFramework(
     framework?: string|Framework, loadExternalAssets: boolean = this.loadExternalAssets
   ): boolean {
-    let activeFramework: Framework = null;
+    if (!framework) return false;
+    let validNewFramework: boolean = false;
     if (!framework || framework === 'default') {
-      activeFramework = this.frameworkLibrary[this.defaultFramework];
+      this.activeFramework = this.frameworkLibrary[this.defaultFramework];
+      validNewFramework = true;
     } else if (typeof framework === 'string' && this.hasFramework(framework)) {
-      activeFramework = this.frameworkLibrary[framework];
+      this.activeFramework = this.frameworkLibrary[framework];
+      validNewFramework = true;
     } else if (typeof framework === 'object' && framework.hasOwnProperty('framework')) {
-      activeFramework = framework;
+      this.activeFramework = framework;
+      validNewFramework = true;
     }
-    if (activeFramework) {
-      this.activeFramework = activeFramework;
+    if (validNewFramework) {
       this.registerFrameworkWidgets(this.activeFramework);
       if (loadExternalAssets) {
         this.loadFrameworkExternalAssets(this.activeFramework);
       } else {
         this.unloadFrameworkExternalAssets();
       }
-      return true;
     }
-    return false;
+    return validNewFramework;
   }
 
   public hasFramework(type: string): boolean {

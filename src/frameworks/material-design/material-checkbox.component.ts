@@ -53,7 +53,7 @@ export class MaterialCheckboxComponent implements OnInit {
   }
 
   private updateValue(event) {
-    event.preventDefault;
+    event.preventDefault();
     this.jsf.updateValue(this, event.target.checked ? this.trueValue : this.falseValue);
   }
 

@@ -245,7 +245,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
         // TODO: check maxItems to verify adding new items is OK, and check
         // additionalItems for whether there is a different schema for new items
         if (newNode.options.addable !== false) {
-          jsf.layoutRefLibrary['#' + arrayPointer] =
+          jsf.layoutRefLibrary[arrayPointer] =
             _.cloneDeep(newNode.items[newNode.items.length - 1]);
           const initialNodeData =
             JsonPointer.get(jsf.initialValues, newNode.dataPointer);
@@ -254,7 +254,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
           ) {
             for (let i = newNode.items.length, l = initialNodeData.length; i < l; i++) {
               newNode.items
-                .push(_.cloneDeep(jsf.layoutRefLibrary['#' + arrayPointer]));
+                .push(_.cloneDeep(jsf.layoutRefLibrary[arrayPointer]));
             }
           }
           let buttonText: string = 'Add';
@@ -284,7 +284,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
             tupleItems: newNode.tupleItems,
             type: '$ref',
             widget: widgetLibrary.getWidget('$ref'),
-            $ref: '#' + dataPointer,
+            $ref: dataPointer,
           };
           if (isDefined(newNode.options.maxItems)) {
             newNodeRef.options.maxItems = newNode.options.maxItems;
@@ -519,9 +519,9 @@ export function buildLayoutFromSchema(
 
     // If addable items, save to layoutRefLibrary, and add $ref item to layout
     if (additionalItems) {
-      jsf.layoutRefLibrary['#' + dataPointer + '/-'] = additionalItems;
-      delete jsf.layoutRefLibrary['#' + dataPointer + '/-']['key'];
-      delete jsf.layoutRefLibrary['#' + dataPointer + '/-']['name'];
+      jsf.layoutRefLibrary[dataPointer + '/-'] = additionalItems;
+      delete jsf.layoutRefLibrary[dataPointer + '/-']['key'];
+      delete jsf.layoutRefLibrary[dataPointer + '/-']['name'];
       let buttonText: string = 'Add ';
       if (additionalItems.options.title) {
         buttonText += additionalItems.options.title;
@@ -544,7 +544,7 @@ export function buildLayoutFromSchema(
         tupleItems: newNode.tupleItems,
         type: '$ref',
         widget: widgetLibrary.getWidget('$ref'),
-        $ref: '#' + dataPointer + '/-',
+        $ref: dataPointer + '/-',
       };
       if (isDefined(newNode.options.maxItems)) {
         newNodeRef.options.maxItems = newNode.options.maxItems;

@@ -59,6 +59,7 @@
     "@types/jasmine": "^2.5.38",
     "@types/lodash": "^4.14.42",
     "@types/node": "^6.0.51",
+    "@types/rx": "^2.5.34",
     "brace": "^0.9.1",
     "buffer": "^5.0.0",
     "canonical-path": "^0.0.2",

@@ -358,11 +358,11 @@ export function isPrimitive(value: any): boolean {
  * Does not coerce values (other than null), and only converts the types
  * of values that would otherwise be valid.
  *
- * If the optional third parameter 'checkIntegers' is TRUE, and the
+ * If the optional third parameter 'strictIntegers' is TRUE, and the
  * JSON Schema type 'integer' is specified, it also verifies the input value
  * is an integer and, if it is, returns it as a JaveScript number.
- * If 'checkIntegers' is FALSE, or not set, the type 'integer' is treated
- * exactly the same as 'number', and does allow decimals.
+ * If 'strictIntegers' is FALSE (or not set) the type 'integer' is treated
+ * exactly the same as 'number', and allows decimals.
  *
  * Examples:
  * toJavaScriptType('10', 'number') = 10
@@ -372,31 +372,29 @@ export function isPrimitive(value: any): boolean {
  * toJavaScriptType(10.5, 'integer') = null // 10.5 is still not an integer
  *
  * @param {PrimitiveValue} value - value to convert
- * @param {SchemaPrimitiveType | SchemaPrimitiveType[]} type(s) - type to convert to
- * @param {boolean = false} checkIntegers - if FALSE, treat integers as numbers
+ * @param {SchemaPrimitiveType | SchemaPrimitiveType[]} types - types to convert to
+ * @param {boolean = false} strictIntegers - if FALSE, treat integers as numbers
  * @return {boolean}
  */
 export function toJavaScriptType(
   value: any,
-  type: SchemaPrimitiveType | SchemaPrimitiveType[],
-  checkIntegers: boolean = false
+  types: SchemaPrimitiveType | SchemaPrimitiveType[],
+  strictIntegers: boolean = true
 ): PrimitiveValue {
   if (!isDefined(value)) return null;
-  if (isString(type)) type = [type];
-  if (checkIntegers && inArray('integer', type)) {
+  if (isString(types)) types = [types];
+  if (strictIntegers && inArray('integer', types)) {
     if (isInteger(value, 'strict')) return value;
     if (isInteger(value)) return parseInt(value, 10);
   }
-  if (inArray('number', type) ||
-    (!checkIntegers && inArray('integer', type))
-  ) {
+  if (inArray('number', types) || (!strictIntegers && inArray('integer', types))) {
     if (isNumber(value, 'strict')) return value;
     if (isNumber(value)) return parseFloat(value);
   }
-  if (inArray('string', type)) {
+  if (inArray('string', types)) {
     if (isString(value)) return value;
   }
-  if (inArray('boolean', type)) {
+  if (inArray('boolean', types)) {
     if (isBoolean(value, true)) return true;
     if (isBoolean(value, false)) return false;
   }

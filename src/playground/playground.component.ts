@@ -215,8 +215,8 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
   };
   private liveFormData: any = {};
   private formValidationErrors: any;
-  private formIsValid: any;
-  private submittedFormData: any = {};
+  private formIsValid: boolean = null;
+  private submittedFormData: any = null;
   private aceEditorOptions: any = {
     highlightActiveLine: true,
     maxLines: 1000,
@@ -263,11 +263,11 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
     return JSON.stringify(this.liveFormData, null, 2);
   }
 
-  isValid(data: any) {
-    this.formIsValid = data;
+  private isValid(isValid: boolean): void {
+    this.formIsValid = isValid;
   }
 
-  validationErrors(data: any) {
+  private validationErrors(data: any): void {
     this.formValidationErrors = data;
   }
 
@@ -310,7 +310,7 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
         '&framework=' + this.selectedFramework
       );
       this.liveFormData = {};
-      this.submittedFormData = {};
+      this.submittedFormData = null;
       this.formIsValid = null;
       this.formValidationErrors = null;
     }
@@ -339,7 +339,7 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
     if (!newFormString) { return; }
     this.formActive = false;
     this.liveFormData = {};
-    this.submittedFormData = {};
+    this.submittedFormData = null;
 
     // Most examples should be written in pure JSON, but if a schema includes
     // a function, the playground will compile it as Javascript instead

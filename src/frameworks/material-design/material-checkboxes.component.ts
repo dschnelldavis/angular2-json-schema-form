@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormArray, AbstractControl } from '@angular/forms';
 
-import { JsonSchemaFormService } from '../../library/json-schema-form.service';
+import { JsonSchemaFormService, CheckboxItem } from '../../library/json-schema-form.service';
 import { buildFormGroup, buildTitleMap, JsonPointer } from '../../library/utilities/index';
 
 @Component({
@@ -67,9 +67,9 @@ export class MaterialCheckboxesComponent implements OnInit {
   private controlValue: any;
   private boundControl: boolean = false;
   private options: any;
-  private layoutOrientation: string = 'vertical';
+  private layoutOrientation: string;
   private formArray: AbstractControl;
-  private checkboxList: any[] = [];
+  private checkboxList: CheckboxItem[] = [];
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
@@ -80,44 +80,28 @@ export class MaterialCheckboxesComponent implements OnInit {
 
   ngOnInit() {
     this.options = this.layoutNode.options;
-    if (this.layoutNode.type === 'checkboxes-inline' ||
-    this.layoutNode.type === 'checkboxbuttons'
-  ) {
-    this.layoutOrientation = 'horizontal';
-  }
+    this.layoutOrientation = (this.layoutNode.type === 'checkboxes-inline' ||
+      this.layoutNode.type === 'checkboxbuttons') ? 'horizontal' : 'vertical';
     this.jsf.initializeControl(this);
     this.checkboxList = buildTitleMap(
-      this.options.titleMap || this.options.enumNames,
-      this.options.enum, true
+      this.options.titleMap || this.options.enumNames, this.options.enum, true
     );
     if (this.boundControl) {
-      this.formArray = this.jsf.getControl(this);
+      const formArray = this.jsf.getControl(this);
       for (let checkboxItem of this.checkboxList) {
-        checkboxItem.checked = this.formArray.value.length ?
-          this.formArray.value.indexOf(checkboxItem.value) !== -1 : false;
+        checkboxItem.checked = formArray.value.indexOf(checkboxItem.value) !== -1;
       }
     }
   }
 
   updateValue(event) {
-    if (this.boundControl) {
-      // Remove all existing items
-      while (this.formArray.value.length) (<FormArray>this.formArray).removeAt(0);
-      // Re-add an item for each checked box
-      for (let checkboxItem of this.checkboxList) {
-        if (event.target.value === checkboxItem.value) {
-          checkboxItem.checked = event.target.checked;
-        }
-        if (checkboxItem.checked) {
-          let newFormControl =
-            buildFormGroup(JsonPointer.get(
-              this.jsf.templateRefLibrary, [this.layoutNode.dataPointer + '/-']
-            ));
-          newFormControl.setValue(checkboxItem.value);
-          (<FormArray>this.formArray).push(newFormControl);
-        }
+    for (let checkboxItem of this.checkboxList) {
+      if (event.target.value === checkboxItem.value) {
+        checkboxItem.checked = event.target.checked;
       }
     }
-    this.formArray.markAsDirty();
+    if (this.boundControl) {
+      this.jsf.updateArrayCheckboxList(this, this.checkboxList);
+    }
   }
 }

@@ -528,6 +528,7 @@ export class JsonPointer {
   static toIndexedPointer(
     genericPointer: string, indexArray: number[], arrayMap: Map<string, number> = null
   ) {
+    if (genericPointer[0] === '#') genericPointer = genericPointer.slice(1);
     if (this.isJsonPointer(genericPointer) && isArray(indexArray)) {
       if (isMap(arrayMap)) {
         let arrayIndex: number = 0;
@@ -570,6 +571,7 @@ export class JsonPointer {
   static toGenericPointer(
     indexedPointer: string, arrayMap: Map<string, number>
   ) {
+    if (indexedPointer[0] === '#') indexedPointer = indexedPointer.slice(1);
     if (this.isJsonPointer(indexedPointer) && isMap(arrayMap)) {
       let pointerArray = this.parse(indexedPointer);
       for (let i = 1, l = pointerArray.length; i < l; i++) {

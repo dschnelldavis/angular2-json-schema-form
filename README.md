@@ -1,6 +1,6 @@
 # Angular 2 JSON Schema Form
 
-[![GitHub MIT License](https://img.shields.io/github/license/dschnelldavis/angular2-json-schema-form.svg?style=social)](https://github.com/dschnelldavis/angular2-json-schema-form) [![npm version](https://badge.fury.io/js/angular2-json-schema-form.svg)](https://www.npmjs.com/package/angular2-json-schema-form)
+[![npm version](https://img.shields.io/npm/v/angular2-json-schema-form.svg?style=plastic)](https://www.npmjs.com/package/angular2-json-schema-form) [![npm downloads](https://img.shields.io/npm/dm/angular2-json-schema-form.svg?style=plastic)](https://www.npmjs.com/package/angular2-json-schema-form) [![GitHub MIT License](https://img.shields.io/github/license/dschnelldavis/angular2-json-schema-form.svg?style=social)](https://github.com/dschnelldavis/angular2-json-schema-form)
 
 A [JSON Schema](http://json-schema.org) Form builder for Angular 2, similar to, and mostly API compatible with,
 
@@ -8,7 +8,7 @@ A [JSON Schema](http://json-schema.org) Form builder for Angular 2, similar to, 
   * [Mozilla](https://blog.mozilla.org/services/)'s [React JSON Schema Form](https://github.com/mozilla-services/react-jsonschema-form) for [React](https://facebook.github.io/react/) ([examples](https://mozilla-services.github.io/react-jsonschema-form/)), and
   * [Joshfire](http://www.joshfire.com)'s [JSON Form](http://github.com/joshfire/jsonform/wiki) for [jQuery](https://jquery.com) ([examples](http://ulion.github.io/jsonform/playground/))
 
-Note: This is a personal proof-of-concept project, and is NOT currently affiliated with any of the organizations listed above.
+Note: This is a personal proof-of-concept project, and is NOT currently affiliated with any of the organizations listed above. (Though they are all awesome, and totally worth checking out.)
 
 ## Installation
 
@@ -37,7 +37,7 @@ All the source code is in the `/src` folder. Inside that folder, you will find t
 * `frameworks` contains the framework library (described below).
 * `widgets` contains the widget library.
 
-If you want additional documentation describing the individual functions used in this library, run `npm run docs` to generate TypeDoc documentation, and then look in the newly generated `/docs` folder.
+If you want additional documentation describing the individual functions used in this library, run `npm run docs` to generate TypeDoc documentation, and then look in the newly generated `/docs` folder. (Angular 2 JSON Schema Form is still a work in progress, so this documentation will vary from highly informative to completely missing.)
 
 ### To install from NPM and use in your own project
 
@@ -108,6 +108,8 @@ Where the `schema` input is a valid JSON schema object (either v3 or v4), and th
 
 ### Advanced use
 
+#### Additional inputs an outputs
+
 For more advanced cases, you may also provide three additional inputs:
 
 * `layout` with a custom form layout (see Angular Schema Form's [form definitions](https://github.com/json-schema-form/angular-schema-form/blob/master/docs/index.md#form-definitions) for information about how to construct a form layout)
@@ -131,6 +133,8 @@ Here is an example:
 </json-schema-form>
 ```
 
+#### Single-input mode
+
 Alternately, you may also combine all your inputs into one compound object and include it as a `form` input, like so:
 
 ```javascript
@@ -151,21 +155,19 @@ let yourCompoundInputObject = {
 
 All samples in example playground use the combined `form` input, which is why they do not require separate `schema`, `layout`, and `data` inputs.
 
-Finally, Angular 2 JSON Schema Form also includes an experimental feature to create a form entirely from a JSON object (with no schema), like so:
+This mode is also useful in cases where you want to store the data and the schema together in the same datastore.
+
+#### Data-only mode
+
+Finally, Angular 2 JSON Schema Form also includes an experimental feature to create a form entirely from a JSON object—with no schema—like so:
 
 ```javascript
 let exampleJsonObject = {
-  "first_name": "Jane", "last_name": "Doe",
-  "age": 25, "is_company": false,
-  "address": {
-    "street_1": "123 Main St.", "street_2": null,
-    "city": "Las Vegas", "state": "NV", "zip_code": "89123"
-  },
-  "phone_numbers": [
-    { "number": "702-123-4567", "type": "cell" },
-    { "number": "702-987-6543", "type": "work" }
-  ],
-  "notes": ""
+  "first_name": "Jane", "last_name": "Doe", "age": 25, "is_company": false,
+  "address": { "street_1": "123 Main St.", "street_2": null,
+    "city": "Las Vegas", "state": "NV", "zip_code": "89123" },
+  "phone_numbers": [ { "number": "702-123-4567", "type": "cell" },
+    { "number": "702-987-6543", "type": "work" } ], "notes": ""
 }
 ```
 
@@ -176,6 +178,10 @@ let exampleJsonObject = {
   (onSubmit)="yourOnSubmitFn($event)">
 </json-schema-form>
 ```
+
+In this mode, Angular 2 JSON Schema Form generates a schema from your data on the fly. The generated schema is obviously very simple, compared to what you could create on your own. However, the above example shows how it will correctly detect and require strings, numbers, and boolean values (null inputs are also assumed to be strings), and will also allow elements to be added and removed from arrays.
+
+After displaying a form in this mode, you can also call `getSchema()` and `getLayout()` from the `JsonSchemaFormService` to return the automatically generated schema and form layout, which can give you an example created from your own data, and head start on writing your own schemas and layouts.
 
 ## Customizing
 
@@ -247,7 +253,7 @@ I wrote this library because I needed a JSON Schema Form builder to use in a lar
 
 The current version is mostly functional, and even includes a few enhancements not available in some other libraries, such as supporting less common JSON Schema features like `oneOf`, `allOf`, and `$ref` links (including circular links). However, it still has several bugs, such as not dynamically enabling and disabling conditionally required fields inside objects, and is very fragile because it does not yet include any testing framework at all.
 
-So if you find this library useful, I encourage you to fork it and send back pull requests for any improvements you make. (I would _love_ some tests...) I also encourage you to submit bug reports and feature requests, and I'll do my best to keep this library up-to-date. However, as I am just a single busy developer, I can't guarantee how long it might take to fix any individual bugs. So if you need a change or fix to be implemented fast, your best bet is to do it yourself and send a pull request.
+So if you find this library useful, I encourage you to fork it and send back pull requests for any improvements you make. (I would _love_ some tests...) I also encourage you to submit bug reports and feature requests, and I'll do my best to answer any questions keep this library up-to-date. However, as I am just a single busy developer, I can't guarantee how long it might take to fix any individual bugs. So if you need a change or fix in a hurry, your best bet is to do it yourself and send a pull request.
 
 Thanks! I hope you enjoy using this library as much as I enjoyed writing it. :-)
 

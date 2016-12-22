@@ -1,12 +1,18 @@
 import { Injectable } from '@angular/core';
 import { AbstractControl, FormArray, FormGroup } from '@angular/forms';
+import { Subject } from 'rxjs/Subject';
 
+import * as Ajv from 'ajv';
 import * as _ from 'lodash';
 
 import {
-  buildFormGroup, convertJsonSchema3to4, getControl, hasOwn, isArray,
-  isDefined, isObject, JsonPointer, parseText
+  buildFormGroup, buildFormGroupTemplate, buildLayout, buildSchemaFromData,
+  buildSchemaFromLayout, convertJsonSchema3to4, formatFormData, getControl,
+  getSchemaReference, hasOwn, hasValue, isArray, isDefined, isObject, isString,
+  JsonPointer, parseText
 } from './utilities/index';
+
+export type CheckboxItem = { name: string, value: any, checked?: boolean };
 
 @Injectable()
 export class JsonSchemaFormService {
@@ -14,6 +20,33 @@ export class JsonSchemaFormService {
   public ReactJsonSchemaFormCompatibility: boolean = false;
   public AngularSchemaFormCompatibility: boolean = false;
   public tpldata: any = {};
+
+  private ajv: any = new Ajv({ allErrors: true }); // AJV: Another JSON Schema Validator
+  private validateFormData: any = null; // Compiled AJV function to validate active form's schema
+
+  public initialValues: any = {}; // The initial data model (e.g. previously submitted data)
+  public schema: any = {}; // The internal JSON Schema
+  public layout: any[] = []; // The internal Form layout
+  public formGroupTemplate: any = {}; // The template used to create formGroup
+  public formGroup: any = null; // The Angular 2 formGroup, which powers the reactive form
+  public framework: any = null; // The active framework component
+
+  public data: any = {}; // Form data, formatted with correct data types
+  public validData: any = null; // Valid form data (or null)
+  public isValid: boolean = null; // Is current form data valid?
+  public validationErrors: any = null; // Any validation errors for current data
+  private formValueSubscription: any = null;
+  public dataChanges: Subject<any> = new Subject();
+  public isValidChanges: Subject<any> = new Subject();
+  public validationErrorChanges: Subject<any> = new Subject();
+
+  public arrayMap: Map<string, number> = new Map<string, number>(); // Maps arrays in data object and number of tuple values
+  public dataMap: Map<string, any> = new Map<string, any>(); // Maps paths in data model to schema and formGroup paths
+  public dataCircularRefMap: Map<string, string> = new Map<string, string>(); // Maps circular reference points in data model
+  public schemaCircularRefMap: Map<string, string> = new Map<string, string>(); // Maps circular reference points in schema
+  public layoutRefLibrary: any = {}; // Library of layout nodes for adding to form
+  public schemaRefLibrary: any = {}; // Library of schemas for resolving schema $refs
+  public templateRefLibrary: any = {}; // Library of formGroup templates for adding to form
 
   // Default global form options
   public globalOptions: any = {
@@ -39,27 +72,113 @@ export class JsonSchemaFormService {
     },
   };
 
-  public initialValues: any = {}; // The initial data model (e.g. previously submitted data)
-  public schema: any = {}; // The internal JSON Schema
-  public layout: any[] = []; // The internal Form layout
-  public formGroupTemplate: any = {}; // The template used to create formGroup
-  public formGroup: any = null; // The Angular 2 formGroup, which powers the reactive form
-  public framework: any = null; // The active framework component
-
-  public arrayMap: Map<string, number> = new Map<string, number>(); // Maps arrays in data object and number of tuple values
-  public dataMap: Map<string, any> = new Map<string, any>(); // Maps paths in data model to schema and formGroup paths
-  public dataCircularRefMap: Map<string, string> = new Map<string, string>(); // Maps circular reference points in data model
-  public schemaCircularRefMap: Map<string, string> = new Map<string, string>(); // Maps circular reference points in schema
-  public layoutRefLibrary: any = {}; // Library of layout nodes for adding to form
-  public schemaRefLibrary: any = {}; // Library of schemas for resolving schema $refs
-  public templateRefLibrary: any = {}; // Library of formGroup templates for adding to form
-
   constructor() { }
+
+  public getData() { return this.data; }
+  public getSchema() { return this.schema; }
+  public getLayout() { return this.layout; }
+
+  public convertJsonSchema3to4() {
+    this.schema = convertJsonSchema3to4(this.schema);
+  }
+
+  public buildFormGroupTemplate(setValues: boolean = true) {
+    this.formGroupTemplate =
+      buildFormGroupTemplate(this, this.initialValues, setValues);
+  }
+
+  private validateData(newValue: any, updateSubscriptions: boolean = true): void {
+    // Format raw form data to correct data types
+    this.data = formatFormData(
+      newValue, this.dataMap, this.dataCircularRefMap, this.arrayMap
+    );
+    this.isValid = this.validateFormData(this.data);
+    this.validData = this.isValid ? this.data : null;
+    this.validationErrors = this.validateFormData.errors;
+    if (updateSubscriptions) {
+      if (this.dataChanges.observers.length) {
+        this.dataChanges.next(this.data);
+      }
+      if (this.isValidChanges.observers.length) {
+        this.isValidChanges.next(this.isValid);
+      }
+      if (this.validationErrorChanges.observers.length) {
+        this.validationErrorChanges.next(this.validationErrors);
+      }
+    }
+  }
+
+  public buildFormGroup() {
+    this.formGroup = <FormGroup>buildFormGroup(this.formGroupTemplate);
+    if (this.formGroup) {
+      this.compileAjvSchema();
+      this.validateData(this.formGroup.value, false);
+      // Set up observables to emit data and validation info when form data changes
+      if (this.formValueSubscription) this.formValueSubscription.unsubscribe();
+      this.formValueSubscription = this.formGroup.valueChanges.subscribe(
+        formValue => this.validateData(formValue)
+      );
+    }
+  }
+
+  public buildLayout(widgetLibrary: any) {
+    this.layout = buildLayout(this, widgetLibrary);
+  }
 
   public setOptions(newOptions: any): void {
     if (typeof newOptions === 'object') {
       Object.assign(this.globalOptions, newOptions);
     }
+  }
+
+  public resetAjvSchema() {
+    this.validateFormData = null;
+  }
+
+  public compileAjvSchema() {
+    if (!this.validateFormData) {
+      this.validateFormData = this.ajv.compile(this.schema);
+    }
+  }
+
+  // Resolve all schema $ref links
+  public resolveSchemaRefLinks() {
+    JsonPointer.forEachDeep(this.schema, (value, pointer) => {
+      if (hasOwn(value, '$ref') && isString(value['$ref'])) {
+        const newReference: string = JsonPointer.compile(value['$ref']);
+        const isCircular = JsonPointer.isSubPointer(newReference, pointer);
+
+        // Save new target schemas in schemaRefLibrary
+        if (hasValue(newReference) && !hasOwn(this.schemaRefLibrary, newReference)) {
+          this.schemaRefLibrary[newReference] = getSchemaReference(
+            this.schema, newReference, this.schemaRefLibrary
+          );
+        }
+
+        // If a $ref link is not circular,
+        // remove link and replace with copy of target schema
+        if (!isCircular) {
+          delete value['$ref'];
+          const targetSchema: any = Object.assign(
+            _.cloneDeep(this.schemaRefLibrary[newReference]), value
+          );
+          this.schema = JsonPointer.set(this.schema, pointer, targetSchema);
+
+        // If a $ref link is circular, save link in schemaCircularRefMap
+        } else {
+          this.schemaCircularRefMap.set(pointer, newReference);
+        }
+      }
+    }, true);
+
+  }
+
+  public buildSchemaFromData() {
+    this.schema = buildSchemaFromData(this.initialValues);
+  }
+
+  public buildSchemaFromLayout() {
+    this.schema = buildSchemaFromLayout(this.layout);
   }
 
   public setTpldata(newTpldata: any = {}): void {
@@ -104,10 +223,6 @@ export class JsonSchemaFormService {
     if (!text) return text;
     childValue = isArrayItem ? parentValues[index] : parentValues;
     return this.parseText(text, childValue, parentValues, index);
-  }
-
-  public convertJsonSchema3to4() {
-    this.schema = convertJsonSchema3to4(this.schema);
   }
 
   public initializeControl(ctx: any): boolean {
@@ -157,6 +272,23 @@ export class JsonSchemaFormService {
     }
   }
 
+  public updateArrayCheckboxList(ctx: any, checkboxList: CheckboxItem[]): void {
+    let formArray = this.getControl(ctx);
+    // Remove all existing items
+    while (formArray.value.length) (<FormArray>formArray).removeAt(0);
+    // Re-add an item for each checked box
+    for (let checkboxItem of checkboxList) {
+      if (checkboxItem.checked) {
+        let newFormControl = buildFormGroup(JsonPointer.get(
+          this.templateRefLibrary, [ctx.layoutNode.dataPointer + '/-']
+        ));
+        newFormControl.setValue(checkboxItem.value);
+        (<FormArray>formArray).push(newFormControl);
+      }
+    }
+    formArray.markAsDirty();
+  }
+
   public getControl(ctx: any): AbstractControl {
     if (!ctx.layoutNode || !ctx.layoutNode.dataPointer ||
       ctx.layoutNode.type === '$ref') return null;
@@ -177,9 +309,7 @@ export class JsonSchemaFormService {
 
   public getControlName(ctx: any): string {
     if (!ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex) return null;
-    return JsonPointer.toKey(JsonPointer.toIndexedPointer(
-      ctx.layoutNode.dataPointer, ctx.dataIndex, this.arrayMap
-    ));
+    return JsonPointer.toKey(this.getDataPointer(ctx));
   }
 
   public getLayoutArray(ctx: any): any[] {
@@ -202,9 +332,9 @@ export class JsonSchemaFormService {
 
   public isControlBound(ctx: any): boolean {
     if (!ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex) return false;
-    const control = this.getControlGroup(ctx);
-    if (!control) return false;
-    return control.controls.hasOwnProperty(JsonPointer.toKey(this.getDataPointer(ctx)));
+    const controlGroup = this.getControlGroup(ctx);
+    const name = this.getControlName(ctx);
+    return controlGroup ? controlGroup.controls.hasOwnProperty(name) : false;
   }
 
   public addItem(ctx: any): boolean {

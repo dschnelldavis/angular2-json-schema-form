@@ -105,8 +105,10 @@
       <h4>Generated Form</h4>
       <json-schema-form
         *ngIf="formActive"
+        loadExternalAssets="true"
         [form]="jsonFormObject"
         [options]="jsonFormOptions"
+        [framework]="selectedFramework"
         (onChanges)="onChanges($event)"
         (onSubmit)="onSubmit($event)"
         (isValid)="isValid($event)"
@@ -129,11 +131,11 @@
       <pre *ngIf="prettyValidationErrors" class="bg-danger">{{prettyValidationErrors}}</pre>
 
       Live data — from onChanges():
-      <pre [class.bg-success]="!prettyValidationErrors && prettyLiveFormData !== '{ }'"
+      <pre [class.bg-success]="!prettyValidationErrors && prettyLiveFormData !== '{}'"
         [class.bg-danger]="prettyValidationErrors">{{prettyLiveFormData}}</pre>
 
       Submitted data — from onSubmit():
-      <pre [class.bg-success]="prettySubmittedFormData !== '{ }'">{{prettySubmittedFormData}}</pre>
+      <pre [class.bg-success]="prettySubmittedFormData !== 'null'">{{prettySubmittedFormData}}</pre>
 
     </div>
   </div>
