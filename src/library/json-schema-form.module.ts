@@ -25,29 +25,19 @@ export {
 };
 
 const COMPONENTS = [
-  ...ALL_FRAMEWORKS,
-  ...ALL_WIDGETS,
-  ...ALL_MATERIAL_DESIGN_WIDGETS,
+  ...ALL_FRAMEWORKS, ...ALL_WIDGETS, ...ALL_MATERIAL_DESIGN_WIDGETS,
 ];
 
 @NgModule({
   imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MaterialModule,
+    CommonModule, FormsModule, ReactiveFormsModule, MaterialModule,
   ],
   declarations: [
-    JsonSchemaFormComponent,
-    OrderableDirective,
-    ...COMPONENTS,
+    JsonSchemaFormComponent, OrderableDirective, ...COMPONENTS,
   ],
   exports: [
-    FormsModule,
-    ReactiveFormsModule,
-    MaterialModule,
-    JsonSchemaFormComponent,
-    OrderableDirective,
+    FormsModule, ReactiveFormsModule, MaterialModule,
+    JsonSchemaFormComponent, OrderableDirective,
   ],
 })
 export class JsonSchemaFormModule {

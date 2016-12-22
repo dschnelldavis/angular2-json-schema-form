@@ -13,7 +13,7 @@ import { AceEditorDirective } from './ace-editor.directive';
 import { routing, appRoutingProviders } from './playground.routing';
 
 @NgModule({
-  imports: [ BrowserModule, HttpModule, routing, JsonSchemaFormModule ],
+  imports: [ BrowserModule, HttpModule, routing, JsonSchemaFormModule.forRoot() ],
   declarations: [
     PlaygroundContainerComponent, PlaygroundComponent, AceEditorDirective
   ],

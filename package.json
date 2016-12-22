@@ -28,7 +28,7 @@
   "scripts": {
     "clean:dist": "rimraf compiled && rimraf dist",
     "clean:all": "npm run clean:dist && rimraf node_modules && npm cache clean",
-    "prepublish": "npm run clean:dist && npm run ngc && npm run syncassets",
+    "prepublish": "npm run clean:dist && npm run tsc && npm run syncassets",
     "syncassets": "rsync -ar --include='*.css' --include='*.html' --include='*.json' --include='*/' --exclude='*' --delete ./src/ ./dist/",
     "watchassets": "onchange 'src/**/*.css' 'src/**/*.html' 'src/**/*.json' -e 'dist/*' -v -- npm run syncassets",
     "lint": "tslint src/**/*.ts",
@@ -37,7 +37,7 @@
     "tsc": "tsc",
     "typings": "typings",
     "docs": "typedoc --options typedoc.json src/index.ts",
-    "start": "npm run prepublish && concurrently \"npm run ngc -w\" \"lite-server\" \"npm run watchassets\""
+    "start": "npm run prepublish && concurrently \"npm run tsc -w\" \"lite-server\" \"npm run watchassets\""
   },
   "dependencies": {
     "@angular/common": "^2.0.0",
