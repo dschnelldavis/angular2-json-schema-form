@@ -6,7 +6,6 @@ import {
 import { JsonSchemaFormService } from '../library/json-schema-form.service';
 
 @Component({
-  moduleId: module.id,
   selector: 'template-widget',
   template: `<div #widgetContainer></div>`,
 })

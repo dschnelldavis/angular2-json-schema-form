@@ -3,7 +3,7 @@ import { Component, Input } from '@angular/core';
 @Component({
   selector: 'root-widget',
   template: `
-    <div *ngFor="let layoutItem of layout; let i = index; trackBy: layoutItem?._id"
+    <div *ngFor="let layoutItem of layout; let i = index; trackBy: trackByItem"
       [dataIndex]="layoutItem?.arrayItem ? (dataIndex || []).concat(i) : (dataIndex || [])"
       [layoutIndex]="(layoutIndex || []).concat(i)"
       [layoutNode]="layoutItem"
@@ -33,4 +33,6 @@ export class RootComponent {
   @Input() layoutIndex: number[];
   @Input() layout: any[];
   @Input() isOrderable: boolean;
+
+  trackByItem(layoutItem: any) { return layoutItem && layoutItem._id; }
 }

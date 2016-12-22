@@ -21,7 +21,7 @@ import { TabsComponent } from './tabs.component';
 import { TemplateComponent } from './template.component';
 import { TextareaComponent } from './textarea.component';
 
-export let ALL_WIDGETS: any[] = [
+export const ALL_WIDGETS = [
   AddReferenceComponent, ButtonComponent, CheckboxComponent,
   CheckboxesComponent, FieldsetComponent, FileComponent, HiddenComponent,
   InputComponent, MessageComponent, NoneComponent, NumberComponent,

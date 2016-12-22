@@ -13,7 +13,7 @@ import { MaterialSelectComponent } from './material-select.component';
 import { MaterialTabsComponent } from './material-tabs.component';
 import { MaterialTextareaComponent } from './material-textarea.component';
 
-export let ALL_MATERIAL_DESIGN_WIDGETS = [
+export const ALL_MATERIAL_DESIGN_WIDGETS = [
   MaterialAddReferenceComponent, MaterialButtonComponent,
   MaterialCardComponent, MaterialCheckboxComponent,
   MaterialCheckboxesComponent, MaterialFileComponent,

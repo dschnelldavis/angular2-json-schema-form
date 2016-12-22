@@ -4,7 +4,6 @@ import { JsonSchemaFormService } from '../library/json-schema-form.service';
 import { JsonPointer } from '../library/utilities/index';
 
 @Component({
-  moduleId: module.id,
   selector: 'tabs-widget',
   template: `
     <ul
