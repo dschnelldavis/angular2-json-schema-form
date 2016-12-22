@@ -1,7 +1,6 @@
 # Development
 compiled
 docs
-src
 
 # TypeScript
 tsconfig.json

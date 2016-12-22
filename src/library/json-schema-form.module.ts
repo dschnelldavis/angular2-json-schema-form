@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, ModuleWithProviders, ANALYZE_FOR_ENTRY_COMPONENTS } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MaterialModule } from '@angular/material';
@@ -24,23 +24,46 @@ export {
   JsonSchemaFormComponent
 };
 
+const COMPONENTS = [
+  ...ALL_FRAMEWORKS,
+  ...ALL_WIDGETS,
+  ...ALL_MATERIAL_DESIGN_WIDGETS,
+];
+
 @NgModule({
   imports: [
-    CommonModule, FormsModule, ReactiveFormsModule, MaterialModule.forRoot()
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MaterialModule,
   ],
   declarations: [
-    JsonSchemaFormComponent, OrderableDirective,
-    ...ALL_FRAMEWORKS, ...ALL_WIDGETS, ...ALL_MATERIAL_DESIGN_WIDGETS
-  ],
-  entryComponents: [
-    ...ALL_FRAMEWORKS, ...ALL_WIDGETS, ...ALL_MATERIAL_DESIGN_WIDGETS
+    JsonSchemaFormComponent,
+    OrderableDirective,
+    ...COMPONENTS,
   ],
   exports: [
-    JsonSchemaFormComponent
-  ],
-  providers: [
-    FrameworkLibraryService, WidgetLibraryService, JsonSchemaFormService
+    FormsModule,
+    ReactiveFormsModule,
+    MaterialModule,
+    JsonSchemaFormComponent,
+    OrderableDirective,
   ],
 })
-export class JsonSchemaFormModule { }
-export default JsonSchemaFormModule;
+export class JsonSchemaFormModule {
+  static forRoot(): ModuleWithProviders {
+    return {
+      ngModule: JsonSchemaFormModule,
+      providers: [
+        FrameworkLibraryService,
+        WidgetLibraryService,
+        JsonSchemaFormService,
+        {
+          provide: ANALYZE_FOR_ENTRY_COMPONENTS,
+          useValue: [...COMPONENTS],
+          multi: true,
+        },
+      ],
+    };
+  }
+}

@@ -20,10 +20,11 @@
     "url": "https://github.com/dschnelldavis/angular2-json-schema-form/issues"
   },
   "files": [
-    "dist/"
+    "dist/",
+    "src/"
   ],
-  "main": "dist/library/json-schema-form.module.js",
-  "typings": "dist/library/json-schema-form.module.d.ts",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "scripts": {
     "clean:dist": "rimraf compiled && rimraf dist",
     "clean:all": "npm run clean:dist && rimraf node_modules && npm cache clean",

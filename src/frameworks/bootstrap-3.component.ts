@@ -99,7 +99,7 @@ import {
 
     <div *ngIf="debug && debugOutput">debug: <pre>{{debugOutput}}</pre></div>
   `,
-  styleUrls: [`
+  styles: [`
     :host /deep/ .list-group-item .form-control-feedback { top: 40; }
     :host /deep/ .checkbox,
     :host /deep/ .radio { margin-top: 0; margin-bottom: 0; }
