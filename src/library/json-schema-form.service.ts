@@ -50,7 +50,8 @@ export class JsonSchemaFormService {
 
   // Default global form options
   public globalOptions: any = {
-    // addSubmit: false, // Add a submit button if layout does not have one?
+    addSubmit: 'auto', // Add a submit button if layout does not have one?
+    // true = always, false = never, 'auto' = only if layout is undefined
     // debug: false, // Show debugging output?
     // fieldsRequired: false, // Are there any required fields in the form?
     // framework: 'bootstrap-3', // Display formating framework to use

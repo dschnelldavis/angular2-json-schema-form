@@ -237,7 +237,8 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
       } else if (this.form && isArray(this.form.layout)) {
         this.jsf.layout = this.form.layout;
       } else {
-        this.jsf.layout = [ '*', { type: 'submit', title: 'Submit' } ];
+        this.jsf.layout = this.jsf.globalOptions.addSubmit === false ?
+          [ '*' ] : [ '*', { type: 'submit', title: 'Submit' } ];
       }
 
       // Import alternate layout formats 'UISchema' or 'customFormItems'
