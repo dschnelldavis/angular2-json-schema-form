@@ -7,27 +7,24 @@ import { buildTitleMap } from '../../library/utilities/index';
 @Component({
   selector: 'material-select-widget',
   template: `
-    <div
-      [class]="options?.htmlClass">
-      <label *ngIf="options?.title"
-        [attr.for]="'control' + layoutNode?._id"
-        [class]="options?.labelHtmlClass"
-        [class.sr-only]="options?.notitle"
-        [innerHTML]="options?.title"></label>
-      <select
-        [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
-        [attr.readonly]="options?.readonly ? 'readonly' : null"
-        [attr.required]="options?.required"
-        [class]="options?.fieldHtmlClass"
-        [disabled]="controlDisabled"
-        [id]="'control' + layoutNode?._id"
-        [name]="controlName"
-        (input)="updateValue($event)">
-        <option *ngFor="let selectItem of selectList"
-          [value]="selectItem.value"
-          [selected]="selectItem.value === controlValue">{{selectItem.name}}</option>
-      </select>
-    </div>`,
+    <label *ngIf="options?.title"
+      [attr.for]="'control' + layoutNode?._id"
+      [class]="options?.labelHtmlClass"
+      [class.sr-only]="options?.notitle"
+      [innerHTML]="options?.title"></label>
+    <select
+      [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
+      [attr.readonly]="options?.readonly ? 'readonly' : null"
+      [attr.required]="options?.required"
+      [class]="options?.fieldHtmlClass"
+      [disabled]="controlDisabled"
+      [id]="'control' + layoutNode?._id"
+      [name]="controlName"
+      (input)="updateValue($event)">
+      <option *ngFor="let selectItem of selectList"
+        [value]="selectItem.value"
+        [selected]="selectItem.value === controlValue">{{selectItem.name}}</option>
+    </select>`,
 })
 export class MaterialSelectComponent implements OnInit {
   private formControl: AbstractControl;

@@ -74,14 +74,11 @@ export class FrameworkLibraryService {
         'tabs': MaterialTabsComponent,
       },
       stylesheets: [
-        // '//justindujardin.github.io/ng2-material/vendor/ng2-material/ng2-material.css',
-        // '//justindujardin.github.io/ng2-material/vendor/ng2-material/font/font.css',
-        // '//cdn.rawgit.com/urish/angular2-material-build/master/angular2_material.css',
-        // '//cdn.rawgit.com/justindujardin/ng2-material/gh-pages/v/0.2.5/dist/ng2-material.css',
-        // '//cdn.rawgit.com/justindujardin/ng2-material/gh-pages/v/0.2.5/dist/font.css',
         '//fonts.googleapis.com/icon?family=Material+Icons',
         '//fonts.googleapis.com/css?family=Roboto:300,400,500,700',
-        '//cdn.rawgit.com/justindujardin/ng2-material/gh-pages/v/0.2.8/ng2-material/all.css',
+        '//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css',
+        // './node_modules/@angular/material/core/theming/prebuilt/deeppurple-amber.css',
+        './node_modules/@angular/material/core/theming/prebuilt/indigo-pink.css',
       ],
     },
     'bootstrap-3': {
@@ -92,8 +89,8 @@ export class FrameworkLibraryService {
       ],
       scripts: [
         // '//code.jquery.com/jquery-2.1.1.min.js',
-        // '//code.jquery.com/ui/1.12.1/jquery-ui.min.js',
         '//ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js',
+        // '//code.jquery.com/ui/1.12.1/jquery-ui.min.js',
         '//ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js',
         '//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js',
       ],
@@ -133,7 +130,7 @@ export class FrameworkLibraryService {
           || script.slice(0, 4) === 'http'
         ) { // Attach URL to remote javascript
           newScript.src = script;
-        } else { // Attach content of given javascript
+        } else { // Attach content as javascript
           newScript.innerHTML = script;
         }
         this.scripts.push(newScript);
@@ -149,7 +146,7 @@ export class FrameworkLibraryService {
           newStylesheet = document.createElement('link');
           (<HTMLLinkElement>newStylesheet).rel = 'stylesheet';
           (<HTMLLinkElement>newStylesheet).href = stylesheet;
-        } else { // Attach content of given stylesheet
+        } else { // Attach content as stylesheet
           newStylesheet = document.createElement('style');
           newStylesheet.innerHTML = stylesheet;
         }

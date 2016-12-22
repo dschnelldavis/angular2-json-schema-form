@@ -1,3 +1,7 @@
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 h2 { font-weight: 200; }
 .navbar-inner {
   -webkit-border-radius: 0;

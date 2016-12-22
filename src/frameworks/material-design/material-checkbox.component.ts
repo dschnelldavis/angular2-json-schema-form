@@ -6,26 +6,24 @@ import { JsonSchemaFormService } from '../../library/json-schema-form.service';
 @Component({
   selector: 'material-checkbox-widget',
   template: `
-    <label
-      [attr.for]="'control' + layoutNode?._id"
-      [class]="options?.itemLabelHtmlClass">
-      <input
-        [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
-        [checked]="isChecked ? 'checked' : null"
-        [class]="options?.fieldHtmlClass + (isChecked ?
-          (' ' + options?.activeClass + ' ' + options?.style?.selected) :
-          (' ' + options?.style?.unselected))"
-        [disabled]="controlDisabled"
-        [id]="'control' + layoutNode?._id"
-        [name]="controlName"
-        [readonly]="options?.readonly ? 'readonly' : null"
-        [value]="controlValue"
-        type="checkbox"
-        (change)="updateValue($event)">
+    <md-checkbox
+      [(ngModel)]="isChecked"
+      align="left"
+      [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
+      [attr.readonly]="options?.readonly ? 'readonly' : null"
+      [attr.value]="controlValue"
+      [class]="options?.fieldHtmlClass + (isChecked ?
+        (' ' + options?.activeClass + ' ' + options?.style?.selected) :
+        (' ' + options?.style?.unselected))"
+      color="primary"
+      [disabled]="controlDisabled"
+      [id]="'control' + layoutNode?._id"
+      [name]="controlName"
+      (change)="updateValue($event)">
       <span *ngIf="options?.title"
         [class.sr-only]="options?.notitle"
         [innerHTML]="options?.title"></span>
-    </label>`,
+    </md-checkbox>`,
 })
 export class MaterialCheckboxComponent implements OnInit {
   private formControl: AbstractControl;
@@ -33,6 +31,7 @@ export class MaterialCheckboxComponent implements OnInit {
   private controlValue: any;
   private controlDisabled: boolean = false;
   private boundControl: boolean = false;
+  private isChecked: boolean = false;
   private options: any;
   private trueValue: any = true;
   private falseValue: any = false;
@@ -53,11 +52,10 @@ export class MaterialCheckboxComponent implements OnInit {
   }
 
   private updateValue(event) {
-    event.preventDefault();
-    this.jsf.updateValue(this, event.target.checked ? this.trueValue : this.falseValue);
+    this.jsf.updateValue(this, event.checked ? this.trueValue : this.falseValue);
   }
 
-  private get isChecked() {
-    return this.jsf.getControlValue(this);
-  }
+  // private get isChecked() {
+  //   return this.jsf.getControlValue(this);
+  // }
 }

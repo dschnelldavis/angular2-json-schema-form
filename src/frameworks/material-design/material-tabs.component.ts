@@ -6,19 +6,16 @@ import { JsonPointer } from '../../library/utilities/index';
 @Component({
   selector: 'material-tabs-widget',
   template: `
-    <ul
-      [class]="options?.labelHtmlClass">
-      <li *ngFor="let item of layoutNode?.items; let i = index; trackBy: item?.dataPointer"
-        [class]="options?.itemLabelHtmlClass + (selectedItem === i ?
-          (' ' + options?.activeClass + ' ' + options?.style?.selected) :
-          (' ' + options?.style?.unselected))"
-        role="presentation"
-        data-tabs>
-        <a *ngIf="showAddTab || item.type !== '$ref'"
-          [innerHTML]="setTitle(item, i)"
-          (click)="select(i)"></a>
-      </li>
-    </ul>
+    <nav md-tab-nav-bar
+      [attr.aria-label]="options?.label || options?.title">
+        <a *ngFor="let item of layoutNode?.items; let i = index; trackBy: item?.dataPointer"
+          md-tab-link
+          [active]="selectedItem === i"
+          (click)="select(i)">
+          <span *ngIf="showAddTab || item.type !== '$ref'"
+            [innerHTML]="setTitle(item, i)"></span>
+        </a>
+    </nav>
 
     <div *ngFor="let layoutItem of layoutNode?.items; let i = index; trackBy: layoutItem?.dataPointer"
       [class]="options?.htmlClass">
