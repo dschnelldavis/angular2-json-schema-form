@@ -1,6 +1,6 @@
 {
   "name": "angular2-json-schema-form",
-  "version": "0.3.0-alpha.10",
+  "version": "0.3.0-alpha.12",
   "author": {
     "name": "dschnelldavis",
     "email": "dschnelldavis@gmail.com"
@@ -28,7 +28,9 @@
   "scripts": {
     "clean:dist": "rimraf compiled && rimraf dist",
     "clean:all": "npm run clean:dist && rimraf node_modules && npm cache clean",
-    "prepublish": "npm run clean:dist && npm run tsc && npm run syncassets",
+    "compile:tsc": "npm run clean:dist && npm run tsc && npm run syncassets",
+    "compile:ngc": "npm run clean:dist && npm run ngc && npm run syncassets",
+    "prepublish": "npm run compile:tsc",
     "syncassets": "rsync -ar --include='*.css' --include='*.html' --include='*.json' --include='*/' --exclude='*' --delete ./src/ ./dist/",
     "watchassets": "onchange 'src/**/*.css' 'src/**/*.html' 'src/**/*.json' -e 'dist/*' -v -- npm run syncassets",
     "lint": "tslint src/**/*.ts",
@@ -37,24 +39,25 @@
     "tsc": "tsc",
     "typings": "typings",
     "docs": "typedoc --options typedoc.json src/index.ts",
-    "start": "npm run prepublish && concurrently \"npm run tsc -w\" \"lite-server\" \"npm run watchassets\""
+    "start:ngc": "npm run compile:ngc && concurrently \"npm run ngc -w\" \"lite-server\" \"npm run watchassets\"",
+    "start": "npm run compile:tsc && concurrently \"npm run tsc -w\" \"lite-server\" \"npm run watchassets\""
   },
   "dependencies": {
-    "@angular/common": "^2.0.0",
-    "@angular/compiler": "^2.0.0",
-    "@angular/core": "^2.0.0",
-    "@angular/forms": "^2.0.0",
+    "@angular/common": "2.x",
+    "@angular/compiler": "2.x",
+    "@angular/core": "2.x",
+    "@angular/forms": "2.x",
     "@angular/material": "2.0.0-alpha.11-3",
-    "@angular/platform-browser": "^2.0.0",
-    "@angular/platform-browser-dynamic": "^2.0.0",
-    "ajv": "^4.0.0",
-    "lodash": "^4.0.0"
+    "@angular/platform-browser": "2.x",
+    "@angular/platform-browser-dynamic": "2.x",
+    "ajv": "4.x",
+    "lodash": "4.x"
   },
   "devDependencies": {
-    "@angular/compiler-cli": "^2.4.0",
-    "@angular/http": "^2.4.0",
-    "@angular/platform-server": "^2.4.0",
-    "@angular/router": "^3.4.0",
+    "@angular/compiler-cli": "^2.4.1",
+    "@angular/http": "^2.4.1",
+    "@angular/platform-server": "^2.4.1",
+    "@angular/router": "^3.4.1",
     "@types/ace": "^0.0.32",
     "@types/ajv": "^0.0.5",
     "@types/jasmine": "^2.5.38",

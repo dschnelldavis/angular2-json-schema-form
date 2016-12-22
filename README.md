@@ -52,7 +52,7 @@ Then add this line to your main application module:
 import { JsonSchemaFormModule } from 'angular2-json-schema-form';
 ```
 
-And finally, add `JsonSchemaFormModule` to the `imports` array in your @NgModule declaration.
+And finally, add `JsonSchemaFormModule.forRoot()` to the `imports` array in your @NgModule declaration.
 
 Your final app.module.ts should look something like this:
 
@@ -65,7 +65,7 @@ import { JsonSchemaFormModule } from 'angular2-json-schema-form';
 import { AppComponent }         from './app.component';
 
 @NgModule({
-  imports:      [ BrowserModule, JsonSchemaFormModule ],
+  imports:      [ BrowserModule, JsonSchemaFormModule.forRoot() ],
   declarations: [ AppComponent ],
   bootstrap:    [ AppComponent ]
 })
