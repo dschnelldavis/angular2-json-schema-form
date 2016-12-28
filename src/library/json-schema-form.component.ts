@@ -48,10 +48,8 @@ import {
 @Component({
   selector: 'json-schema-form',
   template: `
-    <form (ngSubmit)="submitForm()">
-      <root-widget *ngIf="formInitialized"
-        [layout]="jsf.layout">
-      </root-widget>
+    <form *ngIf="formInitialized" (ngSubmit)="submitForm()">
+      <root-widget [layout]="jsf.layout"></root-widget>
     </form>
     <div *ngIf="debug || jsf.globalOptions.debug">
       Debug output: <pre>{{debugOutput}}</pre>
@@ -128,20 +126,8 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
       this.form || this.JSONSchema || this.UISchema
     ) {
       this.formInitialized = false;
-      this.jsf.initialValues = {};
-      this.jsf.schema = {};
-      this.jsf.layout = [];
-      this.jsf.formGroupTemplate = {};
-      this.jsf.formGroup = null;
-      this.jsf.framework = null;
-      this.jsf.arrayMap = new Map<string, number>();
-      this.jsf.dataMap = new Map<string, any>();
-      this.jsf.dataCircularRefMap = new Map<string, string>();
-      this.jsf.schemaCircularRefMap = new Map<string, string>();
-      this.jsf.layoutRefLibrary = {};
-      this.jsf.schemaRefLibrary = {};
-      this.jsf.templateRefLibrary = {};
-      this.jsf.resetAjvSchema();
+      // Reset all form values to defaults
+      this.jsf.resetAllValuesToDefaults();
 
       // Initialize 'options' (global form options) and set framework
       // Combine available inputs:

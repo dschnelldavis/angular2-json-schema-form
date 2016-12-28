@@ -49,7 +49,7 @@ export class JsonSchemaFormService {
   public templateRefLibrary: any = {}; // Library of formGroup templates for adding to form
 
   // Default global form options
-  public globalOptions: any = {
+  public globalOptionDefaults: any = {
     addSubmit: 'auto', // Add a submit button if layout does not have one?
     // true = always, false = never, 'auto' = only if layout is undefined
     // debug: false, // Show debugging output?
@@ -72,12 +72,40 @@ export class JsonSchemaFormService {
       // readonly: false, // Set control as read only?
     },
   };
+  public globalOptions: any = _.cloneDeep(this.globalOptionDefaults);
+
 
   constructor() { }
 
   public getData() { return this.data; }
   public getSchema() { return this.schema; }
   public getLayout() { return this.layout; }
+
+  public resetAllValuesToDefaults() {
+    this.JsonFormCompatibility = false;
+    this.ReactJsonSchemaFormCompatibility = false;
+    this.AngularSchemaFormCompatibility = false;
+    this.tpldata = {};
+    this.validateFormData = null;
+    this.initialValues = {};
+    this.schema = {};
+    this.layout = [];
+    this.formGroupTemplate = {};
+    this.formGroup = null;
+    this.framework = null;
+    this.data = {};
+    this.validData = null;
+    this.isValid = null;
+    this.validationErrors = null;
+    this.arrayMap = new Map<string, number>();
+    this.dataMap = new Map<string, any>();
+    this.dataCircularRefMap = new Map<string, string>();
+    this.schemaCircularRefMap = new Map<string, string>();
+    this.layoutRefLibrary = {};
+    this.schemaRefLibrary = {};
+    this.templateRefLibrary = {};
+    this.globalOptions = _.cloneDeep(this.globalOptionDefaults);
+  }
 
   public convertJsonSchema3to4() {
     this.schema = convertJsonSchema3to4(this.schema);
@@ -132,10 +160,6 @@ export class JsonSchemaFormService {
     }
   }
 
-  public resetAjvSchema() {
-    this.validateFormData = null;
-  }
-
   public compileAjvSchema() {
     if (!this.validateFormData) {
       this.validateFormData = this.ajv.compile(this.schema);
@@ -174,11 +198,13 @@ export class JsonSchemaFormService {
 
   }
 
-  public buildSchemaFromData() {
+  public buildSchemaFromData(data?: any): any {
+    if (data) { return buildSchemaFromData(data); }
     this.schema = buildSchemaFromData(this.initialValues);
   }
 
-  public buildSchemaFromLayout() {
+  public buildSchemaFromLayout(layout?: any): any {
+    if (layout) { return buildSchemaFromLayout(layout); }
     this.schema = buildSchemaFromLayout(this.layout);
   }
 

@@ -54,18 +54,23 @@ import { JsonSchemaFormModule } from 'angular2-json-schema-form';
 
 And finally, add `JsonSchemaFormModule.forRoot()` to the `imports` array in your @NgModule declaration.
 
+(If you plan to use the Material Design framework, you will also need to import the '@angular/material' module in the same way.)
+
 Your final app.module.ts should look something like this:
 
 ```javascript
 import { NgModule }             from '@angular/core';
 import { BrowserModule }        from '@angular/platform-browser';
+import { MaterialModule }       from '@angular/material';
 
 import { JsonSchemaFormModule } from 'angular2-json-schema-form';
 
 import { AppComponent }         from './app.component';
 
 @NgModule({
-  imports:      [ BrowserModule, JsonSchemaFormModule.forRoot() ],
+  imports:      [
+    BrowserModule, MaterialModule.forRoot(), JsonSchemaFormModule.forRoot()
+  ],
   declarations: [ AppComponent ],
   bootstrap:    [ AppComponent ]
 })
@@ -245,15 +250,13 @@ However, once you start developing more complex sites, you should load these ass
 
 #### Two strategies for writing your own frameworks
 
-The two built-in frameworks (both in the `/src/frameworks` folder) demonstrate different strategies for how frameworks can style form elements. The Bootstrap 3 framework is very lightweight and includes no additional widgets (though it does load some external stylesheets and scripts) and works entirely by adding styles to the default widgets. In contrast, the Material Design framework makes much more drastic changes, and uses the [Material Design for Angular 2](https://github.com/angular/material2) library to replace most of the default form control widgets with custom widgets from that library.
+The two built-in frameworks (both in the `/src/frameworks` folder) demonstrate different strategies for how frameworks can style form elements. The Bootstrap 3 framework is very lightweight and includes no additional widgets (though it does load some external stylesheets and scripts) and works entirely by adding styles to the default widgets. In contrast, the Material Design framework makes much more drastic changes, and uses the [Material Design for Angular 2](https://github.com/angular/material2) library (which must also be loaded into the application separately, as described above) to replace most of the default form control widgets with custom widgets from that library.
 
 ## Contributions and future development
 
-I wrote this library because I needed a JSON Schema Form builder to use in a large Angular 2 project I am currently working on. Though I found excellent libraries for Angular 1, React, and jQuery (all linked above), I could not find anything similar for Angular 2—so I wrote this library to fill that gap.
+If you find this library useful, I'd love to hear from you. If you have any trouble with it or would like to request a feature, please post a bug report [here](https://github.com/dschnelldavis/angular2-json-schema-form/issues). If you've made any improvements, please post a pull request [here](https://github.com/dschnelldavis/angular2-json-schema-form/pulls), so I can share your improvements with everyone else who uses this library.
 
-The current version is mostly functional, and even includes a few enhancements not available in some other libraries, such as supporting less common JSON Schema features like `oneOf`, `allOf`, and `$ref` links (including circular links). However, it still has several bugs, such as not dynamically enabling and disabling conditionally required fields inside objects, and is very fragile because it does not yet include any testing framework at all.
-
-So if you find this library useful, I encourage you to fork it and send back pull requests for any improvements you make. (I would _love_ some tests...) I also encourage you to submit bug reports and feature requests, and I'll do my best to answer any questions keep this library up-to-date. However, as I am just a single busy developer, I can't guarantee how long it might take to fix any individual bugs. So if you need a change or fix in a hurry, your best bet is to do it yourself and send a pull request.
+I wrote this library because I needed a JSON Schema Form builder to use in a large Angular 2 project I am currently working on. Though I found excellent libraries for Angular 1, React, and jQuery (all linked above), I could not find anything similar for Angular 2—so I wrote this library to fill that gap. The current version is mostly functional, and even includes a few enhancements not available in some other libraries, such as supporting less common JSON Schema features like `oneOf`, `allOf`, and `$ref` links (including circular links). However, it still has several bugs, such as not dynamically enabling and disabling conditionally required fields inside objects, and it's fragile, because it does not yet include any testing framework. Hopefully all these issues will get fixed eventually, but as I'm just a single busy programmer, I can't guarantee how long it will take. In the meantime, I hope you find it useful, and if you do, please send me your feedback.
 
 Thanks! I hope you enjoy using this library as much as I enjoyed writing it. :-)
 

@@ -1,6 +1,8 @@
 # Development
 compiled
 docs
+dist/playground
+src/playground
 
 # TypeScript
 tsconfig.json

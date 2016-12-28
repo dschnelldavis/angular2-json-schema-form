@@ -7,16 +7,9 @@ import { JsonSchemaFormService } from '../../library/json-schema-form.service';
   selector: 'material-checkbox-widget',
   template: `
     <md-checkbox
-      [(ngModel)]="isChecked"
       align="left"
-      [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
-      [attr.readonly]="options?.readonly ? 'readonly' : null"
-      [attr.value]="controlValue"
-      [class]="options?.fieldHtmlClass + (isChecked ?
-        (' ' + options?.activeClass + ' ' + options?.style?.selected) :
-        (' ' + options?.style?.unselected))"
-      color="primary"
-      [disabled]="controlDisabled"
+      [color]="options?.color || 'accent'"
+      [disabled]="controlDisabled || options?.readonly"
       [id]="'control' + layoutNode?._id"
       [name]="controlName"
       (change)="updateValue($event)">
@@ -31,7 +24,6 @@ export class MaterialCheckboxComponent implements OnInit {
   private controlValue: any;
   private controlDisabled: boolean = false;
   private boundControl: boolean = false;
-  private isChecked: boolean = false;
   private options: any;
   private trueValue: any = true;
   private falseValue: any = false;
@@ -54,8 +46,4 @@ export class MaterialCheckboxComponent implements OnInit {
   private updateValue(event) {
     this.jsf.updateValue(this, event.checked ? this.trueValue : this.falseValue);
   }
-
-  // private get isChecked() {
-  //   return this.jsf.getControlValue(this);
-  // }
 }

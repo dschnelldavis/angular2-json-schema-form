@@ -7,59 +7,43 @@ import { buildFormGroup, buildTitleMap, JsonPointer } from '../../library/utilit
 @Component({
   selector: 'material-checkboxes-widget',
   template: `
+    <md-checkbox type="checkbox"
+      [color]="options?.color || 'accent'"
+      [disabled]="controlDisabled || options?.readonly"
+      [name]="options?.name"
+      [checked]="allChecked"
+      [indeterminate]="someChecked"
+      (change)="updateValue($event, true)">
+      <span [innerHTML]="checkboxItem?.name"></span>
+    </md-checkbox>
     <label *ngIf="options?.title"
       [class]="options?.labelHtmlClass"
       [class.sr-only]="options?.notitle"
       [innerHTML]="options?.title"></label>
-    <div [ngSwitch]="layoutOrientation">
-
-      <!-- 'horizontal' = checkboxes-inline or checkboxbuttons -->
-      <div *ngSwitchCase="'horizontal'"
+    <ul class="checkbox-list" [class.horizontal-list]="horizontalList">
+      <li *ngFor="let checkboxItem of checkboxList"
         [class]="options?.htmlClass">
-        <label *ngFor="let checkboxItem of checkboxList"
-          [attr.for]="'control' + layoutNode?._id + '/' + checkboxItem.value"
-          [class]="options?.itemLabelHtmlClass + (checkboxItem.checked ?
-            (' ' + options?.activeClass + ' ' + options?.style?.selected) :
-            (' ' + options?.style?.unselected))">
-          <input type="checkbox"
-            [attr.required]="options?.required"
-            [checked]="checkboxItem.checked"
-            [class]="options?.fieldHtmlClass"
-            [disabled]="controlDisabled"
-            [id]="'control' + layoutNode?._id + '/' + checkboxItem.value"
-            [name]="formControlName"
-            [readonly]="options?.readonly ? 'readonly' : null"
-            [value]="checkboxItem.value"
-            (change)="updateValue($event)">
-          <span [innerHTML]="checkboxItem.name"></span>
-        </label>
-      </div>
-
-      <!-- 'vertical' = regular checkboxes -->
-      <div *ngSwitchDefault>
-        <div *ngFor="let checkboxItem of checkboxList"
-          [class]="options?.htmlClass">
-          <label
-            [attr.for]="'control' + layoutNode?._id + '/' + checkboxItem.value"
-            [class]="options?.itemLabelHtmlClass + (checkboxItem.checked ?
-              (' ' + options?.activeClass + ' ' + options?.style?.selected) :
-              (' ' + options?.style?.unselected))">
-            <input type="checkbox"
-              [attr.required]="options?.required"
-              [checked]="checkboxItem.checked"
-              [class]="options?.fieldHtmlClass"
-              [disabled]="controlDisabled"
-              [id]="options?.name + '/' + checkboxItem.value"
-              [name]="options?.name"
-              [readonly]="options?.readonly ? 'readonly' : null"
-              [value]="checkboxItem.value"
-              (change)="updateValue($event)">
-            <span [innerHTML]="checkboxItem?.name"></span>
-          </label>
-        </div>
-      </div>
-
-    </div>`,
+        <md-checkbox type="checkbox"
+          [(ngModel)]="checkboxItem.checked"
+          [color]="options?.color || 'accent'"
+          [disabled]="controlDisabled || options?.readonly"
+          [name]="checkboxItem?.name"
+          (change)="updateValue($event)">
+          <span [innerHTML]="checkboxItem?.name"></span>
+        </md-checkbox>
+      </li>
+    </ul>`,
+  styles: [`
+    .checkbox-list {
+      list-style-type: none;
+    }
+    .horizontal-list > li {
+      display: inline-block;
+      margin-right: 10px;
+      zoom: 1;
+      *display: inline;
+    }
+  `]
 })
 export class MaterialCheckboxesComponent implements OnInit {
   private formControl: AbstractControl;
@@ -67,7 +51,7 @@ export class MaterialCheckboxesComponent implements OnInit {
   private controlValue: any;
   private boundControl: boolean = false;
   private options: any;
-  private layoutOrientation: string;
+  private horizontalList: boolean = false;
   private formArray: AbstractControl;
   private checkboxList: CheckboxItem[] = [];
   @Input() layoutNode: any;
@@ -80,8 +64,8 @@ export class MaterialCheckboxesComponent implements OnInit {
 
   ngOnInit() {
     this.options = this.layoutNode.options;
-    this.layoutOrientation = (this.layoutNode.type === 'checkboxes-inline' ||
-      this.layoutNode.type === 'checkboxbuttons') ? 'horizontal' : 'vertical';
+    this.horizontalList = this.layoutNode.type === 'checkboxes-inline' ||
+      this.layoutNode.type === 'checkboxbuttons';
     this.jsf.initializeControl(this);
     this.checkboxList = buildTitleMap(
       this.options.titleMap || this.options.enumNames, this.options.enum, true
@@ -94,11 +78,18 @@ export class MaterialCheckboxesComponent implements OnInit {
     }
   }
 
-  updateValue(event) {
-    for (let checkboxItem of this.checkboxList) {
-      if (event.target.value === checkboxItem.value) {
-        checkboxItem.checked = event.target.checked;
-      }
+  get allChecked(): boolean {
+    return this.checkboxList.filter(t => t.checked).length === this.checkboxList.length;
+  }
+
+  get someChecked(): boolean {
+    const checkedItems = this.checkboxList.filter(t => t.checked).length;
+    return checkedItems > 0 && checkedItems < this.checkboxList.length;
+  }
+
+  updateValue(event: any, checkAll: boolean = false) {
+    if (checkAll) {
+      this.checkboxList.forEach(t => t.checked = event.checked);
     }
     if (this.boundControl) {
       this.jsf.updateArrayCheckboxList(this, this.checkboxList);

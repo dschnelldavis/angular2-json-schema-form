@@ -5,6 +5,18 @@ import {
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { JsonPointer } from './index';
 
+/**
+ * OrderableDirective
+ *
+ * Enables array elements to be reordered by dragging and dropping.
+ *
+ * Only works for arrays that have at least two elements.
+ *
+ * Also detects arrays-within-arrays, and correctly moves either
+ * the child array element or the parent array element,
+ * depending on the drop targert.
+ *
+ */
 @Directive({
   selector: '[orderable]',
 })

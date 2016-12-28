@@ -18,13 +18,13 @@ import 'ajv';
 import 'lodash';
 
 export {
-  WidgetLibraryService,
   FrameworkLibraryService,
+  WidgetLibraryService,
   JsonSchemaFormService,
-  JsonSchemaFormComponent
+  JsonSchemaFormComponent,
 };
 
-const COMPONENTS = [
+const ALL_COMPONENTS = [
   ...ALL_FRAMEWORKS, ...ALL_WIDGETS, ...ALL_MATERIAL_DESIGN_WIDGETS,
 ];
 
@@ -33,7 +33,7 @@ const COMPONENTS = [
     CommonModule, FormsModule, ReactiveFormsModule, MaterialModule,
   ],
   declarations: [
-    JsonSchemaFormComponent, OrderableDirective, ...COMPONENTS,
+    JsonSchemaFormComponent, OrderableDirective, ...ALL_COMPONENTS,
   ],
   exports: [
     FormsModule, ReactiveFormsModule, MaterialModule,
@@ -50,7 +50,7 @@ export class JsonSchemaFormModule {
         JsonSchemaFormService,
         {
           provide: ANALYZE_FOR_ENTRY_COMPONENTS,
-          useValue: [...COMPONENTS],
+          useValue: [...ALL_COMPONENTS],
           multi: true,
         },
       ],

@@ -12,59 +12,25 @@ import { buildTitleMap } from '../../library/utilities/index';
       [class]="options?.labelHtmlClass"
       [class.sr-only]="options?.notitle"
       [innerHTML]="options?.title"></label>
-      <div [ngSwitch]="layoutOrientation">
-
-        <!-- 'horizontal' = radios-inline or radiobuttons -->
-        <div *ngSwitchCase="'horizontal'"
-          [class]="options?.htmlClass">
-          <label *ngFor="let radioItem of radiosList"
-            [attr.for]="'control' + layoutNode?._id + '/' + radioItem?.value"
-            [class]="options?.itemLabelHtmlClass +
-              ((controlValue + '' === radioItem?.value + '') ?
-              (' ' + options?.activeClass + ' ' + options?.style?.selected) :
-              (' ' + options?.style?.unselected))">
-            <input type="radio"
-              [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
-              [attr.readonly]="options?.readonly ? 'readonly' : null"
-              [attr.required]="options?.required"
-              [checked]="radioItem?.value === controlValue"
-              [class]="options?.fieldHtmlClass"
-              [disabled]="controlDisabled"
-              [id]="'control' + layoutNode?._id + '/' + radioItem?.value"
-              [name]="controlName"
-              [value]="radioItem?.value"
-              (change)="updateValue($event)">
-            <span [innerHTML]="radioItem?.name"></span>
-          </label>
-        </div>
-
-        <!-- 'vertical' = regular radios -->
-        <div *ngSwitchDefault>
-          <div *ngFor="let radioItem of radiosList"
-            [class]="options?.htmlClass">
-            <label
-              [attr.for]="'control' + layoutNode?._id + '/' + radioItem?.value"
-              [class]="options?.itemLabelHtmlClass +
-                ((controlValue + '' === radioItem?.value + '') ?
-                (' ' + options?.activeClass + ' ' + options?.style?.selected) :
-                (' ' + options?.style?.unselected))">
-              <input type="radio"
-                [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
-                [attr.readonly]="options?.readonly ? 'readonly' : null"
-                [attr.required]="options?.required"
-                [checked]="radioItem?.value === controlValue"
-                [class]="options?.fieldHtmlClass"
-                [disabled]="controlDisabled"
-                [id]="'control' + layoutNode?._id + '/' + radioItem?.value"
-                [name]="controlName"
-                [value]="radioItem?.value"
-                (change)="updateValue($event)">
-              <span [innerHTML]="radioItem?.name"></span>
-            </label>
-          </div>
-        </div>
-
-      </div>`,
+    <md-radio-group
+      [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
+      [attr.readonly]="options?.readonly ? 'readonly' : null"
+      [attr.required]="options?.required"
+      [class]="options?.fieldHtmlClass"
+      [disabled]="controlDisabled"
+      [name]="controlName"
+      [value]="controlValue">
+      <div *ngFor="let radioItem of radiosList">
+        <md-radio-button
+          [id]="'control' + layoutNode?._id + '/' + radioItem?.value"
+          [value]="radioItem?.value"
+          (click)="updateValue(radioItem?.value)">
+          <span [innerHTML]="radioItem?.name"></span>
+        </md-radio-button>
+        <span *ngIf="layoutOrientation === 'horizontal'">&nbsp;</span>
+        <br *ngIf="layoutOrientation === 'vertical'" />
+      </div>
+    </md-radio-group>`,
 })
 export class MaterialRadiosComponent implements OnInit {
   private formControl: AbstractControl;
@@ -97,7 +63,7 @@ export class MaterialRadiosComponent implements OnInit {
     this.jsf.initializeControl(this);
   }
 
-  private updateValue(event) {
-    this.jsf.updateValue(this, event.target.value);
+  private updateValue(value) {
+    this.jsf.updateValue(this, value);
   }
 }

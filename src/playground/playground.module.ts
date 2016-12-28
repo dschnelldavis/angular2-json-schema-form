@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpModule } from '@angular/http';
+import { MaterialModule } from '@angular/material';
 
 
 import { JsonSchemaFormModule } from '../index';
@@ -13,7 +14,10 @@ import { AceEditorDirective } from './ace-editor.directive';
 import { routing, appRoutingProviders } from './playground.routing';
 
 @NgModule({
-  imports: [ BrowserModule, HttpModule, routing, JsonSchemaFormModule.forRoot() ],
+  imports: [
+    BrowserModule, HttpModule, routing,
+    MaterialModule.forRoot(), JsonSchemaFormModule.forRoot()
+  ],
   declarations: [
     PlaygroundContainerComponent, PlaygroundComponent, AceEditorDirective
   ],
