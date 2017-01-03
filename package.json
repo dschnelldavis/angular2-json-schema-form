@@ -1,6 +1,6 @@
 {
   "name": "angular2-json-schema-form",
-  "version": "0.3.0-alpha.16",
+  "version": "0.3.0-alpha.19",
   "author": {
     "name": "dschnelldavis",
     "email": "dschnelldavis@gmail.com"
@@ -28,17 +28,17 @@
   "scripts": {
     "clean:dist": "rimraf compiled && rimraf dist",
     "clean:all": "npm run clean:dist && rimraf node_modules && npm cache clean",
+    "tsc": "tsc",
+    "ngc": "./node_modules/.bin/ngc",
+    "lint": "tslint src/**/*.ts",
+    "test": "tsc && karma start",
+    "typings": "typings",
+    "docs": "typedoc --options typedoc.json src/index.ts",
+    "syncassets": "./node_modules/.bin/cpr src dist -f \\.ts",
+    "watchassets": "onchange 'src/**/*.css' 'src/**/*.html' 'src/**/*.json' -e 'dist/*' -v -- npm run syncassets",
     "compile:tsc": "npm run clean:dist && npm run tsc && npm run syncassets",
     "compile:ngc": "npm run clean:dist && npm run ngc && npm run syncassets",
     "prepublish": "npm run compile:tsc",
-    "syncassets": "rsync -ar --include='*.css' --include='*.html' --include='*.json' --include='*/' --exclude='*' --delete ./src/ ./dist/",
-    "watchassets": "onchange 'src/**/*.css' 'src/**/*.html' 'src/**/*.json' -e 'dist/*' -v -- npm run syncassets",
-    "lint": "tslint src/**/*.ts",
-    "test": "tsc && karma start",
-    "ngc": "./node_modules/.bin/ngc",
-    "tsc": "tsc",
-    "typings": "typings",
-    "docs": "typedoc --options typedoc.json src/index.ts",
     "start:ngc": "npm run compile:ngc && concurrently \"npm run ngc -w\" \"lite-server\" \"npm run watchassets\"",
     "start": "npm run compile:tsc && concurrently \"npm run tsc -w\" \"lite-server\" \"npm run watchassets\""
   },
@@ -68,6 +68,7 @@
     "codelyzer": "2.0.0-beta.4",
     "concurrently": "^3.0.0",
     "core-js": "^2.4.1",
+    "cpr": "^2.0.2",
     "http-server": "^0.9.0",
     "jasmine-core": "^2.5.2",
     "karma": "^1.3.0",
