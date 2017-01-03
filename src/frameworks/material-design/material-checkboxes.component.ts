@@ -54,6 +54,7 @@ export class MaterialCheckboxesComponent implements OnInit {
   private horizontalList: boolean = false;
   private formArray: AbstractControl;
   private checkboxList: CheckboxItem[] = [];
+  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];

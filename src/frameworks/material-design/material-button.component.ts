@@ -30,6 +30,7 @@ export class MaterialButtonComponent implements OnInit {
   private controlDisabled: boolean = false;
   private boundControl: boolean = false;
   private options: any;
+  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];

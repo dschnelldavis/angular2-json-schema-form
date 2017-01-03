@@ -22,14 +22,14 @@ export function addClasses(
   newClasses: string | string[] | Set<string>
 ): string | string[] | Set<string> {
   const badType = i => !isSet(i) && !isArray(i) && !isString(i);
-  if (badType(newClasses)) return oldClasses;
-  if (badType(oldClasses)) oldClasses = '';
+  if (badType(newClasses)) { return oldClasses; }
+  if (badType(oldClasses)) { oldClasses = ''; }
   const toSet = i => isSet(i) ? i : isArray(i) ? new Set(i) : new Set(i.split(' '));
   let combinedSet: Set<any> = toSet(oldClasses);
   let newSet: Set<any> = toSet(newClasses);
   newSet.forEach(c => combinedSet.add(c));
-  if (isSet(oldClasses)) return combinedSet;
-  if (isArray(oldClasses)) return Array.from(combinedSet);
+  if (isSet(oldClasses)) { return combinedSet; }
+  if (isArray(oldClasses)) { return Array.from(combinedSet); }
   return Array.from(combinedSet).join(' ');
 }
 
@@ -44,11 +44,11 @@ export function addClasses(
  * @return {Object|Array|string|number|boolean|null} - The copied object
  */
 export function copy(object: any): any {
-  if (typeof object !== 'object' || object === null) return object;
-  if (isObject(object)) return Object.assign({}, object);
-  if (isArray(object)) return [].concat(object);
-  if (isMap(object)) return new Map(object);
-  if (isSet(object)) return new Set(object);
+  if (typeof object !== 'object' || object === null) { return object; }
+  if (isObject(object)) { return Object.assign({}, object); }
+  if (isArray(object)) { return [].concat(object); }
+  if (isMap(object)) { return new Map(object); }
+  if (isSet(object)) { return new Set(object); }
   console.error('copy error: Object to copy must be a JavaScript object or value.');
 }
 
@@ -76,7 +76,7 @@ export function forEach(
   object: any, fn: (v: any, k?: string | number, c?: any, rc?: any) => any,
   recurse: boolean | string = false, rootObject: any = object
 ): void {
-  if (isEmpty(object)) return;
+  if (isEmpty(object)) { return; }
   if ((isObject(object) || isArray(object)) && typeof fn === 'function') {
     for (let key of Object.keys(object)) {
       const value = object[key];
@@ -115,7 +115,7 @@ export function forEach(
 export function forEachCopy(
   object: any, fn: (v: any, k?: string | number, o?: any, p?: string) => any
 ): any {
-  if (!hasValue(object)) return;
+  if (!hasValue(object)) { return; }
   if ((isObject(object) || isArray(object)) && typeof fn !== 'function') {
     let newObject: any = isArray(object) ? [] : {};
     for (let key of Object.keys(object)) {
@@ -142,7 +142,7 @@ export function forEachCopy(
  * @return {boolean} - true if object has property, false if not
  */
 export function hasOwn(object: any, property: string): boolean {
-  if (!isObject(object) && !isArray(object)) return false;
+  if (!isObject(object) && !isArray(object)) { return false; }
   return object.hasOwnProperty(property);
 }
 
@@ -166,8 +166,8 @@ export function mergeFilteredObject(
   targetObject: PlainObject, sourceObject: PlainObject, excludeKeys: any[] = [],
   keyFn: (string) => string = (k) => k, valueFn: (any) => any = (v) => v
 ): PlainObject {
-  if (!isObject(sourceObject)) return targetObject;
-  if (!isObject(targetObject)) targetObject = {};
+  if (!isObject(sourceObject)) { return targetObject; }
+  if (!isObject(targetObject)) { targetObject = {}; }
   for (let key of Object.keys(sourceObject)) {
     if (!inArray(key, excludeKeys) && isDefined(sourceObject[key])) {
       targetObject[keyFn(key)] = valueFn(sourceObject[key]);
@@ -188,7 +188,7 @@ export function parseText(
   text: string = '', value: any = {}, values: any = {},
   key: number|string = null, tpldata: any = null
 ): string {
-  if (!text) return text;
+  if (!text) { return text; }
   let idx: number = null; // For JSON Form API compatibility
   let $index: number = null; // For Angular Schema Form API compatibility
   if (typeof key === 'number') { idx = $index = key + 1; }
@@ -223,12 +223,12 @@ export function parseText(
  * @return {string} -
  */
 export function toTitleCase(input: string, forceWords?: string|string[]): string {
-  if (!isString(input)) return input;
+  if (!isString(input)) { return input; }
   let forceArray: string[] = ['a', 'an', 'and', 'as', 'at', 'but', 'by', 'en',
    'for', 'if', 'in', 'nor', 'of', 'on', 'or', 'per', 'the', 'to', 'v', 'v.',
    'vs', 'vs.', 'via'];
-  if (isString(forceWords)) forceWords = forceWords.split('|');
-  if (isArray(forceWords)) forceArray = forceArray.concat(forceWords);
+  if (isString(forceWords)) { forceWords = forceWords.split('|'); }
+  if (isArray(forceWords)) { forceArray = forceArray.concat(forceWords); }
   const forceArrayLower: string[] = forceArray.map(w => w.toLowerCase());
   const noInitialCase: boolean =
     input === input.toUpperCase() || input === input.toLowerCase();

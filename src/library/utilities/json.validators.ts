@@ -112,11 +112,11 @@ export class JsonValidators {
   static required(input?: boolean): IValidatorFn;
 
   static required(input?: AbstractControl | boolean): PlainObject | IValidatorFn {
-    if (input === undefined) input = true;
+    if (input === undefined) { input = true; }
     switch (input) {
       case true: // Return required function (do not execute it yet)
         return (control: AbstractControl, invert: boolean = false): PlainObject => {
-          if (invert) return null; // if not required, always return valid
+          if (invert) { return null; } // if not required, always return valid
           return hasValue(control.value) ? null : { 'required': true };
         };
       case false: // Do nothing
@@ -140,7 +140,7 @@ export class JsonValidators {
    */
   static type(type: SchemaPrimitiveType | SchemaPrimitiveType[]): IValidatorFn {
     return (control: AbstractControl, invert: boolean = false): PlainObject => {
-      if (isEmpty(control.value)) return null;
+      if (isEmpty(control.value)) { return null; }
       let actualValue: any = control.value;
       let typeArray: SchemaPrimitiveType[] = isArray(type) ?
         <SchemaPrimitiveType[]>type : [<SchemaPrimitiveType>type];
@@ -171,7 +171,7 @@ export class JsonValidators {
    */
   static enum(enumList: any[]): IValidatorFn {
     return (control: AbstractControl, invert: boolean = false): PlainObject => {
-      if (isEmpty(control.value)) return null;
+      if (isEmpty(control.value)) { return null; }
       let isValid: boolean = true;
       let actualValues: any | any[] = (isArray(control.value)) ?
         control.value : [control.value];
@@ -211,7 +211,7 @@ export class JsonValidators {
    */
   static minLength(requiredLength: number): IValidatorFn {
     return (control: AbstractControl, invert: boolean = false): PlainObject => {
-      if (isEmpty(control.value)) return null;
+      if (isEmpty(control.value)) { return null; }
       let actualLength: number = isString(control.value) ? control.value.length : 0;
       let isValid: boolean = actualLength >= requiredLength;
       return xor(isValid, invert) ?
@@ -258,7 +258,7 @@ export class JsonValidators {
    */
   static pattern(pattern: string, wholeString: boolean = false): IValidatorFn {
     return (control: AbstractControl, invert: boolean = false): PlainObject => {
-      if (isEmpty(control.value)) return null;
+      if (isEmpty(control.value)) { return null; }
       let actualValue: string = control.value;
       let requiredPattern: string = (wholeString) ? `^${pattern}$` : pattern;
       let regex = new RegExp(requiredPattern);
@@ -285,7 +285,7 @@ export class JsonValidators {
     format: 'date-time' | 'email' | 'hostname' | 'ipv4' | 'ipv6' | 'uri' | 'url' | 'color'
   ): IValidatorFn {
     return (control: AbstractControl, invert: boolean = false): PlainObject => {
-      if (isEmpty(control.value)) return null;
+      if (isEmpty(control.value)) { return null; }
       let isValid: boolean;
       let actualValue: string = control.value;
       if (!isString(actualValue)) {
@@ -344,7 +344,7 @@ export class JsonValidators {
    */
   static minimum(minimum: number, exclusiveMinimum: boolean = false): IValidatorFn {
     return (control: AbstractControl, invert: boolean = false): PlainObject => {
-      if (isEmpty(control.value)) return null;
+      if (isEmpty(control.value)) { return null; }
       let actualValue: number = control.value;
       let isValid: boolean = isNumber(actualValue) &&
         exclusiveMinimum ? actualValue > minimum : actualValue >= minimum;
@@ -368,7 +368,7 @@ export class JsonValidators {
    */
   static maximum(maximum: number, exclusiveMaximum: boolean = false): IValidatorFn {
     return (control: AbstractControl, invert: boolean = false): PlainObject => {
-      if (isEmpty(control.value)) return null;
+      if (isEmpty(control.value)) { return null; }
       let actualValue: number = control.value;
       let isValid: boolean = isNumber(actualValue) &&
         exclusiveMaximum ? actualValue < maximum : actualValue <= maximum;
@@ -388,7 +388,7 @@ export class JsonValidators {
    */
   static multipleOf(multipleOf: number): IValidatorFn {
     return (control: AbstractControl, invert: boolean = false): PlainObject => {
-      if (isEmpty(control.value)) return null;
+      if (isEmpty(control.value)) { return null; }
       let actualValue: number = control.value;
       let isValid: boolean = isNumber(actualValue) && actualValue % multipleOf === 0;
       return xor(isValid, invert) ?
@@ -407,7 +407,7 @@ export class JsonValidators {
    */
   static minProperties(minProperties: number): IValidatorFn {
     return (control: AbstractControl, invert: boolean = false): PlainObject => {
-      if (isEmpty(control.value)) return null;
+      if (isEmpty(control.value)) { return null; }
       let actualProperties: number = Object.keys(control.value).length || 0;
       let isValid: boolean = actualProperties >= minProperties;
       return xor(isValid, invert) ?
@@ -450,11 +450,11 @@ export class JsonValidators {
    */
   static dependencies(dependencies: any): IValidatorFn {
     return (control: AbstractControl, invert: boolean = false): PlainObject => {
-      if (isEmpty(control.value)) return null;
-      if (getType(dependencies) !== 'object' || isEmpty(dependencies)) return null;
+      if (isEmpty(control.value)) { return null; }
+      if (getType(dependencies) !== 'object' || isEmpty(dependencies)) { return null; }
       let allErrors: PlainObject = _mergeObjects(
         forEachCopy(dependencies, (value, requiringField) => {
-          if (!hasValue(control.value[requiringField])) return null;
+          if (!hasValue(control.value[requiringField])) { return null; }
           let requiringFieldErrors: PlainObject = { };
           let requiredFields: string[];
           let properties: PlainObject = { };
@@ -511,7 +511,7 @@ export class JsonValidators {
    */
   static minItems(minItems: number): IValidatorFn {
     return (control: AbstractControl, invert: boolean = false): PlainObject => {
-      if (isEmpty(control.value)) return null;
+      if (isEmpty(control.value)) { return null; }
       let actualItems: number = isArray(control.value) ? control.value.length : 0;
       let isValid: boolean = actualItems >= minItems;
       return xor(isValid, invert) ?
@@ -546,8 +546,8 @@ export class JsonValidators {
    */
   static uniqueItems(unique: boolean = true): IValidatorFn {
     return (control: AbstractControl, invert: boolean = false): PlainObject => {
-      if (!unique) return null;
-      if (isEmpty(control.value)) return null;
+      if (!unique) { return null; }
+      if (isEmpty(control.value)) { return null; }
       let sorted: any[] = control.value.slice().sort();
       let duplicateItems = [];
       for (let i = 1, l = sorted.length; i < l; i++) {
@@ -589,9 +589,9 @@ export class JsonValidators {
    * @return {IValidatorFn} - single combined validator function
    */
   static composeAnyOf(validators: IValidatorFn[]): IValidatorFn {
-    if (!validators) return null;
+    if (!validators) { return null; }
     let presentValidators: IValidatorFn[] = validators.filter(isDefined);
-    if (presentValidators.length === 0) return null;
+    if (presentValidators.length === 0) { return null; }
     return (control: AbstractControl, invert: boolean = false): PlainObject => {
       let arrayOfErrors: PlainObject[] =
         _executeValidators(control, presentValidators, invert).filter(isDefined);
@@ -613,16 +613,16 @@ export class JsonValidators {
    * @return {IValidatorFn} - single combined validator function
    */
   static composeOneOf(validators: IValidatorFn[]): IValidatorFn {
-    if (!validators) return null;
+    if (!validators) { return null; }
     let presentValidators: IValidatorFn[] = validators.filter(isDefined);
-    if (presentValidators.length === 0) return null;
+    if (presentValidators.length === 0) { return null; }
     return (control: AbstractControl, invert: boolean = false): PlainObject => {
       let arrayOfErrors: PlainObject[] =
         _executeValidators(control, presentValidators);
       let validControls: number =
         validators.length - arrayOfErrors.filter(isDefined).length;
       let isValid: boolean = validControls === 1;
-      if (xor(isValid, invert)) return null;
+      if (xor(isValid, invert)) { return null; }
       let arrayOfValids: PlainObject[] =
         _executeValidators(control, presentValidators, invert);
       return _mergeObjects.apply(
@@ -642,9 +642,9 @@ export class JsonValidators {
    * @return {IValidatorFn} - single combined validator function
    */
   static composeAllOf(validators: IValidatorFn[]): IValidatorFn {
-    if (!validators) return null;
+    if (!validators) { return null; }
     let presentValidators: IValidatorFn[] = validators.filter(isDefined);
-    if (presentValidators.length === 0) return null;
+    if (presentValidators.length === 0) { return null; }
     return (control: AbstractControl, invert: boolean = false): PlainObject => {
       let combinedErrors = _mergeErrors(
         _executeValidators(control, presentValidators, invert)
@@ -670,7 +670,7 @@ export class JsonValidators {
    */
   static composeNot(validator: IValidatorFn): IValidatorFn {
     return (control: AbstractControl, invert: boolean = false): PlainObject => {
-      if (isEmpty(control.value)) return null;
+      if (isEmpty(control.value)) { return null; }
       let error: PlainObject = validator(control, !invert);
       let isValid: boolean = error === null;
       return (xor(isValid, invert)) ?
@@ -685,9 +685,9 @@ export class JsonValidators {
    * @return {IValidatorFn} - single combined validator function
    */
   static compose(validators: IValidatorFn[]): IValidatorFn {
-    if (!validators) return null;
+    if (!validators) { return null; }
     let presentValidators = validators.filter(isDefined);
-    if (presentValidators.length === 0) return null;
+    if (presentValidators.length === 0) { return null; }
     return (control: AbstractControl, invert: boolean = false): PlainObject =>
       _mergeErrors(_executeValidators(control, presentValidators, invert));
   };
@@ -699,9 +699,9 @@ export class JsonValidators {
    * @return {AsyncIValidatorFn} - single combined async validator function
    */
   static composeAsync(validators: AsyncIValidatorFn[]): AsyncIValidatorFn {
-    if (!validators) return null;
+    if (!validators) { return null; }
     let presentValidators = validators.filter(isDefined);
-    if (presentValidators.length === 0) return null;
+    if (presentValidators.length === 0) { return null; }
     return (control: AbstractControl, invert: boolean = false) => Promise.all(
       _executeAsyncValidators(control, presentValidators).map(_convertToPromise)
     ).then(_mergeErrors);

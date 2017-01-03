@@ -27,6 +27,7 @@ export class MaterialCheckboxComponent implements OnInit {
   private options: any;
   private trueValue: any = true;
   private falseValue: any = false;
+  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];

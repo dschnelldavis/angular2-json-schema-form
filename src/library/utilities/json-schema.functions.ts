@@ -40,7 +40,7 @@ export function buildSchemaFromLayout(layout: any[]): any {
   //   let returnArray: any[] = [];
   //   for (let layoutItem of layoutItems) {
   //     const returnItem: any = callback(layoutItem);
-  //     if (returnItem) returnArray = returnArray.concat(callback(layoutItem));
+  //     if (returnItem) { returnArray = returnArray.concat(callback(layoutItem)); }
   //     if (layoutItem.items) {
   //       returnArray = returnArray.concat(walkLayout(layoutItem.items, callback));
   //     }
@@ -54,7 +54,7 @@ export function buildSchemaFromLayout(layout: any[]): any {
   //   } else if (layoutItem.key) {
   //     itemKey = layoutItem.key;
   //   }
-  //   if (!itemKey) return;
+  //   if (!itemKey) { return; }
   //   //
   // });
 }
@@ -71,11 +71,11 @@ export function buildSchemaFromData(
   data: any, isRoot: boolean = true
 ): any {
   let newSchema: any = { };
-  if (isRoot) newSchema.$schema = 'http://json-schema.org/draft-04/schema#';
+  if (isRoot) { newSchema.$schema = 'http://json-schema.org/draft-04/schema#'; }
   const getSafeType = (value: any): string => {
     let safeType = getType(value, 'strict');
-    if (safeType === 'integer') return 'number';
-    if (safeType === 'null') return 'string';
+    if (safeType === 'integer') { return 'number'; }
+    if (safeType === 'null') { return 'string'; }
     return safeType;
   };
   newSchema.type = getSafeType(data);
@@ -210,7 +210,7 @@ export function getSchemaReference(
         .map(object => getSchemaReference(schema, object, schemaRefLibrary))
         .reduce((schema1, schema2) => Object.assign(schema1, schema2), { });
     }
-    if (schemaRefLibrary) schemaRefLibrary[schemaPointer] = newSchema;
+    if (schemaRefLibrary) { schemaRefLibrary[schemaPointer] = newSchema; }
     return newSchema;
   }
 }
@@ -267,7 +267,7 @@ export function getInputType(schema: any, layoutNode: any = null): string {
     [schema, '/widget/component'],
     [schema, '/widget']
   ]);
-  if (isString(controlType)) return checkInlineType(controlType, schema, layoutNode);
+  if (isString(controlType)) { return checkInlineType(controlType, schema, layoutNode); }
   let schemaType = schema.type;
   if (schemaType) {
     if (isArray(schemaType)) { // If multiple types listed, use most inclusive type
@@ -287,11 +287,11 @@ export function getInputType(schema: any, layoutNode: any = null): string {
         schemaType = 'null';
       }
     }
-    if (schemaType === 'boolean') return 'checkbox';
+    if (schemaType === 'boolean') { return 'checkbox'; }
     if (schemaType === 'object') {
-      if (hasOwn(schema, 'properties')) return 'fieldset';
+      if (hasOwn(schema, 'properties')) { return 'fieldset'; }
       if (hasOwn(schema, '$ref') ||
-      JsonPointer.has(schema, '/additionalProperties/$ref')) return '$ref';
+      JsonPointer.has(schema, '/additionalProperties/$ref')) { return '$ref'; }
       return null; // return 'textarea'; (?)
     }
     if (schemaType === 'array') {
@@ -299,32 +299,32 @@ export function getInputType(schema: any, layoutNode: any = null): string {
         [schema, '/items'],
         [schema, '/additionalItems']
       ]);
-      if (!itemsObject) return null;
+      if (!itemsObject) { return null; }
       if (hasOwn(itemsObject, 'enum')) {
         return checkInlineType('checkboxes', schema, layoutNode);
       } else {
         return 'array';
       }
     }
-    if (schemaType === 'null') return 'hidden';
-    if (hasOwn(schema, 'enum')) return 'select';
+    if (schemaType === 'null') { return 'hidden'; }
+    if (hasOwn(schema, 'enum')) { return 'select'; }
     if (schemaType === 'number' || schemaType === 'integer') {
       if (hasOwn(schema, 'maximum') && hasOwn(schema, 'minimum') &&
-      (schemaType === 'integer' || hasOwn(schema, 'multipleOf'))) return 'range';
+      (schemaType === 'integer' || hasOwn(schema, 'multipleOf'))) { return 'range'; }
       return schemaType;
     }
     if (schemaType === 'string') {
       if (hasOwn(schema, 'format')) {
-        if (schema.format === 'color') return 'color';
-        if (schema.format === 'date') return 'date';
-        if (schema.format === 'date-time') return 'datetime-local';
-        if (schema.format === 'email') return 'email';
-        if (schema.format === 'uri') return 'url';
+        if (schema.format === 'color') { return 'color'; }
+        if (schema.format === 'date') { return 'date'; }
+        if (schema.format === 'date-time') { return 'datetime-local'; }
+        if (schema.format === 'email') { return 'email'; }
+        if (schema.format === 'uri') { return 'url'; }
       }
       return 'text';
     }
   }
-  if (hasOwn(schema, '$ref')) return '$ref';
+  if (hasOwn(schema, '$ref')) { return '$ref'; }
   return 'text';
 }
 
@@ -393,7 +393,7 @@ export function isInputRequired(schema: any, pointer: string): boolean {
     } else {
       requiredList = schema['required'];
     }
-    if (isArray(requiredList)) return requiredList.indexOf(keyName) !== -1;
+    if (isArray(requiredList)) { return requiredList.indexOf(keyName) !== -1; }
   }
   return false;
 };
@@ -406,7 +406,7 @@ export function isInputRequired(schema: any, pointer: string): boolean {
  * @return {void}
  */
 export function updateInputOptions(layoutNode: any, schema: any, jsf: any) {
-  if (!isObject(layoutNode)) return;
+  if (!isObject(layoutNode)) { return; }
   const templatePointer = JsonPointer.get(jsf,
     ['dataMap', layoutNode.dataPointer, 'templatePointer']);
 
@@ -431,8 +431,8 @@ export function updateInputOptions(layoutNode: any, schema: any, jsf: any) {
   const fixUiKeys = (key) => key.slice(0, 3) === 'ui:' ? key.slice(3) : key;
   mergeFilteredObject(newOptions, jsf.globalOptions.formDefaults,
     [], fixUiKeys);
-  if (JsonPointer.has(schema, '/items/enum')) newOptions.enum = schema.items.enum;
-  if (JsonPointer.has(schema, '/items/titleMap')) newOptions.enum = schema.items.titleMap;
+  if (JsonPointer.has(schema, '/items/enum')) { newOptions.enum = schema.items.enum; }
+  if (JsonPointer.has(schema, '/items/titleMap')) { newOptions.enum = schema.items.titleMap; }
   mergeFilteredObject(newOptions, JsonPointer.get(schema, '/ui:widget/options'),
     [], fixUiKeys);
   mergeFilteredObject(newOptions, JsonPointer.get(schema, '/ui:widget'),
@@ -490,13 +490,13 @@ export function updateInputOptions(layoutNode: any, schema: any, jsf: any) {
  * @return {validators}
  */
 export function getControlValidators(schema: any) {
-  if (!isObject(schema)) return null;
+  if (!isObject(schema)) { return null; }
   let validators: any = { };
   if (hasOwn(schema, 'type')) {
     switch (schema.type) {
       case 'string':
         forEach(['pattern', 'format', 'minLength', 'maxLength'], (prop) => {
-          if (hasOwn(schema, prop)) validators[prop] = [schema[prop]];
+          if (hasOwn(schema, prop)) { validators[prop] = [schema[prop]]; }
         });
       break;
       case 'number': case 'integer':
@@ -509,21 +509,21 @@ export function getControlValidators(schema: any) {
           }
         });
         forEach(['multipleOf', 'type'], (prop) => {
-          if (hasOwn(schema, prop)) validators[prop] = [schema[prop]];
+          if (hasOwn(schema, prop)) { validators[prop] = [schema[prop]]; }
         });
       break;
       case 'object':
         forEach(['minProperties', 'maxProperties', 'dependencies'], (prop) => {
-          if (hasOwn(schema, prop)) validators[prop] = [schema[prop]];
+          if (hasOwn(schema, prop)) { validators[prop] = [schema[prop]]; }
         });
       break;
       case 'array':
         forEach(['minItems', 'maxItems', 'uniqueItems'], (prop) => {
-          if (hasOwn(schema, prop)) validators[prop] = [schema[prop]];
+          if (hasOwn(schema, prop)) { validators[prop] = [schema[prop]]; }
         });
       break;
     }
   }
-  if (hasOwn(schema, 'enum')) validators['enum'] = [schema['enum']];
+  if (hasOwn(schema, 'enum')) { validators['enum'] = [schema['enum']]; }
   return validators;
 }

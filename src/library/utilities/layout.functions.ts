@@ -66,8 +66,8 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
       // If newNode is an array, search for dataPointer in child nodes
       } else if (hasOwn(newNode, 'type') && newNode.type.slice(-5) === 'array') {
         const findDataPointer = (items) => {
-          if (items === null || typeof items !== 'object') return;
-          if (hasOwn(items, 'dataPointer')) return items.dataPointer;
+          if (items === null || typeof items !== 'object') { return; }
+          if (hasOwn(items, 'dataPointer')) { return items.dataPointer; }
           if (isArray(items.items)) {
             for (let item of items.items) {
               if (hasOwn(item, 'dataPointer') &&
@@ -77,7 +77,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
               }
               if (hasOwn(item, 'items')) {
                 const searchItem = findDataPointer(item);
-                if (searchItem) return searchItem;
+                if (searchItem) { return searchItem; }
               }
             }
           }
@@ -99,7 +99,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
       newNode.dataPointer =
         JsonPointer.toGenericPointer(newNode.dataPointer, jsf.arrayMap);
       const LastKey: string = JsonPointer.toKey(newNode.dataPointer);
-      if (isString(LastKey) && LastKey !== '-') newNode.name = LastKey;
+      if (isString(LastKey) && LastKey !== '-') { newNode.name = LastKey; }
       if (!jsf.dataMap.has(newNode.dataPointer)) {
         jsf.dataMap.set(newNode.dataPointer, new Map);
       } else if (
@@ -175,7 +175,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
       jsf.dataMap.get(newNode.dataPointer).set('widget', newNode.widget);
 
       if (newNode.dataType === 'array' && hasOwn(newNode, 'items')) {
-        if (newNode.options.required && !newNode.minItems) newNode.minItems = 1;
+        if (newNode.options.required && !newNode.minItems) { newNode.minItems = 1; }
         let arrayPointer: string = newNode.dataPointer + '/-';
         if (!jsf.dataMap.has(arrayPointer)) {
           jsf.dataMap.set(arrayPointer, new Map);
@@ -292,7 +292,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
           if (isString(JsonPointer.get(newNode, '/style/add'))) {
             newNodeRef.options.fieldStyle = newNode.style.add;
             delete newNode.style.add;
-            if (isEmpty(newNode.style)) delete newNode.style;
+            if (isEmpty(newNode.style)) { delete newNode.style; }
           }
           newNode.items.push(newNodeRef);
         }
@@ -310,7 +310,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
       newNode.widget = widgetLibrary.getWidget(newNode.type);
       updateInputOptions(newNode, {}, jsf);
     }
-    if (newNode.type === 'submit') hasSubmitButton = true;
+    if (newNode.type === 'submit') { hasSubmitButton = true; }
     return newNode;
   });
   if (!hasSubmitButton) {
@@ -347,7 +347,7 @@ export function buildLayoutFromSchema(
 ): any {
   const schema = JsonPointer.get(jsf.schema, schemaPointer);
   if (!hasOwn(schema, 'type') && !hasOwn(schema, 'x-schema-form') &&
-    !hasOwn(schema, '$ref')) return null;
+    !hasOwn(schema, '$ref')) { return null; }
   const newNodeType: string = getInputType(schema);
   let newNode: any = {
     _id: _.uniqueId(),
@@ -360,7 +360,7 @@ export function buildLayoutFromSchema(
     widget: widgetLibrary.getWidget(newNodeType),
   };
   const lastDataKey = JsonPointer.toKey(newNode.dataPointer);
-  if (lastDataKey !== '-') newNode.name = lastDataKey;
+  if (lastDataKey !== '-') { newNode.name = lastDataKey; }
   if (newNode.arrayItem) {
     newNode.options.arrayItemType = arrayItemType;
     newNode.options.removable = removable;
@@ -688,7 +688,7 @@ export function mapLayout(
     if (!isDefined(newNode)) {
       indexPad--;
     } else {
-      if (isArray(newNode)) indexPad += newNode.length - 1;
+      if (isArray(newNode)) { indexPad += newNode.length - 1; }
       newLayout = newLayout.concat(newNode);
     }
   });
@@ -717,20 +717,20 @@ export function buildTitleMap(
             if (enumList.indexOf(value) !== -1) {
               const name: string = titleMap[i].name;
               newTitleMap.push({ name, value });
-              if (!value) hasEmptyValue = true;
+              if (!value) { hasEmptyValue = true; }
             }
           } else if (isString(titleMap[i])) { // React Jsonschema Form style
             if (i < enumList.length) {
               const name: string = titleMap[i];
               const value: any = enumList[i];
               newTitleMap.push({ name, value });
-              if (!value) hasEmptyValue = true;
+              if (!value) { hasEmptyValue = true; }
             }
           }
         }
       } else { // If array titleMap and no enum list, just return the titleMap
         newTitleMap = titleMap;
-        if (!fieldRequired) hasEmptyValue = !!newTitleMap.filter(i => !i.value).length;
+        if (!fieldRequired) { hasEmptyValue = !!newTitleMap.filter(i => !i.value).length; }
       }
     } else if (enumList) { // Alternate JSON Form style, with enum list
       for (let i of Object.keys(enumList)) {
@@ -738,14 +738,14 @@ export function buildTitleMap(
         if (hasOwn(titleMap, value)) {
           let name: string = titleMap[value];
           newTitleMap.push({ name, value });
-          if (!value) hasEmptyValue = true;
+          if (!value) { hasEmptyValue = true; }
         }
       }
     } else { // Alternate JSON Form style, without enum list
       for (let value of Object.keys(titleMap)) {
         let name: string = titleMap[value];
         newTitleMap.push({ name, value });
-        if (!value) hasEmptyValue = true;
+        if (!value) { hasEmptyValue = true; }
       }
     }
   } else if (enumList) { // Build map from enum list alone
@@ -753,7 +753,7 @@ export function buildTitleMap(
       let name: string = enumList[i];
       let value: any = enumList[i];
       newTitleMap.push({ name, value});
-      if (!value) hasEmptyValue = true;
+      if (!value) { hasEmptyValue = true; }
     }
   } else { // If no titleMap and no enum list, return default map of boolean values
     newTitleMap = [{ name: 'True', value: true }, { name: 'False', value: false }];

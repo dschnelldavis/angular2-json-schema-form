@@ -146,7 +146,7 @@ export function buildFormGroupTemplate(
               dataPointer + '/' + i,
               templatePointer + '/controls/' + i
             ));
-            if (isArray(useValues)) useValues = null;
+            if (isArray(useValues)) { useValues = null; }
           }
           if (
             !JsonPointer.has(jsf, ['templateRefLibrary', dataPointer + '/-'])
@@ -254,7 +254,7 @@ export function buildFormGroup(template: any): AbstractControl {
         let groupControls: { [key: string]: AbstractControl } = {};
         forEach(template.controls, (controls, key) => {
           let newControl: AbstractControl = buildFormGroup(controls);
-          if (newControl) groupControls[key] = newControl;
+          if (newControl) { groupControls[key] = newControl; }
         });
         return new FormGroup(groupControls, validatorFn);
       case 'FormArray':
@@ -442,19 +442,20 @@ export function getControl(
 /**
  * 'fixJsonFormOptions' function
  *
- * Rename JSON Form 'options' lists to 'titleMap' lists
+ * Rename JSON Form-style 'options' lists to
+ * Angular Schema Form-style 'titleMap' lists.
  *
  * @param  {any} formObject
  * @return {any}
  */
-export function fixJsonFormOptions(formObject: any): any {
-  if (isObject(formObject) || isArray(formObject)) {
-    forEach(formObject, (value, key) => {
+export function fixJsonFormOptions(layout: any): any {
+  if (isObject(layout) || isArray(layout)) {
+    forEach(layout, (value, key) => {
       if (isObject(value) && hasOwn(value, 'options') && isObject(value.options)) {
         value.titleMap = value.options;
         delete value.options;
       }
     }, 'top-down');
   }
-  return formObject;
+  return layout;
 }

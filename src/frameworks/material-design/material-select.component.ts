@@ -34,6 +34,7 @@ export class MaterialSelectComponent implements OnInit {
   private boundControl: boolean = false;
   private options: any;
   private selectList: any[] = [];
+  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];

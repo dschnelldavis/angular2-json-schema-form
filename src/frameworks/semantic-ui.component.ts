@@ -8,11 +8,13 @@ import { JsonSchemaFormService } from '../library/json-schema-form.service';
   selector: 'semantic-ui-framework',
   template: `
     <select-widget-widget
+      [formID]="formID"
       [layoutNode]="layoutNode"
       [dataIndex]="dataIndex"
       [layoutIndex]="layoutIndex"></select-widget-widget>`,
 })
 export class SemanticUIComponent implements OnInit, OnChanges {
+  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];

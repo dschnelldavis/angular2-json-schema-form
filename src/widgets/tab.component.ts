@@ -8,6 +8,7 @@ import { JsonSchemaFormService } from '../library/json-schema-form.service';
     <div
       [class]="options?.htmlClass">
       <root-widget
+        [formID]="formID"
         [layout]="layoutNode.items"
         [dataIndex]="dataIndex"
         [layoutIndex]="layoutIndex"></root-widget>
@@ -15,6 +16,7 @@ import { JsonSchemaFormService } from '../library/json-schema-form.service';
 })
 export class TabComponent implements OnInit {
   private options: any;
+  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];

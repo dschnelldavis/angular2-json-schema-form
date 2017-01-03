@@ -3,7 +3,7 @@ import { Component, Input } from '@angular/core';
 @Component({
   selector: 'root-widget',
   template: `
-    <div *ngFor="let layoutItem of layout; let i = index; trackBy: trackByItem"
+    <div *ngFor="let layoutItem of layout; let i = index"
       [dataIndex]="layoutItem?.arrayItem ? (dataIndex || []).concat(i) : (dataIndex || [])"
       [layoutIndex]="(layoutIndex || []).concat(i)"
       [layoutNode]="layoutItem"
@@ -12,6 +12,7 @@ import { Component, Input } from '@angular/core';
       <!-- && (layout[layout.length - 1].tupleItems || 0 < (layout.length - 2)) -->
 
       <select-framework-widget
+        [formID]="formID"
         [dataIndex]="layoutItem?.arrayItem ? (dataIndex || []).concat(i) : (dataIndex || [])"
         [layoutIndex]="(layoutIndex || []).concat(i)"
         [layoutNode]="layoutItem"></select-framework-widget>
@@ -29,6 +30,7 @@ import { Component, Input } from '@angular/core';
 })
 export class RootComponent {
   private options: any;
+  @Input() formID: number;
   @Input() dataIndex: number[];
   @Input() layoutIndex: number[];
   @Input() layout: any[];

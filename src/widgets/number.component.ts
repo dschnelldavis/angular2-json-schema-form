@@ -47,6 +47,7 @@ export class NumberComponent implements OnInit {
   private allowDecimal: boolean = true;
   private allowExponents: boolean = false;
   private lastValidNumber: string = '';
+  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
@@ -58,7 +59,7 @@ export class NumberComponent implements OnInit {
   ngOnInit() {
     this.options = this.layoutNode.options;
     this.jsf.initializeControl(this);
-    if (this.layoutNode.dataType === 'integer') this.allowDecimal = false;
+    if (this.layoutNode.dataType === 'integer') { this.allowDecimal = false; }
   }
 
   private updateValue(event) {
@@ -67,21 +68,20 @@ export class NumberComponent implements OnInit {
 
   private validateInput(event) {
     const val = event.target.value;
-    if (/^Digit\d$/.test(event.code)) return true;
-    if (/^Numpad\d$/.test(event.code)) return true;
-    if (/^Arrow/.test(event.code)) return true;
+    if (/^Digit\d$/.test(event.code)) { return true; }
+    if (/^Numpad\d$/.test(event.code)) { return true; }
+    if (/^Arrow/.test(event.code)) { return true; }
     if (inArray(event.code, ['Backspace', 'Delete', 'Enter', 'Escape',
-      'NumpadEnter', 'PrintScreen', 'Tab'])) return true;
-    if (event.ctrlKey || event.altKey || event.metaKey) return true;
-    if (this.allowDecimal && event.key === '.' &&
-      val.indexOf('.') === -1) return true;
+      'NumpadEnter', 'PrintScreen', 'Tab'])) { return true; }
+    if (event.ctrlKey || event.altKey || event.metaKey) { return true; }
+    if (this.allowDecimal && event.key === '.' && val.indexOf('.') === -1) { return true; }
     if (this.allowExponents) {
       const hasExponent = /e/i.test(val);
-      if (/^e$/i.test(event.key) && !hasExponent && val) return true;
+      if (/^e$/i.test(event.key) && !hasExponent && val) { return true; }
       if (event.key === '-') {
         const minusCount = (val.match(/\-/g) || []).length;
-        if ((this.allowNegative || hasExponent) && !minusCount) return true;
-        if (this.allowNegative && hasExponent && minusCount === 1) return true;
+        if ((this.allowNegative || hasExponent) && !minusCount) { return true; }
+        if (this.allowNegative && hasExponent && minusCount === 1) { return true; }
       }
     } else if (this.allowNegative && event.key === '-' && val.indexOf('-') === -1) {
       return true;

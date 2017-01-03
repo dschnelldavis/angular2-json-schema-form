@@ -39,7 +39,7 @@ export type JavaScriptPrimitiveType =
 export type JavaScriptType =
   'string' | 'number' | 'boolean' | 'null' | 'undefined' | 'object' | 'array' |
   'map' | 'set' | 'arguments' | 'date' | 'error' | 'function' | 'json' |
-  'math' | 'regexp' // Note: this list is incomplete
+  'math' | 'regexp'; // Note: this list is incomplete
 export type PrimitiveValue = string | number | boolean | null | undefined;
 export type PlainObject = { [k: string]: any };
 
@@ -173,8 +173,8 @@ export function hasValue(value: any): boolean {
  * @return {boolean} - false if undefined, null, or '', otherwise true
  */
 export function isEmpty(value: any): boolean {
-  if (isArray(value)) return !value.length;
-  if (isObject(value)) return !Object.keys(value).length;
+  if (isArray(value)) { return !value.length; }
+  if (isObject(value)) { return !Object.keys(value).length; }
   return value === undefined || value === null || value === '';
 }
 
@@ -200,7 +200,7 @@ export function isString(value: any): value is string {
  * @return {boolean} - true if number, false if not
  */
 export function isNumber(value: any, strict: any = false): boolean {
-  if (strict && typeof value !== 'number') return false;
+  if (strict && typeof value !== 'number') { return false; }
   return !isNaN(value) && value !== value / 0;
 }
 
@@ -214,7 +214,7 @@ export function isNumber(value: any, strict: any = false): boolean {
  * @return {boolean} - true if number, false if not
  */
 export function isInteger(value: any, strict: any = false): boolean {
-  if (strict && typeof value !== 'number') return false;
+  if (strict && typeof value !== 'number') { return false; }
   return !isNaN(value) &&  value !== value / 0 && value % 1 === 0;
 }
 
@@ -229,11 +229,13 @@ export function isInteger(value: any, strict: any = false): boolean {
  * @return {boolean} - true if boolean, false if not
  */
 export function isBoolean(value: any, option: any = null): boolean {
-  if (option === 'strict') return value === true || value === false;
-  if (option === true) return value === true || value === 1 ||
-    value === 'true' || value === '1';
-  if (option === false) return value === false || value === 0 ||
-    value === 'false' || value === '0';
+  if (option === 'strict') { return value === true || value === false; }
+  if (option === true) {
+    return value === true || value === 1 || value === 'true' || value === '1';
+  }
+  if (option === false) {
+    return value === false || value === 0 || value === 'false' || value === '0';
+  }
   return value === true || value === 1 || value === 'true' || value === '1' ||
     value === false || value === 0 || value === 'false' || value === '0';
 }
@@ -297,13 +299,13 @@ export function isSet(item: any): boolean {
  * @return {boolean}
  */
 export function getType(value: any, strict: any = false): SchemaType {
-  if (!isDefined(value)) return 'null';
-  if (isArray(value)) return 'array';
-  if (isObject(value)) return 'object';
-  if (isBoolean(value, 'strict')) return 'boolean';
-  if (isInteger(value, strict)) return 'integer';
-  if (isNumber(value, strict)) return 'number';
-  if (isString(value)) return 'string';
+  if (!isDefined(value)) { return 'null'; }
+  if (isArray(value)) { return 'array'; }
+  if (isObject(value)) { return 'object'; }
+  if (isBoolean(value, 'strict')) { return 'boolean'; }
+  if (isInteger(value, strict)) { return 'integer'; }
+  if (isNumber(value, strict)) { return 'number'; }
+  if (isString(value)) { return 'string'; }
   return null;
 }
 
@@ -381,22 +383,22 @@ export function toJavaScriptType(
   types: SchemaPrimitiveType | SchemaPrimitiveType[],
   strictIntegers: boolean = true
 ): PrimitiveValue {
-  if (!isDefined(value)) return null;
-  if (isString(types)) types = [types];
+  if (!isDefined(value)) { return null; }
+  if (isString(types)) { types = [types]; }
   if (strictIntegers && inArray('integer', types)) {
-    if (isInteger(value, 'strict')) return value;
-    if (isInteger(value)) return parseInt(value, 10);
+    if (isInteger(value, 'strict')) { return value; }
+    if (isInteger(value)) { return parseInt(value, 10); }
   }
   if (inArray('number', types) || (!strictIntegers && inArray('integer', types))) {
-    if (isNumber(value, 'strict')) return value;
-    if (isNumber(value)) return parseFloat(value);
+    if (isNumber(value, 'strict')) { return value; }
+    if (isNumber(value)) { return parseFloat(value); }
   }
   if (inArray('string', types)) {
-    if (isString(value)) return value;
+    if (isString(value)) { return value; }
   }
   if (inArray('boolean', types)) {
-    if (isBoolean(value, true)) return true;
-    if (isBoolean(value, false)) return false;
+    if (isBoolean(value, true)) { return true; }
+    if (isBoolean(value, false)) { return false; }
   }
   return null;
 }
@@ -448,7 +450,9 @@ export function toJavaScriptType(
 export function toSchemaType(
   value: PrimitiveValue, types: SchemaPrimitiveType | SchemaPrimitiveType[]
 ): PrimitiveValue {
-  if (!isArray(<SchemaPrimitiveType>types)) types = <SchemaPrimitiveType[]>[types];
+  if (!isArray(<SchemaPrimitiveType>types)) {
+    types = <SchemaPrimitiveType[]>[types];
+  }
   if ((<SchemaPrimitiveType[]>types).indexOf('null') !== -1 && !hasValue(value)) {
     return null;
   }
@@ -457,11 +461,11 @@ export function toSchemaType(
   }
   if ((<SchemaPrimitiveType[]>types).indexOf('integer') !== -1) {
     let testValue = toJavaScriptType(value, 'integer');
-    if (testValue !== null) return +testValue;
+    if (testValue !== null) { return +testValue; }
   }
   if ((<SchemaPrimitiveType[]>types).indexOf('number') !== -1) {
     let testValue = toJavaScriptType(value, 'number');
-    if (testValue !== null) return +testValue;
+    if (testValue !== null) { return +testValue; }
   }
   if (
     (isString(value) || isNumber(value, 'strict')) &&
@@ -473,24 +477,24 @@ export function toSchemaType(
     return toJavaScriptType(value, 'boolean');
   }
   if ((<SchemaPrimitiveType[]>types).indexOf('string') !== -1) { // Convert null & boolean to string
-    if (value === null) return '';
+    if (value === null) { return ''; }
     let testValue = toJavaScriptType(value, 'string');
-    if (testValue !== null) return testValue;
+    if (testValue !== null) { return testValue; }
   }
   if ((
     (<SchemaPrimitiveType[]>types).indexOf('number') !== -1 ||
     (<SchemaPrimitiveType[]>types).indexOf('integer') !== -1)
   ) {
-    if (value === true) return 1; // Convert boolean & null to number
-    if (value === false || value === null || value === '') return 0;
+    if (value === true) { return 1; } // Convert boolean & null to number
+    if (value === false || value === null || value === '') { return 0; }
   }
   if ((<SchemaPrimitiveType[]>types).indexOf('number') !== -1) { // Convert mixed string to number
     let testValue = parseFloat(<string>value);
-    if (!!testValue) return testValue;
+    if (!!testValue) { return testValue; }
   }
   if ((<SchemaPrimitiveType[]>types).indexOf('integer') !== -1) { // Convert string or number to integer
     let testValue = parseInt(<string>value, 10);
-    if (!!testValue) return testValue;
+    if (!!testValue) { return testValue; }
   }
   if ((<SchemaPrimitiveType[]>types).indexOf('boolean') !== -1) { // Convert anything to boolean
     return !!value;
@@ -543,10 +547,10 @@ export function _convertToPromise(object: any): Promise<any> {
 export function inArray(
   item: any|any[], array: any[], allIn: boolean = false
 ): boolean {
-  if (!isDefined(item) || !isArray(array)) return false;
+  if (!isDefined(item) || !isArray(array)) { return false; }
   if (isArray(item)) {
     for (let subItem of item) {
-      if (xor(array.indexOf(subItem) !== -1, allIn)) return !allIn;
+      if (xor(array.indexOf(subItem) !== -1, allIn)) { return !allIn; }
     }
     return allIn;
   } else {

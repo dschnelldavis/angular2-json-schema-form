@@ -20,6 +20,7 @@ import { JsonSchemaFormService } from '../../library/json-schema-form.service';
       </md-card-title-group>
       <md-card-content>
         <root-widget *ngIf="expanded"
+          [formID]="formID"
           [layout]="layoutNode.items"
           [dataIndex]="dataIndex"
           [layoutIndex]="layoutIndex"
@@ -34,6 +35,7 @@ import { JsonSchemaFormService } from '../../library/json-schema-form.service';
 export class MaterialCardComponent implements OnInit {
   private options: any;
   private expanded: boolean = true;
+  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];

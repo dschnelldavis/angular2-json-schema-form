@@ -8,7 +8,7 @@ import { JsonPointer } from '../library/utilities/index';
   template: `
     <ul
       [class]="options?.labelHtmlClass">
-      <li *ngFor="let item of layoutNode?.items; let i = index; trackBy: item?.dataPointer"
+      <li *ngFor="let item of layoutNode?.items; let i = index"
         [class]="options?.itemLabelHtmlClass + (selectedItem === i ?
           (' ' + options?.activeClass + ' ' + options?.style?.selected) :
           (' ' + options?.style?.unselected))"
@@ -20,7 +20,7 @@ import { JsonPointer } from '../library/utilities/index';
       </li>
     </ul>
 
-    <div *ngFor="let layoutItem of layoutNode?.items; let i = index; trackBy: layoutItem?.dataPointer"
+    <div *ngFor="let layoutItem of layoutNode?.items; let i = index"
       [class]="options?.htmlClass">
 
       <select-framework-widget *ngIf="selectedItem === i"
@@ -37,6 +37,7 @@ export class TabsComponent implements OnInit {
   private itemCount: number;
   private selectedItem: number = 0;
   private showAddTab: boolean = true;
+  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
@@ -55,6 +56,7 @@ export class TabsComponent implements OnInit {
     if (this.layoutNode.items[index].type === '$ref') {
       this.itemCount = this.layoutNode.items.length;
       this.jsf.addItem({
+        formID: this.formID,
         layoutNode: this.layoutNode.items[index],
         layoutIndex: this.layoutIndex.concat(index),
         dataIndex: this.dataIndex.concat(index)

@@ -70,6 +70,7 @@ export class CheckboxesComponent implements OnInit {
   private layoutOrientation: string;
   private formArray: AbstractControl;
   private checkboxList: CheckboxItem[] = [];
+  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];

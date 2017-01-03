@@ -19,6 +19,7 @@ export class HiddenComponent implements OnInit {
   private controlValue: any;
   private controlDisabled: boolean = false;
   private boundControl: boolean = false;
+  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];

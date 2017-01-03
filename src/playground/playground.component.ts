@@ -3,10 +3,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Http } from '@angular/http';
 import 'rxjs/add/operator/map';
 
-import {
-  FrameworkLibraryService
-} from '../frameworks/framework-library.service';
-
 @Component({
   moduleId: module.id,
   selector: 'playground',
@@ -225,7 +221,6 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
   };
 
   constructor(
-    private frameworkLibrary: FrameworkLibraryService,
     private route: ActivatedRoute,
     private router: Router,
     private http: Http,
@@ -235,15 +230,14 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
     // Checks query string for the name of a form to load
     this.route.queryParams.subscribe(
       params => {
-        if (params['set']) this.selectedSet = params['set'];
-        if (params['example']) this.selectedExample = params['example'];
-        if (params['framework']) this.selectedFramework = params['framework'];
+        if (params['set']) { this.selectedSet = params['set']; }
+        if (params['example']) { this.selectedExample = params['example']; }
+        if (params['framework']) { this.selectedFramework = params['framework']; }
       }
     );
   }
 
   ngAfterViewInit() {
-    this.frameworkLibrary.setFramework(this.selectedFramework);
     this.loadSelectedExample();
   }
 
@@ -272,7 +266,7 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
   }
 
   get prettyValidationErrors() {
-    if (!this.formValidationErrors) return null;
+    if (!this.formValidationErrors) { return null; }
     let prettyValidationErrors = '';
     for (let error of this.formValidationErrors) {
       prettyValidationErrors += (error.dataPath.length ?
@@ -324,7 +318,6 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
   }
 
   private loadSelectedFramework(selectedFramework: string) {
-    this.frameworkLibrary.setFramework(selectedFramework);
     this.router.navigateByUrl(
       '/?set=' + this.selectedSet +
       '&example=' + this.selectedExample +

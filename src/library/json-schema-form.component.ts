@@ -4,12 +4,11 @@ import {
 } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
-import { JsonSchemaFormService } from './json-schema-form.service';
 import { FrameworkLibraryService } from '../frameworks/framework-library.service';
 import { WidgetLibraryService } from '../widgets/widget-library.service';
+import { JsonSchemaFormService } from './json-schema-form.service';
 import {
-  fixJsonFormOptions, forEach, hasOwn, hasValue,
-  isArray, isEmpty, isObject, JsonPointer
+  hasOwn, hasValue, isArray, isEmpty, isObject, JsonPointer
 } from './utilities/index';
 
 /**
@@ -48,46 +47,50 @@ import {
 @Component({
   selector: 'json-schema-form',
   template: `
-    <form *ngIf="formInitialized" (ngSubmit)="submitForm()">
-      <root-widget [layout]="jsf.layout"></root-widget>
+    <form (ngSubmit)="submitForm()">
+      <root-widget [formID]="formID" [layout]="jsf.layout"></root-widget>
     </form>
     <div *ngIf="debug || jsf.globalOptions.debug">
       Debug output: <pre>{{debugOutput}}</pre>
     </div>`,
+  providers: [ JsonSchemaFormService ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
-  private formInitialized: boolean = false; // Used to trigger form rendering
+  private formID: number; // Unique ID for displayed form
   private debugOutput: any; // Debug information, if requested
   private formValueSubscription: any = null;
 
   // Recommended inputs
-  @Input() schema: any; // The input JSON Schema
-  @Input() layout: any[]; // The input Data model
-  @Input() data: any; // The input Form layout
-  @Input() options: any; // The input form global options
+  @Input() schema: any; // The JSON Schema
+  @Input() layout: any[]; // The form layout
+  @Input() data: any; // The data model
+  @Input() options: any; // The global form options
+  @Input() framework: string; // The framework to load
+  @Input() widgets: string; // Any custom widgets to load
 
   // Alternate combined single input
   @Input() form: any; // For testing, and JSON Schema Form API compatibility
 
   // Angular Schema Form API compatibility inputs
-  @Input() model: any; // For Angular Schema Form API compatibility
+  @Input() model: any; // Alternate input for data model
 
   // React JSON Schema Form API compatibility inputs
-  @Input() JSONSchema: any; // For React JSON Schema Form API compatibility
-  @Input() UISchema: any; // For React JSON Schema Form API compatibility
-  @Input() formData: any; // For React JSON Schema Form API compatibility
+  @Input() JSONSchema: any; // Alternate input for JSON Schema
+  @Input() UISchema: any; // UI schema - alternate form layout format
+  @Input() formData: any; // Alternate input for data model
 
   // Development inputs, for testing and debugging
-  @Input() framework: string; // Name of framework to load
   @Input() loadExternalAssets: boolean; // Load external framework assets?
   @Input() debug: boolean; // Show debug information?
 
   // Outputs
   @Output() onChanges = new EventEmitter<any>(); // Live unvalidated internal form data
-  @Output() onSubmit = new EventEmitter<any>(); // Validated complete form data
+  @Output() onSubmit = new EventEmitter<any>(); // Complete validated form data
   @Output() isValid = new EventEmitter<boolean>(); // Is current data valid?
-  @Output() validationErrors = new EventEmitter<any>(); // Validation errors
+  @Output() validationErrors = new EventEmitter<any>(); // Validation errors (if any)
+  @Output() formSchema = new EventEmitter<any>(); // Final schema used to create form
+  @Output() formLayout = new EventEmitter<any>(); // Final layout used to create form
 
   constructor(
     private frameworkLibrary: FrameworkLibraryService,
@@ -125,9 +128,8 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
       this.schema || this.layout || this.data ||
       this.form || this.JSONSchema || this.UISchema
     ) {
-      this.formInitialized = false;
       // Reset all form values to defaults
-      this.jsf.resetAllValuesToDefaults();
+      this.jsf.resetAllValues();
 
       // Initialize 'options' (global form options) and set framework
       // Combine available inputs:
@@ -146,9 +148,17 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
         loadExternalAssets = this.form.options.loadExternalAssets || loadExternalAssets;
         framework = this.form.options.framework || framework;
       }
+      if (isObject(this.widgets)) {
+        this.jsf.setOptions({ widgets: this.widgets });
+      }
       this.frameworkLibrary.setLoadExternalAssets(loadExternalAssets);
       this.frameworkLibrary.setFramework(framework);
       this.jsf.framework = this.frameworkLibrary.getFramework();
+      if (isObject(this.jsf.globalOptions.widgets)) {
+        for (let widget of Object.keys(this.jsf.globalOptions.widgets)) {
+          this.widgetLibrary.registerWidget(widget, this.jsf.globalOptions.widgets[widget]);
+        }
+      }
       if (isObject(this.form) && isObject(this.form.tpldata)) {
         this.jsf.setTpldata(this.form.tpldata);
       }
@@ -218,7 +228,7 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
         this.jsf.layout = this.form;
       } else if (this.form && isArray(this.form.form)) {
         this.jsf.JsonFormCompatibility = true;
-        fixJsonFormOptions(this.form.form);
+        this.jsf.fixJsonFormOptions(this.form.form);
         this.jsf.layout = this.form.form;
       } else if (this.form && isArray(this.form.layout)) {
         this.jsf.layout = this.form.layout;
@@ -243,7 +253,7 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
         alternateLayout = this.form.UISchema;
       } else if (hasOwn(this.form, 'customFormItems')) {
         this.jsf.JsonFormCompatibility = true;
-        fixJsonFormOptions(this.form.customFormItems);
+        this.jsf.fixJsonFormOptions(this.form.customFormItems);
         alternateLayout = this.form.customFormItems;
       }
 
@@ -346,15 +356,16 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
         // // TODO: Figure out how to display calculated values without changing object data
         // // See http://ulion.github.io/jsonform/playground/?example=templating-values
 
-        // Display the template to render the form
-        this.formInitialized = true;
+        // TODO: (re-)render the form
 
         // Subscribe to form changes to output live data, validation, and errors
         this.jsf.dataChanges.subscribe(data => this.onChanges.emit(data));
         this.jsf.isValidChanges.subscribe(isValid => this.isValid.emit(isValid));
         this.jsf.validationErrorChanges.subscribe(errors => this.validationErrors.emit(errors));
 
-        // Output initial data
+        // Output final schema, final layout, and initial data
+        this.formSchema.emit(this.jsf.schema);
+        this.formLayout.emit(this.jsf.layout);
         this.onChanges.emit(this.jsf.data);
 
         // If 'validateOnRender' = true, output initial validation and any errors
@@ -365,6 +376,7 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
 
 // Uncomment individual lines to output debugging information to console:
 // (These always work.)
+// console.log('reloading...');
 // console.log(this.jsf.formGroupTemplate);
 // console.log(this.jsf.formGroup);
 // console.log(this.jsf.initialValues);
@@ -376,7 +388,6 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
 // console.log(this.jsf.dataMap);
 // console.log(this.jsf.schemaCircularRefMap);
 // console.log(this.jsf.dataCircularRefMap);
-
       } else {
         // TODO: Display error message
       }

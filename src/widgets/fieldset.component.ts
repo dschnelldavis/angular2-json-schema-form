@@ -17,6 +17,7 @@ import { JsonSchemaFormService } from '../library/json-schema-form.service';
         (click)="expand()"></legend>
 
         <root-widget *ngIf="expanded"
+          [formID]="formID"
           [layout]="layoutNode.items"
           [dataIndex]="dataIndex"
           [layoutIndex]="layoutIndex"
@@ -31,6 +32,7 @@ import { JsonSchemaFormService } from '../library/json-schema-form.service';
 export class FieldsetComponent implements OnInit {
   private options: any;
   private expanded: boolean = true;
+  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
@@ -45,6 +47,6 @@ export class FieldsetComponent implements OnInit {
   }
 
   private expand() {
-    if (this.options.expandable) this.expanded = !this.expanded;
+    if (this.options.expandable) { this.expanded = !this.expanded; }
   }
 }

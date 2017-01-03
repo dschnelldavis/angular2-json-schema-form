@@ -8,7 +8,7 @@ import { JsonPointer } from '../../library/utilities/index';
   template: `
     <nav md-tab-nav-bar
       [attr.aria-label]="options?.label || options?.title">
-        <a *ngFor="let item of layoutNode?.items; let i = index; trackBy: item?.dataPointer"
+        <a *ngFor="let item of layoutNode?.items; let i = index"
           md-tab-link
           [active]="selectedItem === i"
           (click)="select(i)">
@@ -17,7 +17,7 @@ import { JsonPointer } from '../../library/utilities/index';
         </a>
     </nav>
 
-    <div *ngFor="let layoutItem of layoutNode?.items; let i = index; trackBy: layoutItem?.dataPointer"
+    <div *ngFor="let layoutItem of layoutNode?.items; let i = index"
       [class]="options?.htmlClass">
 
       <select-framework-widget *ngIf="selectedItem === i"
@@ -34,6 +34,7 @@ export class MaterialTabsComponent implements OnInit {
   private itemCount: number;
   private selectedItem: number = 0;
   private showAddTab: boolean = true;
+  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
@@ -52,6 +53,7 @@ export class MaterialTabsComponent implements OnInit {
     if (this.layoutNode.items[index].type === '$ref') {
       this.itemCount = this.layoutNode.items.length;
       this.jsf.addItem({
+        formID: this.formID,
         layoutNode: this.layoutNode.items[index],
         layoutIndex: this.layoutIndex.concat(index),
         dataIndex: this.dataIndex.concat(index)

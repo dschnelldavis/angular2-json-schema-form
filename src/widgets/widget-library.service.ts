@@ -160,13 +160,13 @@ export class WidgetLibraryService {
   }
 
   public setDefaultWidget(type: string): boolean {
-    if (!this.hasWidget(type)) return false;
+    if (!this.hasWidget(type)) { return false; }
     this.defaultWidget = type;
     return true;
   }
 
   public hasWidget(type: string, widgetSet: string = 'activeWidgets'): boolean {
-    if (!type || typeof type !== 'string') return false;
+    if (!type || typeof type !== 'string') { return false; }
     return this[widgetSet].hasOwnProperty(type);
   }
 
@@ -175,7 +175,7 @@ export class WidgetLibraryService {
   }
 
   public registerWidget(type: string, widget: any): boolean {
-    if (!type || !widget || typeof type !== 'string') return false;
+    if (!type || !widget || typeof type !== 'string') { return false; }
     this.registeredWidgets[type] = widget;
     this.setActiveWidgets();
     return true;
@@ -183,7 +183,7 @@ export class WidgetLibraryService {
 
   public unRegisterWidget(type: string): boolean {
     if (!type || typeof type !== 'string' ||
-      !this.registeredWidgets.hasOwnProperty(type)) return false;
+      !this.registeredWidgets.hasOwnProperty(type)) { return false; }
     delete this.registeredWidgets[type];
     this.setActiveWidgets();
     return true;
@@ -191,13 +191,13 @@ export class WidgetLibraryService {
 
   public unRegisterAllWidgets(unRegisterFrameworkWidgets: boolean = true): boolean {
     this.registeredWidgets = { };
-    if (unRegisterFrameworkWidgets) this.frameworkWidgets = { };
+    if (unRegisterFrameworkWidgets) { this.frameworkWidgets = { }; }
     this.setActiveWidgets();
     return true;
   }
 
   public registerFrameworkWidgets(widgets: any): boolean {
-    if (widgets === null || typeof widgets !== 'object') return false;
+    if (widgets === null || typeof widgets !== 'object') { return false; }
     this.frameworkWidgets = widgets;
     this.setActiveWidgets();
     return true;
@@ -212,9 +212,13 @@ export class WidgetLibraryService {
   }
 
   public getWidget(type?: string, widgetSet: string = 'activeWidgets'): any {
-    if (this.hasWidget(type, widgetSet)) return this[widgetSet][type];
-    if (this.hasWidget(this.defaultWidget, widgetSet)) return this[widgetSet][this.defaultWidget];
-    return null;
+    if (this.hasWidget(type, widgetSet)) {
+      return this[widgetSet][type];
+    } else if (this.hasWidget(this.defaultWidget, widgetSet)) {
+      return this[widgetSet][this.defaultWidget];
+    } else {
+      return null;
+    }
   }
 
   public getAllWidgets(): any {

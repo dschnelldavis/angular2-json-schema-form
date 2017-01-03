@@ -20,9 +20,9 @@ import {
       [class]="options?.htmlClass"
       [class.has-feedback]="options?.feedback &&
         options?.isInputWidget && formControl?.dirty"
-      [class.has-error]="!options?.disableErrorState &&
+      [class.has-error]="options?.enableErrorState &&
         formControl?.errors && formControl?.dirty"
-      [class.has-success]="!options?.disableSuccessState &&
+      [class.has-success]="options?.enableSuccessState &&
         !formControl?.errors && formControl?.dirty">
 
       <button *ngIf="options?.removable"
@@ -65,6 +65,7 @@ import {
           [innerHTML]="options?.fieldAddonLeft"></span>
 
         <select-widget-widget
+          [formID]="formID"
           [layoutNode]="widgetLayoutNode"
           [dataIndex]="dataIndex"
           [layoutIndex]="layoutIndex"></select-widget-widget>
@@ -76,8 +77,8 @@ import {
 
       <span *ngIf="options?.feedback && options?.isInputWidget &&
         !options?.fieldAddonRight && !layoutNode.arrayItem && formControl?.dirty"
-        [class.glyphicon-ok]="!options?.disableSuccessState && !formControl?.errors"
-        [class.glyphicon-remove]="!options?.disableErrorState && formControl?.errors"
+        [class.glyphicon-ok]="options?.enableSuccessState && !formControl?.errors"
+        [class.glyphicon-remove]="options?.enableErrorState && formControl?.errors"
         aria-hidden="true"
         class="form-control-feedback glyphicon"></span>
       <div *ngIf="options?.messageLocation !== 'top'">
@@ -121,6 +122,7 @@ export class Bootstrap3Component implements OnInit, OnChanges {
   private layoutPointer: string;
   private formControl: any = null;
   private debugOutput: any = '';
+  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
@@ -136,7 +138,7 @@ export class Bootstrap3Component implements OnInit, OnChanges {
 
   ngOnChanges() {
     this.updateArrayItems();
-    if (!this.controlInitialized) this.initializeControl();
+    if (!this.controlInitialized) { this.initializeControl(); }
   }
 
   private initializeControl() {
@@ -262,7 +264,7 @@ export class Bootstrap3Component implements OnInit, OnChanges {
 
       if (this.formControl) {
         this.formControl.statusChanges.subscribe(value => {
-          if (!this.options.disableErrorState &&
+          if (this.options.enableErrorState &&
             this.options.feedback && value === 'INVALID' &&
             this.formControl.dirty && this.formControl.errors
           ) {
@@ -328,7 +330,7 @@ export class Bootstrap3Component implements OnInit, OnChanges {
           toTitleCase(this.layoutNode.name) : null
         );
         this.widgetOptions.title = null;
-        if (!thisTitle) return null;
+        if (!thisTitle) { return null; }
         if (thisTitle.indexOf('{') === -1 || !this.formControl || !this.dataIndex) {
           return thisTitle;
         }

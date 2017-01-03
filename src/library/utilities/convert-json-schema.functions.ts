@@ -27,7 +27,7 @@ export function convertJsonSchema3to4(schema: any): any {
     return replace && newTypes;
   };
 
-  if (typeof schema !== 'object') return schema;
+  if (typeof schema !== 'object') { return schema; }
   let newSchema = isArray(schema) ? [].concat(schema) : Object.assign({ }, schema);
   let converted: boolean = false;
 
@@ -74,7 +74,7 @@ export function convertJsonSchema3to4(schema: any): any {
         delete newSchema.properties[key].required;
       }
     }
-    if (requiredArray.length) newSchema.required = requiredArray;
+    if (requiredArray.length) { newSchema.required = requiredArray; }
   }
 
   // convert dependencies to arrays
@@ -129,7 +129,7 @@ export function convertJsonSchema3to4(schema: any): any {
     }
 
     // update id
-    if (newSchema.id) newSchema.id += '-CONVERTED-TO-DRAFT-04';
+    if (newSchema.id) { newSchema.id += '-CONVERTED-TO-DRAFT-04'; }
   }
 
   return newSchema;

@@ -18,6 +18,7 @@ export class AddReferenceComponent implements OnInit, OnChanges {
   private options: any;
   private itemCount: number;
   private showAddButton: boolean = true;
+  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];

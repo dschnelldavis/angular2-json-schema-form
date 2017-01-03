@@ -44,6 +44,7 @@ export class InputComponent implements OnInit {
   private boundControl: boolean = false;
   private options: any;
   private autoCompleteList: string[] = [];
+  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];

@@ -11,6 +11,7 @@ import { toTitleCase } from '../../library/utilities/index';
   selector: 'material-design-framework',
   template: `
     <select-widget-widget
+      [formID]="formID"
       [layoutNode]="layoutNode"
       [dataIndex]="dataIndex"
       [layoutIndex]="layoutIndex"></select-widget-widget>
@@ -25,6 +26,7 @@ export class MaterialDesignComponent implements OnInit, OnChanges {
   private widgetOptions: any; // Options passed to child widget
   private layoutPointer: string;
   private formControl: any = null;
+  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];

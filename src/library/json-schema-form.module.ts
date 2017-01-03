@@ -47,7 +47,6 @@ export class JsonSchemaFormModule {
       providers: [
         FrameworkLibraryService,
         WidgetLibraryService,
-        JsonSchemaFormService,
         {
           provide: ANALYZE_FOR_ENTRY_COMPONENTS,
           useValue: [...ALL_COMPONENTS],

@@ -50,6 +50,7 @@ export class MaterialNumberComponent implements OnInit {
   private allowDecimal: boolean = true;
   private allowExponents: boolean = false;
   private lastValidNumber: string = '';
+  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
