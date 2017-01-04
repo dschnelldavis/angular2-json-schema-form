@@ -99,7 +99,9 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
       newNode.dataPointer =
         JsonPointer.toGenericPointer(newNode.dataPointer, jsf.arrayMap);
       const LastKey: string = JsonPointer.toKey(newNode.dataPointer);
-      if (isString(LastKey) && LastKey !== '-') { newNode.name = LastKey; }
+      if (isString(LastKey) && LastKey !== '-') {
+        newNode.name = LastKey;
+      }
       if (!jsf.dataMap.has(newNode.dataPointer)) {
         jsf.dataMap.set(newNode.dataPointer, new Map);
       } else if (
@@ -145,7 +147,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
         }
         if (!newNode.options.title && newNode.options.legend) {
           newNode.options.title = newNode.options.legend;
-        } else if (!newNode.options.title) {
+        } else if (!newNode.options.title && !/^\d+$/.test(newNode.name)) {
           newNode.options.title = toTitleCase(newNode.name.replace(/_/g, ' '));
         }
         if (isInputRequired(jsf.schema, newNode.dataPointer)) {
@@ -260,8 +262,9 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
           let buttonText: string = 'Add';
           if (newNode.options.title) {
             buttonText += ' ' + newNode.options.title;
-          } else if (newNode.name) {
+          } else if (newNode.name && !/^\d+$/.test(newNode.name)) {
             buttonText += ' ' + toTitleCase(newNode.name.replace(/_/g, ' '));
+
           // If newNode doesn't have a title, look for title of parent array item
           } else {
             const parentSchema =
@@ -336,7 +339,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
  * @param {boolean = false} arrayItem -
  * @param {string = null} arrayItemType -
  * @param {boolean = null} removable -
- * @param {boolean = true} forRefLibrary -
+ * @param {boolean = false} forRefLibrary -
  * @return {any}
  */
 export function buildLayoutFromSchema(
@@ -376,7 +379,7 @@ export function buildLayoutFromSchema(
   updateInputOptions(newNode, schema, jsf);
   if (!newNode.options.title && newNode.options.legend) {
     newNode.options.title = newNode.options.legend;
-  } else if (!newNode.options.title && newNode.name) {
+  } else if (!newNode.options.title && newNode.name && !/^\d+$/.test(newNode.name)) {
     newNode.options.title = toTitleCase(newNode.name.replace(/_/g, ' '));
   }
   if (newNode.dataType === 'object') {
@@ -459,7 +462,7 @@ export function buildLayoutFromSchema(
       }));
       if (newNode.items.length < maxItems &&
         hasOwn(schema, 'additionalItems') && isObject(schema.additionalItems)
-      ) { // 'additionalItems' is an object = additional list items
+      ) { // 'additionalItems' is an object = additional list items (after tuple items)
         if (newNode.items.length < templateArray.length) {
           for (let i = newNode.items.length, l = templateArray.length; i < l; i++) {
             newNode.items.push(buildLayoutFromSchema(
@@ -565,11 +568,13 @@ export function buildLayoutFromSchema(
       }
     }
   } else if (newNode.dataType === '$ref') {
+    const schemaRef: string = JsonPointer.compile(schema.$ref);
     let buttonText: string = 'Add';
     if (newNode.options.title) {
       buttonText += ' ' + newNode.options.title;
-    } else if (newNode.name) {
+    } else if (newNode.name && !/^\d+$/.test(newNode.name)) {
       buttonText += ' ' + toTitleCase(newNode.name.replace(/_/g, ' '));
+
     // If newNode doesn't have a title, look for title of parent array item
     } else if (
       hasOwn(JsonPointer.get(jsf.schema, schemaPointer, 0, -1), 'title')
@@ -578,9 +583,9 @@ export function buildLayoutFromSchema(
         JsonPointer.get(jsf.schema, schemaPointer, 0, -1).title;
     }
     Object.assign(newNode, {
-      circularReference: true,
+      recursiveReference: true,
       widget: widgetLibrary.getWidget('$ref'),
-      $ref: schema.$ref,
+      $ref: schemaRef,
     });
     Object.assign(newNode.options, {
       removable: false,
@@ -591,47 +596,57 @@ export function buildLayoutFromSchema(
         JsonPointer.get(jsf.schema, schemaPointer, 0, -1).maxItems;
     }
 
-    // Build dataCircularRefMap
+    // Build dataRecursiveRefMap
+    let genericDataPointer =
+      JsonPointer.toGenericPointer(newNode.dataPointer, jsf.arrayMap);
+    // TODO: Replace the following by checking to see if the parent element is
+    // an array, and only removing the index if allowed
+    genericDataPointer = genericDataPointer.replace(/\/\d+$/, '/-');
     if (!forRefLibrary) {
-      const schemaRef: string = JsonPointer.compile(schema.$ref);
+
       // Is schema $ref a subset of dataPointer?
-      if (JsonPointer.isSubPointer(schemaRef, newNode.dataPointer)) {
-        // If yes, map dataPointer and compiled schema $ref as a circular reference
-        jsf.dataCircularRefMap.set(newNode.dataPointer, schemaRef);
+      // If yes, map dataPointer and schema $ref as a recursive reference
+      if (JsonPointer.isSubPointer(schemaRef, genericDataPointer)) {
+        jsf.dataRecursiveRefMap.set(genericDataPointer, schemaRef);
+
+      // If no, add a partial reference now, so a full reference can be added later
       } else {
-        // If no, create a temporary entry now with a raw schema $ref,
-        // so a circular reference can be created later if a sub-node is
-        // found with a matching schema $ref
-        jsf.dataCircularRefMap.set(schema.$ref, newNode.dataPointer);
+        jsf.dataRecursiveRefMap.set(schemaRef, genericDataPointer);
       }
-    } else if (jsf.dataCircularRefMap.has(schema.$ref) &&
-      !jsf.dataCircularRefMap.has(jsf.dataCircularRefMap.get(schema.$ref))
+
+    // If partial reference already exists,
+    // use current and previous dataPointers to create a full reference
+    } else if (jsf.dataRecursiveRefMap.has(schemaRef) &&
+      !jsf.dataRecursiveRefMap.has(jsf.dataRecursiveRefMap.get(schemaRef))
     ) {
-      // If temporary entry with a raw schema $ref already exists,
-      // map current and previous dataPointers as a circular reference
-      if (newNode.dataPointer === jsf.dataCircularRefMap
-        .get(schema.$ref).slice(-newNode.dataPointer.length)
+      if (genericDataPointer ===
+        jsf.dataRecursiveRefMap.get(schemaRef).slice(-genericDataPointer.length)
       ) {
-        jsf.dataCircularRefMap.set(
-          jsf.dataCircularRefMap.get(schema.$ref),
-          jsf.dataCircularRefMap.get(schema.$ref).slice(0, -newNode.dataPointer.length)
+        jsf.dataRecursiveRefMap.set(
+          jsf.dataRecursiveRefMap.get(schemaRef),
+          jsf.dataRecursiveRefMap.get(schemaRef).slice(0, -genericDataPointer.length)
         );
       } else {
-        jsf.dataCircularRefMap.set(
-          jsf.dataCircularRefMap.get(schema.ref) + newNode.dataPointer,
-          jsf.dataCircularRefMap.get(schema.$ref)
+        jsf.dataRecursiveRefMap.set(
+          jsf.dataRecursiveRefMap.get(schemaRef) + genericDataPointer,
+          jsf.dataRecursiveRefMap.get(schemaRef)
         );
       }
     }
 
     // Add layout template to layoutRefLibrary
-    if (!hasOwn(jsf.layoutRefLibrary, schema.$ref)) {
-      // Set to null first to prevent circular reference from causing endless loop
-      jsf.layoutRefLibrary[schema.$ref] = null;
-      jsf.layoutRefLibrary[schema.$ref] = buildLayoutFromSchema(
-        jsf, widgetLibrary, '', JsonPointer.compile(schema.$ref), '',
+    if (!hasOwn(jsf.layoutRefLibrary, schemaRef)) {
+      // Set to null first to prevent recursive reference from causing endless loop
+      jsf.layoutRefLibrary[schemaRef] = null;
+      const newLayout: any = buildLayoutFromSchema(
+        jsf, widgetLibrary, '', schemaRef, '',
         newNode.arrayItem, newNode.arrayItemType, true, true
       );
+      if (newLayout) {
+        jsf.layoutRefLibrary[schemaRef] = newLayout;
+      } else {
+        delete jsf.layoutRefLibrary[schemaRef];
+      }
     }
   }
   return newNode;

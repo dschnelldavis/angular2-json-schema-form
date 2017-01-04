@@ -7,7 +7,7 @@ import * as _ from 'lodash';
 import {
   forEach, getControlValidators, hasOwn, hasValue, inArray, isArray, isEmpty,
   isObject, isDefined, isPrimitive, JsonPointer, JsonValidators, Pointer,
-  toJavaScriptType, toSchemaType, removeCircularReferences, SchemaPrimitiveType
+  toJavaScriptType, toSchemaType, resolveRecursiveReferences, SchemaPrimitiveType
 } from './index';
 
 /**
@@ -215,10 +215,15 @@ export function buildFormGroupTemplate(
     case '$ref':
       const schemaRef: string = JsonPointer.compile(schema.$ref);
       if (!hasOwn(jsf.templateRefLibrary, schemaRef)) {
-        // Set to null first to prevent circular reference from causing endless loop
+
+        // Set to null first to prevent recursive reference from causing endless loop
         jsf.templateRefLibrary[schemaRef] = null;
-        jsf.templateRefLibrary[schemaRef] =
-          buildFormGroupTemplate(jsf, null, false, schemaRef);
+        const newTemplate: any = buildFormGroupTemplate(jsf, null, false, schemaRef);
+        if (newTemplate) {
+          jsf.templateRefLibrary[schemaRef] = newTemplate;
+        } else {
+          delete jsf.templateRefLibrary[schemaRef];
+        }
       }
       return null;
     default:
@@ -350,22 +355,23 @@ export function setRequiredFields(schema: any, formControlTemplate: any): boolea
  *
  * @param {any} formData - Angular 2 FormGroup data object
  * @param  {Map<string, any>} dataMap -
- * @param  {Map<string, string>} circularRefMap -
+ * @param  {Map<string, string>} recursiveRefMap -
  * @param  {Map<string, number>} arrayMap -
  * @param {boolean = false} fixErrors - if TRUE, tries to fix data
  * @return {any} - formatted data object
  */
 export function formatFormData(
-  formData: any, dataMap: Map<string, any>, circularRefMap: Map<string, string>,
+  formData: any, dataMap: Map<string, any>, recursiveRefMap: Map<string, string>,
   arrayMap: Map<string, number>, fixErrors: boolean = false
 ): any {
+// return formData;
   let formattedData = {};
   JsonPointer.forEachDeep(formData, (value, dataPointer) => {
     if (typeof value !== 'object') {
       let genericPointer: string =
         JsonPointer.has(dataMap, [dataPointer, 'schemaType']) ?
-        dataPointer :
-        removeCircularReferences(dataPointer, circularRefMap, arrayMap);
+          dataPointer :
+          resolveRecursiveReferences(dataPointer, recursiveRefMap, arrayMap);
       if (JsonPointer.has(dataMap, [genericPointer, 'schemaType'])) {
         const schemaType: SchemaPrimitiveType | SchemaPrimitiveType[] =
           dataMap.get(genericPointer).get('schemaType');
@@ -386,7 +392,7 @@ export function formatFormData(
           'for form value at "' + genericPointer + '".');
         console.error(formData);
         console.error(dataMap);
-        console.error(circularRefMap);
+        console.error(recursiveRefMap);
         console.error(arrayMap);
       }
     }
@@ -426,9 +432,8 @@ export function getControl(
       } else if (subGroup.hasOwnProperty(key)) {
         subGroup = subGroup[key];
       } else {
-        console.error(
-          'getControl error: Unable to find "' + key + '" item in FormGroup.'
-        );
+        console.error('getControl error: Unable to find "' + key +
+          '" item in FormGroup.');
         console.error(dataPointer);
         console.error(formGroup);
         return;

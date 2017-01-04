@@ -42,8 +42,8 @@ export class JsonSchemaFormService {
 
   public arrayMap: Map<string, number> = new Map<string, number>(); // Maps arrays in data object and number of tuple values
   public dataMap: Map<string, any> = new Map<string, any>(); // Maps paths in data model to schema and formGroup paths
-  public dataCircularRefMap: Map<string, string> = new Map<string, string>(); // Maps circular reference points in data model
-  public schemaCircularRefMap: Map<string, string> = new Map<string, string>(); // Maps circular reference points in schema
+  public dataRecursiveRefMap: Map<string, string> = new Map<string, string>(); // Maps recursive reference points in data model
+  public schemaRecursiveRefMap: Map<string, string> = new Map<string, string>(); // Maps recursive reference points in schema
   public layoutRefLibrary: any = {}; // Library of layout nodes for adding to form
   public schemaRefLibrary: any = {}; // Library of schemas for resolving schema $refs
   public templateRefLibrary: any = {}; // Library of formGroup templates for adding to form
@@ -103,8 +103,8 @@ export class JsonSchemaFormService {
     this.validationErrors = null;
     this.arrayMap = new Map<string, number>();
     this.dataMap = new Map<string, any>();
-    this.dataCircularRefMap = new Map<string, string>();
-    this.schemaCircularRefMap = new Map<string, string>();
+    this.dataRecursiveRefMap = new Map<string, string>();
+    this.schemaRecursiveRefMap = new Map<string, string>();
     this.layoutRefLibrary = {};
     this.schemaRefLibrary = {};
     this.templateRefLibrary = {};
@@ -128,7 +128,7 @@ export class JsonSchemaFormService {
 
     // Format raw form data to correct data types
     this.data = formatFormData(
-      newValue, this.dataMap, this.dataCircularRefMap, this.arrayMap
+      newValue, this.dataMap, this.dataRecursiveRefMap, this.arrayMap
     );
     this.isValid = this.validateFormData(this.data);
     this.validData = this.isValid ? this.data : null;
@@ -188,10 +188,12 @@ export class JsonSchemaFormService {
 
   // Resolve all schema $ref links
   public resolveSchemaRefLinks() {
+
+    // Search schema for $ref links
     JsonPointer.forEachDeep(this.schema, (value, pointer) => {
       if (hasOwn(value, '$ref') && isString(value['$ref'])) {
         const newReference: string = JsonPointer.compile(value['$ref']);
-        const isCircular = JsonPointer.isSubPointer(newReference, pointer);
+        const isRecursive: boolean = JsonPointer.isSubPointer(newReference, pointer);
 
         // Save new target schemas in schemaRefLibrary
         if (hasValue(newReference) && !hasOwn(this.schemaRefLibrary, newReference)) {
@@ -200,21 +202,79 @@ export class JsonSchemaFormService {
           );
         }
 
-        // If a $ref link is not circular,
+        // Save link in schemaRecursiveRefMap
+        if (!this.schemaRecursiveRefMap.has(pointer)) {
+          this.schemaRecursiveRefMap.set(pointer, newReference);
+        }
+
+        // If a $ref link is not recursive,
         // remove link and replace with copy of target schema
-        if (!isCircular) {
+        if (!isRecursive) {
           delete value['$ref'];
           const targetSchema: any = Object.assign(
             _.cloneDeep(this.schemaRefLibrary[newReference]), value
           );
           this.schema = JsonPointer.set(this.schema, pointer, targetSchema);
 
-        // If a $ref link is circular, save link in schemaCircularRefMap
+          // Save partial link in schemaRecursiveRefMap,
+          // so it can be matched later if it is recursive
+          this.schemaRecursiveRefMap.set(newReference, pointer);
         } else {
-          this.schemaCircularRefMap.set(pointer, newReference);
+
+          // If a matching partial link exists, complete it
+          const mappedReference: string = this.schemaRecursiveRefMap.get(newReference);
+          if (this.schemaRecursiveRefMap.has(newReference) &&
+            JsonPointer.isSubPointer(mappedReference, newReference)
+          ) {
+            this.schemaRecursiveRefMap.set(newReference, mappedReference);
+          }
         }
       }
     }, true);
+
+    // Add redirects for links to shared schemas (such as definitions)
+    let addRedirects: Map<string, string> = new Map<string, string>();
+    this.schemaRecursiveRefMap.forEach((toRef1, fromRef1) =>
+      this.schemaRecursiveRefMap.forEach((toRef2, fromRef2) => {
+        if (fromRef1 !== fromRef2 && fromRef1 !== toRef2 &&
+          JsonPointer.isSubPointer(toRef2, fromRef1)
+        ) {
+          const newRef: string = fromRef2 + fromRef1.slice(toRef2.length);
+          if (!this.schemaRecursiveRefMap.has(newRef)) {
+            addRedirects.set(newRef, toRef1);
+          }
+        }
+      })
+    );
+    addRedirects.forEach((toRef, fromRef) => this.schemaRecursiveRefMap.set(fromRef, toRef));
+
+    // Fix recursive references pointing to shared schemas
+    this.schemaRecursiveRefMap.forEach((toRef1, fromRef1) =>
+      this.schemaRecursiveRefMap.forEach((toRef2, fromRef2) => {
+        if (fromRef1 !== fromRef2 && toRef1 === toRef2 &&
+          JsonPointer.isSubPointer(fromRef1, fromRef2)
+        ) {
+          this.schemaRecursiveRefMap.set(fromRef2, fromRef1);
+        }
+      })
+    );
+
+    // Remove unmatched (non-recursive) partial links
+    this.schemaRecursiveRefMap.forEach((toRef, fromRef) => {
+      if (!JsonPointer.isSubPointer(toRef, fromRef) &&
+        !hasOwn(this.schemaRefLibrary, toRef)
+      ) {
+        this.schemaRecursiveRefMap.delete(fromRef);
+      }
+    });
+
+    // // TODO: Create dataRecursiveRefMap from schemaRecursiveRefMap
+    // this.schemaRecursiveRefMap.forEach((toRef, fromRef) => {
+    //   this.dataRecursiveRefMap.set(
+    //     JsonPointer.toDataPointer(fromRef, this.schema),
+    //     JsonPointer.toDataPointer(toRef, this.schema)
+    //   );
+    // });
   }
 
   public buildSchemaFromData(data?: any): any {
@@ -240,7 +300,7 @@ export class JsonSchemaFormService {
   public setTitle(
     parentCtx: any = {}, childNode: any = null, index: number = null
   ): string {
-    const parentNode: any = parentCtx.layoutNode || {};
+    const parentNode: any = parentCtx.layoutNode;
     let text: string;
     let childValue: any;
     let parentValues: any = this.getControlValue(parentCtx);
@@ -287,10 +347,8 @@ export class JsonSchemaFormService {
       ctx.controlValue = ctx.layoutNode.value;
       const dataPointer = this.getDataPointer(ctx);
       if (dataPointer) {
-        console.error(
-          'warning: control "' + dataPointer +
-          '" is not bound to the Angular 2 FormGroup.'
-        );
+        console.error('warning: control "' + dataPointer +
+          '" is not bound to the Angular 2 FormGroup.');
       }
     }
     return ctx.boundControl;
@@ -319,10 +377,10 @@ export class JsonSchemaFormService {
   }
 
   public updateArrayCheckboxList(ctx: any, checkboxList: CheckboxItem[]): void {
-    let formArray = this.getControl(ctx);
+    let formArray = <FormArray>this.getControl(ctx);
 
     // Remove all existing items
-    while (formArray.value.length) { (<FormArray>formArray).removeAt(0); }
+    while (formArray.value.length) { formArray.removeAt(0); }
 
     // Re-add an item for each checked box
     for (let checkboxItem of checkboxList) {
@@ -331,7 +389,7 @@ export class JsonSchemaFormService {
           this.templateRefLibrary, [ctx.layoutNode.dataPointer + '/-']
         ));
         newFormControl.setValue(checkboxItem.value);
-        (<FormArray>formArray).push(newFormControl);
+        formArray.push(newFormControl);
       }
     }
     formArray.markAsDirty();
@@ -396,17 +454,18 @@ export class JsonSchemaFormService {
 
     // Add the new form control to the parent formArray or formGroup
     if (ctx.layoutNode.arrayItem) { // Add new array item to formArray
-      (<FormArray>this.getControlGroup(ctx)).push(newFormGroup);
+      (<FormArray>this.getControlGroup(ctx))
+        .push(newFormGroup);
     } else { // Add new $ref item to formGroup
-      (<FormGroup>this.getControlGroup(ctx)).addControl(
-        this.getControlName(ctx), newFormGroup
-      );
+      (<FormGroup>this.getControlGroup(ctx))
+        .addControl(this.getControlName(ctx), newFormGroup);
     }
 
     // Copy a new layoutNode from layoutRefLibrary
     const newLayoutNode = _.cloneDeep(JsonPointer.get(
       this.layoutRefLibrary, [ctx.layoutNode.$ref]
     ));
+
     JsonPointer.forEachDeep(newLayoutNode, (value, pointer) => {
 
       // Reset all _id's in newLayoutNode to unique values
@@ -414,12 +473,13 @@ export class JsonSchemaFormService {
 
       // If adding a recursive item, prefix current dataPointer
       // and layoutPointer to all pointers in new layoutNode
-      if (!ctx.layoutNode.arrayItem || ctx.layoutNode.circularReference) {
+      if (!ctx.layoutNode.arrayItem || ctx.layoutNode.recursiveReference) {
         if (hasOwn(value, 'dataPointer')) {
           value.dataPointer = ctx.layoutNode.dataPointer + value.dataPointer;
         }
         if (hasOwn(value, 'layoutPointer')) {
-          value.layoutPointer = ctx.layoutNode.layoutPointer + value.layoutPointer;
+          value.layoutPointer =
+            ctx.layoutNode.layoutPointer.slice(0, -2) + value.layoutPointer;
         }
       }
     });
@@ -435,8 +495,10 @@ export class JsonSchemaFormService {
       !isDefined(oldIndex) || !isDefined(newIndex)) { return false; }
 
     // Move item in the formArray
-    let formArray = this.getControlGroup(ctx);
-    (<any>formArray.controls).splice(newIndex, 0, (<any>formArray.controls).splice(oldIndex, 1)[0]);
+    let formArray = <FormArray>this.getControlGroup(ctx);
+    formArray.controls.splice(newIndex, 0, // add to new index
+      formArray.controls.splice(oldIndex, 1)[0] // remove from old index
+    );
     formArray.updateValueAndValidity();
     (<any>formArray)._onCollectionChange();
 
@@ -452,9 +514,11 @@ export class JsonSchemaFormService {
 
     // Remove the Angular 2 form control from the parent formArray or formGroup
     if (ctx.layoutNode.arrayItem) { // Remove array item from formArray
-      (<FormArray>this.getControlGroup(ctx)).removeAt(ctx.dataIndex[ctx.dataIndex.length - 1]);
+      (<FormArray>this.getControlGroup(ctx))
+        .removeAt(ctx.dataIndex[ctx.dataIndex.length - 1]);
     } else { // Remove $ref item from formGroup
-      (<FormGroup>this.getControlGroup(ctx)).removeControl(this.getControlName(ctx));
+      (<FormGroup>this.getControlGroup(ctx))
+        .removeControl(this.getControlName(ctx));
     }
 
     // Remove layoutNode from layout

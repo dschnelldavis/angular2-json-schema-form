@@ -4,6 +4,8 @@ import {
 } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
+import * as _ from 'lodash';
+
 import { FrameworkLibraryService } from '../frameworks/framework-library.service';
 import { WidgetLibraryService } from '../widgets/widget-library.service';
 import { JsonSchemaFormService } from './json-schema-form.service';
@@ -116,7 +118,7 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
    * - Create 'schemaRefLibrary' to resolve schema $ref links.
    *
    * - Create 'layoutRefLibrary' to use when dynamically adding
-   *   form components to arrays and circular $ref points.
+   *   form components to arrays and recursive $ref points.
    *
    * - Create 'formGroupTemplate', then from it 'formGroup',
    *   the Angular 2 formGroup used to control the reactive form.
@@ -173,17 +175,17 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
       // TODO: 6. (none) no schema - construct form entirely from layout instead
       if (isObject(this.schema)) {
         this.jsf.AngularSchemaFormCompatibility = true;
-        this.jsf.schema = this.schema;
+        this.jsf.schema = _.cloneDeep(this.schema);
       } else if (hasOwn(this.form, 'schema') && isObject(this.form.schema)) {
-        this.jsf.schema = this.form.schema;
+        this.jsf.schema = _.cloneDeep(this.form.schema);
       } else if (isObject(this.JSONSchema)) {
         this.jsf.ReactJsonSchemaFormCompatibility = true;
-        this.jsf.schema = this.JSONSchema;
+        this.jsf.schema = _.cloneDeep(this.JSONSchema);
       } else if (hasOwn(this.form, 'JSONSchema') && isObject(this.form.JSONSchema)) {
         this.jsf.ReactJsonSchemaFormCompatibility = true;
-        this.jsf.schema = this.form.JSONSchema;
+        this.jsf.schema = _.cloneDeep(this.form.JSONSchema);
       } else if (hasOwn(this.form, 'properties') && isObject(this.form.properties)) {
-        this.jsf.schema = this.form;
+        this.jsf.schema = _.cloneDeep(this.form);
       }
 
       if (!isEmpty(this.jsf.schema)) {
@@ -222,19 +224,21 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
       // 4. form.layout - Single input style
       // 5. (none) no input - use default layout instead
       if (isArray(this.layout)) {
-        this.jsf.layout = this.layout;
+        this.jsf.layout = _.cloneDeep(this.layout);
       } else if (isArray(this.form)) {
         this.jsf.AngularSchemaFormCompatibility = true;
-        this.jsf.layout = this.form;
+        this.jsf.layout = _.cloneDeep(this.form);
       } else if (this.form && isArray(this.form.form)) {
         this.jsf.JsonFormCompatibility = true;
-        this.jsf.fixJsonFormOptions(this.form.form);
-        this.jsf.layout = this.form.form;
+        this.jsf.layout =
+          this.jsf.fixJsonFormOptions(_.cloneDeep(this.form.form));
       } else if (this.form && isArray(this.form.layout)) {
-        this.jsf.layout = this.form.layout;
+        this.jsf.layout = _.cloneDeep(this.form.layout);
       } else {
-        this.jsf.layout = this.jsf.globalOptions.addSubmit === false ?
-          [ '*' ] : [ '*', { type: 'submit', title: 'Submit' } ];
+        this.jsf.layout =
+          this.jsf.globalOptions.addSubmit === false ?
+          [ '*' ] :
+          [ '*', { type: 'submit', title: 'Submit' } ];
       }
 
       // Import alternate layout formats 'UISchema' or 'customFormItems'
@@ -247,14 +251,14 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
       let alternateLayout: any = null;
       if (isObject(this.UISchema)) {
         this.jsf.ReactJsonSchemaFormCompatibility = true;
-        alternateLayout = this.UISchema;
+        alternateLayout = _.cloneDeep(this.UISchema);
       } else if (hasOwn(this.form, 'UISchema')) {
         this.jsf.ReactJsonSchemaFormCompatibility = true;
-        alternateLayout = this.form.UISchema;
+        alternateLayout = _.cloneDeep(this.form.UISchema);
       } else if (hasOwn(this.form, 'customFormItems')) {
         this.jsf.JsonFormCompatibility = true;
-        this.jsf.fixJsonFormOptions(this.form.customFormItems);
-        alternateLayout = this.form.customFormItems;
+        alternateLayout =
+          this.jsf.fixJsonFormOptions(_.cloneDeep(this.form.customFormItems));
       }
 
       // if alternate layout found, copy options into schema
@@ -297,21 +301,21 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
       // 6. form.formData - For easier testing of React JSON Schema Forms
       // 7. (none) no data - initialize data from schema and layout defaults only
       if (isObject(this.data)) {
-        this.jsf.initialValues = this.data;
+        this.jsf.initialValues = _.cloneDeep(this.data);
       } else if (isObject(this.model)) {
         this.jsf.AngularSchemaFormCompatibility = true;
-        this.jsf.initialValues = this.model;
+        this.jsf.initialValues = _.cloneDeep(this.model);
       } else if (isObject(this.form) && isObject(this.form.value)) {
         this.jsf.JsonFormCompatibility = true;
-        this.jsf.initialValues = this.form.value;
+        this.jsf.initialValues = _.cloneDeep(this.form.value);
       } else if (isObject(this.form) && isObject(this.form.data)) {
-        this.jsf.initialValues = this.form.data;
+        this.jsf.initialValues = _.cloneDeep(this.form.data);
       } else if (isObject(this.formData)) {
         this.jsf.ReactJsonSchemaFormCompatibility = true;
-        this.jsf.initialValues = this.formData;
+        this.jsf.initialValues = _.cloneDeep(this.formData);
       } else if (hasOwn(this.form, 'formData') && isObject(this.form.formData)) {
         this.jsf.ReactJsonSchemaFormCompatibility = true;
-        this.jsf.initialValues = this.form.formData;
+        this.jsf.initialValues = _.cloneDeep(this.form.formData);
       }
 
       if (isEmpty(this.jsf.schema)) {
@@ -376,18 +380,20 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
 
 // Uncomment individual lines to output debugging information to console:
 // (These always work.)
-// console.log('reloading...');
-// console.log(this.jsf.formGroupTemplate);
-// console.log(this.jsf.formGroup);
-// console.log(this.jsf.initialValues);
-// console.log(this.jsf.templateRefLibrary);
-// console.log(this.jsf.layoutRefLibrary);
+// console.log('loading form...');
 // console.log(this.jsf.schema);
 // console.log(this.jsf.layout);
+// console.log(this.jsf.initialValues);
+// console.log(this.jsf.formGroup.value);
+// console.log(this.jsf.formGroupTemplate);
+// console.log(this.jsf.formGroup);
 // console.log(this.jsf.schemaRefLibrary);
+// console.log(this.jsf.layoutRefLibrary);
+// console.log(this.jsf.templateRefLibrary);
 // console.log(this.jsf.dataMap);
-// console.log(this.jsf.schemaCircularRefMap);
-// console.log(this.jsf.dataCircularRefMap);
+// console.log(this.jsf.arrayMap);
+// console.log(this.jsf.schemaRecursiveRefMap);
+// console.log(this.jsf.dataRecursiveRefMap);
       } else {
         // TODO: Display error message
       }
@@ -400,17 +406,18 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
     if (this.debug || this.jsf.globalOptions.debug) {
       const vars: any[] = [];
       // vars.push(this.jsf.schema);
-      // vars.push(this.jsf.initialValues);
-      // vars.push(this.jsf.dataMap);
-      // vars.push(this.jsf.arrayMap);
-      // vars.push(this.jsf.formGroupTemplate);
       // vars.push(this.jsf.layout);
-      // vars.push(this.jsf.schemaRefLibrary);
       // vars.push(this.jsf.initialValues);
-      // vars.push(this.jsf.formGroup);
       // vars.push(this.jsf.formGroup.value);
+      // vars.push(this.jsf.formGroupTemplate);
+      // vars.push(this.jsf.formGroup);
+      // vars.push(this.jsf.schemaRefLibrary);
       // vars.push(this.jsf.layoutRefLibrary);
       // vars.push(this.jsf.templateRefLibrary);
+      // vars.push(this.jsf.dataMap);
+      // vars.push(this.jsf.arrayMap);
+      // vars.push(this.jsf.schemaRecursiveRefMap);
+      // vars.push(this.jsf.dataRecursiveRefMap);
       this.debugOutput = vars.map(v => JSON.stringify(v, null, 2)).join('\n');
     }
   }

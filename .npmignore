@@ -4,27 +4,23 @@ docs
 dist/playground
 src/playground
 
-# TypeScript
-tsconfig.json
+# Config
+.editorconfig
+.gitignore
 tslint.json
 typedoc.json
-typings.json
-*.ts
-!*.d.ts
 
 # Node
 node_modules
 npm-debug.log
 
-# IDE
+# IDE & OS
 .idea
 .project
 .settings
 .idea/*
 *.iml
 *.swp
-
-# OS
 Thumbs.db
 Desktop.ini
 .DS_Store

@@ -1,6 +1,6 @@
 {
   "name": "angular2-json-schema-form",
-  "version": "0.3.0-alpha.19",
+  "version": "0.3.0-alpha.20",
   "author": {
     "name": "dschnelldavis",
     "email": "dschnelldavis@gmail.com"
@@ -59,9 +59,9 @@
     "@angular/platform-server": "^2.4.1",
     "@angular/router": "^3.4.1",
     "@types/ace": "^0.0.32",
-    "@types/jasmine": "^2.5.38",
-    "@types/lodash": "^4.14.42",
-    "@types/node": "^6.0.53",
+    "@types/jasmine": "^2.5.40",
+    "@types/lodash": "^4.14.45",
+    "@types/node": "^6.0.55",
     "brace": "^0.9.1",
     "buffer": "^5.0.0",
     "canonical-path": "^0.0.2",
@@ -78,14 +78,14 @@
     "karma-jasmine": "^1.0.2",
     "karma-jasmine-html-reporter": "^0.2.2",
     "lite-server": "^2.2.2",
-    "onchange": "^3.2.0",
+    "onchange": "^3.2.1",
     "protractor": "^4.0.13",
     "reflect-metadata": "^0.1.8",
     "rimraf": "^2.5.4",
     "rxjs": "^5.0.2",
     "systemjs": "^0.19.41",
     "tslint": "^4.2.0",
-    "typedoc": "^0.5.1",
+    "typedoc": "^0.5.3",
     "typescript": "^2.1.4",
     "typings": "^2.1.0",
     "zone.js": "^0.7.2"

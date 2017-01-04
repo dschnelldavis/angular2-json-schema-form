@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit } from '@angular/core';
+import { Component, DoCheck, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 import { JsonSchemaFormService } from '../../library/json-schema-form.service';
@@ -17,10 +17,12 @@ import { JsonSchemaFormService } from '../../library/json-schema-form.service';
       </button>
     </section>`,
 })
-export class MaterialAddReferenceComponent implements OnInit, OnChanges {
+export class MaterialAddReferenceComponent implements OnInit, DoCheck {
   private options: any;
   private itemCount: number;
   private showAddButton: boolean = true;
+  private previousLayoutIndex: number[];
+  private previousDataIndex: number[];
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
@@ -32,12 +34,15 @@ export class MaterialAddReferenceComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     this.options = this.layoutNode.options;
-    this.itemCount = this.layoutIndex[this.layoutIndex.length - 1];
     this.updateControl();
   }
 
-  ngOnChanges() {
-    this.updateControl();
+  ngDoCheck() {
+    if (this.previousLayoutIndex !== this.layoutIndex ||
+      this.previousDataIndex !== this.dataIndex
+    ) {
+      this.updateControl();
+    }
   }
 
   private addItem(event) {
@@ -48,8 +53,11 @@ export class MaterialAddReferenceComponent implements OnInit, OnChanges {
   }
 
   private updateControl() {
+    this.itemCount = this.layoutIndex[this.layoutIndex.length - 1];
+    this.previousLayoutIndex = this.layoutIndex;
+    this.previousDataIndex = this.dataIndex;
     this.showAddButton = this.layoutNode.arrayItem &&
-      this.itemCount <= (this.options.maxItems || 1000000);
+      this.itemCount < (this.options.maxItems || 1000000);
   }
 
   private setTitle(): string {

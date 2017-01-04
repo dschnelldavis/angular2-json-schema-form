@@ -1,3 +1,5 @@
+import * as _ from 'lodash';
+
 import {
   getType, hasValue, inArray, isString, isFunction, isObject, isArray
 } from './validator.functions';
@@ -127,7 +129,8 @@ export function getFromSchema(
     let subSchemaArray = false;
     let subSchemaObject = false;
     if (typeof subSchema !== 'object') {
-      console.error('getFromSchema error: Unable to find "' + key + '" key in schema.');
+      console.error('getFromSchema error: Unable to find "' + key +
+        '" key in schema.');
       console.error(schema);
       console.error(dataPointer);
       return null;
@@ -149,9 +152,8 @@ export function getFromSchema(
       } else if (typeof subSchema === 'object' && subSchema.hasOwnProperty(key)) {
         subSchema = subSchema[key];
       } else {
-        console.error(
-          'getFromSchema error: Unable to find "' + key + '" item in schema.'
-        );
+        console.error('getFromSchema error: Unable to find "' + key +
+          '" item in schema.');
         console.error(schema);
         console.error(dataPointer);
         return;
@@ -164,61 +166,74 @@ export function getFromSchema(
 /**
  * 'getSchemaReference' function
  *
- * @param {object | string} reference - JSON Pointer, or '$ref' object
- * @param {object} schema - The schema containing the reference
- * @param {object} referenceLibrary - Optional library of resolved refernces
+ * Return the sub-section of a schema referred to
+ * by a JSON Pointer or '$ref' object.
+ *
+ * @param {object} schema - The schema to return a sub-section from
+ * @param {string|object} reference - JSON Pointer or '$ref' object
+ * @param {object} schemaRefLibrary - Optional library of resolved refernces
+ * @param {object} recursiveRefMap - Optional map of recursive links
  * @return {object} - The refernced schema sub-section
  */
 export function getSchemaReference(
-  schema: any, reference: any, schemaRefLibrary: any = null
+  schema: any, reference: any, schemaRefLibrary: any = null,
+  recursiveRefMap: Map<string, string> = null
 ): any {
   let schemaPointer: string;
   let newSchema: any;
-  if (typeof reference === 'string') {
+  if (isArray(reference) || typeof reference === 'string') {
     schemaPointer = JsonPointer.compile(reference);
-  } else {
-    if (!isObject(reference) || Object.keys(reference).length !== 1 ||
-      !(reference.hasOwnProperty('$ref')) || typeof reference.$ref !== 'string'
-    ) {
-      return reference;
-    }
+  } else if (isObject(reference) && Object.keys(reference).length === 1 &&
+    reference.hasOwnProperty('$ref') && typeof reference.$ref === 'string'
+  ) {
     schemaPointer = JsonPointer.compile(reference.$ref);
+  } else {
+    console.error('getSchemaReference error: ' +
+      'reference must be a JSON Pointer or $ref link');
+    console.error(reference);
+    return reference;
+  }
+  if (recursiveRefMap) {
+    schemaPointer = resolveRecursiveReferences(schemaPointer, recursiveRefMap);
   }
   if (schemaPointer === '') {
-    return schema;
+    return _.cloneDeep(schema);
   } else if (schemaRefLibrary && schemaRefLibrary.hasOwnProperty(schemaPointer)) {
-    return schemaRefLibrary[schemaPointer];
+    return _.cloneDeep(schemaRefLibrary[schemaPointer]);
 
   // TODO: Add ability to download remote schema, if necessary
   // } else if (schemaPointer.slice(0, 4) === 'http') {
   //    http.get(schemaPointer).subscribe(response => {
-  //     // TODO: check for circular references
+  //     // TODO: check for recursive references
   //     // TODO: test and adjust to allow for for async response
   //     if (schemaRefLibrary) schemaRefLibrary[schemaPointer] = response.json();
   //     return response.json();
   //    });
 
   } else {
-    newSchema = JsonPointer.get(schema, schemaPointer);
+    newSchema = _.cloneDeep(JsonPointer.get(schema, schemaPointer));
 
-    // If newSchema is just an allOf array, combine array elements
+    // If newSchema is an allOf array, combine array elements
     // TODO: Check and fix duplicate elements with different values
     if (isObject(newSchema) && Object.keys(newSchema).length === 1 &&
-      (newSchema.hasOwnProperty('allOf')) && isArray(newSchema.allOf)
+      hasOwn(newSchema, 'allOf') && isArray(newSchema.allOf)
     ) {
       newSchema = newSchema.allOf
-        .map(object => getSchemaReference(schema, object, schemaRefLibrary))
+        .map(object => getSchemaReference(schema, object, schemaRefLibrary, recursiveRefMap))
         .reduce((schema1, schema2) => Object.assign(schema1, schema2), { });
     }
-    if (schemaRefLibrary) { schemaRefLibrary[schemaPointer] = newSchema; }
+
+    if (schemaRefLibrary) {
+      schemaRefLibrary[schemaPointer] = _.cloneDeep(newSchema);
+    }
     return newSchema;
   }
 }
 
 /**
- * 'removeCircularReferences' function
+ * 'resolveRecursiveReferences' function
  *
- * Checks a JSON Pointer against a map of circular references and returns
+ * Checks a JSON Pointer against a map of recursive references and returns
  * a JSON Pointer to the shallowest equivalent location in the same object.
  *
  * Using this functions enables an object to be constructed with unlimited
@@ -227,28 +242,49 @@ export function getSchemaReference(
  * just refer to the metadata for their shallow equivalents, instead of having
  * to add additional redundant metadata for each recursively added node.
  *
- * @param  {string} reference -
- * @param  {Map<string, string>} circularRefMap -
- * @param  {Map<string, number>} arrayMap -
+ * Example:
+ *
+ * pointer:         '/stuff/and/more/and/more/and/more/and/more/stuff'
+ * recursiveRefMap: [['/stuff/and/more/and/more', '/stuff/and/more/']]
+ * returned:        '/stuff/and/more/stuff'
+ *
+ * @param  {Pointer} pointer -
+ * @param  {Map<string, string>} recursiveRefMap -
+ * @param  {Map<string, number>} arrayMap - optional
  * @return {string} -
  */
-export function removeCircularReferences(
-  thisPointer: string, circularRefMap: Map<string, string>, arrayMap: Map<string, number>
+export function resolveRecursiveReferences(
+  pointer: Pointer, recursiveRefMap: Map<string, string>,
+  arrayMap: Map<string, number> = new Map<string, number>()
 ): string {
+  let genericPointer =
+    JsonPointer.toGenericPointer(JsonPointer.compile(pointer), arrayMap);
   let possibleReferences = true;
-  thisPointer = JsonPointer.toGenericPointer(thisPointer, arrayMap);
+  let previousPointerValues: Pointer[] = [];
+  const catchCircularLinks = (newPointer) => {
+    if (previousPointerValues.indexOf(newPointer) !== -1) {
+      console.error('resolveRecursiveReferences error: ' +
+        'recursive reference map contains circular links');
+      console.error(recursiveRefMap);
+      return;
+    }
+    previousPointerValues.push(genericPointer);
+    return newPointer;
+  };
   while (possibleReferences) {
     possibleReferences = false;
-    circularRefMap.forEach((subPointer, superPointer) => {
-      if (thisPointer.slice(0, superPointer.length) === superPointer) {
-        thisPointer = JsonPointer.toGenericPointer(
-          subPointer + thisPointer.slice(superPointer.length), arrayMap
-        );
-        possibleReferences = true;
+    recursiveRefMap.forEach((toPointer, fromPointer) => {
+      if (JsonPointer.isSubPointer(toPointer, fromPointer)) {
+        while (JsonPointer.isSubPointer(fromPointer, genericPointer)) {
+          genericPointer = catchCircularLinks(JsonPointer.toGenericPointer(
+            toPointer + genericPointer.slice(fromPointer.length), arrayMap
+          ));
+          possibleReferences = true;
+        }
       }
     });
   }
-  return thisPointer;
+  return genericPointer;
 }
 
 /**

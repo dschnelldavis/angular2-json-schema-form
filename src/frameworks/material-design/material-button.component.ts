@@ -22,6 +22,7 @@ import { JsonSchemaFormService } from '../../library/json-schema-form.service';
         <span *ngIf="options?.title" [innerHTML]="options?.title"></span>
       </button>
     </section>`,
+    styles: [`button { margin-top: 4px; }`],
 })
 export class MaterialButtonComponent implements OnInit {
   private formControl: AbstractControl;

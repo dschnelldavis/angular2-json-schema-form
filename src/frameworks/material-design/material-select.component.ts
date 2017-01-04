@@ -7,24 +7,24 @@ import { buildTitleMap } from '../../library/utilities/index';
 @Component({
   selector: 'material-select-widget',
   template: `
-    <label *ngIf="options?.title"
-      [attr.for]="'control' + layoutNode?._id"
-      [class]="options?.labelHtmlClass"
-      [class.sr-only]="options?.notitle"
-      [innerHTML]="options?.title"></label>
-    <select
-      [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
-      [attr.readonly]="options?.readonly ? 'readonly' : null"
-      [attr.required]="options?.required"
-      [class]="options?.fieldHtmlClass"
-      [disabled]="controlDisabled"
-      [id]="'control' + layoutNode?._id"
-      [name]="controlName"
-      (input)="updateValue($event)">
-      <option *ngFor="let selectItem of selectList"
-        [value]="selectItem.value"
-        [selected]="selectItem.value === controlValue">{{selectItem.name}}</option>
-    </select>`,
+    <section [class]="options?.htmlClass">
+      <md-select #inputControl
+        [(ngModel)]="controlValue"
+        [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
+        [attr.name]="controlName"
+        [attr.readonly]="options?.readonly ? 'readonly' : null"
+        [class]="options?.fieldHtmlClass"
+        [disabled]="controlDisabled"
+        [id]="'control' + layoutNode?._id"
+        [placeholder]="options?.title"
+        [required]="options?.required"
+        (onClose)="updateValue($event)">
+        <md-option *ngFor="let selectItem of selectList"
+          [value]="selectItem.value"
+          [attr.selected]="selectItem.value === controlValue">{{selectItem.name}}</md-option>
+      </md-select>
+    </section>`,
+    styles: [`md-select { margin-top: 18px; }`]
 })
 export class MaterialSelectComponent implements OnInit {
   private formControl: AbstractControl;
@@ -54,6 +54,6 @@ export class MaterialSelectComponent implements OnInit {
   }
 
   private updateValue(event) {
-    this.jsf.updateValue(this, event.target.value);
+    this.jsf.updateValue(this, this.controlValue);
   }
 }

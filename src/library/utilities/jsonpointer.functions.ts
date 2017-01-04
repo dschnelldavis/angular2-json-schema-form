@@ -447,7 +447,8 @@ export class JsonPointer {
     if (typeof keyArray === 'string') {
       if (keyArray[0] === '#') { keyArray = keyArray.slice(1); }
       if (keyArray.length && keyArray[0] !== '/') {
-        console.error('compile error: Invalid JSON Pointer, does not start with "/": ' + keyArray);
+        console.error('compile error: Invalid JSON Pointer, does not start with "/": ' +
+          keyArray);
         return;
       }
       return keyArray;
@@ -495,27 +496,38 @@ export class JsonPointer {
    *
    * Checks whether one JSON Pointer is a subset of another.
    *
-   * @param {Pointer} shortPointer -
-   * @param {Pointer} longPointer -
-   * @return {boolean} - true if shortPointer is a subset of longPointer
+   * @param {Pointer} shortPointer - potential subset JSON Pointer
+   * @param {Pointer} longPointer - potential superset JSON Pointer
+   * @return {boolean} - true if shortPointer is a subset of longPointer, false if not
    */
   static isSubPointer(shortPointer: Pointer, longPointer: Pointer): boolean {
-    let shortArray: string[] = (isArray(shortPointer)) ?
-      <string[]>shortPointer : this.parse(<string>shortPointer);
-    let longArray: string[] = (isArray(longPointer)) ?
-      <string[]>longPointer : this.parse(<string>longPointer);
-    if (!shortArray || !longArray) {
+    if (isArray(shortPointer)) { shortPointer = this.compile(shortPointer); }
+    if (isArray(longPointer)) { longPointer = this.compile(longPointer); }
+    if (typeof shortPointer !== 'string' || typeof longPointer !== 'string') {
       console.error('isSubPointer error: Invalid JSON Pointer, not a string or array:');
-      if (!shortArray) { console.error(shortPointer); }
-      if (!longArray) { console.error(longPointer); }
+      if (typeof shortPointer !== 'string') { console.error(shortPointer); }
+      if (typeof longPointer !== 'string') { console.error(longPointer); }
       return;
     }
-    if (shortArray.length > longArray.length) { return false; }
-    for (let i of Object.keys(shortArray)) {
-      if (shortArray[i] !== longArray[i]) { return false; }
-    }
-    return true;
+    return shortPointer === longPointer.slice(0, shortPointer.length);
   }
+  // static isSubPointer(shortPointer: Pointer, longPointer: Pointer): boolean {
+  //   let shortArray: string[] = (isArray(shortPointer)) ?
+  //     <string[]>shortPointer : this.parse(<string>shortPointer);
+  //   let longArray: string[] = (isArray(longPointer)) ?
+  //     <string[]>longPointer : this.parse(<string>longPointer);
+  //   if (!shortArray || !longArray) {
+  //     console.error('isSubPointer error: Invalid JSON Pointer, not a string or array:');
+  //     if (!shortArray) { console.error(shortPointer); }
+  //     if (!longArray) { console.error(longPointer); }
+  //     return;
+  //   }
+  //   if (shortArray.length > longArray.length) { return false; }
+  //   for (let i of Object.keys(shortArray)) {
+  //     if (shortArray[i] !== longArray[i]) { return false; }
+  //   }
+  //   return true;
+  // }
 
   /**
    * 'toIndexedPointer' function
@@ -531,7 +543,7 @@ export class JsonPointer {
    * @param {number[]} indexArray - The array of numeric indexes
    * @param {Map<string, number>} arrayMap - An optional array map
    * @return {string} - The merged pointer with indexes
-  **/
+   */
   static toIndexedPointer(
     genericPointer: string, indexArray: number[], arrayMap: Map<string, number> = null
   ) {
@@ -566,21 +578,22 @@ export class JsonPointer {
    * indexes (but leaves tuple arrray indexes and all object keys, including
    * numeric keys) to create a generic pointer.
    *
-   * For example, comparing the indexed pointer '/foo/1/bar/2/baz/3' and
+   * For example, using the indexed pointer '/foo/1/bar/2/baz/3' and
    * the arrayMap [['/foo', 0], ['/foo/-/bar', 3], ['/foo/-/bar/2/baz', 0]]
    * would result in the generic pointer '/foo/-/bar/2/baz/-'
+   * Using the indexed pointer '/foo/1/bar/4/baz/3' and the same arrayMap
+   * would result in the generic pointer '/foo/-/bar/-/baz/-'
    *
-   * The structure of the arrayMap is: ['path to array', number of tuple items]
+   * The structure of the arrayMap is: [['path to array', number of tuple items]...]
    *
    * @function
-   * @param {string} indexedPointer - The indexed pointer
-   * @param {Map<string, number>} arrayMap - The array map
-   * @return {string} - The merged pointer with indexes
-  **/
+   * @param {Pointer} indexedPointer - The indexed pointer (array or string)
+   * @param {Map<string, number>} arrayMap - The optional array map (for preserving tuple indexes)
+   * @return {string} - The generic pointer with indexes removed
+   */
   static toGenericPointer(
-    indexedPointer: string, arrayMap: Map<string, number>
+    indexedPointer: Pointer, arrayMap: Map<string, number> = new Map<string, number>()
   ) {
-    if (indexedPointer[0] === '#') { indexedPointer = indexedPointer.slice(1); }
     if (this.isJsonPointer(indexedPointer) && isMap(arrayMap)) {
       let pointerArray = this.parse(indexedPointer);
       for (let i = 1, l = pointerArray.length; i < l; i++) {
@@ -591,8 +604,8 @@ export class JsonPointer {
       }
       return this.compile(pointerArray);
     }
-    console.error('toGenericPointer error: indexedPointer must be ' +
-      'a JSON Pointer and arrayMap must be a Map.');
+    console.error('toGenericPointer error: ' +
+      'indexedPointer must be a JSON Pointer and arrayMap must be a Map.');
     console.error(indexedPointer);
     console.error(arrayMap);
   };
@@ -624,7 +637,8 @@ export class JsonPointer {
           controlPointerArray.push(key);
           subGroup = subGroup[key];
         } else {
-          console.error('toControlPointer error: Unable to find "' + key + '" item in FormGroup.');
+          console.error('toControlPointer error: Unable to find "' + key +
+            '" item in FormGroup.');
           console.error(dataPointer);
           console.error(formGroup);
           return;
@@ -639,7 +653,7 @@ export class JsonPointer {
    * 'parseObjectPath' function
    *
    * Parses a JavaScript object path into an array of keys, which
-   * can then be passed to compile() to convert into a JSON Pointer.
+   * can then be passed to compile() to convert into a string JSON Pointer.
    *
    * Based on mike-marcacci's objectpath parse function:
    * https://github.com/mike-marcacci/objectpath
@@ -658,9 +672,7 @@ export class JsonPointer {
         if (nextDot === -1 && nextOB === -1) { // last item
           parts.push(path.slice(index));
           index = path.length;
-        } else if ( nextDot !== -1 &&
-          (nextDot < nextOB || nextOB === -1)
-        ) { // dot notation
+        } else if (nextDot !== -1 && (nextDot < nextOB || nextOB === -1)) { // dot notation
           parts.push(path.slice(index, nextDot));
           index = nextDot + 1;
         } else { // bracket notation
