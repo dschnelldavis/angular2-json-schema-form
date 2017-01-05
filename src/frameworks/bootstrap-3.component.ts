@@ -25,7 +25,7 @@ import {
       [class.has-success]="options?.enableSuccessState &&
         !formControl?.errors && formControl?.dirty">
 
-      <button *ngIf="options?.removable"
+      <button *ngIf="layoutNode?.arrayItem && options?.removable"
         class="close pull-right"
         style="position: relative; z-index: 20;"
         type="button"

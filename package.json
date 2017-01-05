@@ -1,6 +1,6 @@
 {
   "name": "angular2-json-schema-form",
-  "version": "0.3.0-alpha.20",
+  "version": "0.3.0-alpha.23",
   "author": {
     "name": "dschnelldavis",
     "email": "dschnelldavis@gmail.com"
@@ -50,6 +50,7 @@
     "@angular/material": "2.0.0-beta.1",
     "@angular/platform-browser": "2.x",
     "@angular/platform-browser-dynamic": "2.x",
+    "@types/lodash": "4.x",
     "ajv": "4.x",
     "lodash": "4.x"
   },
@@ -60,8 +61,7 @@
     "@angular/router": "^3.4.1",
     "@types/ace": "^0.0.32",
     "@types/jasmine": "^2.5.40",
-    "@types/lodash": "^4.14.45",
-    "@types/node": "^6.0.55",
+    "@types/node": "^6.0.56",
     "brace": "^0.9.1",
     "buffer": "^5.0.0",
     "canonical-path": "^0.0.2",
