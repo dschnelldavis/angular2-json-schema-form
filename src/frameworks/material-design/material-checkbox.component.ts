@@ -12,6 +12,7 @@ import { JsonSchemaFormService } from '../../library/json-schema-form.service';
       [disabled]="controlDisabled || options?.readonly"
       [id]="'control' + layoutNode?._id"
       [name]="controlName"
+      [checked]="controlValue"
       (change)="updateValue($event)">
       <span *ngIf="options?.title"
         [class.sr-only]="options?.notitle"
