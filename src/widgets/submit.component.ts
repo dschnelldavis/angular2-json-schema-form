@@ -46,6 +46,10 @@ export class SubmitComponent implements OnInit {
   }
 
   private updateValue(event) {
-    this.jsf.updateValue(this, event.target.value);
+    if (typeof this.options.onClick === 'function') {
+      this.options.onClick(event);
+    } else {
+      this.jsf.updateValue(this, event.target.value);
+    }
   }
 }

@@ -277,9 +277,9 @@ export class JsonSchemaFormService {
     // });
   }
 
-  public buildSchemaFromData(data?: any): any {
-    if (data) { return buildSchemaFromData(data); }
-    this.schema = buildSchemaFromData(this.initialValues);
+  public buildSchemaFromData(data?: any, requireAllFields: boolean = false): any {
+    if (data) { return buildSchemaFromData(data, requireAllFields); }
+    this.schema = buildSchemaFromData(this.initialValues, requireAllFields);
   }
 
   public buildSchemaFromLayout(layout?: any): any {

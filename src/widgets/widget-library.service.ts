@@ -121,6 +121,7 @@ export class WidgetLibraryService {
 
   // Recommended 3rd-party add-on widgets (TODO: create wrappers for these...)
     // 'ng2-select': Select control replacement - http://valor-software.com/ng2-select/
+    // 'flatpickr': Flatpickr date picker - https://github.com/chmln/flatpickr
     // 'pikaday': Pikaday date picker - https://github.com/dbushell/Pikaday
     // 'spectrum': Spectrum color picker - http://bgrins.github.io/spectrum
     // 'bootstrap-slider': Bootstrap Slider range control - https://github.com/seiyria/bootstrap-slider

@@ -146,7 +146,7 @@ export class JsonPointer {
           subObject = subObject.get(key);
         } else {
           if (!hasOwn(subObject, key)) {
-            subObject[key] = (keyArray[i + 1].match(/^(\d+|-)$/)) ? [] : { };
+            subObject[key] = (keyArray[i + 1].match(/^(\d+|-)$/)) ? [] : {};
           }
           subObject = subObject[key];
         }
@@ -197,7 +197,7 @@ export class JsonPointer {
           subObject = subObject.get(key);
         } else {
           if (!hasOwn(subObject, key)) {
-            subObject[key] = (keyArray[i + 1].match(/^(\d+|-)$/)) ? [] : { };
+            subObject[key] = (keyArray[i + 1].match(/^(\d+|-)$/)) ? [] : {};
           }
           subObject[key] = copy(subObject[key]);
           subObject = subObject[key];
@@ -293,7 +293,7 @@ export class JsonPointer {
    * @return {Object} - The resulting dictionary object
    */
   static dict(object: any): any {
-    let results: any = { };
+    let results: any = {};
     this.forEachDeep(object, (value, pointer) => {
       if (typeof value !== 'object') { results[pointer] = value; }
     });
@@ -364,7 +364,7 @@ export class JsonPointer {
   ): void {
     if (typeof fn === 'function') {
       if (isObject(object) || isArray(object)) {
-        let newObject = Object.assign(isArray(object) ? [] : { }, object);
+        let newObject = Object.assign(isArray(object) ? [] : {}, object);
         if (!bottomUp) { fn(newObject, pointer, rootObject); }
         for (let key of Object.keys(newObject)) {
           const newPointer: string = pointer + '/' + this.escape(key);
@@ -511,23 +511,6 @@ export class JsonPointer {
     }
     return shortPointer === longPointer.slice(0, shortPointer.length);
   }
-  // static isSubPointer(shortPointer: Pointer, longPointer: Pointer): boolean {
-  //   let shortArray: string[] = (isArray(shortPointer)) ?
-  //     <string[]>shortPointer : this.parse(<string>shortPointer);
-  //   let longArray: string[] = (isArray(longPointer)) ?
-  //     <string[]>longPointer : this.parse(<string>longPointer);
-  //   if (!shortArray || !longArray) {
-  //     console.error('isSubPointer error: Invalid JSON Pointer, not a string or array:');
-  //     if (!shortArray) { console.error(shortPointer); }
-  //     if (!longArray) { console.error(longPointer); }
-  //     return;
-  //   }
-  //   if (shortArray.length > longArray.length) { return false; }
-  //   for (let i of Object.keys(shortArray)) {
-  //     if (shortArray[i] !== longArray[i]) { return false; }
-  //   }
-  //   return true;
-  // }
 
   /**
    * 'toIndexedPointer' function

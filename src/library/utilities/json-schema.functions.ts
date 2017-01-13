@@ -70,27 +70,29 @@ export function buildSchemaFromLayout(layout: any[]): any {
  * @return {JSON Schema} - The new JSON Schema
  */
 export function buildSchemaFromData(
-  data: any, isRoot: boolean = true
+  data: any, requireAllFields: boolean = false, isRoot: boolean = true
 ): any {
   let newSchema: any = { };
   if (isRoot) { newSchema.$schema = 'http://json-schema.org/draft-04/schema#'; }
-  const getSafeType = (value: any): string => {
-    let safeType = getType(value, 'strict');
-    if (safeType === 'integer') { return 'number'; }
-    if (safeType === 'null') { return 'string'; }
-    return safeType;
+  const getFieldType = (value: any): string => {
+    let fieldType = getType(value, 'strict');
+    if (fieldType === 'integer') { return 'number'; }
+    if (fieldType === 'null') { return 'string'; }
+    return fieldType;
   };
-  newSchema.type = getSafeType(data);
+  newSchema.type = getFieldType(data);
   if (newSchema.type === 'object') {
-    newSchema.properties = { };
+    newSchema.properties = {};
+    if (requireAllFields) { newSchema.required = []; }
     for (let key of Object.keys(data)) {
-      newSchema.properties[key] = buildSchemaFromData(data[key], false);
+      newSchema.properties[key] = buildSchemaFromData(data[key], requireAllFields, false);
+      if (requireAllFields) { newSchema.required.push(key); }
     }
   } else if (newSchema.type === 'array') {
-    let itemTypes: string[] = data.map(getSafeType).reduce(
+    let itemTypes: string[] = data.map(getFieldType).reduce(
       (types, type) => types.concat(types.indexOf(type) === -1 ? type : [])
     , []);
-    const buildSubSchemaFromData = (value) => buildSchemaFromData(value, false);
+    const buildSubSchemaFromData = (value) => buildSchemaFromData(value, requireAllFields, false);
     if (itemTypes.length === 1) {
       newSchema.items = data.map(buildSubSchemaFromData).reduce(
         (combined, item) => Object.assign(combined, item)
@@ -98,6 +100,7 @@ export function buildSchemaFromData(
     } else {
       newSchema.items = data.map(buildSubSchemaFromData);
     }
+    if (requireAllFields) { newSchema.minItems = 1; }
   }
   return newSchema;
 }

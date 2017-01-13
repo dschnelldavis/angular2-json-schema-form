@@ -1,6 +1,6 @@
 {
   "name": "angular2-json-schema-form",
-  "version": "0.3.0-alpha.23",
+  "version": "0.3.0-alpha.26",
   "author": {
     "name": "dschnelldavis",
     "email": "dschnelldavis@gmail.com"
@@ -34,7 +34,7 @@
     "test": "tsc && karma start",
     "typings": "typings",
     "docs": "typedoc --options typedoc.json src/index.ts",
-    "syncassets": "./node_modules/.bin/cpr src dist -f \\.ts",
+    "syncassets": "./node_modules/.bin/cpr src dist -f \\.ts -o",
     "watchassets": "onchange 'src/**/*.css' 'src/**/*.html' 'src/**/*.json' -e 'dist/*' -v -- npm run syncassets",
     "compile:tsc": "npm run clean:dist && npm run tsc && npm run syncassets",
     "compile:ngc": "npm run clean:dist && npm run ngc && npm run syncassets",
@@ -79,7 +79,7 @@
     "karma-jasmine-html-reporter": "^0.2.2",
     "lite-server": "^2.2.2",
     "onchange": "^3.2.1",
-    "protractor": "^4.0.13",
+    "protractor": "^5.0.0",
     "reflect-metadata": "^0.1.8",
     "rimraf": "^2.5.4",
     "rxjs": "^5.0.2",

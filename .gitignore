@@ -7,15 +7,13 @@ docs
 node_modules
 npm-debug.log
 
-# IDE
+# IDE & OS
 .idea
 .project
 .settings
 .idea/*
 *.iml
 *.swp
-
-# OS
 Thumbs.db
 Desktop.ini
 .DS_Store

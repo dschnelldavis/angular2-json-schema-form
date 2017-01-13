@@ -3,6 +3,9 @@
   -moz-osx-font-smoothing: grayscale;
 }
 h2 { font-weight: 200; }
+.text {
+  margin-bottom: 1em;
+}
 .navbar-inner {
   -webkit-border-radius: 0;
   -moz-border-radius: 0;
