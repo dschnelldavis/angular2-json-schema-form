@@ -29,13 +29,13 @@ import { JsonSchemaFormService } from '../library/json-schema-form.service';
 })
 export class CheckboxComponent implements OnInit {
   private formControl: AbstractControl;
-  private controlName: string;
-  private controlValue: any;
-  private controlDisabled: boolean = false;
   private boundControl: boolean = false;
-  private options: any;
   private trueValue: any = true;
   private falseValue: any = false;
+  public options: any;
+  public controlName: string;
+  public controlDisabled: boolean = false;
+  public controlValue: any;
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
@@ -53,12 +53,12 @@ export class CheckboxComponent implements OnInit {
     }
   }
 
-  private updateValue(event) {
+  public updateValue(event) {
     event.preventDefault();
     this.jsf.updateValue(this, event.target.checked ? this.trueValue : this.falseValue);
   }
 
-  private get isChecked() {
+  public get isChecked() {
     return this.jsf.getControlValue(this);
   }
 }

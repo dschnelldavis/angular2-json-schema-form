@@ -30,8 +30,8 @@ import { JsonSchemaFormService } from '../library/json-schema-form.service';
   `],
 })
 export class FieldsetComponent implements OnInit {
-  private options: any;
-  private expanded: boolean = true;
+  public options: any;
+  public expanded: boolean = true;
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];

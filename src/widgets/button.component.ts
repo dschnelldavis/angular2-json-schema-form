@@ -4,51 +4,55 @@ import { AbstractControl } from '@angular/forms';
 import { JsonSchemaFormService } from '../library/json-schema-form.service';
 
 @Component({
-  selector: 'button-widget',
-  template: `
+    selector: 'button-widget',
+    template: `
     <div
-      [class]="options?.htmlClass">
+      [class]="buttonLayoutOptions?.htmlClass">
       <button
-        [attr.readonly]="options?.readonly ? 'readonly' : null"
+        [attr.readonly]="buttonLayoutOptions?.readonly ? 'readonly' : null"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
-        [class]="options?.fieldHtmlClass"
+        [class]="buttonLayoutOptions?.fieldHtmlClass"
         [disabled]="controlDisabled"
         [name]="controlName"
         [type]="layoutNode?.type"
         [value]="controlValue"
         (click)="updateValue($event)">
-        <span *ngIf="options?.icon || options?.title"
-          [class]="options?.icon"
-          [innerHTML]="options?.title"></span>
+        <span *ngIf="buttonLayoutOptions?.icon || buttonLayoutOptions?.title"
+          [class]="buttonLayoutOptions?.icon"
+          [innerHTML]="buttonLayoutOptions?.title"></span>
       </button>
     </div>`,
 })
 export class ButtonComponent implements OnInit {
-  private formControl: AbstractControl;
-  private controlName: string;
-  private controlValue: any;
-  private controlDisabled: boolean = false;
-  private boundControl: boolean = false;
-  private options: any;
-  @Input() formID: number;
-  @Input() layoutNode: any;
-  @Input() layoutIndex: number[];
-  @Input() dataIndex: number[];
+    private formControl: AbstractControl;
+    private boundControl: boolean = false;
+    private buttonLayoutOptions: any;
+    public controlDisabled: boolean = false;
+    public controlName: string;
+    public controlValue: any;
+    @Input() formID: number;
+    @Input() layoutNode: any;
+    @Input() layoutIndex: number[];
+    @Input() dataIndex: number[];
 
-  constructor(
-    private jsf: JsonSchemaFormService
-  ) { }
+    constructor(
+        private jsf: JsonSchemaFormService
+    ) { }
 
-  ngOnInit() {
-    this.options = this.layoutNode.options;
-    this.jsf.initializeControl(this);
-  }
-
-  private updateValue(event) {
-    if (typeof this.options.onClick === 'function') {
-      this.options.onClick(event);
-    } else {
-      this.jsf.updateValue(this, event.target.value);
+    ngOnInit() {
+        this.buttonLayoutOptions = this.layoutNode.options;
+        this.jsf.initializeControl(this);
     }
-  }
+
+    public updateValue(event) {
+        if (typeof this.buttonLayoutOptions.onClick === 'function') {
+            this.buttonLayoutOptions.onClick(event);
+        } else {
+            this.jsf.updateValue(this, event.target.value);
+        }
+    }
+
+    public get options() {
+        return this.buttonLayoutOptions;
+    }
 }

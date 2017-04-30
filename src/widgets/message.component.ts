@@ -14,7 +14,7 @@ import { JsonSchemaFormService } from '../library/json-schema-form.service';
 })
 export class MessageComponent implements OnInit {
   private options: any;
-  private message: string = null;
+  public message: string = null;
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
