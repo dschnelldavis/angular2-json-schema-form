@@ -31,11 +31,11 @@ import { buildTitleMap } from '../library/utilities/index';
 })
 export class SelectComponent implements OnInit {
   private formControl: AbstractControl;
-  private controlName: string;
-  private controlValue: any;
-  private controlDisabled: boolean = false;
   private boundControl: boolean = false;
   public selectList: any[] = [];
+  public controlName: string;
+  public controlValue: any;
+  public controlDisabled: boolean = false;
   public options: any;
   @Input() formID: number;
   @Input() layoutNode: any;
@@ -56,7 +56,7 @@ export class SelectComponent implements OnInit {
     this.jsf.initializeControl(this);
   }
 
-  private updateValue(event) {
+  public updateValue(event) {
     this.jsf.updateValue(this, event.target.value);
   }
 }

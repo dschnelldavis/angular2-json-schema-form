@@ -59,9 +59,9 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
-  private formID: number; // Unique ID for displayed form
   private debugOutput: any; // Debug information, if requested
   private formValueSubscription: any = null;
+  public formID: number; // Unique ID for displayed form
 
   // Recommended inputs
   @Input() schema: any; // The JSON Schema
@@ -97,7 +97,7 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
   constructor(
     private frameworkLibrary: FrameworkLibraryService,
     private widgetLibrary: WidgetLibraryService,
-    private jsf: JsonSchemaFormService
+    public jsf: JsonSchemaFormService
   ) { }
 
   ngOnInit() {
@@ -422,7 +422,7 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
     }
   }
 
-  private submitForm() {
+  public submitForm() {
     this.onSubmit.emit(this.jsf.validData);
   }
 }

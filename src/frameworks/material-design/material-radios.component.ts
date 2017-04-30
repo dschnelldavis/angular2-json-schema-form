@@ -33,14 +33,14 @@ import { buildTitleMap } from '../../library/utilities/index';
     </md-radio-group>`,
 })
 export class MaterialRadiosComponent implements OnInit {
-  private formControl: AbstractControl;
-  private controlName: string;
-  private controlValue: any;
-  private controlDisabled: boolean = false;
   private boundControl: boolean = false;
-  private options: any;
-  private layoutOrientation: string = 'vertical';
-  private radiosList: any[] = [];
+  public formControl: AbstractControl;
+  public controlName: string;
+  public controlValue: any;
+  public controlDisabled: boolean = false;
+  public options: any;
+  public layoutOrientation: string = 'vertical';
+  public radiosList: any[] = [];
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
@@ -64,7 +64,7 @@ export class MaterialRadiosComponent implements OnInit {
     this.jsf.initializeControl(this);
   }
 
-  private updateValue(value) {
+  public updateValue(value) {
     this.jsf.updateValue(this, value);
   }
 }

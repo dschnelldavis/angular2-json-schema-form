@@ -22,9 +22,9 @@ import { JsonSchemaFormService } from '../library/json-schema-form.service';
     </div>`,
 })
 export class SubmitComponent implements OnInit {
-  private formControl: AbstractControl;
-  private controlDisabled: boolean = false;
-  private options: any;
+  public formControl: AbstractControl;
+  public controlDisabled: boolean = false;
+  public options: any;
   public boundControl: boolean = false;
   public controlName: string;
   public controlValue: any;

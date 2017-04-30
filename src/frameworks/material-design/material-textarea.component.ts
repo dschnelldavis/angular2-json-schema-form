@@ -33,12 +33,12 @@ import { JsonSchemaFormService } from '../../library/json-schema-form.service';
     </md-textarea>`,
 })
 export class MaterialTextareaComponent implements OnInit {
-  private formControl: AbstractControl;
-  private controlName: string;
-  private controlValue: any;
-  private controlDisabled: boolean = false;
   private boundControl: boolean = false;
-  private options: any;
+  public formControl: AbstractControl;
+  public controlName: string;
+  public controlValue: any;
+  public controlDisabled: boolean = false;
+  public options: any;
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
@@ -53,7 +53,7 @@ export class MaterialTextareaComponent implements OnInit {
     this.jsf.initializeControl(this);
   }
 
-  private updateValue(event) {
+  public updateValue(event) {
     this.jsf.updateValue(this, event.target.value);
   }
 }
