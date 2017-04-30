@@ -43,13 +43,16 @@
     "start": "npm run compile:tsc && concurrently \"npm run tsc -w\" \"lite-server\" \"npm run watchassets\""
   },
   "dependencies": {
-    "@angular/common": "2.x",
-    "@angular/compiler": "2.x",
-    "@angular/core": "2.x",
-    "@angular/forms": "2.x",
-    "@angular/material": "2.0.0-beta.1",
-    "@angular/platform-browser": "2.x",
-    "@angular/platform-browser-dynamic": "2.x",
+    "@angular/animations": "^4.0.0",
+    "@angular/common": "^4.0.0",
+    "@angular/compiler": "^4.0.0",
+    "@angular/core": "^4.0.0",
+    "@angular/forms": "^4.0.0",
+    "@angular/http": "^4.0.0",
+    "@angular/material": "^2.0.0-beta.1",
+    "@angular/platform-browser": "^4.0.0",
+    "@angular/platform-browser-dynamic": "^4.0.0",
+    "@angular/router": "^4.0.0",
     "@types/lodash": "4.x",
     "ajv": "4.x",
     "lodash": "4.x"
