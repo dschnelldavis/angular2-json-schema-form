@@ -39,10 +39,10 @@ import { JsonSchemaFormService } from '../../library/json-schema-form.service';
 export class MaterialInputComponent implements OnInit {
   private boundControl: boolean = false;
   private autoCompleteList: string[] = [];
-  private controlName: string;
   public formControl: AbstractControl;
   public controlDisabled: boolean = false;
   public controlValue: any;
+  public controlName: string;
   public options: any;
   @Input() formID: number;
   @Input() layoutNode: any;
