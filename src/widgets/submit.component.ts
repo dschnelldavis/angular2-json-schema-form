@@ -23,11 +23,11 @@ import { JsonSchemaFormService } from '../library/json-schema-form.service';
 })
 export class SubmitComponent implements OnInit {
   private formControl: AbstractControl;
-  private controlName: string;
-  private controlValue: any;
   private controlDisabled: boolean = false;
-  private boundControl: boolean = false;
   private options: any;
+  public boundControl: boolean = false;
+  public controlName: string;
+  public controlValue: any;
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
@@ -45,7 +45,7 @@ export class SubmitComponent implements OnInit {
     }
   }
 
-  private updateValue(event) {
+  public updateValue(event) {
     if (typeof this.options.onClick === 'function') {
       this.options.onClick(event);
     } else {

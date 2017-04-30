@@ -18,11 +18,11 @@ import { JsonSchemaFormService } from '../../library/json-schema-form.service';
     </section>`,
 })
 export class MaterialAddReferenceComponent implements OnInit, DoCheck {
-  private options: any;
   private itemCount: number;
-  private showAddButton: boolean = true;
   private previousLayoutIndex: number[];
   private previousDataIndex: number[];
+  public showAddButton: boolean = true;
+  public options: any;
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];

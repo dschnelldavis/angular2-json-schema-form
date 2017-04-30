@@ -7,29 +7,29 @@ import { JsonSchemaFormService } from '../library/json-schema-form.service';
     selector: 'button-widget',
     template: `
     <div
-      [class]="buttonLayoutOptions?.htmlClass">
+      [class]="options?.htmlClass">
       <button
-        [attr.readonly]="buttonLayoutOptions?.readonly ? 'readonly' : null"
+        [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
-        [class]="buttonLayoutOptions?.fieldHtmlClass"
+        [class]="options?.fieldHtmlClass"
         [disabled]="controlDisabled"
         [name]="controlName"
         [type]="layoutNode?.type"
         [value]="controlValue"
         (click)="updateValue($event)">
-        <span *ngIf="buttonLayoutOptions?.icon || buttonLayoutOptions?.title"
-          [class]="buttonLayoutOptions?.icon"
-          [innerHTML]="buttonLayoutOptions?.title"></span>
+        <span *ngIf="options?.icon || options?.title"
+          [class]="options?.icon"
+          [innerHTML]="options?.title"></span>
       </button>
     </div>`,
 })
 export class ButtonComponent implements OnInit {
     private formControl: AbstractControl;
     private boundControl: boolean = false;
-    private buttonLayoutOptions: any;
     public controlDisabled: boolean = false;
     public controlName: string;
     public controlValue: any;
+    public options: any;
     @Input() formID: number;
     @Input() layoutNode: any;
     @Input() layoutIndex: number[];
@@ -40,19 +40,15 @@ export class ButtonComponent implements OnInit {
     ) { }
 
     ngOnInit() {
-        this.buttonLayoutOptions = this.layoutNode.options;
+        this.options = this.layoutNode.options;
         this.jsf.initializeControl(this);
     }
 
     public updateValue(event) {
-        if (typeof this.buttonLayoutOptions.onClick === 'function') {
-            this.buttonLayoutOptions.onClick(event);
+        if (typeof this.options.onClick === 'function') {
+            this.options.onClick(event);
         } else {
             this.jsf.updateValue(this, event.target.value);
         }
-    }
-
-    public get options() {
-        return this.buttonLayoutOptions;
     }
 }
