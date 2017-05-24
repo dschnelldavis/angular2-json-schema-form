@@ -1,9 +1,9 @@
-# Angular 2 JSON Schema Form
+# Angular2 JSON Schema Form
 
 [![npm version](https://img.shields.io/npm/v/angular2-json-schema-form.svg?style=plastic)](https://www.npmjs.com/package/angular2-json-schema-form) [![npm downloads](https://img.shields.io/npm/dm/angular2-json-schema-form.svg?style=plastic)](https://www.npmjs.com/package/angular2-json-schema-form) [![GitHub MIT License](https://img.shields.io/github/license/dschnelldavis/angular2-json-schema-form.svg?style=social)](https://github.com/dschnelldavis/angular2-json-schema-form)
 [![Dependencies](https://david-dm.org/dschnelldavis/angular2-json-schema-form.svg)](https://david-dm.org/dschnelldavis/angular2-json-schema-form) [![devDependencies](https://david-dm.org/dschnelldavis/angular2-json-schema-form/dev-status.svg)](https://david-dm.org/dschnelldavis/angular2-json-schema-form?type=dev)
 
-A [JSON Schema](http://json-schema.org) Form builder for Angular 2, similar to, and mostly API compatible with,
+A [JSON Schema](http://json-schema.org) Form builder for Angular (2 or 4), similar to, and mostly API compatible with,
 
   * [JSON Schema Form](https://github.com/json-schema-form)'s [Angular Schema Form](http://schemaform.io) for [Angular 1](https://angularjs.org) ([examples](http://schemaform.io/examples/bootstrap-example.html))
   * [Mozilla](https://blog.mozilla.org/services/)'s [React JSON Schema Form](https://github.com/mozilla-services/react-jsonschema-form) for [React](https://facebook.github.io/react/) ([examples](https://mozilla-services.github.io/react-jsonschema-form/)), and
@@ -15,7 +15,7 @@ Note: This is a personal proof-of-concept project, and is NOT currently affiliat
 
 ### To install from GitHub and play with the examples
 
-The [GitHub](https://github.com) version of Angular 2 JSON Schema Form includes an example playground with over 70 different JSON Schemas (including all examples used by each of the three libraries listed above), and the ability to quickly view any example formatted using Bootstrap 3 or Material Design (or with no formatting, which is functional, but usually pretty ugly).
+The [GitHub](https://github.com) version of Angular JSON Schema Form includes an example playground with over 70 different JSON Schemas (including all examples used by each of the three libraries listed above), and the ability to quickly view any example formatted using Bootstrap 3 or Material Design (or with no formatting, which is functional, but usually pretty ugly).
 
 To install both the library and the example playground, clone `https://github.com/dschnelldavis/angular2-json-schema-form.git` with your favorite git program, or, assuming you have [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and [Node/NPM](https://nodejs.org/en/download/) installed, enter the following in your terminal:
 
@@ -30,13 +30,13 @@ This should start the example playground locally and display it at `http://local
 
 All the source code is in the `/src` folder. Inside that folder, you will find the following sub-folders:
 
-* `library` contains the Angular 2 JSON Schema Form library
+* `library` contains the Angular JSON Schema Form library
 * `playground` contains the example playground
 * `playground/examples` contains the JSON Schema examples
 * `frameworks` contains the framework library (described below)
 * `widgets` contains the widget library
 
-If you want additional documentation describing the individual functions used in this library, run `npm run docs` to generate TypeDoc documentation, and then look in the newly generated `/docs` folder. (Angular 2 JSON Schema Form is still a work in progress, so right now this documentation varies from highly detailed to completely missing.)
+If you want additional documentation describing the individual functions used in this library, run `npm run docs` to generate TypeDoc documentation, and then look in the newly generated `/docs` folder. (Angular JSON Schema Form is still a work in progress, so right now this documentation varies from highly detailed to completely missing.)
 
 ### To install from NPM and use in your own project
 
@@ -131,11 +131,11 @@ And add this line to the 'packages' section:
 
 (For a complete example of how to install and use the library with SystemJS, clone the GitHub repository and look at how the library is imported into the example playground.)
 
-## Using Angular 2 JSON Schema Form
+## Using Angular JSON Schema Form
 
 ### Basic use
 
-For basic use, after loading the JsonSchemaFormModule as described above, to add a form to your Angular 2 component, simply add the following to your component's template:
+For basic use, after loading the JsonSchemaFormModule as described above, to add a form to your Angular component, simply add the following to your component's template:
 
 ```html
 <json-schema-form
@@ -232,7 +232,7 @@ exampleJsonObject = {
 </json-schema-form>
 ```
 
-In this mode, Angular 2 JSON Schema Form generates a schema from your data on the fly. The generated schema is obviously very simple compared to what you could create on your own. However, as the above example shows, it does detect and enforce string, number, and boolean values (nulls are also assumed to be strings), and automatically allows array elements to be added, removed, and reordered.
+In this mode, Angular JSON Schema Form generates a schema from your data on the fly. The generated schema is obviously very simple compared to what you could create on your own. However, as the above example shows, it does detect and enforce string, number, and boolean values (nulls are also assumed to be strings), and automatically allows array elements to be added, removed, and reordered.
 
 After displaying a form in this mode, you can also use the `formSchema` and `formLayout` outputs (described in 'Debugging inputs and outputs', below), to return the generated schema and layout, which will give you a head start on writing your own schemas and layouts by showing you examples created from your own data.
 
@@ -290,11 +290,11 @@ Finally, Angular2 JSON Schema Form includes some additional inputs and outputs f
 
 ## Customizing
 
-Angular 2 JSON Schema Form has two built-in features designed to make it easy to customize at run-time: a widget library and a framework library. All forms are constructed from these basic components. The default widget library includes all standard HTML 5 form controls, as well as several common layout patterns, such as multiple checkboxes and tab sets. And the default framework library includes templates to style forms using either Bootstrap 3 or Material Design (or with no formatting, which is not useful in production, but can be helpful for debugging).
+Angular JSON Schema Form has two built-in features designed to make it easy to customize at run-time: a widget library and a framework library. All forms are constructed from these basic components. The default widget library includes all standard HTML 5 form controls, as well as several common layout patterns, such as multiple checkboxes and tab sets. And the default framework library includes templates to style forms using either Bootstrap 3 or Material Design (or with no formatting, which is not useful in production, but can be helpful for debugging).
 
 ### Changing or adding widgets
 
-To add a new widget or override an existing widget, either add an object containing your new widgets to the `widgets` input of the `<json-schema-form>` tag, or load the `WidgetLibraryService` and call `registerWidget(widgetType, widgetComponent)`, with a string type name and an Angular 2 component to be used whenever a form needs that widget type.
+To add a new widget or override an existing widget, either add an object containing your new widgets to the `widgets` input of the `<json-schema-form>` tag, or load the `WidgetLibraryService` and call `registerWidget(widgetType, widgetComponent)`, with a string type name and an Angular component to be used whenever a form needs that widget type.
 
 Example:
 
@@ -359,13 +359,13 @@ constructor(private frameworkLibrary: FrameworkLibraryService) { }
 frameworkLibrary.setFramework(yourCustomFramework);
 ```
 
-The value of the required `framework` key is an Angular 2 component which will be called to format each widget before it is displayed. The optional `widgets` object contains any custom widgets which will override or supplement the built-in widgets. And the optional `stylesheets` and `scripts` arrays contain URLs to any additional external style sheets or JavaScript libraries required by the framework.
+The value of the required `framework` key is an Angular component which will be called to format each widget before it is displayed. The optional `widgets` object contains any custom widgets which will override or supplement the built-in widgets. And the optional `stylesheets` and `scripts` arrays contain URLs to any additional external style sheets or JavaScript libraries required by the framework.
 
 #### Loading external assets required by a framework
 
-Most Web layout framework libraries (including both Bootstrap and Material Design) need additional external JavaScript and/or CSS assets loaded in order to work properly. The best practice is to load these assets separately in your site, before calling Angular 2 JSON Schema Form. (For the included libraries, follow these links for more information about how to do this: [Bootstrap](http://getbootstrap.com/getting-started/) and [Material Design](https://github.com/angular/material2/blob/master/GETTING_STARTED.md).)
+Most Web layout framework libraries (including both Bootstrap and Material Design) need additional external JavaScript and/or CSS assets loaded in order to work properly. The best practice is to load these assets separately in your site, before calling Angular JSON Schema Form. (For the included libraries, follow these links for more information about how to do this: [Bootstrap](http://getbootstrap.com/getting-started/) and [Material Design](https://github.com/angular/material2/blob/master/GETTING_STARTED.md).)
 
-Alternately, during development, you may find it helpful to let Angular 2 JSON Schema Form load these resources for you (as wed did in the 'Basic use' example, above), which you can do in several ways:
+Alternately, during development, you may find it helpful to let Angular JSON Schema Form load these resources for you (as wed did in the 'Basic use' example, above), which you can do in several ways:
 
   * Call `setFramework` with a second parameter of `true` (e.g. `setFramework('material-design', true)`), or
   * Add `loadExternalAssets: true` to your `options` object, or
@@ -377,7 +377,7 @@ However, if you are creating a production site you should load these assets sepa
 
 #### Two strategies for writing your own frameworks
 
-The two built-in frameworks (both in the `/src/frameworks` folder) demonstrate different strategies for how frameworks can style form elements. The Bootstrap 3 framework is very lightweight and includes no additional widgets (though it does load some external stylesheets and scripts) and works entirely by adding styles to the default widgets. In contrast, the Material Design framework uses the [Material Design for Angular 2](https://github.com/angular/material2) library (which must also be loaded into the application separately, as described above) to replace most of the default form control widgets with custom widgets from that library.
+The two built-in frameworks (both in the `/src/frameworks` folder) demonstrate different strategies for how frameworks can style form elements. The Bootstrap 3 framework is very lightweight and includes no additional widgets (though it does load some external stylesheets and scripts) and works entirely by adding styles to the default widgets. In contrast, the Material Design framework uses the [Material Design for Angular](https://github.com/angular/material2) library (which must also be loaded into the application separately, as described above) to replace most of the default form control widgets with custom widgets from that library.
 
 ## Contributions and future development
 

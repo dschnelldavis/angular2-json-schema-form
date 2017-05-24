@@ -8,7 +8,7 @@ import { OrderableDirective } from './utilities/orderable.directive';
 
 import { ALL_FRAMEWORKS } from '../frameworks/index';
 import { ALL_WIDGETS } from '../widgets/index';
-import { ALL_MATERIAL_DESIGN_WIDGETS } from '../frameworks/material-design/index';
+// import { ALL_MATERIAL_DESIGN_WIDGETS } from '../frameworks/material-design/index';
 
 import { FrameworkLibraryService } from '../frameworks/framework-library.service';
 import { WidgetLibraryService } from '../widgets/widget-library.service';
@@ -25,7 +25,7 @@ export {
 };
 
 const ALL_COMPONENTS = [
-  ...ALL_FRAMEWORKS, ...ALL_WIDGETS, ...ALL_MATERIAL_DESIGN_WIDGETS,
+  ...ALL_FRAMEWORKS, ...ALL_WIDGETS // , ...ALL_MATERIAL_DESIGN_WIDGETS,
 ];
 
 @NgModule({

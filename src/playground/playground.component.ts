@@ -189,7 +189,7 @@ export class PlaygroundComponent implements OnInit, AfterViewInit {
     frameworkList: [ 'bootstrap-3', 'material-design', 'no-framework' ],
     frameworks: {
       'bootstrap-3': 'Bootstrap 3 framework',
-      'material-design': 'Material Design framework (under construction)',
+      // 'material-design': 'Material Design framework (under construction)',
       'no-framework': 'No Framework (bare controls + styles from layout only)',
     },
   };
