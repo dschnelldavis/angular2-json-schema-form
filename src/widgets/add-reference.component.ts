@@ -6,7 +6,7 @@ import { JsonSchemaFormService } from '../library/json-schema-form.service';
 @Component({
   selector: 'add-reference-widget',
   template: `
-    <button *ngIf="showAddButton"
+    <button *ngIf="addButtonVisible"
       [class]="options?.fieldHtmlClass"
       [disabled]="options?.readonly"
       (click)="addItem($event)">
@@ -17,9 +17,9 @@ import { JsonSchemaFormService } from '../library/json-schema-form.service';
 export class AddReferenceComponent implements OnInit, DoCheck {
   private options: any;
   private itemCount: number;
-  private showAddButton: boolean = true;
   private previousLayoutIndex: number[];
   private previousDataIndex: number[];
+  public addButtonVisible: boolean = true;
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
@@ -53,7 +53,7 @@ export class AddReferenceComponent implements OnInit, DoCheck {
     this.itemCount = this.layoutIndex[this.layoutIndex.length - 1];
     this.previousLayoutIndex = this.layoutIndex;
     this.previousDataIndex = this.dataIndex;
-    this.showAddButton = this.layoutNode.arrayItem &&
+    this.addButtonVisible = this.layoutNode.arrayItem &&
       this.itemCount < (this.options.maxItems || 1000000);
   }
 
@@ -63,5 +63,9 @@ export class AddReferenceComponent implements OnInit, DoCheck {
       layoutNode: this.jsf.getParentNode(this)
     };
     return this.jsf.setTitle(parent, this.layoutNode, this.itemCount);
+  }
+
+  public get showAddButton() {
+      return this.addButtonVisible;
   }
 }

@@ -33,8 +33,8 @@ import { JsonSchemaFormService } from '../../library/json-schema-form.service';
   `],
 })
 export class MaterialCardComponent implements OnInit {
-  private options: any;
-  private expanded: boolean = true;
+  public expanded: boolean = true;
+  public options: any;
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
@@ -49,7 +49,7 @@ export class MaterialCardComponent implements OnInit {
     this.expanded = !this.options.expandable;
   }
 
-  private expand() {
-    if (this.options.expandable) this.expanded = !this.expanded;
+  public expand() {
+    if (this.options.expandable) { this.expanded = !this.expanded; }
   }
 }

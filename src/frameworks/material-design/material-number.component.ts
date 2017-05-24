@@ -43,16 +43,16 @@ import { getControl, inArray, isDefined } from '../../library/utilities/index';
     styles: [`md-input { margin-top: 6px; }`],
 })
 export class MaterialNumberComponent implements OnInit {
-  private formControl: AbstractControl;
-  private controlName: string;
-  private controlValue: any;
-  private controlDisabled: boolean = false;
   private boundControl: boolean = false;
-  private options: any;
   private allowNegative: boolean = true;
   private allowDecimal: boolean = true;
   private allowExponents: boolean = false;
-  private lastValidNumber: string = '';
+  public lastValidNumber: string = '';
+  public formControl: AbstractControl;
+  public controlName: string;
+  public controlValue: any;
+  public controlDisabled: boolean = false;
+  public options: any;
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
@@ -65,30 +65,29 @@ export class MaterialNumberComponent implements OnInit {
   ngOnInit() {
     this.options = this.layoutNode.options;
     this.jsf.initializeControl(this);
-    if (this.layoutNode.dataType === 'integer') this.allowDecimal = false;
+    if (this.layoutNode.dataType === 'integer') { this.allowDecimal = false; }
   }
 
-  private updateValue(event) {
+  public updateValue(event) {
     this.jsf.updateValue(this, event.target.value);
   }
 
-  private validateInput(event) {
+  public validateInput(event) {
     const val = event.target.value;
-    if (/^Digit\d$/.test(event.code)) return true;
-    if (/^Numpad\d$/.test(event.code)) return true;
-    if (/^Arrow/.test(event.code)) return true;
-    if (inArray(event.code, ['Backspace', 'Delete', 'Enter', 'Escape',
-      'NumpadEnter', 'PrintScreen', 'Tab'])) return true;
-    if (event.ctrlKey || event.altKey || event.metaKey) return true;
+    if (/^Digit\d$/.test(event.code)) { return true; }
+    if (/^Numpad\d$/.test(event.code)) { return true; }
+    if (/^Arrow/.test(event.code)) { return true; }
+    if (inArray(event.code, ['Backspace', 'Delete', 'Enter', 'Escape', 'NumpadEnter', 'PrintScreen', 'Tab'])) { return true; }
+    if (event.ctrlKey || event.altKey || event.metaKey) { return true; }
     if (this.allowDecimal && event.key === '.' &&
-      val.indexOf('.') === -1) return true;
+      val.indexOf('.') === -1) { return true; }
     if (this.allowExponents) {
       const hasExponent = /e/i.test(val);
-      if (/^e$/i.test(event.key) && !hasExponent && val) return true;
+      if (/^e$/i.test(event.key) && !hasExponent && val) { return true; }
       if (event.key === '-') {
         const minusCount = (val.match(/\-/g) || []).length;
-        if ((this.allowNegative || hasExponent) && !minusCount) return true;
-        if (this.allowNegative && hasExponent && minusCount === 1) return true;
+        if ((this.allowNegative || hasExponent) && !minusCount) { return true; }
+        if (this.allowNegative && hasExponent && minusCount === 1) { return true; }
       }
     } else if (this.allowNegative && event.key === '-' && val.indexOf('-') === -1) {
       return true;
@@ -98,7 +97,7 @@ export class MaterialNumberComponent implements OnInit {
     return false;
   }
 
-  private validateNumber(event) {
+  public validateNumber(event) {
     // TODO: This only works for input type=text - make it work for type=number
     const val = event.target.value;
     if (!isNaN(val) || val === '' || val === '.' || val === '-' || val === '-.' ||

@@ -39,6 +39,7 @@ const ALL_COMPONENTS = [
     FormsModule, ReactiveFormsModule, MaterialModule,
     JsonSchemaFormComponent, OrderableDirective,
   ],
+  entryComponents: [...ALL_COMPONENTS]
 })
 export class JsonSchemaFormModule {
   static forRoot(): ModuleWithProviders {
@@ -47,11 +48,6 @@ export class JsonSchemaFormModule {
       providers: [
         FrameworkLibraryService,
         WidgetLibraryService,
-        {
-          provide: ANALYZE_FOR_ENTRY_COMPONENTS,
-          useValue: [...ALL_COMPONENTS],
-          multi: true,
-        },
       ],
     };
   }

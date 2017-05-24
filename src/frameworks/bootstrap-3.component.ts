@@ -97,12 +97,13 @@ import {
 })
 export class Bootstrap3Component implements OnInit, OnChanges {
   private controlInitialized: boolean = false;
-  private options: any; // Options used in this framework
-  private widgetLayoutNode: any; // layoutNode passed to child widget
   private widgetOptions: any; // Options passed to child widget
   private layoutPointer: string;
-  private formControl: any = null;
-  private debugOutput: any = '';
+  public widgetLayoutNode: any; // layoutNode passed to child widget
+  public options: any; // Options used in this framework
+  public formControl: any = null;
+  public debugOutput: any = '';
+  public debug: any = '';
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
@@ -110,7 +111,7 @@ export class Bootstrap3Component implements OnInit, OnChanges {
 
   constructor(
     public changeDetector: ChangeDetectorRef,
-    private jsf: JsonSchemaFormService
+    public jsf: JsonSchemaFormService
   ) { }
 
   ngOnInit() {

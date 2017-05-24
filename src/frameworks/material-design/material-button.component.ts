@@ -26,11 +26,11 @@ import { JsonSchemaFormService } from '../../library/json-schema-form.service';
 })
 export class MaterialButtonComponent implements OnInit {
   private formControl: AbstractControl;
-  private controlName: string;
-  private controlValue: any;
-  private controlDisabled: boolean = false;
   private boundControl: boolean = false;
-  private options: any;
+  public controlName: string;
+  public controlDisabled: boolean = false;
+  public controlValue: any;
+  public options: any;
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
@@ -45,7 +45,7 @@ export class MaterialButtonComponent implements OnInit {
     this.jsf.initializeControl(this);
   }
 
-  private updateValue(event) {
+  public updateValue(event) {
     if (typeof this.options.onClick === 'function') {
       this.options.onClick(event);
     } else {

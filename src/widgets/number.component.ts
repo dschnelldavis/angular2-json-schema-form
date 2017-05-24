@@ -38,15 +38,15 @@ import { getControl, inArray, isDefined } from '../library/utilities/index';
 })
 export class NumberComponent implements OnInit {
   private formControl: AbstractControl;
-  private controlName: string;
-  private controlValue: any;
-  private controlDisabled: boolean = false;
   private boundControl: boolean = false;
-  private options: any;
   private allowNegative: boolean = true;
   private allowDecimal: boolean = true;
   private allowExponents: boolean = false;
-  private lastValidNumber: string = '';
+  public lastValidNumber: string = '';
+  public controlName: string;
+  public controlValue: any;
+  public controlDisabled: boolean = false;
+  public options: any;
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
@@ -62,11 +62,11 @@ export class NumberComponent implements OnInit {
     if (this.layoutNode.dataType === 'integer') { this.allowDecimal = false; }
   }
 
-  private updateValue(event) {
+  public updateValue(event) {
     this.jsf.updateValue(this, event.target.value);
   }
 
-  private validateInput(event) {
+  public validateInput(event) {
     const val = event.target.value;
     if (/^Digit\d$/.test(event.code)) { return true; }
     if (/^Numpad\d$/.test(event.code)) { return true; }
@@ -91,7 +91,7 @@ export class NumberComponent implements OnInit {
     return false;
   }
 
-  private validateNumber(event) {
+  public validateNumber(event) {
     // TODO: This only works for input type=text - make it work for type=number
     const val = event.target.value;
     if (!isNaN(val) || val === '' || val === '.' || val === '-' || val === '-.' ||

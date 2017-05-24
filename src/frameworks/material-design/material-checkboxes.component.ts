@@ -46,14 +46,16 @@ import { buildFormGroup, buildTitleMap, JsonPointer } from '../../library/utilit
   `]
 })
 export class MaterialCheckboxesComponent implements OnInit {
-  private formControl: AbstractControl;
-  private controlName: string;
-  private controlValue: any;
   private boundControl: boolean = false;
-  private options: any;
-  private horizontalList: boolean = false;
   private formArray: AbstractControl;
-  private checkboxList: CheckboxItem[] = [];
+  public formControl: AbstractControl;
+  public controlName: string;
+  public controlValue: any;
+  public controlDisabled: boolean = false;
+  public checkboxItem: any;
+  public checkboxList: CheckboxItem[] = [];
+  public horizontalList: boolean = false;
+  public options: any;
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];

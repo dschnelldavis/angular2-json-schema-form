@@ -37,13 +37,13 @@ import { JsonSchemaFormService } from '../../library/json-schema-form.service';
     styles: [`md-input { margin-top: 6px; }`],
 })
 export class MaterialInputComponent implements OnInit {
-  private formControl: AbstractControl;
-  private controlName: string;
-  private controlValue: any;
-  private controlDisabled: boolean = false;
   private boundControl: boolean = false;
-  private options: any;
   private autoCompleteList: string[] = [];
+  public formControl: AbstractControl;
+  public controlDisabled: boolean = false;
+  public controlValue: any;
+  public controlName: string;
+  public options: any;
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
@@ -58,7 +58,7 @@ export class MaterialInputComponent implements OnInit {
     this.jsf.initializeControl(this);
   }
 
-  private updateValue(event) {
+  public updateValue(event) {
     this.jsf.updateValue(this, event.target.value);
   }
 }

@@ -66,10 +66,10 @@ export class CheckboxesComponent implements OnInit {
   private controlName: string;
   private controlValue: any;
   private boundControl: boolean = false;
-  private options: any;
-  private layoutOrientation: string;
   private formArray: AbstractControl;
   private checkboxList: CheckboxItem[] = [];
+  public options: any;
+  public layoutOrientation: string;
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];

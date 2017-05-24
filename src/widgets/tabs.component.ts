@@ -33,10 +33,10 @@ import { JsonPointer } from '../library/utilities/index';
   styles: [`a { cursor: pointer; }`],
 })
 export class TabsComponent implements OnInit {
-  private options: any;
   private itemCount: number;
   private selectedItem: number = 0;
   private showAddTab: boolean = true;
+  public options: any;
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
