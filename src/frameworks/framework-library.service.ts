@@ -9,19 +9,19 @@ import { NoFrameworkComponent } from './no-framework.component';
 // https://github.com/angular/material2
 // https://www.muicss.com/docs/v1/css-js/forms
 // http://materializecss.com/forms.html
-import { MaterialDesignComponent } from './material-design/material-design.component';
-import { MaterialAddReferenceComponent } from './material-design/material-add-reference.component';
-import { MaterialButtonComponent } from './material-design/material-button.component';
-import { MaterialCardComponent } from './material-design/material-card.component';
-import { MaterialCheckboxComponent } from './material-design/material-checkbox.component';
-import { MaterialCheckboxesComponent } from './material-design/material-checkboxes.component';
-import { MaterialFileComponent } from './material-design/material-file.component';
-import { MaterialInputComponent } from './material-design/material-input.component';
-import { MaterialNumberComponent } from './material-design/material-number.component';
-import { MaterialRadiosComponent } from './material-design/material-radios.component';
-import { MaterialSelectComponent } from './material-design/material-select.component';
-import { MaterialTabsComponent } from './material-design/material-tabs.component';
-import { MaterialTextareaComponent } from './material-design/material-textarea.component';
+// import { MaterialDesignComponent } from './material-design/material-design.component';
+// import { MaterialAddReferenceComponent } from './material-design/material-add-reference.component';
+// import { MaterialButtonComponent } from './material-design/material-button.component';
+// import { MaterialCardComponent } from './material-design/material-card.component';
+// import { MaterialCheckboxComponent } from './material-design/material-checkbox.component';
+// import { MaterialCheckboxesComponent } from './material-design/material-checkboxes.component';
+// import { MaterialFileComponent } from './material-design/material-file.component';
+// import { MaterialInputComponent } from './material-design/material-input.component';
+// import { MaterialNumberComponent } from './material-design/material-number.component';
+// import { MaterialRadiosComponent } from './material-design/material-radios.component';
+// import { MaterialSelectComponent } from './material-design/material-select.component';
+// import { MaterialTabsComponent } from './material-design/material-tabs.component';
+// import { MaterialTextareaComponent } from './material-design/material-textarea.component';
 
 // Bootstrap 3 Framework
 // https://github.com/valor-software/ng2-bootstrap
@@ -56,31 +56,31 @@ export class FrameworkLibraryService {
   private defaultFramework: string = 'bootstrap-3';
   private frameworkLibrary: FrameworkLibrary = {
     'no-framework': { framework: NoFrameworkComponent },
-    'material-design': {
-      framework: MaterialDesignComponent,
-      widgets: {
-        '$ref': MaterialAddReferenceComponent,
-        'number': MaterialNumberComponent,
-        'text': MaterialInputComponent,
-        'file': MaterialFileComponent,
-        'checkbox': MaterialCheckboxComponent,
-        'submit': 'button',
-        'button': MaterialButtonComponent,
-        'select': MaterialSelectComponent,
-        'textarea': MaterialTextareaComponent,
-        'checkboxes': MaterialCheckboxesComponent,
-        'radios': MaterialRadiosComponent,
-        'card': MaterialCardComponent,
-        'tabs': MaterialTabsComponent,
-      },
-      stylesheets: [
-        '//fonts.googleapis.com/icon?family=Material+Icons',
-        '//fonts.googleapis.com/css?family=Roboto:300,400,500,700',
-        '//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css',
-        // './node_modules/@angular/material/core/theming/prebuilt/deeppurple-amber.css',
-        './node_modules/@angular/material/core/theming/prebuilt/indigo-pink.css',
-      ],
-    },
+    // 'material-design': {
+    //   framework: MaterialDesignComponent,
+    //   widgets: {
+    //     '$ref': MaterialAddReferenceComponent,
+    //     'number': MaterialNumberComponent,
+    //     'text': MaterialInputComponent,
+    //     'file': MaterialFileComponent,
+    //     'checkbox': MaterialCheckboxComponent,
+    //     'submit': 'button',
+    //     'button': MaterialButtonComponent,
+    //     'select': MaterialSelectComponent,
+    //     'textarea': MaterialTextareaComponent,
+    //     'checkboxes': MaterialCheckboxesComponent,
+    //     'radios': MaterialRadiosComponent,
+    //     'card': MaterialCardComponent,
+    //     'tabs': MaterialTabsComponent,
+    //   },
+    //   stylesheets: [
+    //     '//fonts.googleapis.com/icon?family=Material+Icons',
+    //     '//fonts.googleapis.com/css?family=Roboto:300,400,500,700',
+    //     '//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css',
+    //     // './node_modules/@angular/material/core/theming/prebuilt/deeppurple-amber.css',
+    //     './node_modules/@angular/material/core/theming/prebuilt/indigo-pink.css',
+    //   ],
+    // },
     'bootstrap-3': {
       framework: Bootstrap3Component,
       stylesheets: [

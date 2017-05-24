@@ -44,7 +44,8 @@
   },
   "dependencies": {
     "ajv": "5.x",
-    "lodash": "4.x"
+    "lodash": "4.x",
+    "@types/lodash": "4.x"
   },
   "peerDependencies": {
     "@angular/common": ">=2.0.0 <5.0.0",
@@ -66,7 +67,6 @@
     "@angular/router": "^4.0.0",
     "@types/ace": "^0.0.32",
     "@types/jasmine": "^2.5.38",
-    "@types/lodash": "4.x",
     "@types/node": "^7.0.21",
     "brace": "^0.10.0",
     "buffer": "^5.0.0",
@@ -90,11 +90,11 @@
     "reflect-metadata": "^0.1.8",
     "rimraf": "^2.6.1",
     "rxjs": "^5.1.0",
-    "systemjs": "^0.19.41",
-    "tslint": "^5.2.0",
-    "typedoc": "^0.5.3",
-    "typescript": "^2.1.4",
+    "systemjs": "^0.20.12",
+    "tslint": "^5.3.2",
+    "typedoc": "^0.7.1",
+    "typescript": "^2.2.0",
     "typings": "^2.1.0",
-    "zone.js": "^0.8.4"
+    "zone.js": "^0.8.11"
   }
 }

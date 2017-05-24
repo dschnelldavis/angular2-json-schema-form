@@ -18,7 +18,8 @@
     "compiled",
     "dist",
     "docs",
-    "node_modules"
+    "node_modules",
+    "src/frameworks/material-design"
   ],
   "angularCompilerOptions": {
     "genDir": "compiled"
