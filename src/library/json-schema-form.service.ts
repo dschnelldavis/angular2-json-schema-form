@@ -71,6 +71,7 @@ export class JsonSchemaFormService {
       enableSuccessState: true, // Apply 'has-success' class when field validates?
       // disableSuccessState: false, // Don't apply 'has-success' class when field validates?
       feedback: false, // Show inline feedback icons?
+      feedbackOnRender: false, //Show errorMessage on Render
       notitle: false, // Hide title?
       readonly: false, // Set control as read only?
     },

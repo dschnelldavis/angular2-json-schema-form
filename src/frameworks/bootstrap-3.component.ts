@@ -19,11 +19,11 @@ import {
     <div
       [class]="options?.htmlClass"
       [class.has-feedback]="options?.feedback &&
-        options?.isInputWidget && formControl?.dirty"
+        options?.isInputWidget && ( formControl?.dirty || options?.feedbackOnRender)"
       [class.has-error]="options?.enableErrorState &&
-        formControl?.errors && formControl?.dirty"
+        formControl?.errors && ( formControl?.dirty || options?.feedbackOnRender)"
       [class.has-success]="options?.enableSuccessState &&
-        !formControl?.errors && formControl?.dirty">
+        !formControl?.errors && ( formControl?.dirty || options?.feedbackOnRender)">
 
       <button *ngIf="layoutNode?.arrayItem && options?.removable"
         class="close pull-right"
@@ -34,18 +34,9 @@ import {
         <span class="sr-only">Close</span>
       </button>
       <div *ngIf="options?.messageLocation === 'top'">
-        <p *ngIf="options?.errorMessage"
-          [innerHTML]="options?.errorMessage" class="help-block"></p>
-        <p *ngIf="options?.feedback && formControl?.dirty"
-          class="sr-only"
-          [id]="'control' + layoutNode?._id + 'Status'"
-          [innerHTML]="options?.errorMessage ? '(error)' : '(success)'"></p>
-        <p *ngIf="options?.description"
+          <p *ngIf="options?.helpBlock"
           class="help-block"
-          [innerHTML]="options?.description"></p>
-        <p *ngIf="options?.help"
-          class="help-block"
-          [innerHTML]="options?.help"></p>
+          [innerHTML]="options?.helpBlock"></p>
       </div>
 
       <label *ngIf="options?.title && layoutNode?.type !== 'tab'"
@@ -76,25 +67,15 @@ import {
       </div>
 
       <span *ngIf="options?.feedback && options?.isInputWidget &&
-        !options?.fieldAddonRight && !layoutNode.arrayItem && formControl?.dirty"
+        !options?.fieldAddonRight && !layoutNode.arrayItem && ( formControl?.dirty || options?.feedbackOnRender)"
         [class.glyphicon-ok]="options?.enableSuccessState && !formControl?.errors"
         [class.glyphicon-remove]="options?.enableErrorState && formControl?.errors"
         aria-hidden="true"
         class="form-control-feedback glyphicon"></span>
       <div *ngIf="options?.messageLocation !== 'top'">
-        <p *ngIf="!options?.errorMessage"
+        <p *ngIf="options?.helpBlock"
           class="help-block"
-          [innerHTML]="options?.errorMessage"></p>
-        <p *ngIf="options?.feedback && formControl?.dirty"
-          class="sr-only"
-          [id]="'control' + layoutNode?._id + 'Status'"
-          [innerHTML]="options?.errorMessage ? '(error)' : '(success)'"></p>
-        <p *ngIf="options?.description"
-          class="help-block"
-          [innerHTML]="options?.description"></p>
-        <p *ngIf="options?.help"
-          class="help-block"
-          [innerHTML]="options?.help"></p>
+          [innerHTML]="options?.helpBlock"></p>
       </div>
     </div>
 
@@ -263,21 +244,8 @@ export class Bootstrap3Component implements OnInit, OnChanges {
       }
 
       if (this.formControl) {
-        this.formControl.statusChanges.subscribe(value => {
-          if (this.options.enableErrorState &&
-            this.options.feedback && value === 'INVALID' &&
-            this.formControl.dirty && this.formControl.errors
-          ) {
-            this.options.errorMessage = Object.keys(this.formControl.errors).map(
-                error => [error, Object.keys(this.formControl.errors[error]).map(
-                  errorParameter => errorParameter + ': ' +
-                    this.formControl.errors[error][errorParameter]
-                ).join(', ')].filter(e => e).join(' - ')
-              ).join('<br>');
-          } else {
-            this.options.errorMessage = null;
-          }
-        });
+        this.updateHelpBlock(this.formControl.status);
+        this.formControl.statusChanges.subscribe(value => this.updateHelpBlock(value));
 
         if (this.options.debug) {
           let vars: any[] = [];
@@ -287,6 +255,22 @@ export class Bootstrap3Component implements OnInit, OnChanges {
         }
       }
       this.controlInitialized = true;
+    }
+
+  }
+
+  private updateHelpBlock(value){
+    this.options.helpBlock = this.options.description|| this.options.help || false;
+    if (this.options.enableErrorState && value === 'INVALID' && this.formControl.errors &&
+      ( this.formControl.dirty || this.options.feedbackOnRender )
+    ) {
+      this.options.helpBlock = Object.keys(this.formControl.errors).map(
+        error => [error, Object.keys(this.formControl.errors[error]).map(
+          errorParameter => errorParameter + ': ' +
+          this.formControl.errors[error][errorParameter]
+        ).join(', ')].filter(e => e).join(' - ')
+      ).join('<br>');
+
     }
   }
 
