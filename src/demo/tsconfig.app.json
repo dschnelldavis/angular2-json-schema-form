@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../out-tsc/app",
+    "experimentalDecorators": true,
+    "module": "es2015",
+    "baseUrl": "",
+    "types": [],
+    "paths": {
+      "angular2-json-schema-form": [
+        "../../src"
+      ]
+    }
+  },
+  "exclude": [
+    "test.ts",
+    "**/*.spec.ts"
+  ],
+  "atom": { "rewriteTsconfig": false }
+}

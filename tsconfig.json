@@ -1,27 +1,17 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "lib": [ "es6", "dom" ],
     "target": "es5",
-    "rootDir": "src",
-    "outDir": "dist",
+    "module": "es2015",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "inlineSources": true,
     "declaration": true,
-    "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "newLine": "LF",
-    "noImplicitAny": false,
-    "removeComments": true,
-    "sourceMap": true
+    "suppressImplicitAnyIndexErrors": true,
+    "skipLibCheck": true,
+    "stripInternal": true,
+    "lib": [ "es2015", "dom" ],
+    "emitDecoratorMetadata": true
   },
-  "exclude": [
-    "compiled",
-    "dist",
-    "docs",
-    "node_modules",
-    "src/frameworks/material-design"
-  ],
-  "angularCompilerOptions": {
-    "genDir": "compiled"
-  }
+  "atom": { "rewriteTsconfig": false }
 }

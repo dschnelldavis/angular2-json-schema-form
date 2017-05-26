@@ -1,10 +1,11 @@
 # Development
+src
 compiled
+out-tsc
 docs
-dist/playground
-src/playground
 
 # Config
+.angular-cli.json
 .editorconfig
 .gitignore
 tslint.json

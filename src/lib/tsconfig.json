@@ -1,0 +1,23 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "target": "es2015",
+    "outDir": "../../out-tsc/lib-es2015/",
+    "rootDir": "./",
+    "baseUrl": "",
+    "types": [],
+    "experimentalDecorators": true
+  },
+  "files": [
+    "./index.ts",
+    "./typings.d.ts"
+  ],
+  "angularCompilerOptions": {
+    "annotateForClosureCompiler": true,
+    "strictMetadataEmit": true,
+    "skipTemplateCodegen": true,
+    "flatModuleOutFile": "angular2-json-schema-form.js",
+    "flatModuleId": "angular2-json-schema-form",
+    "genDir": "../../out-tsc/lib-gen-dir/"
+  }
+}

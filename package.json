@@ -1,15 +1,14 @@
 {
   "name": "angular2-json-schema-form",
-  "version": "0.3.0-alpha.27",
+  "version": "0.4.0-alpha.1",
   "author": {
-    "name": "dschnelldavis",
+    "name": "David Schnell-Davis",
     "email": "dschnelldavis@gmail.com"
   },
-  "description": "Angular 2 JSON Schema Form builder",
+  "description": "Angular JSON Schema Form builder",
   "keywords": [
-    "Angular 2",
-    "JSON Schema",
-    "Form builder"
+    "Angular", "ng2", "Angular2", "Angular 2", "ng4", "Angular4", "Angular 4",
+    "JSON Schema", "form", "forms", "form builder"
   ],
   "license": "MIT",
   "repository": {
@@ -19,33 +18,45 @@
   "bugs": {
     "url": "https://github.com/dschnelldavis/angular2-json-schema-form/issues"
   },
-  "files": [
-    "dist/",
-    "src/"
-  ],
-  "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
+  "main": "./angular2-json-schema-form.umd.js",
+  "module": "./angular2-json-schema-form.es5.js",
+  "es2015": "./angular2-json-schema-form.js",
+  "typings": "./angular2-json-schema-form.d.ts",
+  "engines": {
+    "node": ">= 6.9.0",
+    "npm": ">= 3.0.0"
+  },
   "scripts": {
-    "clean:dist": "rimraf compiled && rimraf dist",
-    "clean:all": "npm run clean:dist && rimraf node_modules && npm cache clean",
-    "tsc": "tsc",
-    "ngc": "./node_modules/.bin/ngc",
-    "lint": "tslint src/**/*.ts",
-    "test": "tsc && karma start",
-    "typings": "typings",
+    "ng": "ng",
+    "serve": "ng serve",
+    "start": "ng serve",
+    "test": "ng test",
+    "lint": "ng lint",
     "docs": "typedoc --options typedoc.json src/index.ts",
-    "syncassets": "./node_modules/.bin/cpr src dist -f \\.ts -o",
-    "watchassets": "onchange 'src/**/*.css' 'src/**/*.html' 'src/**/*.json' -e 'dist/*' -v -- npm run syncassets",
-    "compile:tsc": "npm run clean:dist && npm run tsc && npm run syncassets",
-    "compile:ngc": "npm run clean:dist && npm run ngc && npm run syncassets",
-    "prepublish": "npm run compile:tsc",
-    "start:ngc": "npm run compile:ngc && concurrently \"npm run ngc -w\" \"lite-server\" \"npm run watchassets\"",
-    "start": "npm run compile:tsc && concurrently \"npm run tsc -w\" \"lite-server\" \"npm run watchassets\""
+    "clean": "rimraf out-tsc dist/*",
+    "prebuild": "npm run clean",
+    "build": "node build.js",
+    "ng-build": "ng build",
+    "old-build-demo": "tsc -p src/demo/",
+    "old-build-demo:watch": "tsc -p src/demo/ -w",
+    "old-prestart": "npm run build-demo",
+    "old-build-test": "tsc -p src/lib/tsconfig.spec.json",
+    "old-build-test:watch": "tsc -p src/lib/tsconfig.spec.json -w",
+    "old-pretest": "npm run build-test",
+    "old-preintegration": "npm run build && cd integration && npm run clean && npm install",
+    "old-integration": "npm run integration:aot && npm run integration:jit",
+    "old-integration:jit": "cd integration && npm run e2e",
+    "old-integration:aot": "cd integration && npm run e2e:aot",
+    "old-start": "concurrently \"npm run build-demo:watch\" \"npm run serve\"",
+    "old-serve": "lite-server -c=bs-config.json",
+    "old-test": "concurrently \"npm run build-test:watch\" \"karma start karma.conf.js\"",
+    "old-pretest:once": "npm run build-test",
+    "old-test:once": "karma start karma.conf.js --single-run",
+    "old-lint": "tslint ./src/**/*.ts -t verbose"
   },
   "dependencies": {
     "ajv": "5.x",
-    "lodash": "4.x",
-    "@types/lodash": "4.x"
+    "lodash": "4.x"
   },
   "peerDependencies": {
     "@angular/common": ">=2.0.0 <5.0.0",
@@ -54,6 +65,7 @@
   },
   "devDependencies": {
     "@angular/animations": "^4.0.0",
+    "@angular/cli": "^1.0.1",
     "@angular/common": "^4.0.0",
     "@angular/compiler": "^4.0.0",
     "@angular/compiler-cli": "^4.0.0",
@@ -63,19 +75,17 @@
     "@angular/material": "^2.0.0-beta.5",
     "@angular/platform-browser": "^4.0.0",
     "@angular/platform-browser-dynamic": "^4.0.0",
-    "@angular/platform-server": "^4.0.0",
     "@angular/router": "^4.0.0",
     "@types/ace": "^0.0.32",
     "@types/jasmine": "^2.5.38",
     "@types/node": "^7.0.21",
     "brace": "^0.10.0",
-    "buffer": "^5.0.0",
-    "canonical-path": "^0.0.2",
+    "camelcase": "^4.0.0",
     "codelyzer": "^3.0.0",
     "concurrently": "^3.2.0",
     "core-js": "^2.4.1",
-    "cpr": "^2.0.2",
-    "http-server": "^0.9.0",
+    "glob": "^7.1.1",
+    "hammerjs": "^2.0.8",
     "jasmine-core": "^2.5.2",
     "jasmine-spec-reporter": "^4.1.0",
     "karma": "^1.4.1",
@@ -84,17 +94,17 @@
     "karma-coverage-istanbul-reporter": "^1.2.1",
     "karma-jasmine": "^1.1.0",
     "karma-jasmine-html-reporter": "^0.2.2",
-    "lite-server": "^2.2.2",
-    "onchange": "^3.2.1",
     "protractor": "^5.1.0",
-    "reflect-metadata": "^0.1.8",
     "rimraf": "^2.6.1",
+    "rollup": "^0.41.5",
+    "rollup-plugin-commonjs": "^8.0.2",
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "rollup-plugin-sourcemaps": "^0.4.1",
+    "rollup-plugin-uglify": "^2.0.1",
     "rxjs": "^5.1.0",
-    "systemjs": "^0.20.12",
-    "tslint": "^5.3.2",
-    "typedoc": "^0.7.1",
+    "ts-node": "~2.1.2",
+    "tslint": "^5.2.0",
     "typescript": "^2.2.0",
-    "typings": "^2.1.0",
-    "zone.js": "^0.8.11"
+    "zone.js": "^0.8.4"
   }
 }
