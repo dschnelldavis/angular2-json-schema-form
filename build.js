@@ -91,7 +91,9 @@ return Promise.resolve()
       plugins: [
         sourcemaps(),
         nodeResolve(),
-        commonjs()
+        commonjs({ namedExports: {
+          'node_modules/lodash/index.js': [ 'cloneDeep', 'filter', 'map', 'uniqueId' ]
+        } })
       ]
     };
 
@@ -115,7 +117,7 @@ return Promise.resolve()
       entry: es5Entry,
       dest: path.join(distFolder, `${libName}.es5.js`),
       format: 'es',
-      intro: 'import * as Ajv from \'ajv\';'
+      intro: `import * as Ajv from 'ajv';\nimport * as _ from 'lodash';`
     });
 
     // ESM+ES2015 flat module bundle.
@@ -123,7 +125,7 @@ return Promise.resolve()
       entry: es2015Entry,
       dest: path.join(distFolder, `${libName}.js`),
       format: 'es',
-      intro: 'import * as Ajv from \'ajv\';'
+      intro: `import * as Ajv from 'ajv';`
     });
 
     const allBundles = [
@@ -139,41 +141,18 @@ return Promise.resolve()
   // Copy package files
   .then(() => Promise.resolve()
     .then(() => _relativeCopy('LICENSE', rootFolder, distFolder))
+    .then(() => console.log('LICENSE file copied.'))
+    .then(() => _relativeCopy('README.md', rootFolder, distFolder))
+    .then(() => console.log('README.md file copied.'))
     .then(() => _relativeCopy('package.json', rootFolder, distFolder))
     .then(() => _cleanPackageJson(distFolder))
-    .then(() => _relativeCopy('README.md', rootFolder, distFolder))
-    .then(() => console.log('LICENSE, package.json, and README.md files copied.'))
+    .then(() => console.log('package.json file copied and updated.'))
   )
   .catch(e => {
-    console.error('\Build failed. See below for errors.\n');
+    console.error('Build failed. See below for errors.\n');
     console.error(e);
     process.exit(1);
   });
-
-// Clean package.json file
-function _cleanPackageJson(dir) {
-  return new Promise((resolve, reject) => {
-    const fullPath = path.join(dir, 'package.json');
-    // fs.readFile(fullPath, 'utf-8', (err, data) => {
-    //   let packageData = JSON.parse(data);
-    //   delete packageData.engines;
-    //   delete packageData.scripts;
-    //   delete packageData.devDependencies;
-    //   fs.writeFile(fullPath, JSON.stringify(packageData, null, 2),
-    //     () => console.log('package.json updated.')
-    //   );
-    // });
-
-    let data = fs.readFileSync(fullPath, 'utf-8');
-    let packageData = JSON.parse(data);
-    delete packageData.engines;
-    delete packageData.scripts;
-    delete packageData.devDependencies;
-    fs.writeFileSync(fullPath, JSON.stringify(packageData, null, 2));
-    console.log('package.json file cleaned.');
-console.log(JSON.stringify(packageData, null, 2));
-  });
-}
 
 // Copy files maintaining relative paths.
 function _relativeCopy(fileGlob, from, to) {
@@ -198,4 +177,17 @@ function _recursiveMkDir(dir) {
     _recursiveMkDir(path.dirname(dir));
     fs.mkdirSync(dir);
   }
+}
+
+// Clean package.json file
+function _cleanPackageJson(dir) {
+  return new Promise((resolve, reject) => {
+    const fullPath = path.join(dir, 'package.json');
+    let data = JSON.parse(fs.readFileSync(fullPath, 'utf-8'));
+    delete data.engines;
+    delete data.scripts;
+    delete data.devDependencies;
+    fs.writeFileSync(fullPath, JSON.stringify(data, null, 2));
+    resolve();
+  });
 }

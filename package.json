@@ -1,6 +1,6 @@
 {
   "name": "angular2-json-schema-form",
-  "version": "0.4.0-alpha.5",
+  "version": "0.4.0-alpha.7",
   "author": {
     "name": "David Schnell-Davis",
     "email": "dschnelldavis@gmail.com"
@@ -22,7 +22,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/dschnelldavis/angular2-json-schema-form"
+    "url": "git+https://github.com/dschnelldavis/angular2-json-schema-form"
   },
   "bugs": {
     "url": "https://github.com/dschnelldavis/angular2-json-schema-form/issues"
@@ -45,6 +45,7 @@
     "clean": "rimraf out-tsc dist/*",
     "prebuild": "npm run clean",
     "build": "node build.js",
+    "postbuild": "rimraf out-tsc",
     "ng-build": "ng build",
     "old-build-demo": "tsc -p src/demo/",
     "old-build-demo:watch": "tsc -p src/demo/ -w",
@@ -65,7 +66,7 @@
   },
   "dependencies": {
     "@angular/animations": ">=2.0.0 <5.0.0",
-    "@angular/material": "^2.0.0-beta.5",
+    "@angular/material": "^2.0.0-beta.6",
     "ajv": "5.x",
     "hammerjs": "2.x",
     "lodash": "4.x"
@@ -75,10 +76,11 @@
     "@angular/core": ">=2.0.0 <5.0.0",
     "@angular/forms": ">=2.0.0 <5.0.0",
     "@angular/platform-browser": ">=2.0.0 <5.0.0",
+    "@angular/platform-browser-dynamic": ">=2.0.0 <5.0.0",
     "rxjs": "5.x"
   },
   "devDependencies": {
-    "@angular/cli": "^1.0.1",
+    "@angular/cli": "^1.0.0",
     "@angular/common": "^4.0.0",
     "@angular/compiler": "^4.0.0",
     "@angular/compiler-cli": "^4.0.0",
@@ -113,7 +115,7 @@
     "rollup-plugin-node-resolve-angular": "^2.0.3",
     "rollup-plugin-sourcemaps": "^0.4.1",
     "rollup-plugin-uglify": "^2.0.1",
-    "ts-node": "~2.1.2",
+    "ts-node": "^3.0.0",
     "tslint": "^5.2.0",
     "typedoc": "^0.7.1",
     "typescript": "^2.2.0",

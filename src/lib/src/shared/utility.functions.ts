@@ -158,19 +158,22 @@ export function hasOwn(object: any, property: string): boolean {
  * @param {PlainObject} targetObject - Target object to add keys and values to
  * @param {PlainObject} sourceObject - Source object to copy keys and values from
  * @param {string[]} excludeKeys - Array of keys to exclude
- * @param {(string) => string = (k) => k} keyFn - Function to apply to keys
- * @param {(any) => any = (v) => v} valueFn - Function to apply to values
+ * @param {(string: string) => string = (k) => k} keyFn - Function to apply to keys
+ * @param {(any: any) => any = (v) => v} valueFn - Function to apply to values
  * @return {PlainObject} - Returns targetObject
  */
 export function mergeFilteredObject(
-  targetObject: PlainObject, sourceObject: PlainObject, excludeKeys: any[] = [],
-  keyFn: (string) => string = (k) => k, valueFn: (any) => any = (v) => v
+  targetObject: PlainObject,
+  sourceObject: PlainObject,
+  excludeKeys: any[] = [],
+  keyFn: (string: string) => string = (key: string) => key,
+  valFn: (any: any) => any = (val: any) => val
 ): PlainObject {
   if (!isObject(sourceObject)) { return targetObject; }
   if (!isObject(targetObject)) { targetObject = {}; }
   for (let key of Object.keys(sourceObject)) {
     if (!inArray(key, excludeKeys) && isDefined(sourceObject[key])) {
-      targetObject[keyFn(key)] = valueFn(sourceObject[key]);
+      targetObject[keyFn(key)] = valFn(sourceObject[key]);
     }
   }
   return targetObject;
