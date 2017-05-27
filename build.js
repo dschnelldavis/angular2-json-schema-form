@@ -8,7 +8,8 @@ const ngc = require('@angular/compiler-cli/src/main').main;
 const rollup = require('rollup');
 const uglify = require('rollup-plugin-uglify');
 const sourcemaps = require('rollup-plugin-sourcemaps');
-const resolve = require('rollup-plugin-node-resolve');
+// const nodeResolve = require('rollup-plugin-node-resolve');
+const nodeResolve = require('rollup-plugin-node-resolve-angular');
 const commonjs = require('rollup-plugin-commonjs');
 
 const inlineResources = require('./inline-resources');
@@ -60,28 +61,36 @@ return Promise.resolve()
         // The key here is library name, and the value is the the name of the global variable name
         // the window object.
         // See https://github.com/rollup/rollup/wiki/JavaScript-API#globals for more.
-        '@angular/core': 'ng.core',
+        '@angular/animations': 'ng.animations',
         '@angular/common': 'ng.common',
+        '@angular/core': 'ng.core',
         '@angular/forms': 'ng.forms',
         '@angular/material': 'ng.material',
-        'rxjs': 'rxjs',
-        'lodash': '_',
-        'ajv': 'Ajv'
+        '@angular/platform-browser': 'ng.platformBrowser',
+        'ajv': 'Ajv',
+        'lodash': '_'
       },
       external: [
         // List of dependencies
         // See https://github.com/rollup/rollup/wiki/JavaScript-API#external for more.
-        '@angular/core',
+        '@angular/animations',
         '@angular/common',
+        '@angular/core',
         '@angular/forms',
         '@angular/material',
-        'rxjs',
+        '@angular/platform-browser',
         'ajv',
+        'hammerjs',
         'lodash',
+        'rxjs'
       ],
+      onwarn: function (warning) {
+        if (warning.code === 'THIS_IS_UNDEFINED') return;
+        console.warn( warning.message );
+      },
       plugins: [
         sourcemaps(),
-        resolve(),
+        nodeResolve(),
         commonjs()
       ]
     };
@@ -105,14 +114,16 @@ return Promise.resolve()
     const fesm5config = Object.assign({}, rollupBaseConfig, {
       entry: es5Entry,
       dest: path.join(distFolder, `${libName}.es5.js`),
-      format: 'es'
+      format: 'es',
+      intro: 'import * as Ajv from \'ajv\';'
     });
 
     // ESM+ES2015 flat module bundle.
     const fesm2015config = Object.assign({}, rollupBaseConfig, {
       entry: es2015Entry,
       dest: path.join(distFolder, `${libName}.js`),
-      format: 'es'
+      format: 'es',
+      intro: 'import * as Ajv from \'ajv\';'
     });
 
     const allBundles = [
@@ -129,8 +140,9 @@ return Promise.resolve()
   .then(() => Promise.resolve()
     .then(() => _relativeCopy('LICENSE', rootFolder, distFolder))
     .then(() => _relativeCopy('package.json', rootFolder, distFolder))
+    .then(() => _cleanPackageJson(distFolder))
     .then(() => _relativeCopy('README.md', rootFolder, distFolder))
-    .then(() => console.log('Package files copy succeeded.'))
+    .then(() => console.log('LICENSE, package.json, and README.md files copied.'))
   )
   .catch(e => {
     console.error('\Build failed. See below for errors.\n');
@@ -138,6 +150,30 @@ return Promise.resolve()
     process.exit(1);
   });
 
+// Clean package.json file
+function _cleanPackageJson(dir) {
+  return new Promise((resolve, reject) => {
+    const fullPath = path.join(dir, 'package.json');
+    // fs.readFile(fullPath, 'utf-8', (err, data) => {
+    //   let packageData = JSON.parse(data);
+    //   delete packageData.engines;
+    //   delete packageData.scripts;
+    //   delete packageData.devDependencies;
+    //   fs.writeFile(fullPath, JSON.stringify(packageData, null, 2),
+    //     () => console.log('package.json updated.')
+    //   );
+    // });
+
+    let data = fs.readFileSync(fullPath, 'utf-8');
+    let packageData = JSON.parse(data);
+    delete packageData.engines;
+    delete packageData.scripts;
+    delete packageData.devDependencies;
+    fs.writeFileSync(fullPath, JSON.stringify(packageData, null, 2));
+    console.log('package.json file cleaned.');
+console.log(JSON.stringify(packageData, null, 2));
+  });
+}
 
 // Copy files maintaining relative paths.
 function _relativeCopy(fileGlob, from, to) {

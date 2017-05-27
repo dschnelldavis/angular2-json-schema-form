@@ -52,7 +52,8 @@
     "unified-signatures": true,
     "variable-name": false,
     "whitespace": [ true, "check-branch", "check-decl",
-      "check-operator", "check-separator", "check-type" ],
+      "check-operator", "check-separator", "check-type"
+    ],
 
     "directive-selector": [true, "attribute", "jsf", "camelCase"],
     "component-selector": [true, "element", "jsf", "kebab-case"],

@@ -1,12 +1,12 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "es2015",
     "outDir": "../../out-tsc/lib-es2015/",
+    "target": "es2015",
     "rootDir": "./",
     "baseUrl": "",
     "types": [],
-    "experimentalDecorators": true
+    "emitDecoratorMetadata": false
   },
   "files": [
     "./index.ts",

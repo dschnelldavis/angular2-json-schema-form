@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/angular2-json-schema-form.svg?style=plastic)](https://www.npmjs.com/package/angular2-json-schema-form) [![npm downloads](https://img.shields.io/npm/dm/angular2-json-schema-form.svg?style=plastic)](https://www.npmjs.com/package/angular2-json-schema-form) [![GitHub MIT License](https://img.shields.io/github/license/dschnelldavis/angular2-json-schema-form.svg?style=social)](https://github.com/dschnelldavis/angular2-json-schema-form)
 [![Dependencies](https://david-dm.org/dschnelldavis/angular2-json-schema-form.svg)](https://david-dm.org/dschnelldavis/angular2-json-schema-form) [![devDependencies](https://david-dm.org/dschnelldavis/angular2-json-schema-form/dev-status.svg)](https://david-dm.org/dschnelldavis/angular2-json-schema-form?type=dev)
 
-A [JSON Schema](http://json-schema.org) Form builder for Angular (2 or 4), similar to, and mostly API compatible with,
+A [JSON Schema](http://json-schema.org) Form builder for Angular 2 or 4, similar to, and mostly API compatible with,
 
   * [JSON Schema Form](https://github.com/json-schema-form)'s [Angular Schema Form](http://schemaform.io) for [AngularJS](https://angularjs.org) ([examples](http://schemaform.io/examples/bootstrap-example.html))
   * [Mozilla](https://blog.mozilla.org/services/)'s [React JSON Schema Form](https://github.com/mozilla-services/react-jsonschema-form) for [React](https://facebook.github.io/react/) ([examples](https://mozilla-services.github.io/react-jsonschema-form/)), and
@@ -15,7 +15,7 @@ Note: This is currently a personal proof-of-concept project, and is NOT affiliat
 
 ### To install from GitHub and play with the examples
 
-The [GitHub version of Angular JSON Schema Form](https://github.com/dschnelldavis/angular2-json-schema-form) includes an example playground with over 70 different JSON Schemas (including all examples used by each of the three libraries listed above), and the ability to quickly view any example formatted using Bootstrap 3 or Material Design (or with no formatting, which is functional, but usually pretty ugly).
+The [GitHub version of Angular JSON Schema Form](https://github.com/dschnelldavis/angular2-json-schema-form) includes an example playground with over 70 different JSON Schemas (including all examples used by each of the three libraries listed above), and the ability to quickly view any example formatted using Bootstrap 3 or Material Design (or with no formatting).
 
 To install both the library and the example playground, clone `https://github.com/dschnelldavis/angular2-json-schema-form.git` with your favorite git program, or, assuming you have [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and [Node/NPM](https://nodejs.org/en/download/) installed, enter the following in your terminal:
 
@@ -26,14 +26,14 @@ npm install
 npm start
 ```
 
-This should start the example playground locally and display it at `http://localhost:4200`
+This should start a server with the example playground, which you can view in your browser at `http://localhost:4200`
 
 All the source code is in the `/src` folder. Inside that folder, you will find the following sub-folders:
 
-* `lib/json-schema-form` - Angular JSON Schema Form main library
-* `lib/framework-library` - framework library
-* `lib/widget-library` - widget library
-* `lib/shared` - various utilities and helper functions
+* `lib/src` - Angular JSON Schema Form main library
+* `lib/src/framework-library` - framework library
+* `lib/src/widget-library` - widget library
+* `lib/src/shared` - various utilities and helper functions
 * `demo` - demonstration playground example application
 * `demo/assets/example-schemas` - JSON Schema examples used in playground
 
@@ -43,26 +43,14 @@ If you want additional documentation describing the individual functions used in
 
 If, after playing with the examples, you decide this library is functional enough to use in your own project, you can [install it from NPM](https://www.npmjs.com/package/angular2-json-schema-form) using either [NPM](https://www.npmjs.com) or [Yarn](https://yarnpkg.com) by running the following from your terminal:
 
-NPM:
 ```shell
 npm install angular2-json-schema-form --save
-```
-
-or Yarn:
-```shell
-yarn add angular2-json-schema-form
 ```
 
 If you want to use the Material Design framework, also install Angular2 Material. (If you only want to use the Bootstrap 3 framework, you can skip this step.)
 
-NPM:
 ```shell
 npm install angular2-json-schema-form --save
-```
-
-or Yarn:
-```shell
-yarn add angular2-json-schema-form
 ```
 
 Then import JsonSchemaFormModule in your main application module:

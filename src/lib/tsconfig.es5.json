@@ -4,7 +4,8 @@
     "target": "es5",
     "outDir": "../../out-tsc/lib-es5/",
     "baseUrl": "",
-    "types": []
+    "types": [],
+    "emitDecoratorMetadata": false
   },
   "files": [
     "./index.ts",
