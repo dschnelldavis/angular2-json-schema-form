@@ -4,6 +4,7 @@ import { CheckboxComponent }        from './checkbox.component';
 import { CheckboxesComponent }      from './checkboxes.component';
 import { FieldsetComponent }        from './fieldset.component';
 import { FileComponent }            from './file.component';
+import { FlexComponent }            from './flex.component';
 import { HiddenComponent }          from './hidden.component';
 import { InputComponent }           from './input.component';
 import { MessageComponent }         from './message.component';
@@ -22,8 +23,8 @@ import { TemplateComponent }        from './template.component';
 import { TextareaComponent }        from './textarea.component';
 
 export const BASIC_WIDGETS = [
-  AddReferenceComponent, ButtonComponent, CheckboxComponent,
-  CheckboxesComponent, FieldsetComponent, FileComponent, HiddenComponent,
+  AddReferenceComponent, ButtonComponent, CheckboxComponent, CheckboxesComponent,
+  FieldsetComponent, FileComponent, FlexComponent, HiddenComponent,
   InputComponent, MessageComponent, NoneComponent, NumberComponent,
   RadiosComponent, RootComponent, SectionComponent, SelectComponent,
   SelectFrameworkComponent, SelectWidgetComponent, SubmitComponent,

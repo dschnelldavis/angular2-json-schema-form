@@ -6,6 +6,7 @@
     "comment-format": [ true, "check-space" ],
     "curly": true,
     "eofline": true,
+    "experimentalDecorators": true,
     "forin": true,
     "import-blacklist": [true, "rxjs"],
     "import-spacing": true,

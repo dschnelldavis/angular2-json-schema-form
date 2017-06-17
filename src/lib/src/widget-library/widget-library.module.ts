@@ -11,6 +11,7 @@ import { CheckboxComponent }                from './checkbox.component';
 import { CheckboxesComponent }              from './checkboxes.component';
 import { FieldsetComponent }                from './fieldset.component';
 import { FileComponent }                    from './file.component';
+import { FlexComponent }                    from './flex.component';
 import { HiddenComponent }                  from './hidden.component';
 import { InputComponent }                   from './input.component';
 import { MessageComponent }                 from './message.component';
@@ -28,14 +29,7 @@ import { TabsComponent }                    from './tabs.component';
 import { TemplateComponent }                from './template.component';
 import { TextareaComponent }                from './textarea.component';
 
-const BASIC_WIDGETS = [
-  AddReferenceComponent, ButtonComponent, CheckboxComponent,
-  CheckboxesComponent, FieldsetComponent, FileComponent, HiddenComponent,
-  InputComponent, MessageComponent, NoneComponent, NumberComponent,
-  RadiosComponent, RootComponent, SectionComponent, SelectComponent,
-  SelectFrameworkComponent, SelectWidgetComponent, SubmitComponent,
-  TabComponent, TabsComponent, TemplateComponent, TextareaComponent
-];
+import { BASIC_WIDGETS }                    from './index';
 
 @NgModule({
   imports:         [ CommonModule, FormsModule, ReactiveFormsModule ],

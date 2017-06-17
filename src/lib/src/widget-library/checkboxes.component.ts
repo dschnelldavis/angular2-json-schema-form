@@ -9,7 +9,7 @@ import { buildFormGroup, buildTitleMap, JsonPointer } from '../shared';
   template: `
     <label *ngIf="options?.title"
       [class]="options?.labelHtmlClass"
-      [class.sr-only]="options?.notitle"
+      [style.display]="options?.notitle ? 'none' : ''"
       [innerHTML]="options?.title"></label>
     <div [ngSwitch]="layoutOrientation">
 

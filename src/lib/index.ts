@@ -13,6 +13,7 @@ import { CheckboxComponent }                from './src/widget-library/checkbox.
 import { CheckboxesComponent }              from './src/widget-library/checkboxes.component';
 import { FieldsetComponent }                from './src/widget-library/fieldset.component';
 import { FileComponent }                    from './src/widget-library/file.component';
+import { FlexComponent }                    from './src/widget-library/flex.component';
 import { HiddenComponent }                  from './src/widget-library/hidden.component';
 import { InputComponent }                   from './src/widget-library/input.component';
 import { MessageComponent }                 from './src/widget-library/message.component';

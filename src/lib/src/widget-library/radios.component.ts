@@ -10,7 +10,7 @@ import { buildTitleMap } from '../shared';
     <label *ngIf="options?.title"
       [attr.for]="'control' + layoutNode?._id"
       [class]="options?.labelHtmlClass"
-      [class.sr-only]="options?.notitle"
+      [style.display]="options?.notitle ? 'none' : ''"
       [innerHTML]="options?.title"></label>
       <div [ngSwitch]="layoutOrientation">
 

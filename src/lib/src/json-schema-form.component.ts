@@ -380,7 +380,7 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
 // (These always work.)
 // console.log('loading form...');
 // console.log(this.jsf.schema);
-// console.log(this.jsf.layout);
+console.log(this.jsf.layout);
 // console.log(this.jsf.initialValues);
 // console.log(this.jsf.formGroup.value);
 // console.log(this.jsf.formGroupTemplate);

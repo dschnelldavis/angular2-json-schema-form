@@ -18,7 +18,7 @@ import { buildFormGroup, buildTitleMap, JsonPointer } from '../../shared';
     </md-checkbox>
     <label *ngIf="options?.title"
       [class]="options?.labelHtmlClass"
-      [class.sr-only]="options?.notitle"
+      [style.display]="options?.notitle ? 'none' : ''"
       [innerHTML]="options?.title"></label>
     <ul class="checkbox-list" [class.horizontal-list]="horizontalList">
       <li *ngFor="let checkboxItem of checkboxList"
@@ -41,7 +41,6 @@ import { buildFormGroup, buildTitleMap, JsonPointer } from '../../shared';
       display: inline-block;
       margin-right: 10px;
       zoom: 1;
-      *display: inline;
     }
   `]
 })

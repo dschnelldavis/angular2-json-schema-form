@@ -319,8 +319,7 @@ export class JsonValidators {
             isValid = !!actualValue.match(/^#[A-Fa-f0-9]{6}$/);
             break;
           default:
-            console.error('format validator error: "' + format +
-              '" is not a recognized format.');
+            console.error(`format validator error: "${format}" is not a recognized format.`);
             isValid = true;
         }
       }

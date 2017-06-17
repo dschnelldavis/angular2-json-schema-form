@@ -11,7 +11,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
       [class.expanded]="options?.expandable && expanded">
       <label *ngIf="options?.title"
         [class]="options?.labelHtmlClass"
-        [class.sr-only]="options?.notitle"
+        [style.display]="options?.notitle ? 'none' : ''"
         [innerHTML]="options?.title"
         (click)="expand()"></label>
 

@@ -40,7 +40,7 @@ import { addClasses, inArray, JsonPointer, toTitleCase } from '../shared';
         [class]="options?.labelHtmlClass"
         [class.sr-only]="options?.notitle"
         [innerHTML]="options?.title"></label>
-      <strong *ngIf="options?.title && options?.required"
+      <strong *ngIf="options?.title && !options?.notitle && options?.required"
         class="text-danger">*</strong>
       <p *ngIf="layoutNode?.type === 'submit' && jsf?.globalOptions?.fieldsRequired">
         <strong class="text-danger">*</strong> = required fields

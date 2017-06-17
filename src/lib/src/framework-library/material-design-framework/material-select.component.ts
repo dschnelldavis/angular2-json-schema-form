@@ -7,16 +7,18 @@ import { buildTitleMap } from '../../shared';
 @Component({
   selector: 'material-select-widget',
   template: `
-    <section [style.width]="'100%'" [class]="options?.htmlClass">
+    <section [style.width]="'100%'" [class]="options?.htmlClass || null">
       <md-select #inputControl
         [(ngModel)]="controlValue"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.name]="controlName"
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [disabled]="controlDisabled"
+        [floatPlaceholder]="options?.floatPlaceholder || (options?.notitle ? 'never' : 'auto')"
         [id]="'control' + layoutNode?._id"
-        [placeholder]="options?.title"
+        [placeholder]="options?.notitle ? options?.placeholder : options?.title"
         [required]="options?.required"
+        [style.margin-top]="'4px'"
         [style.width]="'100%'"
         (onClose)="updateValue()">
         <md-option *ngFor="let selectItem of selectList"
@@ -24,7 +26,6 @@ import { buildTitleMap } from '../../shared';
           [attr.selected]="selectItem.value === controlValue">{{selectItem.name}}</md-option>
       </md-select>
     </section>`,
-    styles: [`md-select { margin-top: 18px; }`]
 })
 export class MaterialSelectComponent implements OnInit {
   private formControl: AbstractControl;

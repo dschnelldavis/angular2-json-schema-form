@@ -12,7 +12,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
       [disabled]="options?.readonly">
       <legend *ngIf="options?.title && layoutNode?.type !== 'tab'"
         [class]="options?.labelHtmlClass"
-        [class.sr-only]="options?.notitle"
+        [style.display]="options?.notitle ? 'none' : ''"
         [innerHTML]="options?.title"
         (click)="expand()"></legend>
 
@@ -25,6 +25,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
 
     </fieldset>`,
   styles: [`
+    .expandable: { background-color: #ccc; }
     .expandable > legend:before { content: '\\25B8'; padding-right: .3em; }
     .expanded > legend:before { content: '\\25BE'; padding-right: .2em; }
   `],

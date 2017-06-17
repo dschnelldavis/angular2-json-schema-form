@@ -6,7 +6,10 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
 @Component({
   selector: 'material-input-widget',
   template: `
-    <md-input-container [style.width]="'100%'">
+    <md-input-container
+      [floatPlaceholder]="options?.floatPlaceholder || (options?.notitle ? 'never' : 'auto')"
+      [style.margin-top]="'-2px'"
+      [style.width]="'100%'">
       <input mdInput #inputControl
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.list]="'control' + layoutNode?._id + 'Autocomplete'"
@@ -17,7 +20,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
         [disabled]="controlDisabled"
         [id]="'control' + layoutNode?._id"
         [name]="controlName"
-        [placeholder]="options?.title"
+        [placeholder]="options?.notitle ? options?.placeholder : options?.title"
         [required]="options?.required"
         [style.width]="'100%'"
         [type]="layoutNode?.type"
@@ -29,10 +32,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
         md-suffix>{{options?.fieldAddonRight}}</span>
       <md-hint *ngIf="options?.description && !options?.placeholder && formControl?.dirty"
         align="end">{{options?.description}}</md-hint>
-      <md-hint *ngIf="!options?.description && options?.placeholder && !formControl?.dirty"
-        align="end">{{options?.placeholder}}</md-hint>
     </md-input-container>`,
-    styles: [`md-input-container { margin-top: 6px; }`],
 })
 export class MaterialInputComponent implements OnInit {
   private formControl: AbstractControl;

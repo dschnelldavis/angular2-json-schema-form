@@ -184,7 +184,13 @@ export class JsonSchemaFormService {
 
   public compileAjvSchema() {
     if (!this.validateFormData) {
-      this.validateFormData = this.ajv.compile(this.schema);
+      // if 'ui:order' exists in properties, remove it before compiling with ajv
+      let testSchema = this.schema;
+      if (Array.isArray(this.schema.properties['ui:order'])) {
+        testSchema = _.cloneDeep(this.schema);
+        delete testSchema.properties['ui:order'];
+      }
+      this.validateFormData = this.ajv.compile(testSchema);
     }
   }
 

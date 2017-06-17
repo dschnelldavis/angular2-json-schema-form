@@ -120,12 +120,10 @@ export function convertJsonSchema3to4(schema: any): any {
   if (converted === true) {
 
     // update or delete schema identifier
-    if (newSchema.$schema) {
-      if (newSchema.$schema === 'http://json-schema.org/draft-03/schema#') {
-        newSchema.$schema = 'http://json-schema.org/draft-04/schema#';
-      } else {
-        delete newSchema.$schema;
-      }
+    if (newSchema.$schema === 'http://json-schema.org/draft-03/schema#') {
+      newSchema.$schema = 'http://json-schema.org/draft-04/schema#';
+    } else if (newSchema.$schema) {
+      delete newSchema.$schema;
     }
 
     // update id

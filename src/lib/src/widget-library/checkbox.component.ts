@@ -23,7 +23,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
         type="checkbox"
         (change)="updateValue($event)">
       <span *ngIf="options?.title"
-        [class.sr-only]="options?.notitle"
+        [style.display]="options?.notitle ? 'none' : ''"
         [innerHTML]="options?.title"></span>
     </label>`,
 })

@@ -14,8 +14,8 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
         [class]="options?.labelHtmlClass"
         (click)="expand()">
         <md-card-title *ngIf="options?.title"
-          [class.sr-only]="options?.notitle"
-          [innerHTML]="options?.title">{{options?.title}}</md-card-title>
+          [style.display]="options?.notitle ? 'none' : ''"
+          [innerHTML]="options?.title"></md-card-title>
         <md-card-subtitle *ngIf="options?.description">{{options?.description}}</md-card-subtitle>
       </md-card-header>
       <md-card-content>

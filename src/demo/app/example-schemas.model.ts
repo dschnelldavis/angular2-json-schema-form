@@ -1,6 +1,6 @@
 // Sources:
 //
-// Angular Schema Form compatibility examples ('asf-...') from
+// Angular Schema Form (AngularJS) compatibility examples ('asf-...') from
 //   http://schemaform.io/examples/bootstrap-example.html
 //
 // React JSON Schema Form compatibility examples ('rjsf-...') from
@@ -12,14 +12,18 @@
 // Other examples ('ng2jsf-...') are original
 
 export const ExampleSchemas: any = {
-  exampleSetList: [ 'asf', 'rjsf', 'jsf', 'ng2jsf' ],
+  exampleSetList: [ 'ng2jsf', 'asf', 'rjsf', 'jsf', ],
   exampleSets: {
-    'asf': 'Angular Schema Form compatibility examples',
-    'rjsf': 'React JSON Schema Form compatibility examples',
-    'jsf': 'JSONForm compatibility examples',
-    'ng2jsf': 'Other examples',
+    'ng2jsf': 'Angular JSON Schema Form examples',
+    'asf': 'Compatibility Examples: Angular Schema Form (AngularJS)',
+    'rjsf': 'Compatibility Examples: React JSON Schema Form',
+    'jsf': 'Compatibility Examples: JSONForm (jQuery)',
   },
   exampleList: {
+    'ng2jsf': [
+      'ng2jsf-flex-layout', 'ng2jsf-simple-array', 'ng2jsf-data-only', // 'ng2jsf-layout-only',
+      'ng2jsf-json-schema-draft04', 'ng2jsf-json-schema-draft03',
+    ],
     'asf': [
       'asf-simple', 'asf-basic-json-schema-type', 'asf-bootstrap-grid',
       'asf-complex-key-support', 'asf-array', 'asf-tab-array',
@@ -48,12 +52,16 @@ export const ExampleSchemas: any = {
       'jsf-templating-values', 'jsf-templating-tpldata', 'jsf-events',
       'jsf-previousvalues', 'jsf-previousvalues-multidimensional',
     ],
-    'ng2jsf': [
-      'ng2jsf-simple-array', 'ng2jsf-data-only', // 'ng2jsf-layout-only',
-      'ng2jsf-json-schema-draft04', 'ng2jsf-json-schema-draft03',
-    ],
   },
   examples: {
+    'ng2jsf': {
+      'ng2jsf-flex-layout': 'Flexbox layout',
+      'ng2jsf-simple-array': 'Simple Array',
+      'ng2jsf-data-only': 'Data Only (no Schema or Layout)',
+      'ng2jsf-layout-only': 'Layout Only (no Schema or Data)',
+      'ng2jsf-json-schema-draft04': 'JSON Meta-Schema - Version 4',
+      'ng2jsf-json-schema-draft03': 'JSON Meta-Schema - Version3',
+    },
     'asf': {
       'asf-simple': 'Simple',
       'asf-basic-json-schema-type': 'Basic JSON Schema Type',
@@ -127,13 +135,6 @@ export const ExampleSchemas: any = {
       'jsf-previousvalues': 'Using previously submitted values',
       'jsf-previousvalues-multidimensional': 'Using previously submitted values - Multidimensional arrays',
     },
-    'ng2jsf': {
-      'ng2jsf-simple-array': 'Simple Array',
-      'ng2jsf-data-only': 'Data Only (no Schema or Layout)',
-      'ng2jsf-layout-only': 'Layout Only (no Schema or Data)',
-      'ng2jsf-json-schema-draft04': 'JSON Meta-Schema - Version 4',
-      'ng2jsf-json-schema-draft03': 'JSON Meta-Schema - Version3',
-    },
   },
   links: {
     'asf': { 'url': 'http://schemaform.io/examples/bootstrap-example.html', },
@@ -187,10 +188,10 @@ export const ExampleSchemas: any = {
       },
     },
   },
-  frameworkList: [ 'bootstrap-3', 'material-design', 'no-framework' ],
+  frameworkList: [ 'material-design', 'bootstrap-3', 'no-framework', ],
   frameworks: {
+    'material-design': 'Material Design framework',
     'bootstrap-3': 'Bootstrap 3 framework',
-    'material-design': 'Material Design framework (under construction)',
     'no-framework': 'No Framework (bare controls + styles from layout only)',
   },
 };

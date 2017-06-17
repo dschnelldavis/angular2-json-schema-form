@@ -6,6 +6,7 @@ import { CheckboxComponent }        from './checkbox.component';
 import { CheckboxesComponent }      from './checkboxes.component';
 import { FieldsetComponent }        from './fieldset.component';
 import { FileComponent }            from './file.component';
+import { FlexComponent }            from './flex.component';
 import { HiddenComponent }          from './hidden.component';
 import { InputComponent }           from './input.component';
 import { MessageComponent }         from './message.component';
@@ -34,7 +35,7 @@ export class WidgetLibraryService {
     'root': RootComponent, // Form root, renders a complete layout
     'select-framework': SelectFrameworkComponent, // Applies the selected framework to a specified widget
     'select-widget': SelectWidgetComponent, // Displays a specified widget
-    '$ref': AddReferenceComponent, // Button, adds new array item or $ref element
+    '$ref': AddReferenceComponent, // Button to add a new array item or $ref element
 
   // Free-form text HTML 'input' form control widgets <input type="...">
     'email': 'text',
@@ -85,6 +86,7 @@ export class WidgetLibraryService {
     // 'label': automatically added to data widgets
     // 'legend': automatically added to fieldsets
     'fieldset': FieldsetComponent, // A fieldset, with an optional legend
+    'flex': FlexComponent, // A flexbox container
 
   // Non-HTML layout widgets
     'array': 'fieldset', // A list you can add, remove and reorder

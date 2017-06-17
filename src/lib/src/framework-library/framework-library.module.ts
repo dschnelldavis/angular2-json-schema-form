@@ -13,14 +13,7 @@ import { Bootstrap3FrameworkComponent }     from './bootstrap-3-framework.compon
 import { JsonSchemaFormService }            from '../json-schema-form.service';
 import { WidgetLibraryService }             from '../widget-library/widget-library.service';
 import { FrameworkLibraryService }          from './framework-library.service';
-
-const FRAMEWORK_COMPONENTS = [
-  NoFrameworkComponent,
-  Bootstrap3FrameworkComponent,
-  // Bootstrap4FrameworkComponent,
-  // Foundation6FrameworkComponent,
-  // SemanticUIFrameworkComponent
-];
+import { FRAMEWORK_COMPONENTS }             from './index';
 
 @NgModule({
   imports:         [ CommonModule, WidgetLibraryModule, MaterialDesignFrameworkModule ],
