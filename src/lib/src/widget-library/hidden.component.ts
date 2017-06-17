@@ -14,11 +14,11 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
       [value]="controlValue">`,
 })
 export class HiddenComponent implements OnInit {
-  private formControl: AbstractControl;
-  private controlName: string;
-  private controlValue: any;
-  private controlDisabled: boolean = false;
-  private boundControl: boolean = false;
+  formControl: AbstractControl;
+  controlName: string;
+  controlValue: any;
+  controlDisabled: boolean = false;
+  boundControl: boolean = false;
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];

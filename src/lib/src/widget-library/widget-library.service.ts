@@ -27,8 +27,8 @@ import { TextareaComponent }        from './textarea.component';
 @Injectable()
 export class WidgetLibraryService {
 
-  private defaultWidget: string = 'none';
-  private widgetLibrary: any = {
+  defaultWidget: string = 'none';
+  widgetLibrary: any = {
 
   // Angular JSON Schema Form administrative widgets
     'none': NoneComponent, // Placeholder, for development - displays nothing
@@ -132,15 +132,15 @@ export class WidgetLibraryService {
     // 'wysihtml5': HTML editor - http://jhollingworth.github.io/bootstrap-wysihtml5
     // 'quill': Quill HTML / rich text editor (?) - https://quilljs.com
   };
-  private registeredWidgets: any = { };
-  private frameworkWidgets: any = { };
-  private activeWidgets: any = { };
+  registeredWidgets: any = { };
+  frameworkWidgets: any = { };
+  activeWidgets: any = { };
 
   constructor() {
     this.setActiveWidgets();
   }
 
-  private setActiveWidgets() {
+  setActiveWidgets() {
     this.activeWidgets = Object.assign(
       { }, this.widgetLibrary, this.frameworkWidgets, this.registeredWidgets
     );
@@ -160,29 +160,29 @@ export class WidgetLibraryService {
     }
   }
 
-  public setDefaultWidget(type: string): boolean {
+  setDefaultWidget(type: string): boolean {
     if (!this.hasWidget(type)) { return false; }
     this.defaultWidget = type;
     return true;
   }
 
-  public hasWidget(type: string, widgetSet: string = 'activeWidgets'): boolean {
+  hasWidget(type: string, widgetSet: string = 'activeWidgets'): boolean {
     if (!type || typeof type !== 'string') { return false; }
     return this[widgetSet].hasOwnProperty(type);
   }
 
-  public hasDefaultWidget(type: string): boolean {
+  hasDefaultWidget(type: string): boolean {
     return this.hasWidget(type, 'widgetLibrary');
   }
 
-  public registerWidget(type: string, widget: any): boolean {
+  registerWidget(type: string, widget: any): boolean {
     if (!type || !widget || typeof type !== 'string') { return false; }
     this.registeredWidgets[type] = widget;
     this.setActiveWidgets();
     return true;
   }
 
-  public unRegisterWidget(type: string): boolean {
+  unRegisterWidget(type: string): boolean {
     if (!type || typeof type !== 'string' ||
       !this.registeredWidgets.hasOwnProperty(type)) { return false; }
     delete this.registeredWidgets[type];
@@ -190,21 +190,21 @@ export class WidgetLibraryService {
     return true;
   }
 
-  public unRegisterAllWidgets(unRegisterFrameworkWidgets: boolean = true): boolean {
+  unRegisterAllWidgets(unRegisterFrameworkWidgets: boolean = true): boolean {
     this.registeredWidgets = { };
     if (unRegisterFrameworkWidgets) { this.frameworkWidgets = { }; }
     this.setActiveWidgets();
     return true;
   }
 
-  public registerFrameworkWidgets(widgets: any): boolean {
+  registerFrameworkWidgets(widgets: any): boolean {
     if (widgets === null || typeof widgets !== 'object') { return false; }
     this.frameworkWidgets = widgets;
     this.setActiveWidgets();
     return true;
   }
 
-  public unRegisterFrameworkWidgets(): boolean {
+  unRegisterFrameworkWidgets(): boolean {
     if (Object.keys(this.frameworkWidgets).length) {
       this.frameworkWidgets = { };
       this.setActiveWidgets();
@@ -212,7 +212,7 @@ export class WidgetLibraryService {
     return true;
   }
 
-  public getWidget(type?: string, widgetSet: string = 'activeWidgets'): any {
+  getWidget(type?: string, widgetSet: string = 'activeWidgets'): any {
     if (this.hasWidget(type, widgetSet)) {
       return this[widgetSet][type];
     } else if (this.hasWidget(this.defaultWidget, widgetSet)) {
@@ -222,7 +222,7 @@ export class WidgetLibraryService {
     }
   }
 
-  public getAllWidgets(): any {
+  getAllWidgets(): any {
     return {
       widgetLibrary: this.widgetLibrary,
       registeredWidgets: this.registeredWidgets,

@@ -31,10 +31,10 @@ import { JsonPointer } from '../../shared';
   styles: [`a { cursor: pointer; }`],
 })
 export class MaterialTabsComponent implements OnInit {
-  private options: any;
-  private itemCount: number;
-  private selectedItem: number = 0;
-  private showAddTab: boolean = true;
+  options: any;
+  itemCount: number;
+  selectedItem: number = 0;
+  showAddTab: boolean = true;
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
@@ -50,7 +50,7 @@ export class MaterialTabsComponent implements OnInit {
     this.updateControl();
   }
 
-  private select(index) {
+  select(index) {
     if (this.layoutNode.items[index].type === '$ref') {
       this.itemCount = this.layoutNode.items.length;
       this.jsf.addItem({
@@ -64,7 +64,7 @@ export class MaterialTabsComponent implements OnInit {
     this.selectedItem = index;
   }
 
-  private updateControl() {
+  updateControl() {
     const lastItem = this.layoutNode.items[this.layoutNode.items.length - 1];
     if (lastItem.type === '$ref' &&
       this.itemCount >= (lastItem.options.maxItems || 1000000)
@@ -73,7 +73,7 @@ export class MaterialTabsComponent implements OnInit {
     }
   }
 
-  private setTitle(item: any = null, index: number = null): string {
+  setTitle(item: any = null, index: number = null): string {
     return this.jsf.setTitle(this, item, index);
   }
 }

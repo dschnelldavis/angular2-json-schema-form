@@ -17,11 +17,11 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
     </section>`,
 })
 export class MaterialAddReferenceComponent implements OnInit, DoCheck {
-  private options: any;
-  private itemCount: number;
-  private showAddButton: boolean = true;
-  private previousLayoutIndex: number[];
-  private previousDataIndex: number[];
+  options: any;
+  itemCount: number;
+  showAddButton: boolean = true;
+  previousLayoutIndex: number[];
+  previousDataIndex: number[];
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
@@ -44,14 +44,14 @@ export class MaterialAddReferenceComponent implements OnInit, DoCheck {
     }
   }
 
-  private addItem(event) {
+  addItem(event) {
     event.preventDefault();
     this.itemCount = this.layoutIndex[this.layoutIndex.length - 1] + 1;
     this.jsf.addItem(this);
     this.updateControl();
   }
 
-  private updateControl() {
+  updateControl() {
     this.itemCount = this.layoutIndex[this.layoutIndex.length - 1];
     this.previousLayoutIndex = this.layoutIndex;
     this.previousDataIndex = this.dataIndex;
@@ -59,7 +59,7 @@ export class MaterialAddReferenceComponent implements OnInit, DoCheck {
       this.itemCount < (this.options.maxItems || 1000000);
   }
 
-  private setTitle(): string {
+  setTitle(): string {
     const parent: any = {
       dataIndex: this.dataIndex.slice(0, -1),
       layoutNode: this.jsf.getParentNode(this)

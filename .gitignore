@@ -4,7 +4,7 @@
 /compiled
 /dist
 /docs
-/out-tsc
+/out-ngc
 /tmp
 
 # dependencies

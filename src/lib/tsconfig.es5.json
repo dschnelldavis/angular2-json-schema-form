@@ -2,7 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "target": "es5",
-    "outDir": "../../out-tsc/lib-es5/",
+    "outDir": "../../out-ngc/lib-es5/",
     "baseUrl": "",
     "types": [],
     "emitDecoratorMetadata": false
@@ -17,6 +17,6 @@
     "skipTemplateCodegen": true,
     "flatModuleOutFile": "angular2-json-schema-form.js",
     "flatModuleId": "angular2-json-schema-form",
-    "genDir": "../../out-tsc/lib-gen-dir/"
+    "genDir": "../../out-ngc/lib-gen-dir/"
   }
 }

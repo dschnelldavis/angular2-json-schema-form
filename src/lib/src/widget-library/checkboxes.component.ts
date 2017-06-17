@@ -62,14 +62,14 @@ import { buildFormGroup, buildTitleMap, JsonPointer } from '../shared';
     </div>`,
 })
 export class CheckboxesComponent implements OnInit {
-  private formControl: AbstractControl;
-  private controlName: string;
-  private controlValue: any;
-  private boundControl: boolean = false;
-  private options: any;
-  private layoutOrientation: string;
-  private formArray: AbstractControl;
-  private checkboxList: CheckboxItem[] = [];
+  formControl: AbstractControl;
+  controlName: string;
+  controlValue: any;
+  boundControl: boolean = false;
+  options: any;
+  layoutOrientation: string;
+  formArray: AbstractControl;
+  checkboxList: CheckboxItem[] = [];
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];

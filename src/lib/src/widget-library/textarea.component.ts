@@ -30,12 +30,12 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
     </div>`,
 })
 export class TextareaComponent implements OnInit {
-  private formControl: AbstractControl;
-  private controlName: string;
-  private controlValue: any;
-  private controlDisabled: boolean = false;
-  private boundControl: boolean = false;
-  private options: any;
+  formControl: AbstractControl;
+  controlName: string;
+  controlValue: any;
+  controlDisabled: boolean = false;
+  boundControl: boolean = false;
+  options: any;
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
@@ -50,7 +50,7 @@ export class TextareaComponent implements OnInit {
     this.jsf.initializeControl(this);
   }
 
-  private updateValue(event) {
+  updateValue(event) {
     this.jsf.updateValue(this, event.target.value);
   }
 }

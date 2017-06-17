@@ -15,7 +15,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
     </div>`,
 })
 export class TabComponent implements OnInit {
-  private options: any;
+  options: any;
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];

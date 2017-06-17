@@ -57,9 +57,9 @@ import { hasOwn, hasValue, isArray, isEmpty, isObject, JsonPointer } from './sha
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
-  private formID: number; // Unique ID for displayed form
-  private debugOutput: any; // Debug information, if requested
-  private formValueSubscription: any = null;
+  formID: number; // Unique ID for displayed form
+  debugOutput: any; // Debug information, if requested
+  formValueSubscription: any = null;
 
   // Recommended inputs
   @Input() schema: any; // The JSON Schema
@@ -420,7 +420,7 @@ console.log(this.jsf.layout);
     }
   }
 
-  private submitForm() {
+  submitForm() {
     this.onSubmit.emit(this.jsf.validData);
   }
 }

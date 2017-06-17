@@ -26,3 +26,21 @@ export const MATERIAL_DESIGN_COMPONENTS = [
   MaterialSliderComponent, MaterialTabsComponent,
   MaterialTextareaComponent, MaterialDesignFrameworkComponent
 ];
+
+export * from './material-add-reference.component';
+export * from './material-button.component';
+export * from './material-button-group.component';
+export * from './material-card.component';
+export * from './material-checkbox.component';
+export * from './material-checkboxes.component';
+export * from './material-datepicker.component';
+export * from './material-file.component';
+export * from './material-input.component';
+export * from './material-number.component';
+export * from './material-radios.component';
+export * from './material-select.component';
+export * from './material-slider.component';
+export * from './material-tabs.component';
+export * from './material-textarea.component';
+
+export * from './material-design-framework.component';

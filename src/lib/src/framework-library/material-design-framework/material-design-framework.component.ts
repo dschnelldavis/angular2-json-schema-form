@@ -16,14 +16,14 @@ import { toTitleCase } from '../../shared';
   `
 })
 export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
-  private controlInitialized: boolean = false;
-  private controlType: string;
-  private inputType: string;
-  private options: any; // Options used in this framework
-  private widgetLayoutNode: any; // layoutNode passed to child widget
-  private widgetOptions: any; // Options passed to child widget
-  private layoutPointer: string;
-  private formControl: any = null;
+  controlInitialized: boolean = false;
+  controlType: string;
+  inputType: string;
+  options: any; // Options used in this framework
+  widgetLayoutNode: any; // layoutNode passed to child widget
+  widgetOptions: any; // Options passed to child widget
+  layoutPointer: string;
+  formControl: any = null;
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
@@ -42,7 +42,7 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
     if (!this.controlInitialized) this.initializeControl();
   }
 
-  private initializeControl() {
+  initializeControl() {
     if (this.layoutNode) {
       this.options = _.cloneDeep(this.layoutNode.options);
       this.widgetLayoutNode = Object.assign(
@@ -155,7 +155,7 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
     }
   }
 
-  private setTitle(): string {
+  setTitle(): string {
     switch (this.layoutNode.type) {
       case 'array':    case 'button': case 'checkbox': case 'conditional':
       case 'fieldset': case 'help':   case 'msg':      case 'message':

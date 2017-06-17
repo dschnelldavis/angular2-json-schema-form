@@ -16,43 +16,44 @@ export type CheckboxItem = { name: string, value: any, checked?: boolean };
 
 @Injectable()
 export class JsonSchemaFormService {
-  public JsonFormCompatibility: boolean = false;
-  public ReactJsonSchemaFormCompatibility: boolean = false;
-  public AngularSchemaFormCompatibility: boolean = false;
-  public tpldata: any = {};
+  JsonFormCompatibility: boolean = false;
+  ReactJsonSchemaFormCompatibility: boolean = false;
+  AngularSchemaFormCompatibility: boolean = false;
+  tpldata: any = {};
 
-  private ajvOptions: any = { allErrors: true, unknownFormats: 'ignore' };
-  private ajv: any = new Ajv(this.ajvOptions); // AJV: Another JSON Schema Validator
-  private validateFormData: any = null; // Compiled AJV function to validate active form's schema
+  ajvOptions: any = { allErrors: true, unknownFormats: 'ignore' };
+  ajv: any = new Ajv(this.ajvOptions); // AJV: Another JSON Schema Validator
+  validateFormData: any = null; // Compiled AJV function to validate active form's schema
 
-  public initialValues: any = {}; // The initial data model (e.g. previously submitted data)
-  public schema: any = {}; // The internal JSON Schema
-  public layout: any[] = []; // The internal Form layout
-  public formGroupTemplate: any = {}; // The template used to create formGroup
-  public formGroup: any = null; // The Angular formGroup, which powers the reactive form
-  public framework: any = null; // The active framework component
+  initialValues: any = {}; // The initial data model (e.g. previously submitted data)
+  schema: any = {}; // The internal JSON Schema
+  layout: any[] = []; // The internal Form layout
+  formGroupTemplate: any = {}; // The template used to create formGroup
+  formGroup: any = null; // The Angular formGroup, which powers the reactive form
+  framework: any = null; // The active framework component
 
-  public data: any = {}; // Form data, formatted with correct data types
-  public validData: any = null; // Valid form data (or null)
-  public isValid: boolean = null; // Is current form data valid?
-  public validationErrors: any = null; // Any validation errors for current data
-  private formValueSubscription: any = null; // Subscription to formGroup.valueChanges observable (for un- and re-subscribing)
-  public dataChanges: Subject<any> = new Subject(); // Form data observable
-  public isValidChanges: Subject<any> = new Subject(); // isValid observable
-  public validationErrorChanges: Subject<any> = new Subject(); // validationErrors observable
+  data: any = {}; // Form data, formatted with correct data types
+  validData: any = null; // Valid form data (or null)
+  isValid: boolean = null; // Is current form data valid?
+  validationErrors: any = null; // Any validation errors for current data
+  formValueSubscription: any = null; // Subscription to formGroup.valueChanges observable (for un- and re-subscribing)
+  dataChanges: Subject<any> = new Subject(); // Form data observable
+  isValidChanges: Subject<any> = new Subject(); // isValid observable
+  validationErrorChanges: Subject<any> = new Subject(); // validationErrors observable
 
-  public arrayMap: Map<string, number> = new Map<string, number>(); // Maps arrays in data object and number of tuple values
-  public dataMap: Map<string, any> = new Map<string, any>(); // Maps paths in data model to schema and formGroup paths
-  public dataRecursiveRefMap: Map<string, string> = new Map<string, string>(); // Maps recursive reference points in data model
-  public schemaRecursiveRefMap: Map<string, string> = new Map<string, string>(); // Maps recursive reference points in schema
-  public layoutRefLibrary: any = {}; // Library of layout nodes for adding to form
-  public schemaRefLibrary: any = {}; // Library of schemas for resolving schema $refs
-  public templateRefLibrary: any = {}; // Library of formGroup templates for adding to form
+  arrayMap: Map<string, number> = new Map<string, number>(); // Maps arrays in data object and number of tuple values
+  dataMap: Map<string, any> = new Map<string, any>(); // Maps paths in data model to schema and formGroup paths
+  dataRecursiveRefMap: Map<string, string> = new Map<string, string>(); // Maps recursive reference points in data model
+  schemaRecursiveRefMap: Map<string, string> = new Map<string, string>(); // Maps recursive reference points in schema
+  layoutRefLibrary: any = {}; // Library of layout nodes for adding to form
+  schemaRefLibrary: any = {}; // Library of schemas for resolving schema $refs
+  templateRefLibrary: any = {}; // Library of formGroup templates for adding to form
 
   // Default global form options
-  public globalOptionDefaults: any = {
+  globalOptionDefaults: any = {
     addSubmit: 'auto', // Add a submit button if layout does not have one?
-      // for addSubmit: true = always, false = never, 'auto' = only if layout is undefined
+      // for addSubmit: true = always, false = never,
+      // 'auto' = only if layout is undefined (so form is built from schema alone)
     debug: false, // Show debugging output?
     fieldsRequired: false, // Are there any required fields in the form?
     framework: 'bootstrap-3', // The framework to load
@@ -72,22 +73,22 @@ export class JsonSchemaFormService {
       enableSuccessState: true, // Apply 'has-success' class when field validates?
       // disableSuccessState: false, // Don't apply 'has-success' class when field validates?
       feedback: false, // Show inline feedback icons?
-      feedbackOnRender: false, //Show errorMessage on Render?
+      feedbackOnRender: false, // Show errorMessage on Render?
       notitle: false, // Hide title?
       readonly: false, // Set control as read only?
     },
   };
-  public globalOptions: any;
+  globalOptions: any;
 
   constructor() {
     this.globalOptions = _.cloneDeep(this.globalOptionDefaults);
   }
 
-  public getData() { return this.data; }
-  public getSchema() { return this.schema; }
-  public getLayout() { return this.layout; }
+  getData() { return this.data; }
+  getSchema() { return this.schema; }
+  getLayout() { return this.layout; }
 
-  public resetAllValues() {
+  resetAllValues() {
     this.JsonFormCompatibility = false;
     this.ReactJsonSchemaFormCompatibility = false;
     this.AngularSchemaFormCompatibility = false;
@@ -113,20 +114,20 @@ export class JsonSchemaFormService {
     this.globalOptions = _.cloneDeep(this.globalOptionDefaults);
   }
 
-  public convertJsonSchema3to4() {
+  convertJsonSchema3to4() {
     this.schema = convertJsonSchema3to4(this.schema);
   }
 
-  public fixJsonFormOptions(layout: any): any {
+  fixJsonFormOptions(layout: any): any {
     return fixJsonFormOptions(layout);
   }
 
-  public buildFormGroupTemplate(setValues: boolean = true) {
+  buildFormGroupTemplate(setValues: boolean = true) {
     this.formGroupTemplate =
       buildFormGroupTemplate(this, this.initialValues, setValues);
   }
 
-  private validateData(newValue: any, updateSubscriptions: boolean = true): void {
+  validateData(newValue: any, updateSubscriptions: boolean = true): void {
 
     // Format raw form data to correct data types
     this.data = formatFormData(
@@ -148,7 +149,7 @@ export class JsonSchemaFormService {
     }
   }
 
-  public buildFormGroup() {
+  buildFormGroup() {
     this.formGroup = <FormGroup>buildFormGroup(this.formGroupTemplate);
     if (this.formGroup) {
       this.compileAjvSchema();
@@ -162,11 +163,11 @@ export class JsonSchemaFormService {
     }
   }
 
-  public buildLayout(widgetLibrary: any) {
+  buildLayout(widgetLibrary: any) {
     this.layout = buildLayout(this, widgetLibrary);
   }
 
-  public setOptions(newOptions: any): void {
+  setOptions(newOptions: any): void {
     if (typeof newOptions === 'object') {
       Object.assign(this.globalOptions, newOptions);
     }
@@ -182,7 +183,7 @@ export class JsonSchemaFormService {
     }
   }
 
-  public compileAjvSchema() {
+  compileAjvSchema() {
     if (!this.validateFormData) {
       // if 'ui:order' exists in properties, remove it before compiling with ajv
       let testSchema = this.schema;
@@ -195,7 +196,7 @@ export class JsonSchemaFormService {
   }
 
   // Resolve all schema $ref links
-  public resolveSchemaRefLinks() {
+  resolveSchemaRefLinks() {
 
     // Search schema for $ref links
     JsonPointer.forEachDeep(this.schema, (value, pointer) => {
@@ -285,27 +286,27 @@ export class JsonSchemaFormService {
     // });
   }
 
-  public buildSchemaFromData(data?: any, requireAllFields: boolean = false): any {
+  buildSchemaFromData(data?: any, requireAllFields: boolean = false): any {
     if (data) { return buildSchemaFromData(data, requireAllFields); }
     this.schema = buildSchemaFromData(this.initialValues, requireAllFields);
   }
 
-  public buildSchemaFromLayout(layout?: any): any {
+  buildSchemaFromLayout(layout?: any): any {
     if (layout) { return buildSchemaFromLayout(layout); }
     this.schema = buildSchemaFromLayout(this.layout);
   }
 
-  public setTpldata(newTpldata: any = {}): void {
+  setTpldata(newTpldata: any = {}): void {
     this.tpldata = newTpldata;
   }
 
-  public parseText(
+  parseText(
     text: string = '', value: any = {}, values: any = {}, key: number|string = null
   ): string {
     return parseText(text, value, values, key, this.tpldata);
   }
 
-  public setTitle(
+  setTitle(
     parentCtx: any = {}, childNode: any = null, index: number = null
   ): string {
     const parentNode: any = parentCtx.layoutNode;
@@ -339,7 +340,7 @@ export class JsonSchemaFormService {
     return this.parseText(text, childValue, parentValues, index);
   }
 
-  public initializeControl(ctx: any): boolean {
+  initializeControl(ctx: any): boolean {
     ctx.formControl = this.getControl(ctx);
     ctx.boundControl = !!ctx.formControl;
     if (ctx.boundControl) {
@@ -362,7 +363,7 @@ export class JsonSchemaFormService {
     return ctx.boundControl;
   }
 
-  public updateValue(ctx: any, value): void {
+  updateValue(ctx: any, value): void {
 
     // Set value of current control
     ctx.controlValue = value;
@@ -384,7 +385,7 @@ export class JsonSchemaFormService {
     }
   }
 
-  public updateArrayCheckboxList(ctx: any, checkboxList: CheckboxItem[]): void {
+  updateArrayCheckboxList(ctx: any, checkboxList: CheckboxItem[]): void {
     let formArray = <FormArray>this.getControl(ctx);
 
     // Remove all existing items
@@ -403,55 +404,55 @@ export class JsonSchemaFormService {
     formArray.markAsDirty();
   }
 
-  public getControl(ctx: any): AbstractControl {
+  getControl(ctx: any): AbstractControl {
     if (!ctx.layoutNode || !ctx.layoutNode.dataPointer ||
       ctx.layoutNode.type === '$ref') { return null; }
     return getControl(this.formGroup, this.getDataPointer(ctx));
   }
 
-  public getControlValue(ctx: any): AbstractControl {
+  getControlValue(ctx: any): AbstractControl {
     if (!ctx.layoutNode || !ctx.layoutNode.dataPointer ||
       ctx.layoutNode.type === '$ref') { return null; }
     const control = getControl(this.formGroup, this.getDataPointer(ctx));
     return control ? control.value : null;
   }
 
-  public getControlGroup(ctx: any): FormArray | FormGroup {
+  getControlGroup(ctx: any): FormArray | FormGroup {
     if (!ctx.layoutNode || !ctx.layoutNode.dataPointer) { return null; }
     return getControl(this.formGroup, this.getDataPointer(ctx), true);
   }
 
-  public getControlName(ctx: any): string {
+  getControlName(ctx: any): string {
     if (!ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex) { return null; }
     return JsonPointer.toKey(this.getDataPointer(ctx));
   }
 
-  public getLayoutArray(ctx: any): any[] {
+  getLayoutArray(ctx: any): any[] {
     return JsonPointer.get(this.layout, this.getLayoutPointer(ctx), 0, -1);
   }
 
-  public getParentNode(ctx: any): any[] {
+  getParentNode(ctx: any): any[] {
     return JsonPointer.get(this.layout, this.getLayoutPointer(ctx), 0, -2);
   }
 
-  public getDataPointer(ctx: any): string {
+  getDataPointer(ctx: any): string {
     if (!ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex) { return null; }
     return JsonPointer.toIndexedPointer(ctx.layoutNode.dataPointer, ctx.dataIndex, this.arrayMap);
   }
 
-  public getLayoutPointer(ctx: any): string {
+  getLayoutPointer(ctx: any): string {
     if (!ctx.layoutNode || !ctx.layoutNode.layoutPointer || !ctx.layoutIndex) { return null; }
     return JsonPointer.toIndexedPointer(ctx.layoutNode.layoutPointer, ctx.layoutIndex);
   }
 
-  public isControlBound(ctx: any): boolean {
+  isControlBound(ctx: any): boolean {
     if (!ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex) { return false; }
     const controlGroup = this.getControlGroup(ctx);
     const name = this.getControlName(ctx);
     return controlGroup ? controlGroup.controls.hasOwnProperty(name) : false;
   }
 
-  public addItem(ctx: any): boolean {
+  addItem(ctx: any): boolean {
     if (!ctx.layoutNode || !ctx.layoutNode.$ref || !ctx.dataIndex ||
       !ctx.layoutNode.layoutPointer || !ctx.layoutIndex) { return false; }
 
@@ -497,7 +498,7 @@ export class JsonSchemaFormService {
     return true;
   }
 
-  public moveArrayItem(ctx: any, oldIndex: number, newIndex: number): boolean {
+  moveArrayItem(ctx: any, oldIndex: number, newIndex: number): boolean {
     if (!ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex ||
       !ctx.layoutNode.layoutPointer || !ctx.layoutIndex ||
       !isDefined(oldIndex) || !isDefined(newIndex)) { return false; }
@@ -516,7 +517,7 @@ export class JsonSchemaFormService {
     return true;
   }
 
-  public removeItem(ctx: any): boolean {
+  removeItem(ctx: any): boolean {
     if (!ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex ||
       !ctx.layoutNode.layoutPointer || !ctx.layoutIndex) { return false; }
 

@@ -13,8 +13,8 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
       [innerHTML]="message"></span>`,
 })
 export class MessageComponent implements OnInit {
-  private options: any;
-  private message: string = null;
+  options: any;
+  message: string = null;
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];

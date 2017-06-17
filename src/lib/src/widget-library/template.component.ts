@@ -10,13 +10,13 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
   template: `<div #widgetContainer></div>`,
 })
 export class TemplateComponent implements OnInit, OnChanges {
-  private newComponent: ComponentRef<any> = null;
+  newComponent: ComponentRef<any> = null;
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
   @ViewChild('widgetContainer', { read: ViewContainerRef })
-    private widgetContainer: ViewContainerRef;
+    widgetContainer: ViewContainerRef;
 
   constructor(
     private componentFactory: ComponentFactoryResolver,
@@ -31,7 +31,7 @@ export class TemplateComponent implements OnInit, OnChanges {
     this.updateComponent();
   }
 
-  private updateComponent() {
+  updateComponent() {
     if (!this.newComponent && this.layoutNode.options.template) {
       this.newComponent = this.widgetContainer.createComponent(
         this.componentFactory.resolveComponentFactory(this.layoutNode.options.template)

@@ -13,13 +13,13 @@ declare var ace: any;
   selector: '[ace-editor]'
 })
 export class AceEditorDirective {
-  private _options: any = {};
-  private _readOnly: boolean = false;
-  private _theme: string = 'chrome';
-  private _mode: string = 'javascript';
-  private _autoUpdateContent: boolean = true;
-  private editor: any;
-  private oldText: any;
+  _options: any = {};
+  _readOnly: boolean = false;
+  _theme: string = 'chrome';
+  _mode: string = 'javascript';
+  _autoUpdateContent: boolean = true;
+  editor: any;
+  oldText: any;
   @Output('textChanged') textChanged = new EventEmitter();
 
   constructor(elementRef: ElementRef) {

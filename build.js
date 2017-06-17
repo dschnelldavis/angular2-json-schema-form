@@ -17,7 +17,7 @@ const inlineResources = require('./inline-resources');
 
 const libName = require('./package.json').name;
 const rootFolder = path.join(__dirname);
-const compilationFolder = path.join(rootFolder, 'out-tsc');
+const compilationFolder = path.join(rootFolder, 'out-ngc');
 const srcFolder = path.join(rootFolder, 'src/lib');
 const distFolder = path.join(rootFolder, 'dist');
 const tempLibFolder = path.join(compilationFolder, 'lib');

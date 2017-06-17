@@ -11,3 +11,9 @@ export const FRAMEWORK_COMPONENTS = [
   // Foundation6FrameworkComponent,
   // SemanticUIFrameworkComponent
 ];
+
+export * from './no-framework.component';
+export * from './bootstrap-3-framework.component';
+// export * from './bootstrap-4-framework.component';
+// export * from './foundation-6-framework.component';
+// export * from './semantic-ui-framework.component';

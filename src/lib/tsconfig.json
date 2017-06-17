@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../out-tsc/lib-es2015/",
+    "outDir": "../../out-ngc/lib-es2015/",
     "target": "es2015",
     "rootDir": "./",
     "baseUrl": "",
@@ -18,6 +18,6 @@
     "skipTemplateCodegen": true,
     "flatModuleOutFile": "angular2-json-schema-form.js",
     "flatModuleId": "angular2-json-schema-form",
-    "genDir": "../../out-tsc/lib-gen-dir/"
+    "genDir": "../../out-ngc/lib-gen-dir/"
   }
 }

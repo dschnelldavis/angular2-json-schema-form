@@ -12,28 +12,28 @@ import { ExampleSchemas } from './example-schemas.model';
   styleUrls: [ 'demo.component.css' ]
 })
 export class DemoComponent implements OnInit, AfterViewInit {
-  private exampleSchemas = ExampleSchemas;
-  private selectedSet: string = 'asf';
-  private selectedExample: string = 'asf-basic-json-schema-type';
-  private selectedFramework: string = 'bootstrap-3';
+  exampleSchemas = ExampleSchemas;
+  selectedSet: string = 'asf';
+  selectedExample: string = 'asf-basic-json-schema-type';
+  selectedFramework: string = 'bootstrap-3';
 
-  private formActive: boolean = false;
-  private aceHeight: number = 600;
-  private jsonFormSchema: string;
-  private jsonFormValid: boolean = false;
-  private jsonFormErrorMessage: string = 'Loading form...';
-  private jsonFormObject: any;
-  private jsonFormOptions: any = {
+  formActive: boolean = false;
+  aceHeight: number = 600;
+  jsonFormSchema: string;
+  jsonFormValid: boolean = false;
+  jsonFormErrorMessage: string = 'Loading form...';
+  jsonFormObject: any;
+  jsonFormOptions: any = {
     addSubmit: true, // Add a submit button if layout does not have one
     loadExternalAssets: true, // Load external css and JavaScript for frameworks
     formDefaults: { feedback: true }, // SHow inline feedback icons
     debug: false,
   };
-  private liveFormData: any = {};
-  private formValidationErrors: any;
-  private formIsValid: boolean = null;
-  private submittedFormData: any = null;
-  private aceEditorOptions: any = {
+  liveFormData: any = {};
+  formValidationErrors: any;
+  formIsValid: boolean = null;
+  submittedFormData: any = null;
+  aceEditorOptions: any = {
     highlightActiveLine: true,
     maxLines: 1000,
     printMargin: false,
@@ -77,11 +77,11 @@ export class DemoComponent implements OnInit, AfterViewInit {
     return JSON.stringify(this.liveFormData, null, 2);
   }
 
-  private isValid(isValid: boolean): void {
+  isValid(isValid: boolean): void {
     this.formIsValid = isValid;
   }
 
-  private validationErrors(data: any): void {
+  validationErrors(data: any): void {
     this.formValidationErrors = data;
   }
 
@@ -95,11 +95,11 @@ export class DemoComponent implements OnInit, AfterViewInit {
     return prettyValidationErrors;
   }
 
-  private resizeAceEditor() {
+  resizeAceEditor() {
     this.aceHeight = window.innerHeight - 230;
   }
 
-  private loadSelectedSet(selectedSet?: string) {
+  loadSelectedSet(selectedSet?: string) {
     if (selectedSet && selectedSet !== this.selectedSet) {
       this.selectedSet = selectedSet;
       this.selectedExample = this.exampleSchemas.exampleList[selectedSet][0];
@@ -114,7 +114,7 @@ export class DemoComponent implements OnInit, AfterViewInit {
 
   // Load and display the selected schema
   // (runs whenever the user selects a schema from the drop-down menu)
-  private loadSelectedExample(selectedSet?: string, selectedExample?: string) {
+  loadSelectedExample(selectedSet?: string, selectedExample?: string) {
     if (selectedExample && selectedExample !== this.selectedExample) {
       this.selectedSet = selectedSet;
       this.selectedExample = selectedExample;
@@ -137,7 +137,7 @@ export class DemoComponent implements OnInit, AfterViewInit {
       });
   }
 
-  private loadSelectedFramework(selectedFramework: string) {
+  loadSelectedFramework(selectedFramework: string) {
     this.router.navigateByUrl(
       '/?set=' + this.selectedSet +
       '&example=' + this.selectedExample +
@@ -148,7 +148,7 @@ export class DemoComponent implements OnInit, AfterViewInit {
 
   // Display the form entered by the user
   // (runs whenever the user changes the jsonform object in the ACE input field)
-  private generateForm(newFormString: string) {
+  generateForm(newFormString: string) {
     if (!newFormString) { return; }
     this.formActive = false;
     this.liveFormData = {};

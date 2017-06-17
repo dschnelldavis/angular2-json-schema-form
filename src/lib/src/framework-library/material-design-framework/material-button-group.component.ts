@@ -32,14 +32,14 @@ import { buildTitleMap } from '../../shared';
     </md-button-toggle-group>`,
 })
 export class MaterialButtonGroupComponent implements OnInit {
-  private formControl: AbstractControl;
-  private controlName: string;
-  private controlValue: any;
-  private controlDisabled: boolean = false;
-  private boundControl: boolean = false;
-  private options: any;
-  private flexDirection: string = 'column';
-  private radiosList: any[] = [];
+  formControl: AbstractControl;
+  controlName: string;
+  controlValue: any;
+  controlDisabled: boolean = false;
+  boundControl: boolean = false;
+  options: any;
+  flexDirection: string = 'column';
+  radiosList: any[] = [];
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
@@ -61,7 +61,7 @@ export class MaterialButtonGroupComponent implements OnInit {
     this.jsf.initializeControl(this);
   }
 
-  private updateValue(value) {
+  updateValue(value) {
     this.jsf.updateValue(this, value);
   }
 }

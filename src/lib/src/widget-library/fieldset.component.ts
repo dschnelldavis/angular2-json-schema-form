@@ -25,14 +25,13 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
 
     </fieldset>`,
   styles: [`
-    .expandable: { background-color: #ccc; }
     .expandable > legend:before { content: '\\25B8'; padding-right: .3em; }
     .expanded > legend:before { content: '\\25BE'; padding-right: .2em; }
   `],
 })
 export class FieldsetComponent implements OnInit {
-  private options: any;
-  private expanded: boolean = true;
+  options: any;
+  expanded: boolean = true;
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
@@ -47,7 +46,7 @@ export class FieldsetComponent implements OnInit {
     this.expanded = !this.options.expandable;
   }
 
-  private expand() {
+  expand() {
     if (this.options.expandable) { this.expanded = !this.expanded; }
   }
 }

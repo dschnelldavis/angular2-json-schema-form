@@ -1,6 +1,6 @@
 import { Injectable }                       from '@angular/core';
 
-import { WidgetLibraryService }             from '../widget-library/widget-library.service';
+import { WidgetLibraryService }             from '../widget-library';
 
 // No framework - unmodified HTML controls, with styles from layout only
 import { NoFrameworkComponent }             from './no-framework.component';
@@ -9,22 +9,22 @@ import { NoFrameworkComponent }             from './no-framework.component';
 // https://github.com/angular/material2
 // https://www.muicss.com/docs/v1/css-js/forms
 // http://materializecss.com/forms.html
-import { MaterialAddReferenceComponent }    from './material-design-framework/material-add-reference.component';
-import { MaterialButtonComponent }          from './material-design-framework/material-button.component';
-import { MaterialButtonGroupComponent }     from './material-design-framework/material-button-group.component';
-import { MaterialCardComponent }            from './material-design-framework/material-card.component';
-import { MaterialCheckboxComponent }        from './material-design-framework/material-checkbox.component';
-import { MaterialCheckboxesComponent }      from './material-design-framework/material-checkboxes.component';
-import { MaterialDatepickerComponent }      from './material-design-framework/material-datepicker.component';
-import { MaterialFileComponent }            from './material-design-framework/material-file.component';
-import { MaterialInputComponent }           from './material-design-framework/material-input.component';
-import { MaterialNumberComponent }          from './material-design-framework/material-number.component';
-import { MaterialRadiosComponent }          from './material-design-framework/material-radios.component';
-import { MaterialSelectComponent }          from './material-design-framework/material-select.component';
-import { MaterialSliderComponent }          from './material-design-framework/material-slider.component';
-import { MaterialTabsComponent }            from './material-design-framework/material-tabs.component';
-import { MaterialTextareaComponent }        from './material-design-framework/material-textarea.component';
-import { MaterialDesignFrameworkComponent } from './material-design-framework/material-design-framework.component';
+import { MaterialAddReferenceComponent }    from './material-design-framework';
+import { MaterialButtonComponent }          from './material-design-framework';
+import { MaterialButtonGroupComponent }     from './material-design-framework';
+import { MaterialCardComponent }            from './material-design-framework';
+import { MaterialCheckboxComponent }        from './material-design-framework';
+import { MaterialCheckboxesComponent }      from './material-design-framework';
+import { MaterialDatepickerComponent }      from './material-design-framework';
+import { MaterialFileComponent }            from './material-design-framework';
+import { MaterialInputComponent }           from './material-design-framework';
+import { MaterialNumberComponent }          from './material-design-framework';
+import { MaterialRadiosComponent }          from './material-design-framework';
+import { MaterialSelectComponent }          from './material-design-framework';
+import { MaterialSliderComponent }          from './material-design-framework';
+import { MaterialTabsComponent }            from './material-design-framework';
+import { MaterialTextareaComponent }        from './material-design-framework';
+import { MaterialDesignFrameworkComponent } from './material-design-framework';
 
 // Bootstrap 3 Framework
 // https://github.com/valor-software/ng2-bootstrap
@@ -54,12 +54,12 @@ export type FrameworkLibrary = { [key: string]: Framework };
 
 @Injectable()
 export class FrameworkLibraryService {
-  private activeFramework: Framework = null;
-  private stylesheets: (HTMLStyleElement|HTMLLinkElement)[];
-  private scripts: HTMLScriptElement[];
-  private loadExternalAssets: boolean = false;
-  private defaultFramework: string = 'bootstrap-3';
-  private frameworkLibrary: FrameworkLibrary = {
+  activeFramework: Framework = null;
+  stylesheets: (HTMLStyleElement|HTMLLinkElement)[];
+  scripts: HTMLScriptElement[];
+  loadExternalAssets: boolean = false;
+  defaultFramework: string = 'bootstrap-3';
+  frameworkLibrary: FrameworkLibrary = {
     'no-framework': { framework: NoFrameworkComponent },
     'material-design': {
       framework: MaterialDesignFrameworkComponent,
@@ -118,7 +118,7 @@ export class FrameworkLibraryService {
     private widgetLibrary: WidgetLibraryService
   ) { }
 
-  private registerFrameworkWidgets(framework: Framework): boolean {
+  registerFrameworkWidgets(framework: Framework): boolean {
     if (framework.hasOwnProperty('widgets')) {
       this.widgetLibrary.registerFrameworkWidgets(framework.widgets);
       return true;
@@ -127,7 +127,7 @@ export class FrameworkLibraryService {
     return false;
   }
 
-  private unloadFrameworkExternalAssets(): void {
+  unloadFrameworkExternalAssets(): void {
     for (let node of [...(this.scripts || []), ...(this.stylesheets || [])]) {
       node.parentNode.removeChild(node);
     }
@@ -135,7 +135,7 @@ export class FrameworkLibraryService {
     this.stylesheets = [];
   }
 
-  private loadFrameworkExternalAssets(framework: Framework): boolean {
+  loadFrameworkExternalAssets(framework: Framework): boolean {
     this.unloadFrameworkExternalAssets();
     if (framework.hasOwnProperty('scripts')) {
       for (let script of framework.scripts) {

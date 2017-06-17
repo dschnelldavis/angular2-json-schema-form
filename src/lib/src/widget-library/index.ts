@@ -30,3 +30,29 @@ export const BASIC_WIDGETS = [
   SelectFrameworkComponent, SelectWidgetComponent, SubmitComponent,
   TabComponent, TabsComponent, TemplateComponent, TextareaComponent
 ];
+
+export * from './add-reference.component';
+export * from './button.component';
+export * from './checkbox.component';
+export * from './checkboxes.component';
+export * from './fieldset.component';
+export * from './file.component';
+export * from './flex.component';
+export * from './hidden.component';
+export * from './input.component';
+export * from './message.component';
+export * from './none.component';
+export * from './number.component';
+export * from './radios.component';
+export * from './root.component';
+export * from './section.component';
+export * from './select.component';
+export * from './select-framework.component';
+export * from './select-widget.component';
+export * from './submit.component';
+export * from './tab.component';
+export * from './tabs.component';
+export * from './template.component';
+export * from './textarea.component';
+
+export * from './widget-library.service';

@@ -92,14 +92,14 @@ import { addClasses, inArray, JsonPointer, toTitleCase } from '../shared';
   `],
 })
 export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
-  private controlInitialized: boolean = false;
-  private widgetOptions: any; // Options passed to child widget
-  private layoutPointer: string;
-  public widgetLayoutNode: any; // layoutNode passed to child widget
-  public options: any; // Options used in this framework
-  public formControl: any = null;
-  public debugOutput: any = '';
-  public debug: any = '';
+  controlInitialized: boolean = false;
+  widgetOptions: any; // Options passed to child widget
+  layoutPointer: string;
+  widgetLayoutNode: any; // layoutNode passed to child widget
+  options: any; // Options used in this framework
+  formControl: any = null;
+  debugOutput: any = '';
+  debug: any = '';
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
@@ -119,7 +119,7 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
     if (!this.controlInitialized) { this.initializeControl(); }
   }
 
-  private initializeControl() {
+  initializeControl() {
     if (this.layoutNode) {
       this.options = _.cloneDeep(this.layoutNode.options);
       this.widgetLayoutNode = Object.assign(
@@ -256,7 +256,7 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
 
   }
 
-  private updateHelpBlock(value){
+  updateHelpBlock(value){
     this.options.helpBlock = this.options.description|| this.options.help || false;
     if (this.options.enableErrorState && value === 'INVALID' && this.formControl.errors &&
       (this.formControl.dirty || this.options.feedbackOnRender)
@@ -271,7 +271,7 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
     }
   }
 
-  private updateArrayItems() {
+  updateArrayItems() {
     if (this.layoutNode.arrayItem && this.options.removable &&
       this.dataIndex && this.dataIndex.length
     ) {
@@ -291,7 +291,7 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
     }
   }
 
-  private setTitle(): string {
+  setTitle(): string {
     switch (this.layoutNode.type) {
       case 'array': case 'button': case 'checkbox': case 'conditional':
       case 'fieldset': case 'help': case 'msg': case 'message':
@@ -324,7 +324,7 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
     }
   }
 
-  private removeItem() {
+  removeItem() {
     this.jsf.removeItem(this);
   }
 }

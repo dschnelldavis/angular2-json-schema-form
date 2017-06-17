@@ -42,8 +42,8 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
     </div>`,
 })
 export class FlexComponent implements OnInit {
-  private options: any;
-  private expanded: boolean = true;
+  options: any;
+  expanded: boolean = true;
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
