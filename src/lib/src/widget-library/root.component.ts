@@ -3,13 +3,12 @@ import { Component, Input } from '@angular/core';
 @Component({
   selector: 'root-widget',
   template: `
-    <div *ngFor="let layoutItem of layout; let i = index">
-      <!-- [dataIndex]="layoutItem?.arrayItem ? (dataIndex || []).concat(i) : (dataIndex || [])"
+    <div *ngFor="let layoutItem of layout; let i = index"
+      [orderable]="isDraggable(layoutItem)"
+      [formID]="formID"
+      [dataIndex]="layoutItem?.arrayItem ? (dataIndex || []).concat(i) : (dataIndex || [])"
       [layoutIndex]="(layoutIndex || []).concat(i)"
-      [layoutNode]="layoutItem"
-      [orderable]="isOrderable !== false && layoutItem?.type !== '$ref' &&
-        layoutItem?.arrayItem && layoutItem?.options?.arrayItemType === 'list'"> -->
-      <!-- && (layout[layout.length - 1].tupleItems || 0 < (layout.length - 2)) -->
+      [layoutNode]="layoutItem">
 
       <select-framework-widget
         [formID]="formID"
@@ -32,12 +31,20 @@ import { Component, Input } from '@angular/core';
   `],
 })
 export class RootComponent {
-  private options: any;
+  options: any;
   @Input() formID: number;
   @Input() dataIndex: number[];
   @Input() layoutIndex: number[];
   @Input() layout: any[];
   @Input() isOrderable: boolean;
 
-  trackByItem(layoutItem: any) { return layoutItem && layoutItem._id; }
+  isDraggable(node: any): boolean {
+    return this.isOrderable !== false && node.type !== '$ref' &&
+      node.arrayItem && node.options.arrayItemType === 'list';
+      // && (this.layout[this.layout.length - 1].tupleItems || this.layout.length > 2);
+  }
+
+  trackByItem(layoutItem: any) {
+    return layoutItem && layoutItem._id;
+  }
 }

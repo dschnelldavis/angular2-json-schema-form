@@ -1,6 +1,4 @@
-import {
-  Directive, ElementRef, HostListener, Input, OnInit
-} from '@angular/core';
+import { Directive, ElementRef, HostListener, Input, OnInit } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { JsonPointer } from './jsonpointer.functions';
@@ -21,11 +19,11 @@ import { JsonPointer } from './jsonpointer.functions';
   selector: '[orderable]',
 })
 export class OrderableDirective implements OnInit {
-  private arrayPointer: string;
-  private listen: boolean = false;
-  private element: any;
-  private overParentElement: boolean = false;
-  private overChildElement: boolean = false;
+  arrayPointer: string;
+  listen: boolean = false;
+  element: any;
+  overParentElement: boolean = false;
+  overChildElement: boolean = false;
   @Input() orderable: boolean;
   @Input() formID: number;
   @Input() layoutNode: any;
