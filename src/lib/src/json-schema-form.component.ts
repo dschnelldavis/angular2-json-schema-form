@@ -9,7 +9,9 @@ import * as _ from 'lodash';
 import { FrameworkLibraryService } from './framework-library/framework-library.service';
 import { WidgetLibraryService } from './widget-library/widget-library.service';
 import { JsonSchemaFormService } from './json-schema-form.service';
-import { hasOwn, hasValue, isArray, isEmpty, isObject, JsonPointer } from './shared';
+import { hasValue, isArray, isEmpty, isObject } from './shared/validator.functions';
+import { hasOwn } from './shared/utility.functions';
+import { JsonPointer } from './shared/jsonpointer.functions';
 
 /**
  * @module 'JsonSchemaFormComponent' - Angular JSON Schema Form
@@ -48,9 +50,9 @@ import { hasOwn, hasValue, isArray, isEmpty, isObject, JsonPointer } from './sha
   selector: 'json-schema-form',
   template: `
     <form (ngSubmit)="submitForm()">
-      <root-widget [formID]="formID" [layout]="jsf.layout"></root-widget>
+      <root-widget [formID]="formID" [layout]="jsfObject.layout"></root-widget>
     </form>
-    <div *ngIf="debug || jsf.globalOptions.debug">
+    <div *ngIf="debug || jsfObject.globalOptions.debug">
       Debug output: <pre>{{debugOutput}}</pre>
     </div>`,
   providers: [ JsonSchemaFormService ],
@@ -60,6 +62,7 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
   formID: number; // Unique ID for displayed form
   debugOutput: any; // Debug information, if requested
   formValueSubscription: any = null;
+  jsfObject: any;
 
   // Recommended inputs
   @Input() schema: any; // The JSON Schema
@@ -96,7 +99,9 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
     private frameworkLibrary: FrameworkLibraryService,
     private widgetLibrary: WidgetLibraryService,
     private jsf: JsonSchemaFormService
-  ) { }
+  ) {
+    this.jsfObject = jsf;
+  }
 
   ngOnInit() {
     this.initializeForm();

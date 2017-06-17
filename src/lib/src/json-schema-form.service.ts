@@ -5,12 +5,19 @@ import { Subject } from 'rxjs/Subject';
 import * as Ajv from 'ajv';
 import * as _ from 'lodash';
 
+import { convertJsonSchema3to4 } from './shared/convert-json-schema.functions';
 import {
-  buildFormGroup, buildFormGroupTemplate, buildLayout, buildSchemaFromData,
-  buildSchemaFromLayout, convertJsonSchema3to4, fixJsonFormOptions,
-  formatFormData, getControl, getSchemaReference, hasOwn, hasValue, isArray,
-  isDefined, isObject, isString, JsonPointer, parseText
-} from './shared';
+  hasValue, isArray, isDefined, isObject, isString
+} from './shared/validator.functions';
+import { hasOwn, parseText } from './shared/utility.functions';
+import { JsonPointer } from './shared/jsonpointer.functions';
+import {
+  buildSchemaFromData, buildSchemaFromLayout, getSchemaReference
+} from './shared/json-schema.functions';
+import {
+  buildFormGroup, buildFormGroupTemplate, fixJsonFormOptions, formatFormData, getControl
+} from './shared/form-group.functions';
+import { buildLayout } from './shared/layout.functions';
 
 export type CheckboxItem = { name: string, value: any, checked?: boolean };
 

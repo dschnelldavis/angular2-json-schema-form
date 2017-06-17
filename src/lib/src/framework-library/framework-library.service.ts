@@ -1,47 +1,44 @@
-import { Injectable }                       from '@angular/core';
+import { Inject, Injectable }               from '@angular/core';
 
-import { WidgetLibraryService }             from '../widget-library';
+import { WidgetLibraryService }             from '../widget-library/widget-library.service';
 
 // No framework - unmodified HTML controls, with styles from layout only
 import { NoFrameworkComponent }             from './no-framework.component';
 
-// Material Design Framework (under construction)
+// Material Design Framework
 // https://github.com/angular/material2
-// https://www.muicss.com/docs/v1/css-js/forms
-// http://materializecss.com/forms.html
-import { MaterialAddReferenceComponent }    from './material-design-framework';
-import { MaterialButtonComponent }          from './material-design-framework';
-import { MaterialButtonGroupComponent }     from './material-design-framework';
-import { MaterialCardComponent }            from './material-design-framework';
-import { MaterialCheckboxComponent }        from './material-design-framework';
-import { MaterialCheckboxesComponent }      from './material-design-framework';
-import { MaterialDatepickerComponent }      from './material-design-framework';
-import { MaterialFileComponent }            from './material-design-framework';
-import { MaterialInputComponent }           from './material-design-framework';
-import { MaterialNumberComponent }          from './material-design-framework';
-import { MaterialRadiosComponent }          from './material-design-framework';
-import { MaterialSelectComponent }          from './material-design-framework';
-import { MaterialSliderComponent }          from './material-design-framework';
-import { MaterialTabsComponent }            from './material-design-framework';
-import { MaterialTextareaComponent }        from './material-design-framework';
-import { MaterialDesignFrameworkComponent } from './material-design-framework';
+import { MaterialAddReferenceComponent }    from './material-design-framework/material-add-reference.component';
+import { MaterialButtonComponent }          from './material-design-framework/material-button.component';
+import { MaterialButtonGroupComponent }     from './material-design-framework/material-button-group.component';
+import { MaterialCardComponent }            from './material-design-framework/material-card.component';
+import { MaterialCheckboxComponent }        from './material-design-framework/material-checkbox.component';
+import { MaterialCheckboxesComponent }      from './material-design-framework/material-checkboxes.component';
+import { MaterialDatepickerComponent }      from './material-design-framework/material-datepicker.component';
+import { MaterialFileComponent }            from './material-design-framework/material-file.component';
+import { MaterialInputComponent }           from './material-design-framework/material-input.component';
+import { MaterialNumberComponent }          from './material-design-framework/material-number.component';
+import { MaterialRadiosComponent }          from './material-design-framework/material-radios.component';
+import { MaterialSelectComponent }          from './material-design-framework/material-select.component';
+import { MaterialSliderComponent }          from './material-design-framework/material-slider.component';
+import { MaterialTabsComponent }            from './material-design-framework/material-tabs.component';
+import { MaterialTextareaComponent }        from './material-design-framework/material-textarea.component';
+import { MaterialDesignFrameworkComponent } from './material-design-framework/material-design-framework.component';
 
 // Bootstrap 3 Framework
 // https://github.com/valor-software/ng2-bootstrap
 import { Bootstrap3FrameworkComponent }     from './bootstrap-3-framework.component';
 
-// Bootstrap 4 Framework (not started)
+// Suggested future frameworks:
+
+// Bootstrap 4:
 // https://github.com/ng-bootstrap/ng-bootstrap
 // http://v4-alpha.getbootstrap.com/components/forms/
-// import { Bootstrap4FrameworkComponent }     from './bootstrap-4-framework.component';
 
-// Foundation 6 Framework (not started)
+// Foundation 6:
 // https://github.com/zurb/foundation-sites
-// import { Foundation6FrameworkComponent }    from './foundation-6-framework.component';
 
-// Semantic UI Framework (not started)
+// Semantic UI:
 // https://github.com/vladotesanovic/ngSemantic
-// import { SemanticUIFrameworkComponent }     from './semantic-ui-framework.component';
 
 export type Framework = {
   framework: any,
@@ -64,28 +61,28 @@ export class FrameworkLibraryService {
     'material-design': {
       framework: MaterialDesignFrameworkComponent,
       widgets: {
-        '$ref': MaterialAddReferenceComponent,
-        'number': MaterialNumberComponent,
-        'slider': MaterialSliderComponent,
-        'text': MaterialInputComponent,
-        'date': MaterialDatepickerComponent,
-        'file': MaterialFileComponent,
-        'checkbox': MaterialCheckboxComponent,
-        'button': MaterialButtonComponent,
-        'buttonGroup': MaterialButtonGroupComponent,
-        'select': MaterialSelectComponent,
-        'textarea': MaterialTextareaComponent,
-        'checkboxes': MaterialCheckboxesComponent,
-        'radios': MaterialRadiosComponent,
-        'card': MaterialCardComponent,
-        'tabs': MaterialTabsComponent,
-        'alt-date': 'date',
-        'range': 'slider',
-        'submit': 'button',
+        '$ref':         MaterialAddReferenceComponent,
+        'number':       MaterialNumberComponent,
+        'slider':       MaterialSliderComponent,
+        'text':         MaterialInputComponent,
+        'date':         MaterialDatepickerComponent,
+        'file':         MaterialFileComponent,
+        'checkbox':     MaterialCheckboxComponent,
+        'button':       MaterialButtonComponent,
+        'buttonGroup':  MaterialButtonGroupComponent,
+        'select':       MaterialSelectComponent,
+        'textarea':     MaterialTextareaComponent,
+        'checkboxes':   MaterialCheckboxesComponent,
+        'radios':       MaterialRadiosComponent,
+        'card':         MaterialCardComponent,
+        'tabs':         MaterialTabsComponent,
+        'alt-date':     'date',
+        'range':        'slider',
+        'submit':       'button',
         'radiobuttons': 'buttonGroup',
-        'color': 'none',
-        'hidden': 'none',
-        'image': 'none',
+        'color':        'none',
+        'hidden':       'none',
+        'image':        'none',
       },
       stylesheets: [
         '//fonts.googleapis.com/icon?family=Material+Icons',
@@ -108,14 +105,11 @@ export class FrameworkLibraryService {
         '//ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js',
         '//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js',
       ],
-    },
-    // 'bootstrap-4': { framework: Bootstrap4FrameworkComponent, },
-    // 'foundation-6': { framework: Foundation6FrameworkComponent, },
-    // 'smantic-ui': { framework: SemanticUIFrameworkComponent, },
+    }
   };
 
   constructor(
-    private widgetLibrary: WidgetLibraryService
+    @Inject(WidgetLibraryService) private widgetLibrary: WidgetLibraryService
   ) { }
 
   registerFrameworkWidgets(framework: Framework): boolean {

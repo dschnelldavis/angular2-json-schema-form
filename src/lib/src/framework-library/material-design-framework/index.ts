@@ -27,20 +27,20 @@ export const MATERIAL_DESIGN_COMPONENTS = [
   MaterialTextareaComponent, MaterialDesignFrameworkComponent
 ];
 
-export * from './material-add-reference.component';
-export * from './material-button.component';
-export * from './material-button-group.component';
-export * from './material-card.component';
-export * from './material-checkbox.component';
-export * from './material-checkboxes.component';
-export * from './material-datepicker.component';
-export * from './material-file.component';
-export * from './material-input.component';
-export * from './material-number.component';
-export * from './material-radios.component';
-export * from './material-select.component';
-export * from './material-slider.component';
-export * from './material-tabs.component';
-export * from './material-textarea.component';
+export { MaterialAddReferenceComponent }    from './material-add-reference.component';
+export { MaterialButtonComponent }          from './material-button.component';
+export { MaterialButtonGroupComponent }     from './material-button-group.component';
+export { MaterialCardComponent }            from './material-card.component';
+export { MaterialCheckboxComponent }        from './material-checkbox.component';
+export { MaterialCheckboxesComponent }      from './material-checkboxes.component';
+export { MaterialDatepickerComponent }      from './material-datepicker.component';
+export { MaterialFileComponent }            from './material-file.component';
+export { MaterialInputComponent }           from './material-input.component';
+export { MaterialNumberComponent }          from './material-number.component';
+export { MaterialRadiosComponent }          from './material-radios.component';
+export { MaterialSelectComponent }          from './material-select.component';
+export { MaterialSliderComponent }          from './material-slider.component';
+export { MaterialTabsComponent }            from './material-tabs.component';
+export { MaterialTextareaComponent }        from './material-textarea.component';
 
-export * from './material-design-framework.component';
+export { MaterialDesignFrameworkComponent } from './material-design-framework.component';

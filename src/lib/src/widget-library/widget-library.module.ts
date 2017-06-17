@@ -2,9 +2,10 @@ import { NgModule }                         from '@angular/core';
 import { CommonModule }                     from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-import { OrderableDirective }               from '../shared/orderable.directive';
+import { OrderableDirective }               from './orderable.directive';
 
 import { WidgetLibraryService }             from './widget-library.service';
+import { JsonSchemaFormService }            from '../json-schema-form.service';
 
 import { BASIC_WIDGETS }                    from './index';
 
@@ -13,6 +14,6 @@ import { BASIC_WIDGETS }                    from './index';
   declarations:    [ ...BASIC_WIDGETS, OrderableDirective ],
   exports:         [ ...BASIC_WIDGETS, OrderableDirective ],
   entryComponents: [ ...BASIC_WIDGETS ],
-  providers:       [ WidgetLibraryService ]
+  providers:       [ JsonSchemaFormService, WidgetLibraryService ]
 })
 export class WidgetLibraryModule { }

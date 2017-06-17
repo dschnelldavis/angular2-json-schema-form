@@ -5,10 +5,13 @@ import {
 import * as _ from 'lodash';
 
 import {
-  forEach, getControlValidators, hasOwn, hasValue, inArray, isArray, isEmpty,
-  isObject, isDefined, isPrimitive, JsonPointer, JsonValidators, Pointer,
-  toJavaScriptType, toSchemaType, resolveRecursiveReferences, SchemaPrimitiveType
-} from './index';
+  hasValue, inArray, isArray, isEmpty, isObject, isDefined, isPrimitive,
+  toJavaScriptType, toSchemaType, SchemaPrimitiveType
+} from './validator.functions';
+import { forEach, hasOwn } from './utility.functions';
+import { Pointer, JsonPointer } from './jsonpointer.functions';
+import { JsonValidators } from './json.validators';
+import { getControlValidators, resolveRecursiveReferences } from './json-schema.functions';
 
 /**
  * FormGroup function library:
@@ -25,7 +28,8 @@ import {
  *
  * fixJsonFormOptions:
  *
- * ---- Under construction: ----
+ * ---- Coming soon: ----
+ * TODO: add buildFormGroupTemplateFromLayout function
  * buildFormGroupTemplateFromLayout: Builds a FormGroupTemplate from a form layout
  */
 

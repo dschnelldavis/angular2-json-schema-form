@@ -3,7 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { HttpModule } from '@angular/http';
 import { RouterModule } from '@angular/router';
 
-import { JsonSchemaFormModule } from '../../lib';
+import { JsonSchemaFormModule } from '../../lib/src/json-schema-form.module';
 // To include JsonSchemaFormModule after downloading from NPM, use this instead:
 // import { JsonSchemaFormModule } from 'angular2-json-schema-form';
 

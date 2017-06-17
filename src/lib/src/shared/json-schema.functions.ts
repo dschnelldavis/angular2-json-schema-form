@@ -20,6 +20,8 @@ import { JsonValidators } from './json.validators';
  *
  * getInputType:
  *
+ * checkInlineType:
+ *
  * isInputRequired:
  *
  * updateInputOptions:

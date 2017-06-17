@@ -10,7 +10,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
       [disabled]="controlDisabled"
       [name]="controlName"
       [id]="'control' + layoutNode?._id"
-      [type]="hidden"
+      type="hidden"
       [value]="controlValue">`,
 })
 export class HiddenComponent implements OnInit {

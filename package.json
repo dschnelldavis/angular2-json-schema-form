@@ -1,6 +1,6 @@
 {
   "name": "angular2-json-schema-form",
-  "version": "0.4.0-alpha.9",
+  "version": "0.4.0-alpha.11",
   "author": {
     "name": "David Schnell-Davis",
     "email": "dschnelldavis@gmail.com"
@@ -41,11 +41,13 @@
     "start": "ng serve",
     "test": "ng test",
     "lint": "ng lint",
-    "docs": "typedoc --options typedoc.json src/index.ts",
+    "docs": "typedoc --options typedoc.json lib/src/json-schema-form.module.ts",
     "clean": "rimraf out-ngc dist/*",
     "prebuild": "npm run clean",
     "build": "node build.js",
     "postbuild": "rimraf out-ngc",
+    "prepublish": "npm run build",
+    "publish": "cd dist && npm publish",
     "ng-build": "ng build",
     "old-build-demo": "tsc -p src/demo/",
     "old-build-demo:watch": "tsc -p src/demo/ -w",

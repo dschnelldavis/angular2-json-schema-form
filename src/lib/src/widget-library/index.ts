@@ -31,28 +31,31 @@ export const BASIC_WIDGETS = [
   TabComponent, TabsComponent, TemplateComponent, TextareaComponent
 ];
 
-export * from './add-reference.component';
-export * from './button.component';
-export * from './checkbox.component';
-export * from './checkboxes.component';
-export * from './fieldset.component';
-export * from './file.component';
-export * from './flex.component';
-export * from './hidden.component';
-export * from './input.component';
-export * from './message.component';
-export * from './none.component';
-export * from './number.component';
-export * from './radios.component';
-export * from './root.component';
-export * from './section.component';
-export * from './select.component';
-export * from './select-framework.component';
-export * from './select-widget.component';
-export * from './submit.component';
-export * from './tab.component';
-export * from './tabs.component';
-export * from './template.component';
-export * from './textarea.component';
+export { AddReferenceComponent }    from './add-reference.component';
+export { ButtonComponent }          from './button.component';
+export { CheckboxComponent }        from './checkbox.component';
+export { CheckboxesComponent }      from './checkboxes.component';
+export { FieldsetComponent }        from './fieldset.component';
+export { FileComponent }            from './file.component';
+export { FlexComponent }            from './flex.component';
+export { HiddenComponent }          from './hidden.component';
+export { InputComponent }           from './input.component';
+export { MessageComponent }         from './message.component';
+export { NoneComponent }            from './none.component';
+export { NumberComponent }          from './number.component';
+export { RadiosComponent }          from './radios.component';
+export { RootComponent }            from './root.component';
+export { SectionComponent }         from './section.component';
+export { SelectComponent }          from './select.component';
+export { SelectFrameworkComponent } from './select-framework.component';
+export { SelectWidgetComponent }    from './select-widget.component';
+export { SubmitComponent }          from './submit.component';
+export { TabComponent }             from './tab.component';
+export { TabsComponent }            from './tabs.component';
+export { TemplateComponent }        from './template.component';
+export { TextareaComponent }        from './textarea.component';
 
-export * from './widget-library.service';
+export { OrderableDirective }       from './orderable.directive';
+
+export { WidgetLibraryService }     from './widget-library.service';
+export { WidgetLibraryModule }      from './widget-library.module';

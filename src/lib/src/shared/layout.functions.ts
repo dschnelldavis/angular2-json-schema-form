@@ -1,11 +1,18 @@
 import * as _ from 'lodash';
 
 import {
-  buildFormGroupTemplate, checkInlineType, copy, forEach, getControl,
-  getFromSchema, getInputType, hasOwn, inArray, isArray, isEmpty,
-  isInputRequired, isNumber, isObject, isDefined, isString, JsonPointer,
-  toTitleCase, updateInputOptions
-} from './index';
+  inArray, isArray, isEmpty, isNumber, isObject, isDefined, isString
+} from './validator.functions';
+
+import { copy, forEach, hasOwn, toTitleCase } from './utility.functions';
+
+import { Pointer, JsonPointer } from './jsonpointer.functions';
+
+import {
+  getFromSchema, getInputType, checkInlineType, isInputRequired, updateInputOptions
+} from './json-schema.functions';
+
+import { buildFormGroupTemplate, getControl } from './form-group.functions';
 
 /**
  * Layout function library:

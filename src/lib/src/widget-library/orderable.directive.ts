@@ -1,7 +1,7 @@
 import { Directive, ElementRef, HostListener, Input, OnInit } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
-import { JsonPointer } from './jsonpointer.functions';
+import { JsonPointer } from '../shared/jsonpointer.functions';
 
 /**
  * OrderableDirective

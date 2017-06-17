@@ -14,7 +14,7 @@ import { buildFormGroup, buildTitleMap, JsonPointer } from '../../shared';
       [checked]="allChecked"
       [indeterminate]="someChecked"
       (change)="updateAllValues($event)">
-      <span [innerHTML]="checkboxItem?.name"></span>
+      <span [innerHTML]="options?.name"></span>
     </md-checkbox>
     <label *ngIf="options?.title"
       [class]="options?.labelHtmlClass"
@@ -48,6 +48,7 @@ export class MaterialCheckboxesComponent implements OnInit {
   formControl: AbstractControl;
   controlName: string;
   controlValue: any;
+  controlDisabled: boolean = false;
   boundControl: boolean = false;
   options: any;
   horizontalList: boolean = false;

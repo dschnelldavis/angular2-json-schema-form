@@ -1,11 +1,30 @@
-export * from './src/shared/convert-json-schema.functions';
-export * from './src/shared/validator.functions';
-export * from './src/shared/utility.functions';
-export * from './src/shared/jsonpointer.functions';
-export * from './src/shared/json.validators';
-export * from './src/shared/json-schema.functions';
-export * from './src/shared/form-group.functions';
-export * from './src/shared/layout.functions';
+import { convertJsonSchema3to4 } from './src/shared/convert-json-schema.functions';
+import {
+  _executeValidators, _executeAsyncValidators, _mergeObjects, _mergeErrors,
+  isDefined, hasValue, isEmpty, isString, isNumber, isInteger, isBoolean,
+  isFunction, isObject, isArray, isMap, isSet, isPromise, getType, isType,
+  isPrimitive, toJavaScriptType, toSchemaType, _convertToPromise, inArray, xor,
+  SchemaPrimitiveType, SchemaType, JavaScriptPrimitiveType, JavaScriptType,
+  PrimitiveValue, PlainObject, IValidatorFn, AsyncIValidatorFn
+} from './src/shared/validator.functions';
+import {
+  addClasses, copy, forEach, forEachCopy, hasOwn,
+  mergeFilteredObject, parseText, toTitleCase
+} from './src/shared/utility.functions';
+import { Pointer, JsonPointer } from './src/shared/jsonpointer.functions';
+import { JsonValidators } from './src/shared/json.validators';
+import {
+  buildSchemaFromLayout, buildSchemaFromData, getFromSchema,
+  getSchemaReference, getInputType, checkInlineType, isInputRequired,
+  updateInputOptions, getControlValidators
+} from './src/shared/json-schema.functions';
+import {
+  buildFormGroupTemplate, buildFormGroup, setRequiredFields,
+  formatFormData, getControl, fixJsonFormOptions
+} from './src/shared/form-group.functions';
+import {
+  buildLayout, buildLayoutFromSchema, mapLayout, buildTitleMap
+} from './src/shared/layout.functions';
 
 import { AddReferenceComponent }            from './src/widget-library/add-reference.component';
 import { ButtonComponent }                  from './src/widget-library/button.component';
@@ -30,8 +49,9 @@ import { TabComponent }                     from './src/widget-library/tab.compo
 import { TabsComponent }                    from './src/widget-library/tabs.component';
 import { TemplateComponent }                from './src/widget-library/template.component';
 import { TextareaComponent }                from './src/widget-library/textarea.component';
-import { WidgetLibraryService }             from './src/widget-library/widget-library.service';
+import { OrderableDirective }               from './src/widget-library/orderable.directive';
 import { WidgetLibraryModule }              from './src/widget-library/widget-library.module';
+import { WidgetLibraryService }             from './src/widget-library/widget-library.service';
 
 import { MaterialAddReferenceComponent }    from './src/framework-library/material-design-framework/material-add-reference.component';
 import { MaterialButtonComponent }          from './src/framework-library/material-design-framework/material-button.component';
@@ -50,12 +70,8 @@ import { MaterialTabsComponent }            from './src/framework-library/materi
 import { MaterialTextareaComponent }        from './src/framework-library/material-design-framework/material-textarea.component';
 import { MaterialDesignFrameworkComponent } from './src/framework-library/material-design-framework/material-design-framework.component';
 import { MaterialDesignFrameworkModule }    from './src/framework-library/material-design-framework/material-design-framework.module';
-
 import { NoFrameworkComponent }             from './src/framework-library/no-framework.component';
 import { Bootstrap3FrameworkComponent }     from './src/framework-library/bootstrap-3-framework.component';
-// import { Bootstrap4FrameworkComponent }     from './src/framework-library/bootstrap-4-framework.component';
-// import { Foundation6FrameworkComponent }    from './src/framework-library/foundation-6-framework.component';
-// import { SemanticUIFrameworkComponent }     from './src/framework-library/semantic-ui-framework.component';
 import { FrameworkLibraryService }          from './src/framework-library/framework-library.service';
 import { FrameworkLibraryModule }           from './src/framework-library/framework-library.module';
 

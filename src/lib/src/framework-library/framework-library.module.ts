@@ -4,7 +4,6 @@ import { CommonModule }                     from '@angular/common';
 import { WidgetLibraryModule }              from '../widget-library/widget-library.module';
 import { MaterialDesignFrameworkModule }    from './material-design-framework/material-design-framework.module';
 
-import { JsonSchemaFormService }            from '../json-schema-form.service';
 import { WidgetLibraryService }             from '../widget-library/widget-library.service';
 import { FrameworkLibraryService }          from './framework-library.service';
 

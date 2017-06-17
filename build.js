@@ -55,11 +55,11 @@ return Promise.resolve()
       moduleName: camelCase(libName),
       sourceMap: true,
       // ATTENTION:
-      // Add any dependency or peer dependency your library to `globals` and `external`.
-      // This is required for UMD bundle users.
+      // Add any dependency or peer dependency your library to
+      // `globals` and `external`. This is required for UMD bundle users.
       globals: {
-        // The key here is library name, and the value is the the name of the global variable name
-        // the window object.
+        // The key here is library name, and the value is the the name
+        // of the global variable name the window object.
         // See https://github.com/rollup/rollup/wiki/JavaScript-API#globals for more.
         '@angular/animations': 'ng.animations',
         '@angular/common': 'ng.common',
@@ -71,8 +71,8 @@ return Promise.resolve()
         'lodash': '_'
       },
       external: [
-        // List of dependencies
-        // See https://github.com/rollup/rollup/wiki/JavaScript-API#external for more.
+        // List of dependencies. For more, see
+        // https://github.com/rollup/rollup/wiki/JavaScript-API#external
         '@angular/animations',
         '@angular/common',
         '@angular/core',
@@ -144,8 +144,7 @@ return Promise.resolve()
     .then(() => console.log('LICENSE file copied.'))
     .then(() => _relativeCopy('README.md', rootFolder, distFolder))
     .then(() => console.log('README.md file copied.'))
-    .then(() => _relativeCopy('package.json', rootFolder, distFolder))
-    .then(() => _cleanPackageJson(distFolder))
+    .then(() => _copyPackageJson(rootFolder, distFolder))
     .then(() => console.log('package.json file copied and updated.'))
   )
   .catch(e => {
@@ -179,15 +178,16 @@ function _recursiveMkDir(dir) {
   }
 }
 
-// Clean package.json file
-function _cleanPackageJson(dir) {
+// Copy and update package.json file
+function _copyPackageJson(from, to) {
   return new Promise((resolve, reject) => {
-    const fullPath = path.join(dir, 'package.json');
-    let data = JSON.parse(fs.readFileSync(fullPath, 'utf-8'));
+    const origin = path.join(from, 'package.json');
+    const dest = path.join(to, 'package.json');
+    let data = JSON.parse(fs.readFileSync(origin, 'utf-8'));
     delete data.engines;
     delete data.scripts;
     delete data.devDependencies;
-    fs.writeFileSync(fullPath, JSON.stringify(data, null, 2));
+    fs.writeFileSync(dest, JSON.stringify(data, null, 2));
     resolve();
   });
 }

@@ -4,22 +4,17 @@ const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
 
-
 /**
- * Simple Promiseify function that takes a Node API and return a version that supports promises.
- * We use promises instead of synchronized functions to make the process less I/O bound and
- * faster. It also simplifies the code.
+ * Simple Promiseify function that takes a Node API and return a version that
+ * supports promises. We use promises instead of synchronized functions to
+ * make the process less I/O bound and faster. It also simplifies the code.
  */
 function promiseify(fn) {
   return function () {
     const args = [].slice.call(arguments, 0);
     return new Promise((resolve, reject) => {
       fn.apply(this, args.concat([function (err, value) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(value);
-        }
+        if (err) { reject(err); } else { resolve(value); }
       }]));
     });
   };
@@ -85,10 +80,9 @@ function inlineTemplate(content, urlResolver) {
   });
 }
 
-
 /**
- * Inline the styles for a source file. Simply search for instances of `styleUrls: [...]` and
- * replace with `styles: [...]` (with the content of the file included).
+ * Inline the styles for a source file. Search for instances of `styleUrls: [...]`
+ * and replace with `styles: [...]` (with the content of the file included).
  * @param urlResolver {Function} A resolver that takes a URL and return a path.
  * @param content {string} The source file's content.
  * @return {string} The content with all styles inlined.
@@ -96,20 +90,17 @@ function inlineTemplate(content, urlResolver) {
 function inlineStyle(content, urlResolver) {
   return content.replace(/styleUrls:\s*(\[[\s\S]*?\])/gm, function (m, styleUrls) {
     const urls = eval(styleUrls);
-    return 'styles: ['
-      + urls.map(styleUrl => {
-        const styleFile = urlResolver(styleUrl);
-        const styleContent = fs.readFileSync(styleFile, 'utf-8');
-        const shortenedStyle = styleContent
-          .replace(/([\n\r]\s*)+/gm, ' ')
-          .replace(/"/g, '\\"');
-        return `"${shortenedStyle}"`;
-      })
-        .join(',\n')
-      + ']';
+    const styles = urls.map(styleUrl => {
+      const styleFile = urlResolver(styleUrl);
+      const styleContent = fs.readFileSync(styleFile, 'utf-8');
+      const shortenedStyle = styleContent
+        .replace(/([\n\r]\s*)+/gm, ' ')
+        .replace(/"/g, '\\"');
+      return `"${shortenedStyle}"`;
+    });
+    return `styles: [${styles.join(',\n')}]`;
   });
 }
-
 
 /**
  * Remove every mention of `moduleId: module.id`.
