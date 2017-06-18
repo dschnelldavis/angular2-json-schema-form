@@ -24,8 +24,8 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
 
     </div>`,
   styles: [`
-    .expandable > label:before { content: '\\25B8'; padding-right: .3em; }
-    .expanded > label:before { content: '\\25BE'; padding-right: .2em; }
+    .expandable > label:before { content: '▶'; padding-right: .3em; }
+    .expanded > label:before { content: '▼'; padding-right: .2em; }
   `],
 })
 export class SectionComponent implements OnInit {

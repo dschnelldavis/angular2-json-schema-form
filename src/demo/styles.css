@@ -1,1 +1,32 @@
-@import 'assets/material-design-themes/indigo-pink.css';
+@import 'assets/material-design-themes/deeppurple-amber.css';
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h2 { font-weight: 200; }
+
+.text { margin-bottom: 1em; }
+
+.ace-editor, .json-schema-form {
+  border-radius: 6px;
+  padding: 12px;
+  border: 1px solid #ccc;
+}
+
+.navbar .factory a {
+  display: block;
+  padding: 10px 20px 10px;
+  text-indent: -9999px;
+  width: 178px;
+}
+.navbar-inner {
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  border-radius: 0;
+}
+
+.defualt-cursor:hover { cursor: default; }
+
+.top-margin { margin-top: 6px; }

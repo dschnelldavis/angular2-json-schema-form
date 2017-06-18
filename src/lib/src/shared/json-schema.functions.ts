@@ -75,7 +75,7 @@ export function buildSchemaFromData(
   data: any, requireAllFields: boolean = false, isRoot: boolean = true
 ): any {
   let newSchema: any = { };
-  if (isRoot) { newSchema.$schema = 'http://json-schema.org/draft-04/schema#'; }
+  if (isRoot) { newSchema.$schema = 'http://json-schema.org/draft-06/schema#'; }
   const getFieldType = (value: any): string => {
     let fieldType = getType(value, 'strict');
     if (fieldType === 'integer') { return 'number'; }

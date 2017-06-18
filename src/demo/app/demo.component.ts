@@ -8,26 +8,32 @@ import { ExampleSchemas } from './example-schemas.model';
 
 @Component({
   selector: 'demo',
-  templateUrl: 'demo.component.html',
-  styleUrls: [ 'demo.component.css' ]
+  templateUrl: 'demo.component.html'
 })
 export class DemoComponent implements OnInit, AfterViewInit {
-  exampleSchemas = ExampleSchemas;
+  exampleSchemas: any = ExampleSchemas;
   selectedSet: string = 'asf';
   selectedExample: string = 'asf-basic-json-schema-type';
   selectedFramework: string = 'bootstrap-3';
+  visible: { [item: string]: boolean } = {
+    options: true,
+    schema: true,
+    form: true,
+    output: true
+  };
 
   formActive: boolean = false;
   aceHeight: number = 600;
   jsonFormSchema: string;
   jsonFormValid: boolean = false;
-  jsonFormErrorMessage: string = 'Loading form...';
+  jsonFormStatusMessage: string = 'Loading form...';
   jsonFormObject: any;
   jsonFormOptions: any = {
     addSubmit: true, // Add a submit button if layout does not have one
     loadExternalAssets: true, // Load external css and JavaScript for frameworks
-    formDefaults: { feedback: true }, // SHow inline feedback icons
+    formDefaults: { feedback: true }, // Show inline feedback icons
     debug: false,
+    returnEmptyFields: false,
   };
   liveFormData: any = {};
   formValidationErrors: any;
@@ -150,6 +156,7 @@ export class DemoComponent implements OnInit, AfterViewInit {
   // (runs whenever the user changes the jsonform object in the ACE input field)
   generateForm(newFormString: string) {
     if (!newFormString) { return; }
+    this.jsonFormStatusMessage = 'Loading form...';
     this.formActive = false;
     this.liveFormData = {};
     this.submittedFormData = null;
@@ -175,7 +182,7 @@ export class DemoComponent implements OnInit, AfterViewInit {
 
         // If entered content is not valid JSON or JavaScript, show error
         this.jsonFormValid = false;
-        this.jsonFormErrorMessage =
+        this.jsonFormStatusMessage =
           'Entered content is not currently a valid JSON Form object.\n' +
           'As soon as it is, you will see your form here. So keep typing. :-)\n\n' +
           'JavaScript parser returned:\n\n' + jsonError;
@@ -183,5 +190,19 @@ export class DemoComponent implements OnInit, AfterViewInit {
       }
     }
     this.formActive = true;
+  }
+
+  toggleVisible(item: string) {
+    this.visible[item] = !this.visible[item];
+  }
+
+  toggleFormOption(option: string) {
+    if (option === 'feedback') {
+      this.jsonFormOptions.formDefaults.feedback =
+        !this.jsonFormOptions.formDefaults.feedback;
+    } else {
+      this.jsonFormOptions[option] = !this.jsonFormOptions[option];
+    }
+    this.generateForm(this.jsonFormSchema);
   }
 }

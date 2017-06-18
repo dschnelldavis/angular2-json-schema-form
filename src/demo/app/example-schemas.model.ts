@@ -14,10 +14,10 @@
 export const ExampleSchemas: any = {
   exampleSetList: [ 'ng2jsf', 'asf', 'rjsf', 'jsf', ],
   exampleSets: {
-    'ng2jsf': 'Angular JSON Schema Form examples',
-    'asf': 'Compatibility Examples: Angular Schema Form (AngularJS)',
-    'rjsf': 'Compatibility Examples: React JSON Schema Form',
-    'jsf': 'Compatibility Examples: JSONForm (jQuery)',
+    'ng2jsf': 'Angular2 JSON Schema Form examples',
+    'asf': 'Angular Schema Form (AngularJS) examples',
+    'rjsf': 'React JSON Schema Form examples',
+    'jsf': 'JSONForm (jQuery) examples',
   },
   exampleList: {
     'ng2jsf': [
@@ -192,6 +192,6 @@ export const ExampleSchemas: any = {
   frameworks: {
     'material-design': 'Material Design framework',
     'bootstrap-3': 'Bootstrap 3 framework',
-    'no-framework': 'No Framework (bare controls + styles from layout only)',
+    'no-framework': 'No Framework (plain HTML controls)',
   },
 };

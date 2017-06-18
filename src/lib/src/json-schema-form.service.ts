@@ -5,7 +5,7 @@ import { Subject } from 'rxjs/Subject';
 import * as Ajv from 'ajv';
 import * as _ from 'lodash';
 
-import { convertJsonSchema3to4 } from './shared/convert-json-schema.functions';
+import { convertJsonSchemaToDraft6 } from './shared/convert-json-schema.functions';
 import {
   hasValue, isArray, isDefined, isObject, isString
 } from './shared/validator.functions';
@@ -60,10 +60,10 @@ export class JsonSchemaFormService {
   globalOptionDefaults: any = {
     addSubmit: 'auto', // Add a submit button if layout does not have one?
       // for addSubmit: true = always, false = never,
-      // 'auto' = only if layout is undefined (so form is built from schema alone)
+      // 'auto' = only if layout is undefined (form is built from schema alone)
     debug: false, // Show debugging output?
     fieldsRequired: false, // Are there any required fields in the form?
-    framework: 'bootstrap-3', // The framework to load
+    framework: 'material-design', // The framework to load
     widgets: {}, // Any custom widgets to load
     loadExternalAssets: false, // Load external css and JavaScript for framework?
     pristine: { errors: true, success: true },
@@ -83,6 +83,7 @@ export class JsonSchemaFormService {
       feedbackOnRender: false, // Show errorMessage on Render?
       notitle: false, // Hide title?
       readonly: false, // Set control as read only?
+      returnEmptyFields: true, // return values for fields that contain no data?
     },
   };
   globalOptions: any;
@@ -121,8 +122,8 @@ export class JsonSchemaFormService {
     this.globalOptions = _.cloneDeep(this.globalOptionDefaults);
   }
 
-  convertJsonSchema3to4() {
-    this.schema = convertJsonSchema3to4(this.schema);
+  convertJsonSchemaToDraft6() {
+    this.schema = convertJsonSchemaToDraft6(this.schema);
   }
 
   fixJsonFormOptions(layout: any): any {
@@ -138,7 +139,8 @@ export class JsonSchemaFormService {
 
     // Format raw form data to correct data types
     this.data = formatFormData(
-      newValue, this.dataMap, this.dataRecursiveRefMap, this.arrayMap
+      newValue, this.dataMap, this.dataRecursiveRefMap,
+      this.arrayMap, this.globalOptions.returnEmptyFields
     );
     this.isValid = this.validateFormData(this.data);
     this.validData = this.isValid ? this.data : null;

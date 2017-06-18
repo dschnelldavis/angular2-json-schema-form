@@ -1,4 +1,4 @@
-import { convertJsonSchema3to4 } from './src/shared/convert-json-schema.functions';
+import { convertJsonSchemaToDraft6 } from './src/shared/convert-json-schema.functions';
 import {
   _executeValidators, _executeAsyncValidators, _mergeObjects, _mergeErrors,
   isDefined, hasValue, isEmpty, isString, isNumber, isInteger, isBoolean,

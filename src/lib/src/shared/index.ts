@@ -1,7 +1,7 @@
 // Warning: Changing the following order may cause errors
 // if a library is imported before another library it depends on.
 
-export { convertJsonSchema3to4 } from './convert-json-schema.functions';
+export { convertJsonSchemaToDraft6 } from './convert-json-schema.functions';
 
 export {
   _executeValidators, _executeAsyncValidators, _mergeObjects, _mergeErrors,

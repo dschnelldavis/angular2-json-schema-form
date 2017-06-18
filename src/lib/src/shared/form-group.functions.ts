@@ -365,13 +365,13 @@ export function setRequiredFields(schema: any, formControlTemplate: any): boolea
  * @return {any} - formatted data object
  */
 export function formatFormData(
-  formData: any, dataMap: Map<string, any>, recursiveRefMap: Map<string, string>,
-  arrayMap: Map<string, number>, fixErrors: boolean = false
+  formData: any, dataMap: Map<string, any>,
+  recursiveRefMap: Map<string, string>, arrayMap: Map<string, number>,
+  returnEmptyFields: boolean = false, fixErrors: boolean = false
 ): any {
-// return formData;
   let formattedData = {};
   JsonPointer.forEachDeep(formData, (value, dataPointer) => {
-    if (typeof value !== 'object') {
+    if (typeof value !== 'object' || (value === null && returnEmptyFields)) {
       let genericPointer: string =
         JsonPointer.has(dataMap, [dataPointer, 'schemaType']) ?
           dataPointer :
@@ -381,19 +381,21 @@ export function formatFormData(
           dataMap.get(genericPointer).get('schemaType');
         if (schemaType === 'null') {
           JsonPointer.set(formattedData, dataPointer, null);
-        } else if ( hasValue(value) &&
+        } else if ( (hasValue(value) || returnEmptyFields) &&
           inArray(schemaType, ['string', 'integer', 'number', 'boolean'])
         ) {
-          const newValue = fixErrors ?
+          const newValue = (fixErrors || (value === null && returnEmptyFields)) ?
             toSchemaType(value, schemaType) :
             toJavaScriptType(value, schemaType);
-          if (isDefined(newValue)) {
+          if (isDefined(newValue) || returnEmptyFields) {
             JsonPointer.set(formattedData, dataPointer, newValue);
           }
         }
       } else {
-        console.error('formatFormData error: Schema type not found ' +
-          'for form value at "' + genericPointer + '".');
+        console.error(
+          'formatFormData error: Schema type not found for form value at ' +
+          genericPointer
+        );
         console.error(formData);
         console.error(dataMap);
         console.error(recursiveRefMap);

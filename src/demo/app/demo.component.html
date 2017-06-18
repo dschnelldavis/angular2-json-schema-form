@@ -71,30 +71,83 @@
       <div class="clearfix visible-sm-block"></div>
     </div>
 
-    <div class="row">
-      <div class="col-sm-2">
-        <label for="example">Framework:</label>
-      </div>
-      <div class="col-sm-6">
-        <select id="example" class="form-control"
-          (change)="loadSelectedFramework($event.target.value)">
-          <option *ngFor="let framework of exampleSchemas.frameworkList"
-            [value]="framework"
-            [selected]="selectedFramework === framework">
-            {{exampleSchemas.frameworks[framework]}}
-          </option>
-        </select>
-      </div>
-      <div class="col-sm-4"></div>
-      <div class="clearfix visible-sm-block"></div>
-    </div>
-
   </div>
 
   <div class="row">
     <div class="col-sm-5">
-      <h4>JSON Schema and Layout</h4>
-      <div ace-editor
+
+      <legend class="defualt-cursor" (click)="toggleVisible('options')">
+        {{visible.options ? '▼' : '▶'}} Options
+      </legend>
+      <div *ngIf="visible.options">
+
+        <div class="row">
+          <div class="col-sm-3"><label for="framework">Framework:</label></div>
+          <div class="col-sm-9">
+            <select id="framework" class="form-control"
+              (change)="loadSelectedFramework($event.target.value)">
+              <option *ngFor="let framework of exampleSchemas.frameworkList"
+                [value]="framework"
+                [selected]="selectedFramework === framework">
+                {{exampleSchemas.frameworks[framework]}}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row top-margin">
+          <div class="col-sm-12">
+            <input id="returnEmptyFields" type="checkbox"
+              [checked]="jsonFormOptions.returnEmptyFields"
+              (click)="toggleFormOption('returnEmptyFields')">
+            &nbsp;
+            <label for="returnEmptyFields">Return empty fields?</label>
+            (default = true)
+          </div>
+        </div>
+
+        <div class="row top-margin">
+          <div class="col-sm-12">
+            <input id="addSubmit" type="checkbox"
+              [checked]="jsonFormOptions.addSubmit"
+              (click)="toggleFormOption('addSubmit')">
+            &nbsp;
+            <label for="addSubmit">Add submit button?</label>
+            (default = only add if no layout is defined)
+          </div>
+        </div>
+
+        <div class="row top-margin">
+          <div class="col-sm-12">
+            <input id="feedback" type="checkbox"
+              [checked]="jsonFormOptions.formDefaults.feedback"
+              (click)="toggleFormOption('feedback')">
+            &nbsp;
+            <label for="feedback">Show inline fedback?</label>
+            (default = false)
+          </div>
+        </div>
+
+        <div class="row top-margin">
+          <div class="col-sm-12">
+            <input id="debug" type="checkbox"
+              [checked]="jsonFormOptions.debug"
+              (click)="toggleFormOption('debug')">
+            &nbsp;
+            <label for="debug">Show debuging information?</label>
+            (default = false)
+          </div>
+        </div>
+
+      </div>
+      &nbsp;
+
+      <legend class="defualt-cursor" (click)="toggleVisible('schema')">
+        {{visible.schema ? '▼' : '▶'}} JSON Schema and Layout
+      </legend>
+      <div *ngIf="visible.schema"
+        ace-editor
+        class="ace-editor"
         [text]="jsonFormSchema"
         [options]="aceEditorOptions"
         [readOnly]="false"
@@ -105,44 +158,57 @@
         style="width:100%; overflow: auto; border: 1px solid black;">
         (loading form specification...)
       </div>
+
     </div>
     <div class="col-sm-7">
 
-      <h4>Generated Form</h4>
-      <json-schema-form
-        *ngIf="formActive"
-        loadExternalAssets="true"
-        [form]="jsonFormObject"
-        [options]="jsonFormOptions"
-        [framework]="selectedFramework"
-        (onChanges)="onChanges($event)"
-        (onSubmit)="onSubmit($event)"
-        (isValid)="isValid($event)"
-        (validationErrors)="validationErrors($event)">
-      </json-schema-form>
+      <legend class="defualt-cursor" (click)="toggleVisible('form')">
+        {{visible.form ? '▼' : '▶'}} Generated Form
+      </legend>
+      <div *ngIf="visible.form" class="json-schema-form">
+        <div *ngIf="!formActive">
+          {{jsonFormStatusMessage}}
+        </div>
+        <json-schema-form
+          *ngIf="formActive"
+          loadExternalAssets="true"
+          [form]="jsonFormObject"
+          [options]="jsonFormOptions"
+          [framework]="selectedFramework"
+          (onChanges)="onChanges($event)"
+          (onSubmit)="onSubmit($event)"
+          (isValid)="isValid($event)"
+          (validationErrors)="validationErrors($event)">
+        </json-schema-form>
+      </div>
+      &nbsp;
 
-      <hr>
+      <legend class="defualt-cursor" (click)="toggleVisible('output')">
+        {{visible.output ? '▼' : '▶'}} Form Output
+      </legend>
+      <div *ngIf="visible.output">
 
-      <p>
-        Valid?:
-        <strong *ngIf="formIsValid || prettyValidationErrors"
-          [class.text-success]="formIsValid"
-          [class.text-danger]="!formIsValid">
-          {{formIsValid ? 'Yes' : 'No'}}
-        </strong>
-        <span *ngIf="prettyValidationErrors">
-          — errors from validationErrors():
-        </span>
-      </p>
+        <div>
+          Valid?:
+          <strong *ngIf="formIsValid || prettyValidationErrors"
+            [class.text-success]="formIsValid"
+            [class.text-danger]="!formIsValid">
+            {{formIsValid ? 'Yes' : 'No'}}
+          </strong>
+          <span *ngIf="!formIsValid && !prettyValidationErrors">n/a</span>
+          <span *ngIf="prettyValidationErrors">— errors from validationErrors():</span>
+          <pre *ngIf="prettyValidationErrors" class="bg-danger">{{prettyValidationErrors}}</pre>
+        </div>
+        &nbsp;<br>
 
-      <pre *ngIf="prettyValidationErrors" class="bg-danger">{{prettyValidationErrors}}</pre>
+        Live data — from onChanges():
+        <pre [class.bg-success]="!prettyValidationErrors && prettyLiveFormData !== '{}'"
+          [class.bg-danger]="prettyValidationErrors">{{prettyLiveFormData}}</pre>
 
-      Live data — from onChanges():
-      <pre [class.bg-success]="!prettyValidationErrors && prettyLiveFormData !== '{}'"
-        [class.bg-danger]="prettyValidationErrors">{{prettyLiveFormData}}</pre>
+        Submitted data — from onSubmit():
+        <pre [class.bg-success]="prettySubmittedFormData !== 'null'">{{prettySubmittedFormData}}</pre>
 
-      Submitted data — from onSubmit():
-      <pre [class.bg-success]="prettySubmittedFormData !== 'null'">{{prettySubmittedFormData}}</pre>
+      </div>
 
     </div>
   </div>

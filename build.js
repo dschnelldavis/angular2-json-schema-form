@@ -11,10 +11,7 @@ const sourcemaps = require('rollup-plugin-sourcemaps');
 // const nodeResolve = require('rollup-plugin-node-resolve');
 const nodeResolve = require('rollup-plugin-node-resolve-angular');
 const commonjs = require('rollup-plugin-commonjs');
-
 const inlineResources = require('./inline-resources');
-
-
 const libName = require('./package.json').name;
 const rootFolder = path.join(__dirname);
 const compilationFolder = path.join(rootFolder, 'out-ngc');
@@ -48,36 +45,32 @@ return Promise.resolve()
   )
   // Bundle lib.
   .then(() => {
-    // Base configuration.
+    // Base configuration
     const es5Entry = path.join(es5OutputFolder, `${libName}.js`);
     const es2015Entry = path.join(es2015OutputFolder, `${libName}.js`);
     const rollupBaseConfig = {
       moduleName: camelCase(libName),
       sourceMap: true,
       // ATTENTION:
-      // Add any dependency or peer dependency your library to
+      // Add all dependencies and peer dependencies of your library to
       // `globals` and `external`. This is required for UMD bundle users.
       globals: {
-        // The key here is library name, and the value is the the name
-        // of the global variable name the window object.
-        // See https://github.com/rollup/rollup/wiki/JavaScript-API#globals for more.
-        '@angular/animations': 'ng.animations',
+        // key   = The library name
+        // value = The global variable name on the window object
+        // https://github.com/rollup/rollup/wiki/JavaScript-API#globals
         '@angular/common': 'ng.common',
         '@angular/core': 'ng.core',
         '@angular/forms': 'ng.forms',
-        '@angular/material': 'ng.material',
         '@angular/platform-browser': 'ng.platformBrowser',
         'ajv': 'Ajv',
         'lodash': '_'
       },
       external: [
-        // List of dependencies. For more, see
+        // List of dependencies
         // https://github.com/rollup/rollup/wiki/JavaScript-API#external
-        '@angular/animations',
         '@angular/common',
         '@angular/core',
         '@angular/forms',
-        '@angular/material',
         '@angular/platform-browser',
         'ajv',
         'hammerjs',
@@ -92,19 +85,20 @@ return Promise.resolve()
         sourcemaps(),
         nodeResolve(),
         commonjs({ namedExports: {
+          // list of lodash functions used by your library
           'node_modules/lodash/index.js': [ 'cloneDeep', 'filter', 'map', 'uniqueId' ]
         } })
       ]
     };
 
-    // UMD bundle.
+    // UMD bundle
     const umdConfig = Object.assign({}, rollupBaseConfig, {
       entry: es5Entry,
       dest: path.join(distFolder, `bundles`, `${libName}.umd.js`),
       format: 'umd',
     });
 
-    // Minified UMD bundle.
+    // Minified UMD bundle
     const minifiedUmdConfig = Object.assign({}, rollupBaseConfig, {
       entry: es5Entry,
       dest: path.join(distFolder, `bundles`, `${libName}.umd.min.js`),
@@ -112,7 +106,7 @@ return Promise.resolve()
       plugins: rollupBaseConfig.plugins.concat([uglify({})])
     });
 
-    // ESM+ES5 flat module bundle.
+    // ESM+ES5 flat module bundle
     const fesm5config = Object.assign({}, rollupBaseConfig, {
       entry: es5Entry,
       dest: path.join(distFolder, `${libName}.es5.js`),
@@ -120,7 +114,7 @@ return Promise.resolve()
       intro: `import * as Ajv from 'ajv';\nimport * as _ from 'lodash';`
     });
 
-    // ESM+ES2015 flat module bundle.
+    // ESM+ES2015 flat module bundle
     const fesm2015config = Object.assign({}, rollupBaseConfig, {
       entry: es2015Entry,
       dest: path.join(distFolder, `${libName}.js`),
@@ -153,17 +147,17 @@ return Promise.resolve()
     process.exit(1);
   });
 
-// Copy files maintaining relative paths.
+// Copy files, maintaining relative paths.
 function _relativeCopy(fileGlob, from, to) {
   return new Promise((resolve, reject) => {
     glob(fileGlob, { cwd: from, nodir: true }, (err, files) => {
       if (err) reject(err);
       files.forEach(file => {
         const origin = path.join(from, file);
-        const dest = path.join(to, file);
+        const destination = path.join(to, file);
         const data = fs.readFileSync(origin, 'utf-8');
-        _recursiveMkDir(path.dirname(dest));
-        fs.writeFileSync(dest, data);
+        _recursiveMkDir(path.dirname(destination));
+        fs.writeFileSync(destination, data);
         resolve();
       })
     })
@@ -178,16 +172,16 @@ function _recursiveMkDir(dir) {
   }
 }
 
-// Copy and update package.json file
+// Copy and update package.json file.
 function _copyPackageJson(from, to) {
   return new Promise((resolve, reject) => {
     const origin = path.join(from, 'package.json');
-    const dest = path.join(to, 'package.json');
+    const destination = path.join(to, 'package.json');
     let data = JSON.parse(fs.readFileSync(origin, 'utf-8'));
     delete data.engines;
     delete data.scripts;
     delete data.devDependencies;
-    fs.writeFileSync(dest, JSON.stringify(data, null, 2));
+    fs.writeFileSync(destination, JSON.stringify(data, null, 2));
     resolve();
   });
 }

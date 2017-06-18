@@ -1,22 +1,21 @@
 /**
- * 'convertJsonSchema3to4' function
+ * 'convertJsonSchemaToDraft6' function
  *
- * Converts JSON Schema version 3 to JSON Schema version 4
+ * Converts JSON Schema version 3 or 4 to JSON Schema version 6
  *
- * Based on geraintluff's JSON Schema compatibility function
+ * Partially based on geraintluff's JSON Schema 3 to 4 compatibility function
  * https://github.com/geraintluff/json-schema-compatibility
+ * Also uses suggestions from AJV's JSON Schema 4 to 6 migration guide
+ * https://github.com/epoberezkin/ajv/releases/tag/5.0.0
  *
  * @param {object} originalSchema - JSON schema (version 3 or 4)
- * @return {object} - JSON schema (version 4)
+ * @return {object} - JSON schema (version 6)
  */
-export function convertJsonSchema3to4(schema: any): any {
-
-  const isArray = (item: any): boolean => Array.isArray(item) ||
-    Object.prototype.toString.call(item) === '[object Array]';
+export function convertJsonSchemaToDraft6(schema: any): any {
 
   const convertTypes = (types, replace: boolean = false): boolean | any[] => {
     let newTypes: any[] = [];
-    for (let type of isArray(types) ? types : [types]) {
+    for (let type of Array.isArray(types) ? types : [types]) {
       if (typeof type === 'object') {
         newTypes.push(type);
         replace = true;
@@ -28,13 +27,11 @@ export function convertJsonSchema3to4(schema: any): any {
   };
 
   if (typeof schema !== 'object') { return schema; }
-  let newSchema = isArray(schema) ? [].concat(schema) : Object.assign({ }, schema);
-  let converted: boolean = false;
+  let newSchema = Array.isArray(schema) ? [].concat(schema) : Object.assign({ }, schema);
 
   // convert multiple types to anyOf
   if (newSchema.type) {
     if (typeof newSchema.type !== 'string') {
-      converted = true;
       let anyOf = convertTypes(newSchema.type);
       if (anyOf) {
         newSchema.anyOf = anyOf;
@@ -47,15 +44,13 @@ export function convertJsonSchema3to4(schema: any): any {
 
   // convert extends to allOf
   if (newSchema.extends) {
-    converted = true;
-    newSchema.allOf = isArray(newSchema.extends) ?
+    newSchema.allOf = Array.isArray(newSchema.extends) ?
       newSchema.extends : [newSchema.extends];
     delete newSchema.extends;
   }
 
   // convert disallow to not
   if (newSchema.disallow) {
-    converted = true;
     newSchema.not = (typeof newSchema.disallow === 'string') ?
       { 'type': newSchema.disallow } :
       { 'anyOf': convertTypes(newSchema.disallow, true) };
@@ -64,12 +59,11 @@ export function convertJsonSchema3to4(schema: any): any {
 
   // move required from individual items to required array
   if (newSchema.properties) {
-    let requiredArray = isArray(newSchema.required) ? newSchema.required : [];
+    let requiredArray = Array.isArray(newSchema.required) ? newSchema.required : [];
     for (let key of Object.keys(newSchema.properties)) {
       if (typeof newSchema.properties[key].required === 'boolean') {
         if (newSchema.properties[key].required) {
           requiredArray.push(key);
-          converted = true;
         }
         delete newSchema.properties[key].required;
       }
@@ -81,53 +75,69 @@ export function convertJsonSchema3to4(schema: any): any {
   if (newSchema.dependencies) {
     for (let key of Object.keys(newSchema.dependencies)) {
       if (typeof newSchema.dependencies[key] === 'string') {
-        converted = true;
-        newSchema.dependencies[key] = [newSchema.dependencies[key]];
+          newSchema.dependencies[key] = [newSchema.dependencies[key]];
       }
     }
   }
 
   // delete boolean required key
   if (typeof newSchema.required === 'boolean') {
-    converted = true;
     delete newSchema.required;
   }
 
   // convert divisibleBy to multipleOf
   if (newSchema.divisibleBy) {
-    converted = true;
     newSchema.multipleOf = newSchema.divisibleBy;
     delete newSchema.divisibleBy;
+  }
+
+  // fix boolean exclusiveMinimum
+  if (newSchema.minimum && newSchema.exclusiveMinimum === true) {
+    newSchema.exclusiveMinimum = newSchema.minimum;
+    delete newSchema.minimum;
+  } else  if (typeof newSchema.exclusiveMinimum !== 'number') {
+    delete newSchema.exclusiveMinimum;
+  }
+
+  // fix boolean exclusiveMaximum
+  if (newSchema.maximum && newSchema.exclusiveMaximum === true) {
+    newSchema.exclusiveMaximum = newSchema.maximum;
+    delete newSchema.maximum;
+  } else  if (typeof newSchema.exclusiveMaximum !== 'number') {
+    delete newSchema.exclusiveMaximum;
+  }
+
+  // update or delete $schema identifier
+  if (
+    newSchema.$schema === 'http://json-schema.org/draft-03/schema#' ||
+    newSchema.$schema === 'http://json-schema.org/draft-04/schema#'
+  ) {
+    newSchema.$schema = 'http://json-schema.org/draft-06/schema#';
+  } else if (newSchema.$schema) {
+    delete newSchema.$schema;
+  }
+
+  // convert id to $id
+  if (newSchema.id) {
+    newSchema.$id = newSchema.id + '-CONVERTED-TO-DRAFT-06';
+    delete newSchema.id;
   }
 
   // convert sub schemas
   for (let key of Object.keys(newSchema)) {
     if (['properties', 'patternProperties', 'dependencies'].indexOf(key) > -1) {
       for (let subKey of Object.keys(newSchema[key])) {
-        newSchema[key][subKey] = convertJsonSchema3to4(newSchema[key][subKey]);
+        newSchema[key][subKey] = convertJsonSchemaToDraft6(newSchema[key][subKey]);
       }
     } else if (key !== 'enum') {
-      if (isArray(newSchema[key])) {
+      if (Array.isArray(newSchema[key])) {
         for (let subSchema of newSchema[key]) {
-          subSchema = convertJsonSchema3to4(subSchema);
+          subSchema = convertJsonSchemaToDraft6(subSchema);
         }
       } else if (typeof newSchema[key] === 'object') {
-        newSchema[key] = convertJsonSchema3to4(newSchema[key]);
+        newSchema[key] = convertJsonSchemaToDraft6(newSchema[key]);
       }
     }
-  }
-
-  if (converted === true) {
-
-    // update or delete schema identifier
-    if (newSchema.$schema === 'http://json-schema.org/draft-03/schema#') {
-      newSchema.$schema = 'http://json-schema.org/draft-04/schema#';
-    } else if (newSchema.$schema) {
-      delete newSchema.$schema;
-    }
-
-    // update id
-    if (newSchema.id) { newSchema.id += '-CONVERTED-TO-DRAFT-04'; }
   }
 
   return newSchema;

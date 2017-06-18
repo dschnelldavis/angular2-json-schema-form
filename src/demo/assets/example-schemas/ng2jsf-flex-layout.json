@@ -27,8 +27,7 @@
           },
           "required": [ "number", "type" ]
         }
-      },
-      "notes": { "type": "string" }
+      }
     }
   },
   "layout": [ {
@@ -82,7 +81,6 @@
     "phone_numbers": [
       { "number": "702-123-4567", "type": "cell" },
       { "number": "702-987-6543", "type": "work" }
-    ],
-    "notes": ""
+    ]
   }
 }

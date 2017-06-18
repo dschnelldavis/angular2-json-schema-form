@@ -25,8 +25,8 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
 
     </fieldset>`,
   styles: [`
-    .expandable > legend:before { content: '\\25B8'; padding-right: .3em; }
-    .expanded > legend:before { content: '\\25BE'; padding-right: .2em; }
+    .expandable > legend:before { content: '▶'; padding-right: .3em; }
+    .expanded > legend:before { content: '▼'; padding-right: .2em; }
   `],
 })
 export class FieldsetComponent implements OnInit {

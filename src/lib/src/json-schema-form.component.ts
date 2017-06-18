@@ -204,13 +204,12 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
           !hasOwn(this.jsf.schema, 'properties')
         ) {
           this.jsf.JsonFormCompatibility = true;
-          this.jsf.schema = {
-            'type': 'object', 'properties': this.jsf.schema
-          };
+          this.jsf.schema = { 'type': 'object', 'properties': this.jsf.schema };
         }
 
-        // If JSON Schema is version 3 (JSON Form style), convert it to version 4
-        this.jsf.convertJsonSchema3to4();
+        // Convert JSON Schemas version 3 (JSON Form style)
+        // or version 4 (Angular Schema Form style) to version 6
+        this.jsf.convertJsonSchemaToDraft6();
 
         // Initialize ajv and compile schema
         this.jsf.compileAjvSchema();
@@ -385,7 +384,8 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
 // (These always work.)
 // console.log('loading form...');
 // console.log(this.jsf.schema);
-console.log(this.jsf.layout);
+// console.log(this.jsf.layout);
+// console.log(this.options);
 // console.log(this.jsf.initialValues);
 // console.log(this.jsf.formGroup.value);
 // console.log(this.jsf.formGroupTemplate);
