@@ -11,13 +11,17 @@ A [JSON Schema](http://json-schema.org) Form builder for Angular 2 or 4, similar
 
 Note: This is currently a personal proof-of-concept project, and is NOT affiliated with any of the organizations listed above. (Though they are all awesome, and totally worth checking out.)
 
+## Check out the live demo and play with the examples
+
+[Check out some examples here.](https://angular2-json-schema-form.firebaseapp.com/)
+
+This example playground features over 70 different JSON Schemas for you to try (including all examples used by each of the three libraries listed above), and the ability to quickly view any example formatted with Material Design or Bootstrap 3, or without any formatting.
+
 ## Installation
 
-### To install from GitHub and play with the examples
+### To install from GitHub
 
-The [GitHub version of Angular JSON Schema Form](https://github.com/dschnelldavis/angular2-json-schema-form) includes an example playground with over 70 different JSON Schemas (including all examples used by each of the three libraries listed above), and the ability to quickly view any example formatted using Bootstrap 3 or Material Design (or without any formatting).
-
-To install both the library and the example playground, clone `https://github.com/dschnelldavis/angular2-json-schema-form.git` with your favorite git program. Or, assuming you have [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and [Node/NPM](https://nodejs.org/en/download/) installed, enter the following in your terminal:
+To install [the library and the example playground from GitHub](https://github.com/dschnelldavis/angular2-json-schema-form), clone `https://github.com/dschnelldavis/angular2-json-schema-form.git` with your favorite git program. Or, assuming you have [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and [Node/NPM](https://nodejs.org/en/download/) installed, enter the following in your terminal:
 
 ```shell
 git clone https://github.com/dschnelldavis/angular2-json-schema-form.git angular2-json-schema-form
@@ -77,11 +81,11 @@ export class AppModule { }
 
 Make sure you are running the latest version of Angular CLI.
 
-Older versions of Angular CLI (e.g. 1.0.1) may fail with the error `Critical dependency: the request of a dependency is an expression` while trying to compile ajv (Another JSON Schema Validator). But this error has been fixed in newer versions (e.g. 1.0.6).
+Older versions of Angular CLI (e.g. 1.0.1) may fail with the error `Critical dependency: the request of a dependency is an expression` while trying to compile ajv (Another JSON Schema Validator). But this error has been fixed in newer versions. So if you receive that error, just upgrade your Angular CLI to the latest version.
 
 #### Additional notes for SystemJS
 
-If you use SystemJS (used in the [Angular quickstart seed](https://github.com/angular/quickstart)), you will also need to make the following changes to your systemjs.config.js file. (If you're using a recent version of Angular CLI, or you don't have a systemjs.config.js file in your project, that means you're not using SystemJS, and you can safely ignore this section.)
+If you use SystemJS, you will also need to make the following changes to your systemjs.config.js file. (If you're using a recent version of Angular CLI, or you don't have a systemjs.config.js file in your project, that means you're not using SystemJS, and you can safely ignore this section.)
 
 Add these lines to the 'map' section of systemjs.config.js, if they do not already exist:
 ```javascript
@@ -101,14 +105,11 @@ For basic use, after loading the JsonSchemaFormModule as described above, to add
 ```html
 <json-schema-form
   [schema]="yourJsonSchema"
-  loadExternalAssets="true"
   (onSubmit)="yourOnSubmitFn($event)">
 </json-schema-form>
 ```
 
 Where the `schema` input is a valid JSON schema object (v3 or v4), and the `onSubmit` output calls a function to process the submitted form data, which will be passed as a JSON object. If you don't already have your own schemas, you can find a whole bunch of samples to test with in the `src/demo/assets/example-schemas` folder, as described above.
-
-(Note: The `loadExternalAssets` attribute is useful when you are first trying out this library, but you will want to remove it in production sites, and manually load any required assets instead. For full details see 'Changing or adding frameworks', below.)
 
 ### Advanced use
 
@@ -117,7 +118,7 @@ Where the `schema` input is a valid JSON schema object (v3 or v4), and the `onSu
 For more control over your form, you may provide these additional inputs:
 
   * `layout` with a custom form layout (see Angular Schema Form's [form definitions](https://github.com/json-schema-form/angular-schema-form/blob/master/docs/index.md#form-definitions) for information about how to construct a form layout)
-  * `data` to populate the form with defaults or previously submitted values
+  * `data` to populate the form with default or previously submitted values
   * `options` to set any global options for the form
   * `widgets` to add custom widgets
   * `framework` to set which framework to use
@@ -134,12 +135,15 @@ Here is an example:
   [options]="yourGlobalOptionSettings"
   [widgets]="yourCustomWidgets"
   [framework]="nameOfFrameworkToUse-or-yourCustomFramework"
+  loadExternalAssets="true"
   (onChanges)="yourOnChangesFn($event)"
   (onSubmit)="yourOnSubmitFn($event)"
   (isValid)="yourIsValidFn($event)"
   (validationErrors)="yourValidationErrorsFn($event)">
 </json-schema-form>
 ```
+
+(Note: The `loadExternalAssets` attribute may be useful when you are first trying out this library, but do not use it in production sites - instead separately load any required assets. For full details see 'Changing or adding frameworks', below.)
 
 #### Single-input mode
 
@@ -169,7 +173,7 @@ Combining inputs is useful if you have many unique forms and store each form's d
 
 #### Data-only mode
 
-An experimental feature will also create a form entirely from a JSON object—with no schema—like so:
+Angular JSON Schema Form can also create a form entirely from a JSON object—with no schema—like so:
 
 ```javascript
 exampleJsonObject = {
@@ -188,7 +192,6 @@ exampleJsonObject = {
 ```html
 <json-schema-form
   [data]="exampleJsonObject"
-  loadExternalAssets="true"
   (onSubmit)="yourOnSubmitFn($event)">
 </json-schema-form>
 ```
@@ -346,7 +349,7 @@ If you find this library useful, I'd love to hear from you. If you have any trou
 
 If you're a programmer and would like a fun intermediate-level Angular project to hack on, then clone the library and take a look at the source code. I wrote this library both because I needed an Angular JSON Schema Form builder, and also as a way to sharpen my Angular skills. This project is just complex enough to be challenging and fun, but not so difficult as to be overwhelming. One thing I particularly like is that each example in the demo playground is like a little puzzle which provides immediate feedback—as soon as it works perfectly, you know you've solved it.
 
-I've also tried to split things into small modules as much as possible, so even though some code is still a bit messy, most individual parts should be straightforward to work with. (A lot of the code is well commented, though some isn't—but I'm working to fix that. If you run into anything you don't understand, please ask.) If you make improvements, please [submit a pull request](https://github.com/dschnelldavis/angular2-json-schema-form/pulls) to share what you've done with everyone else.
+I've also tried to split things into small modules as much as possible, so even though some code is still a bit messy, most individual parts should be straightforward to work with. (A lot of the code is well commented, though some isn't—but I'm working to fix that. If you run into anything you don't understand, please ask.) If you make improvements, please [submit a pull request](https://github.com/dschnelldavis/angular2-json-schema-form/pulls) to share what you've done.
 
 This library is mostly functional (I'm already using it in another large site, where it works well), but it still has many small bugs to fix and enhancements that could be made. Here's a random list of some stuff I know needs to be added or improved:
 
@@ -354,7 +357,7 @@ This library is mostly functional (I'm already using it in another large site, w
 
   * The 'JSON Schema - Required Field' example doesn't work—Currently, required fields inside objects are always required. But when the object itself is not required, those fields should instead be dynamically required, or not, only if at least one field in the object is non-empty.
 
-  * More frameworks—Not everyone uses Bootstrap 3 or Material Design, so it would be great to create framework plug-ins for [Bootstrap 4](https://github.com/ng-bootstrap/ng-bootstrap), [Foundation 6](https://github.com/zurb/foundation-sites), [Semantic UI](https://github.com/vladotesanovic/ngSemantic), or other web design frameworks.
+  * More frameworks—Not everyone uses Material Design or Bootstrap 3, so it would be great to create framework plug-ins for [Bootstrap 4](https://github.com/ng-bootstrap/ng-bootstrap), [Foundation 6](https://github.com/zurb/foundation-sites), [Semantic UI](https://github.com/vladotesanovic/ngSemantic), or other web design frameworks.
 
   * More widgets—There are lots of great form controls available, such as the [Pikaday calendar](https://github.com/dbushell/Pikaday), [Spectrum color picker](http://bgrins.github.io/spectrum), and [ACE code editor](https://ace.c9.io), which just need small custom wrappers to convert them into Angular JSON Schema Form plug-ins.
 

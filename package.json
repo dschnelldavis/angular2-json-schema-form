@@ -1,6 +1,6 @@
 {
   "name": "angular2-json-schema-form",
-  "version": "0.4.0-alpha.13",
+  "version": "0.4.0-alpha.14",
   "author": {
     "name": "David Schnell-Davis",
     "email": "dschnelldavis@gmail.com"
@@ -48,6 +48,7 @@
     "postbuild": "rimraf out-ngc",
     "prepublish": "npm run build",
     "publish": "cd dist && npm publish",
+    "deploy:app": "ng build && firebase deploy",
     "ng-build": "ng build",
     "old-build-demo": "tsc -p src/demo/",
     "old-build-demo:watch": "tsc -p src/demo/ -w",
