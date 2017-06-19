@@ -1,0 +1,96 @@
+@import '~@angular/material/theming';
+@include mat-core();
+$demo-app-primary: mat-palette($mat-blue);
+$demo-app-accent:  mat-palette($mat-amber, A200, A100, A400);
+$demo-app-warn:    mat-palette($mat-red);
+$demo-app-theme: mat-light-theme($demo-app-primary, $demo-app-accent, $demo-app-warn);
+@include angular-material-theme($demo-app-theme);
+
+
+$row-height: 56px;
+$font-size: 1.6rem;
+$line-height: 3.2rem;
+
+md-toolbar {
+  &.mat-medium {
+    min-height: $row-height;
+    md-toolbar-row { height: $row-height; }
+  }
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: rgb(250, 250, 250) !important;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  font-size: $font-size;
+  height: 100%;
+  line-height: $line-height;
+  margin: 0;
+  padding: 0;
+}
+
+.ace_active-line {
+  background: none !important;
+}
+
+.demo-page-header {
+  background-color: mat-color($demo-app-primary, lighter);
+  font-size: $font-size;
+  line-height: $line-height;
+  margin-bottom: 12px;
+  .header-content {
+    padding: 12px;
+    .menu-label {
+      margin-right: 12px;
+      font-weight: bold;
+    }
+  }
+}
+
+md-select {
+  margin: 24px 0 12px;
+}
+
+.mat-menu-panel {
+  &.example-menu {
+    max-width: 560px;
+  }
+}
+
+md-card {
+  margin: 8px;
+}
+
+[ace-editor], .data-good, .data-bad {
+  border-radius: 3px;
+  padding: 6px;
+  border: 1px solid #ccc !important;
+}
+
+[ace-editor] {
+  background-color: rgb(253, 253, 253) !important;
+}
+
+.data-good {
+  background-color: #dfd;
+}
+
+.data-bad {
+  background-color: #fcc;
+}
+
+.defualt-cursor:hover {
+  cursor: default;
+}
+
+.avoidwrap {
+  display:inline-block;
+}
+
+.full-width-card {
+  width: 90%;
+  align-self: center;
+}

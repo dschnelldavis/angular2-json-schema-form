@@ -1,217 +1,183 @@
-<div class="navbar navbar-inverse" style="border-radius: 0 !important;">
-    <div class="container-fluid">
-      <div class="navbar-header">
-        <a class="navbar-brand" href="/">Angular JSON Schema Form — Demonstration Playground</a>
-      </div>
-    </div>
-</div>
-<div class="container-fluid">
-
-  <div class="text row">
-    <div class="col-sm-12">
-      An Angular <a href="http://json-schema.org/">JSON Schema</a> Form builder,
-      similar to, and mostly API compatible with,
+<div class="demo-page-header">
+  <md-toolbar class="mat-elevation-z4 mat-medium" color="primary">
+    Angular JSON Schema Form — Demonstration Playground
+  </md-toolbar>
+  <div class="header-content">
+    An Angular <a href="http://json-schema.org/">JSON Schema</a> Form builder,
+    similar to, and mostly API compatible with,
+    <span class="avoidwrap">
       <!-- JSON Schema Form's Angular Schema Form -->
       <!-- https://github.com/json-schema-form -->
       <!-- http://schemaform.io -->
-      <a href="http://schemaform.io/examples/bootstrap-example.html">Angular Schema Form</a>.
-      <span style="white-space: nowrap;">
-        <!-- Mozilla's React JSON Schema Form -->
-        <!-- https://github.com/mozilla-services/react-jsonschema-form -->
-        <a href="https://mozilla-services.github.io/react-jsonschema-form/">React JSON Schema Form</a>,
-        and
-        <!-- Joshfire's JSON Form -->
-        <!-- http://factory.joshfire.com/ -->
-        <!-- http://github.com/joshfire/jsonform/wiki -->
-        <a href="http://ulion.github.io/jsonform/playground/">JSON Form</a>,
-      </span>
-    </div>
+      <a href="http://schemaform.io/examples/bootstrap-example.html">Angular Schema Form</a>,
+      <!-- Mozilla's React JSON Schema Form -->
+      <!-- https://github.com/mozilla-services/react-jsonschema-form -->
+      <a href="https://mozilla-services.github.io/react-jsonschema-form/">React JSON Schema Form</a>,
+      and
+      <!-- Joshfire's JSON Form -->
+      <!-- http://factory.joshfire.com/ -->
+      <!-- http://github.com/joshfire/jsonform/wiki -->
+      <a href="http://ulion.github.io/jsonform/playground/">JSON Form</a>.
+    </span><br>
+    Choose an example, or create your own, and check out the generated form.<br><br>
+
+    <span class="menu-label">Current example:</span>
+    <button md-raised-button
+      color="primary"
+      [mdMenuTriggerFor]="exampleMenu">
+      <md-icon>menu</md-icon> {{selectedSetName}} {{selectedExampleName}}
+    </button>
+    <md-menu #exampleMenu="mdMenu" class="example-menu">
+      <button md-menu-item class="mat-medium"
+        *ngFor="let example of examples.ng2jsf.schemas"
+        (click)="loadSelectedExample('ng2jsf', '', example.file, example.name)">
+        {{example.name}}
+      </button>
+      <button md-menu-item class="mat-medium"
+        [mdMenuTriggerFor]="asfMenu">
+        <md-icon>menu</md-icon>
+        <span>Angular Schema Form (AngularJS) examples</span>
+      </button>
+      <md-menu #asfMenu="mdMenu" class="example-menu">
+        <button md-menu-item class="mat-medium"
+          *ngFor="let example of examples.asf.schemas"
+          (click)="loadSelectedExample('asf', 'Angular Schema Form:', example.file, example.name)">
+          {{example.name}}
+        </button>
+      </md-menu>
+      <button md-menu-item class="mat-medium"
+        [mdMenuTriggerFor]="rjsfMenu">
+        <md-icon>menu</md-icon>
+        <span>React JSON Schema Form examples</span>
+      </button>
+      <md-menu #rjsfMenu="mdMenu" class="example-menu">
+        <button md-menu-item class="mat-medium"
+          *ngFor="let example of examples.rjsf.schemas"
+          (click)="loadSelectedExample('rjsf', 'React JSON Schema Form:', example.file, example.name)">
+          {{example.name}}
+        </button>
+      </md-menu>
+      <button md-menu-item class="mat-medium"
+        [mdMenuTriggerFor]="jsfMenu">
+        <md-icon>menu</md-icon>
+        <span>JSONForm (jQuery) examples</span>
+      </button>
+      <md-menu #jsfMenu="mdMenu" class="example-menu">
+        <button md-menu-item class="mat-medium"
+          *ngFor="let example of examples.jsf.schemas"
+          (click)="loadSelectedExample('jsf', 'JSONForm:', example.file, example.name)">
+          {{example.name}}
+        </button>
+      </md-menu>
+    </md-menu>
   </div>
-
-  <div class="text row">
-    <div class="col-sm-12">
-      Choose an example below, or create your own, and check the generated form.
+</div>
+<div fxLayout="row" fxLayoutAlign="space-between start"
+  fxLayout.lt-sm="column" fxLayoutAlign.lt-sm="flex-start center">
+  <md-card fxFlex="1 1 50%">
+    <h4 class="defualt-cursor" (click)="toggleVisible('options')">
+      {{visible.options ? '▼' : '▶'}} Selected Framework and Options
+    </h4>
+    <div *ngIf="visible.options" fxLayout="column" [@expandSection]="true">
+      <md-select
+        [(ngModel)]="selectedFramework"
+        name="framework"
+        placeholder="Framework">
+        <md-option
+          *ngFor="let framework of frameworkList"
+          [value]="framework">
+          {{frameworks[framework]}}
+        </md-option>
+      </md-select>
+      <div>
+        <md-checkbox color="primary" [(ngModel)]="jsonFormOptions.returnEmptyFields">
+          Return empty fields?
+        </md-checkbox>
+        (default = true)
+      </div>
+      <div>
+        <md-checkbox color="primary" [(ngModel)]="jsonFormOptions.addSubmit">
+          Add submit button?
+        </md-checkbox>
+        (default = only add if no layout is defined)
+      </div>
+      <div>
+        <md-checkbox color="primary" [(ngModel)]="jsonFormOptions.formDefaults.feedback">
+          Show inline fedback?
+        </md-checkbox>
+        (default = false)
+      </div>
+      <div>
+        <md-checkbox color="primary" [(ngModel)]="jsonFormOptions.debug">
+          Show debuging information?
+        </md-checkbox>
+        (default = false)
+      </div>
     </div>
-  </div>
-
-  <div class="form-group">
-    <div class="row">
-      <div class="col-sm-2">
-        <label for="exampleSet">Example Set:</label>
-      </div>
-      <div class="col-sm-6">
-        <select id="exampleSet" class="form-control"
-          (change)="loadSelectedSet($event.target.value)">
-          <option *ngFor="let set of exampleSchemas.exampleSetList"
-            [value]="set"
-            [selected]="selectedSet === set">
-            {{exampleSchemas.exampleSets[set]}}
-          </option>
-        </select>
-      </div>
-      <div class="col-sm-4"></div>
-      <div class="clearfix visible-sm-block"></div>
+    <hr>
+    <h4 class="defualt-cursor" (click)="toggleVisible('schema')">
+      {{visible.schema ? '▼' : '▶'}} Input JSON Schema and Form Layout
+    </h4>
+    <div *ngIf="visible.schema" [@expandSection]="true"
+      ace-editor
+      [text]="jsonFormSchema"
+      [options]="aceEditorOptions"
+      [readOnly]="false"
+      [autoUpdateContent]="true"
+      (textChanged)="generateForm($event)"
+      [style.min-height]="aceHeight + 'px'"
+      style="width:100%; overflow: auto; border: 1px solid black;">
+      (loading form specification...)
     </div>
+  </md-card>
+  <md-card fxFlex="1 1 50%">
+    <h4 class="defualt-cursor" (click)="toggleVisible('form')">
+      {{visible.form ? '▼' : '▶'}} Generated Form
+    </h4>
+    <div *ngIf="visible.form" class="json-schema-form" [@expandSection]="true">
+      <div *ngIf="!formActive">{{jsonFormStatusMessage}}</div>
 
-    <div class="row">
-      <div class="col-sm-2">
-        <label for="example">Example:</label>
-      </div>
-      <div class="col-sm-6">
-        <select id="example" class="form-control"
-          (change)="loadSelectedExample(selectedSet, $event.target.value)">
-          <option *ngFor="let example of exampleSchemas.exampleList[selectedSet]"
-            [value]="example"
-            [selected]="selectedExample === example">
-            {{exampleSchemas.examples[selectedSet][example]}}
-          </option>
-        </select>
-      </div>
-      <div class="col-sm-4"></div>
-      <div class="clearfix visible-sm-block"></div>
-    </div>
-
-  </div>
-
-  <div class="row">
-    <div class="col-sm-5">
-
-      <legend class="defualt-cursor" (click)="toggleVisible('options')">
-        {{visible.options ? '▼' : '▶'}} Options
-      </legend>
-      <div *ngIf="visible.options">
-
-        <div class="row">
-          <div class="col-sm-3"><label for="framework">Framework:</label></div>
-          <div class="col-sm-9">
-            <select id="framework" class="form-control"
-              (change)="loadSelectedFramework($event.target.value)">
-              <option *ngFor="let framework of exampleSchemas.frameworkList"
-                [value]="framework"
-                [selected]="selectedFramework === framework">
-                {{exampleSchemas.frameworks[framework]}}
-              </option>
-            </select>
-          </div>
-        </div>
-
-        <div class="row top-margin">
-          <div class="col-sm-12">
-            <input id="returnEmptyFields" type="checkbox"
-              [checked]="jsonFormOptions.returnEmptyFields"
-              (click)="toggleFormOption('returnEmptyFields')">
-            &nbsp;
-            <label for="returnEmptyFields">Return empty fields?</label>
-            (default = true)
-          </div>
-        </div>
-
-        <div class="row top-margin">
-          <div class="col-sm-12">
-            <input id="addSubmit" type="checkbox"
-              [checked]="jsonFormOptions.addSubmit"
-              (click)="toggleFormOption('addSubmit')">
-            &nbsp;
-            <label for="addSubmit">Add submit button?</label>
-            (default = only add if no layout is defined)
-          </div>
-        </div>
-
-        <div class="row top-margin">
-          <div class="col-sm-12">
-            <input id="feedback" type="checkbox"
-              [checked]="jsonFormOptions.formDefaults.feedback"
-              (click)="toggleFormOption('feedback')">
-            &nbsp;
-            <label for="feedback">Show inline fedback?</label>
-            (default = false)
-          </div>
-        </div>
-
-        <div class="row top-margin">
-          <div class="col-sm-12">
-            <input id="debug" type="checkbox"
-              [checked]="jsonFormOptions.debug"
-              (click)="toggleFormOption('debug')">
-            &nbsp;
-            <label for="debug">Show debuging information?</label>
-            (default = false)
-          </div>
-        </div>
-
-      </div>
-      &nbsp;
-
-      <legend class="defualt-cursor" (click)="toggleVisible('schema')">
-        {{visible.schema ? '▼' : '▶'}} JSON Schema and Layout
-      </legend>
-      <div *ngIf="visible.schema"
-        ace-editor
-        class="ace-editor"
-        [text]="jsonFormSchema"
-        [options]="aceEditorOptions"
-        [readOnly]="false"
-        [autoUpdateContent]="true"
-        (textChanged)="generateForm($event)"
-        (window:resize)="resizeAceEditor()"
-        [style.min-height]="aceHeight + 'px'"
-        style="width:100%; overflow: auto; border: 1px solid black;">
-        (loading form specification...)
-      </div>
+      <!-- This is the form! -->
+      <json-schema-form
+        *ngIf="formActive"
+        loadExternalAssets="true"
+        [form]="jsonFormObject"
+        [options]="jsonFormOptions"
+        [framework]="selectedFramework"
+        (onChanges)="onChanges($event)"
+        (onSubmit)="onSubmit($event)"
+        (isValid)="isValid($event)"
+        (validationErrors)="validationErrors($event)">
+      </json-schema-form>
 
     </div>
-    <div class="col-sm-7">
-
-      <legend class="defualt-cursor" (click)="toggleVisible('form')">
-        {{visible.form ? '▼' : '▶'}} Generated Form
-      </legend>
-      <div *ngIf="visible.form" class="json-schema-form">
-        <div *ngIf="!formActive">
-          {{jsonFormStatusMessage}}
-        </div>
-        <json-schema-form
-          *ngIf="formActive"
-          loadExternalAssets="true"
-          [form]="jsonFormObject"
-          [options]="jsonFormOptions"
-          [framework]="selectedFramework"
-          (onChanges)="onChanges($event)"
-          (onSubmit)="onSubmit($event)"
-          (isValid)="isValid($event)"
-          (validationErrors)="validationErrors($event)">
-        </json-schema-form>
+    <hr>
+    <h4 class="defualt-cursor" (click)="toggleVisible('output')">
+      {{visible.output ? '▼' : '▶'}} Form Output
+    </h4>
+    <div *ngIf="visible.output" fxLayout="column" [@expandSection]="true">
+      <div>
+        Valid?:
+        <strong *ngIf="formIsValid || prettyValidationErrors"
+          [class.text-success]="formIsValid"
+          [class.text-danger]="!formIsValid">
+          {{formIsValid ? 'Yes' : 'No'}}
+        </strong>
+        <span *ngIf="!formIsValid && !prettyValidationErrors">n/a</span>
+        <span *ngIf="prettyValidationErrors">— errors from validationErrors():</span>
+        <pre *ngIf="prettyValidationErrors" class="bg-danger">{{prettyValidationErrors}}</pre>
       </div>
-      &nbsp;
-
-      <legend class="defualt-cursor" (click)="toggleVisible('output')">
-        {{visible.output ? '▼' : '▶'}} Form Output
-      </legend>
-      <div *ngIf="visible.output">
-
-        <div>
-          Valid?:
-          <strong *ngIf="formIsValid || prettyValidationErrors"
-            [class.text-success]="formIsValid"
-            [class.text-danger]="!formIsValid">
-            {{formIsValid ? 'Yes' : 'No'}}
-          </strong>
-          <span *ngIf="!formIsValid && !prettyValidationErrors">n/a</span>
-          <span *ngIf="prettyValidationErrors">— errors from validationErrors():</span>
-          <pre *ngIf="prettyValidationErrors" class="bg-danger">{{prettyValidationErrors}}</pre>
-        </div>
-        &nbsp;<br>
-
+      <div>
         Live data — from onChanges():
-        <pre [class.bg-success]="!prettyValidationErrors && prettyLiveFormData !== '{}'"
-          [class.bg-danger]="prettyValidationErrors">{{prettyLiveFormData}}</pre>
-
-        Submitted data — from onSubmit():
-        <pre [class.bg-success]="prettySubmittedFormData !== 'null'">{{prettySubmittedFormData}}</pre>
-
+        <pre
+          [class.data-good]="!prettyValidationErrors && prettyLiveFormData !== '{}'"
+          [class.data-bad]="prettyValidationErrors">{{prettyLiveFormData}}</pre>
       </div>
-
+      <div>
+        Submitted data — from onSubmit():
+        <pre [class.data-good]="prettySubmittedFormData !== 'null'">{{prettySubmittedFormData}}</pre>
+      </div>
     </div>
-  </div>
+  </md-card>
 
 </div>
-<footer class="footer"></footer>

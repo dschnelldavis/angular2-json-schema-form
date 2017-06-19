@@ -1,20 +1,41 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { trigger, state, style, animate, transition } from '@angular/animations';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Http } from '@angular/http';
 
 import 'rxjs/add/operator/map';
 
-import { ExampleSchemas } from './example-schemas.model';
+import { Examples } from './example-schemas.model';
 
 @Component({
   selector: 'demo',
-  templateUrl: 'demo.component.html'
+  templateUrl: 'demo.component.html',
+  animations: [
+    trigger('expandSection', [
+      state('in', style({ height: '*' })),
+      transition(':enter', [
+        style({ height: 0 }), animate(100),
+      ]),
+      transition(':leave', [
+        style({ height: '*' }),
+        animate(100, style({ height: 0 })),
+      ]),
+    ]),
+  ],
 })
-export class DemoComponent implements OnInit, AfterViewInit {
-  exampleSchemas: any = ExampleSchemas;
-  selectedSet: string = 'asf';
-  selectedExample: string = 'asf-basic-json-schema-type';
-  selectedFramework: string = 'bootstrap-3';
+export class DemoComponent implements OnInit {
+  examples: any = Examples;
+  frameworkList: any = ['material-design', 'bootstrap-3', 'no-framework'];
+  frameworks: any = {
+    'material-design': 'Material Design framework',
+    'bootstrap-3': 'Bootstrap 3 framework',
+    'no-framework': 'No Framework (plain HTML controls)',
+  };
+  selectedSet: string = 'ng2jsf';
+  selectedSetName: string = '';
+  selectedExample: string = 'ng2jsf-flex-layout';
+  selectedExampleName: string = 'Flexbox layout';
+  selectedFramework: string = 'material-design';
   visible: { [item: string]: boolean } = {
     options: true,
     schema: true,
@@ -23,7 +44,6 @@ export class DemoComponent implements OnInit, AfterViewInit {
   };
 
   formActive: boolean = false;
-  aceHeight: number = 600;
   jsonFormSchema: string;
   jsonFormValid: boolean = false;
   jsonFormStatusMessage: string = 'Loading form...';
@@ -53,18 +73,29 @@ export class DemoComponent implements OnInit, AfterViewInit {
   ) { }
 
   ngOnInit() {
-    // Checks query string for the name of a form to load
+    // Subscribe to query string to detect schema to load
     this.route.queryParams.subscribe(
       params => {
-        if (params['set']) { this.selectedSet = params['set']; }
-        if (params['example']) { this.selectedExample = params['example']; }
-        if (params['framework']) { this.selectedFramework = params['framework']; }
+        if (params['set']) {
+          this.selectedSet = params['set'];
+          this.selectedSetName = ({
+            ng2jsf: '',
+            asf: 'Angular Schema Form:',
+            rsf: 'React Schema Form:',
+            jsf: 'JSONForm:'
+          })[this.selectedSet];
+        }
+        if (params['example']) {
+          this.selectedExample = params['example'];
+          this.selectedExampleName = this.examples[this.selectedSet].schemas
+            .find(schema => schema.file === this.selectedExample).name;
+        }
+        if (params['framework']) {
+          this.selectedFramework = params['framework'];
+        }
+        this.loadSelectedExample();
       }
     );
-  }
-
-  ngAfterViewInit() {
-    this.loadSelectedExample();
   }
 
   onSubmit(data: any) {
@@ -101,29 +132,17 @@ export class DemoComponent implements OnInit, AfterViewInit {
     return prettyValidationErrors;
   }
 
-  resizeAceEditor() {
-    this.aceHeight = window.innerHeight - 230;
-  }
-
-  loadSelectedSet(selectedSet?: string) {
-    if (selectedSet && selectedSet !== this.selectedSet) {
+  loadSelectedExample(
+    selectedSet: string = this.selectedSet,
+    selectedSetName: string = this.selectedSetName,
+    selectedExample: string = this.selectedExample,
+    selectedExampleName: string = this.selectedExampleName
+  ) {
+    if (selectedExample !== this.selectedExample) {
       this.selectedSet = selectedSet;
-      this.selectedExample = this.exampleSchemas.exampleList[selectedSet][0];
-      this.router.navigateByUrl(
-        '/?set=' + selectedSet +
-        '&example=' + this.selectedExample +
-        '&framework=' + this.selectedFramework
-      );
-      this.loadSelectedExample();
-    }
-  }
-
-  // Load and display the selected schema
-  // (runs whenever the user selects a schema from the drop-down menu)
-  loadSelectedExample(selectedSet?: string, selectedExample?: string) {
-    if (selectedExample && selectedExample !== this.selectedExample) {
-      this.selectedSet = selectedSet;
+      this.selectedSetName = selectedSetName;
       this.selectedExample = selectedExample;
+      this.selectedExampleName = selectedExampleName;
       this.router.navigateByUrl(
         '/?set=' + selectedSet +
         '&example=' + selectedExample +
@@ -141,6 +160,7 @@ export class DemoComponent implements OnInit, AfterViewInit {
         this.jsonFormSchema = schema;
         this.generateForm(this.jsonFormSchema);
       });
+    // this.resizeAceEditor();
   }
 
   loadSelectedFramework(selectedFramework: string) {

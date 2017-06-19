@@ -55,7 +55,7 @@ export class FrameworkLibraryService {
   stylesheets: (HTMLStyleElement|HTMLLinkElement)[];
   scripts: HTMLScriptElement[];
   loadExternalAssets: boolean = false;
-  defaultFramework: string = 'bootstrap-3';
+  defaultFramework: string = 'material-design';
   frameworkLibrary: FrameworkLibrary = {
     'no-framework': { framework: NoFrameworkComponent },
     'material-design': {

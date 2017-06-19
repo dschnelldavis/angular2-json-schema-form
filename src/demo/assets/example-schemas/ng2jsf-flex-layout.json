@@ -34,15 +34,13 @@
     "type": "flex",
     "flex-direction": "column",
     "items": [
-      {
-        "type": "flex",
+      { "type": "flex",
         "flex-flow": "row wrap",
         "items": [ "first_name", "last_name" ]
       },
       { "key": "address.street_1", "title": "Address", "placeholder": "Street" },
       { "key": "address.street_2", "notitle": true },
-      {
-        "type": "flex",
+      { "type": "flex",
         "flex-direction": "row",
         "items": [
           { "key": "address.city", "flex": "3 3 150px",
@@ -53,10 +51,8 @@
             "notitle": true, "placeholder": "Zip Code" }
         ]
       },
-      {
-        "key": "phone_numbers",
-        "type": "flex",
-        "flex-direction": "column",
+      { "key": "phone_numbers",
+        "type": "array",
         "items": [ {
           "type": "flex",
           "flex-direction": "row",

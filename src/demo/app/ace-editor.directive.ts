@@ -3,8 +3,7 @@ import {
 } from '@angular/core';
 
 import 'brace';
-import 'brace/theme/chrome';
-import 'brace/mode/javascript';
+import 'brace/theme/sqlserver';
 import 'brace/mode/json';
 
 declare var ace: any;
@@ -13,10 +12,14 @@ declare var ace: any;
   selector: '[ace-editor]'
 })
 export class AceEditorDirective {
-  _options: any = {};
+  _options: any = {
+    basePath: '/node_modules/brace',
+  };
+  _highlightActiveLine: boolean = false;
+  _showGutter: boolean = false;
   _readOnly: boolean = false;
-  _theme: string = 'chrome';
-  _mode: string = 'javascript';
+  _theme: string = 'sqlserver';
+  _mode: string = 'json';
   _autoUpdateContent: boolean = true;
   editor: any;
   oldText: any;
@@ -35,6 +38,8 @@ export class AceEditorDirective {
     this.editor.setOptions(this._options);
     this.editor.setTheme(`ace/theme/${this._theme}`);
     this.editor.getSession().setMode(`ace/mode/${this._mode}`);
+    this.editor.setHighlightActiveLine(this._highlightActiveLine);
+    this.editor.renderer.setShowGutter(this._showGutter);
     this.editor.setReadOnly(this._readOnly);
     this.editor.$blockScrolling = Infinity;
   }

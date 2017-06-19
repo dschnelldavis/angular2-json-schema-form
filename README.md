@@ -199,7 +199,7 @@ After displaying a form in this mode, you can also use the `formSchema` and `for
 
 #### Compatibility modes
 
-If you have previously used another JSON form creation library—Angular Schema Form (for AngularJS), JSON Form (for jQuery), or React JSON Schema Form (for React, obviously)—in order to make the transition easier, Angular JSON Schema Form will recognize the input names and custom input objects used by those libraries, and will automatically work with JSON Schemas in [version 4](http://json-schema.org/draft-03/schema), [version 3](http://json-schema.org/draft-03/schema), or the [truncated version 3 format supported by JSON Form](https://github.com/joshfire/jsonform/wiki#schema-shortcut). So the following will all work:
+If you have previously used another JSON form creation library—Angular Schema Form (for AngularJS), React JSON Schema Form, or JSON Form (for jQuery)—in order to make the transition easier, Angular JSON Schema Form will recognize the input names and custom input objects used by those libraries. It should automatically work with JSON Schemas in [version 6](http://json-schema.org/draft-06/schema), [version 4](http://json-schema.org/draft-04/schema), [version 3](http://json-schema.org/draft-03/schema), or the [truncated version 3 format supported by JSON Form](https://github.com/joshfire/jsonform/wiki#schema-shortcut). So the following will all work:
 
 Angular Schema Form compatibility:
 ```html
@@ -291,7 +291,7 @@ To see many examples of widgets, explore the source code, or call `getAllWidgets
 
 ### Changing or adding frameworks
 
-To change the active framework, either use the `framework` input of the `<json-schema-form>` tag, or load the `FrameworkLibraryService` and call `setFramework(yourCustomFramework)`, with either the name of an available framework (by default 'no-framework', 'bootstrap-3' or 'material-design'), or with your own custom framework object in the following format:
+To change the active framework, either use the `framework` input of the `<json-schema-form>` tag, or load the `FrameworkLibraryService` and call `setFramework(yourCustomFramework)`, with either the name of an available framework (by default 'material-design', 'bootstrap-3' or 'no-framework'), or with your own custom framework object in the following format:
 
 ```javascript
 import { YourFrameworkComponent } from './your-framework.component';
