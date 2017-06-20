@@ -30,9 +30,7 @@ import { AddReferenceComponent }            from './src/widget-library/add-refer
 import { ButtonComponent }                  from './src/widget-library/button.component';
 import { CheckboxComponent }                from './src/widget-library/checkbox.component';
 import { CheckboxesComponent }              from './src/widget-library/checkboxes.component';
-import { FieldsetComponent }                from './src/widget-library/fieldset.component';
 import { FileComponent }                    from './src/widget-library/file.component';
-import { FlexComponent }                    from './src/widget-library/flex.component';
 import { HiddenComponent }                  from './src/widget-library/hidden.component';
 import { InputComponent }                   from './src/widget-library/input.component';
 import { MessageComponent }                 from './src/widget-library/message.component';
@@ -53,6 +51,8 @@ import { OrderableDirective }               from './src/widget-library/orderable
 import { WidgetLibraryModule }              from './src/widget-library/widget-library.module';
 import { WidgetLibraryService }             from './src/widget-library/widget-library.service';
 
+import { FlexLayoutRootComponent }          from './src/framework-library/material-design-framework/flex-layout-root.component';
+import { FlexLayoutSectionComponent }       from './src/framework-library/material-design-framework/flex-layout-section.component';
 import { MaterialAddReferenceComponent }    from './src/framework-library/material-design-framework/material-add-reference.component';
 import { MaterialButtonComponent }          from './src/framework-library/material-design-framework/material-button.component';
 import { MaterialButtonGroupComponent }     from './src/framework-library/material-design-framework/material-button-group.component';

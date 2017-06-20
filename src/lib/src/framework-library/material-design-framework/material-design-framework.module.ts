@@ -1,6 +1,7 @@
 import { NgModule }                         from '@angular/core';
 import { CommonModule }                     from '@angular/common';
 import { BrowserAnimationsModule }          from '@angular/platform-browser/animations';
+import { FlexLayoutModule }                 from '@angular/flex-layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
   MaterialModule, MdDatepickerModule, MdNativeDateModule
@@ -13,8 +14,9 @@ import { MATERIAL_DESIGN_COMPONENTS }       from './index';
 
 @NgModule({
   imports: [
-    CommonModule, BrowserAnimationsModule, FormsModule, ReactiveFormsModule,
-    MaterialModule, MdDatepickerModule, MdNativeDateModule, WidgetLibraryModule
+    CommonModule, BrowserAnimationsModule, FlexLayoutModule,
+    FormsModule, ReactiveFormsModule, MaterialModule,
+    MdDatepickerModule, MdNativeDateModule, WidgetLibraryModule
   ],
   declarations:    [ ...MATERIAL_DESIGN_COMPONENTS ],
   exports:         [ ...MATERIAL_DESIGN_COMPONENTS ],

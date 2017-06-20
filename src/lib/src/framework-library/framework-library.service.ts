@@ -7,6 +7,8 @@ import { NoFrameworkComponent }             from './no-framework.component';
 
 // Material Design Framework
 // https://github.com/angular/material2
+import { FlexLayoutRootComponent }          from './material-design-framework/flex-layout-root.component';
+import { FlexLayoutSectionComponent }       from './material-design-framework/flex-layout-section.component';
 import { MaterialAddReferenceComponent }    from './material-design-framework/material-add-reference.component';
 import { MaterialButtonComponent }          from './material-design-framework/material-button.component';
 import { MaterialButtonGroupComponent }     from './material-design-framework/material-button-group.component';
@@ -62,6 +64,8 @@ export class FrameworkLibraryService {
       framework: MaterialDesignFrameworkComponent,
       widgets: {
         '$ref':         MaterialAddReferenceComponent,
+        'root':         FlexLayoutRootComponent,
+        'section':      FlexLayoutSectionComponent,
         'number':       MaterialNumberComponent,
         'slider':       MaterialSliderComponent,
         'text':         MaterialInputComponent,

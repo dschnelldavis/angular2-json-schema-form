@@ -30,40 +30,38 @@
       }
     }
   },
-  "layout": [ {
-    "type": "flex",
-    "flex-direction": "column",
-    "items": [
-      { "type": "flex",
-        "flex-flow": "row wrap",
-        "items": [ "first_name", "last_name" ]
-      },
-      { "key": "address.street_1", "title": "Address", "placeholder": "Street" },
-      { "key": "address.street_2", "notitle": true },
-      { "type": "flex",
+  "layout": [
+    { "type": "flex",
+      "flex-flow": "row wrap",
+      "items": [ "first_name", "last_name" ]
+    },
+    { "key": "address.street_1", "title": "Address", "placeholder": "Street" },
+    { "key": "address.street_2", "notitle": true },
+    { "type": "div",
+      "display": "flex",
+      "flex-direction": "row",
+      "items": [
+        { "key": "address.city", "flex": "3 3 150px",
+          "notitle": true, "placeholder": "City" },
+        { "key": "address.state", "flex": "1 1 50px",
+          "notitle": true, "placeholder": "State" },
+        { "key": "address.zip_code", "flex": "2 2 100px",
+          "notitle": true, "placeholder": "Zip Code" }
+      ]
+    },
+    { "key": "phone_numbers",
+      "type": "array",
+      "items": [ {
+        "type": "div",
+        "displayFlex": true,
         "flex-direction": "row",
         "items": [
-          { "key": "address.city", "flex": "3 3 150px",
-            "notitle": true, "placeholder": "City" },
-          { "key": "address.state", "flex": "1 1 50px",
-            "notitle": true, "placeholder": "State" },
-          { "key": "address.zip_code", "flex": "2 2 100px",
-            "notitle": true, "placeholder": "Zip Code" }
+          { "key": "phone_numbers[].type", "flex": "1 1 50px", "notitle": true, "required": true },
+          { "key": "phone_numbers[].number", "flex": "4 4 200px", "notitle": true }
         ]
-      },
-      { "key": "phone_numbers",
-        "type": "array",
-        "items": [ {
-          "type": "flex",
-          "flex-direction": "row",
-          "items": [
-            { "key": "phone_numbers[].type", "flex": "1 1 50px", "notitle": true, "required": true },
-            { "key": "phone_numbers[].number", "flex": "4 4 200px", "notitle": true }
-          ]
-        } ]
-      }
-    ]
-  } ],
+      } ]
+    }
+  ],
   "data": {
     "first_name": "Jane",
     "last_name": "Doe",

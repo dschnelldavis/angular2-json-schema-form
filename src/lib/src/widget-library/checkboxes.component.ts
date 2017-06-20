@@ -11,12 +11,32 @@ import { buildFormGroup, buildTitleMap, JsonPointer } from '../shared';
       [class]="options?.labelHtmlClass"
       [style.display]="options?.notitle ? 'none' : ''"
       [innerHTML]="options?.title"></label>
-    <div [ngSwitch]="layoutOrientation">
 
-      <!-- 'horizontal' = checkboxes-inline or checkboxbuttons -->
-      <div *ngSwitchCase="'horizontal'"
-        [class]="options?.htmlClass">
-        <label *ngFor="let checkboxItem of checkboxList"
+    <!-- 'horizontal' = checkboxes-inline or checkboxbuttons -->
+    <div *ngIf="layoutOrientation === 'horizontal'" [class]="options?.htmlClass">
+      <label *ngFor="let checkboxItem of checkboxList"
+        [attr.for]="'control' + layoutNode?._id + '/' + checkboxItem.value"
+        [class]="options?.itemLabelHtmlClass + (checkboxItem.checked ?
+          (' ' + options?.activeClass + ' ' + options?.style?.selected) :
+          (' ' + options?.style?.unselected))">
+        <input type="checkbox"
+          [attr.required]="options?.required"
+          [checked]="checkboxItem.checked"
+          [class]="options?.fieldHtmlClass"
+          [disabled]="controlDisabled"
+          [id]="'control' + layoutNode?._id + '/' + checkboxItem.value"
+          [name]="formControlName"
+          [readonly]="options?.readonly ? 'readonly' : null"
+          [value]="checkboxItem.value"
+          (change)="updateValue($event)">
+        <span [innerHTML]="checkboxItem.name"></span>
+      </label>
+    </div>
+
+    <!-- 'vertical' = regular checkboxes -->
+    <div *ngIf="layoutOrientation === 'horizontal'">
+      <div *ngFor="let checkboxItem of checkboxList" [class]="options?.htmlClass">
+        <label
           [attr.for]="'control' + layoutNode?._id + '/' + checkboxItem.value"
           [class]="options?.itemLabelHtmlClass + (checkboxItem.checked ?
             (' ' + options?.activeClass + ' ' + options?.style?.selected) :
@@ -26,39 +46,14 @@ import { buildFormGroup, buildTitleMap, JsonPointer } from '../shared';
             [checked]="checkboxItem.checked"
             [class]="options?.fieldHtmlClass"
             [disabled]="controlDisabled"
-            [id]="'control' + layoutNode?._id + '/' + checkboxItem.value"
-            [name]="formControlName"
+            [id]="options?.name + '/' + checkboxItem.value"
+            [name]="options?.name"
             [readonly]="options?.readonly ? 'readonly' : null"
             [value]="checkboxItem.value"
             (change)="updateValue($event)">
-          <span [innerHTML]="checkboxItem.name"></span>
+          <span [innerHTML]="checkboxItem?.name"></span>
         </label>
       </div>
-
-      <!-- 'vertical' = regular checkboxes -->
-      <div *ngSwitchDefault>
-        <div *ngFor="let checkboxItem of checkboxList"
-          [class]="options?.htmlClass">
-          <label
-            [attr.for]="'control' + layoutNode?._id + '/' + checkboxItem.value"
-            [class]="options?.itemLabelHtmlClass + (checkboxItem.checked ?
-              (' ' + options?.activeClass + ' ' + options?.style?.selected) :
-              (' ' + options?.style?.unselected))">
-            <input type="checkbox"
-              [attr.required]="options?.required"
-              [checked]="checkboxItem.checked"
-              [class]="options?.fieldHtmlClass"
-              [disabled]="controlDisabled"
-              [id]="options?.name + '/' + checkboxItem.value"
-              [name]="options?.name"
-              [readonly]="options?.readonly ? 'readonly' : null"
-              [value]="checkboxItem.value"
-              (change)="updateValue($event)">
-            <span [innerHTML]="checkboxItem?.name"></span>
-          </label>
-        </div>
-      </div>
-
     </div>`,
 })
 export class CheckboxesComponent implements OnInit {

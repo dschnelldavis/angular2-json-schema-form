@@ -1,3 +1,5 @@
+import { FlexLayoutRootComponent }          from './flex-layout-root.component';
+import { FlexLayoutSectionComponent }       from './flex-layout-section.component';
 import { MaterialAddReferenceComponent }    from './material-add-reference.component';
 import { MaterialButtonComponent }          from './material-button.component';
 import { MaterialButtonGroupComponent }     from './material-button-group.component';
@@ -17,7 +19,7 @@ import { MaterialTextareaComponent }        from './material-textarea.component'
 import { MaterialDesignFrameworkComponent } from './material-design-framework.component';
 
 export const MATERIAL_DESIGN_COMPONENTS = [
-  MaterialAddReferenceComponent, MaterialButtonComponent,
+  FlexLayoutRootComponent, FlexLayoutSectionComponent, MaterialAddReferenceComponent, MaterialButtonComponent,
   MaterialButtonGroupComponent, MaterialCardComponent,
   MaterialCheckboxComponent, MaterialCheckboxesComponent,
   MaterialDatepickerComponent, MaterialFileComponent,
@@ -27,6 +29,8 @@ export const MATERIAL_DESIGN_COMPONENTS = [
   MaterialTextareaComponent, MaterialDesignFrameworkComponent
 ];
 
+export { FlexLayoutRootComponent }          from './flex-layout-root.component';
+export { FlexLayoutSectionComponent }       from './flex-layout-section.component';
 export { MaterialAddReferenceComponent }    from './material-add-reference.component';
 export { MaterialButtonComponent }          from './material-button.component';
 export { MaterialButtonGroupComponent }     from './material-button-group.component';

@@ -1,9 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 
-import { JsonSchemaFormService } from '../json-schema-form.service';
-
 @Component({
-  selector: 'section-widget',
+  selector: 'flex-layout-section-widget',
   template: `
     <div *ngIf="containerType === 'div'"
       [class]="options?.htmlClass"
@@ -26,7 +24,12 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
           [style.flex-wrap]="getFlexAttribute('flex-wrap')"
           [style.justify-content]="getFlexAttribute('justify-content')"
           [style.align-items]="getFlexAttribute('align-items')"
-          [style.align-content]="getFlexAttribute('align-content')"></root-widget>
+          [style.align-content]="getFlexAttribute('align-content')"
+          [fxLayout]="options.fxLayout"
+          [fxLayoutWrap]="options.fxLayoutWrap"
+          [fxLayoutGap]="options.fxLayoutGap"
+          [fxLayoutAlign]="options.fxLayoutAlign"
+          [attr.fxFlexFill]="options.fxLayoutAlign"></root-widget>
 
     </div>
 
@@ -52,7 +55,12 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
           [style.flex-wrap]="getFlexAttribute('flex-wrap')"
           [style.justify-content]="getFlexAttribute('justify-content')"
           [style.align-items]="getFlexAttribute('align-items')"
-          [style.align-content]="getFlexAttribute('align-content')"></root-widget>
+          [style.align-content]="getFlexAttribute('align-content')"
+          [fxLayout]="options.fxLayout"
+          [fxLayoutWrap]="options.fxLayoutWrap"
+          [fxLayoutGap]="options.fxLayoutGap"
+          [fxLayoutAlign]="options.fxLayoutAlign"
+          [attr.fxFlexFill]="options.fxLayoutAlign"></root-widget>
 
     </fieldset>`,
   styles: [`
@@ -60,7 +68,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
     .expanded > legend:before { content: '▼'; padding-right: .2em; }
   `],
 })
-export class SectionComponent implements OnInit {
+export class FlexLayoutSectionComponent implements OnInit {
   options: any;
   expanded: boolean = true;
   containerType: string;
@@ -68,10 +76,6 @@ export class SectionComponent implements OnInit {
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
-
-  constructor(
-    private jsf: JsonSchemaFormService
-  ) { }
 
   ngOnInit() {
     switch (this.layoutNode.type) {
@@ -96,7 +100,7 @@ export class SectionComponent implements OnInit {
   }
 
   // Set attributes for flexbox container
-  // (child attributes are set in root.component)
+  // (child attributes are set in flex-layout-root.component)
   getFlexAttribute(attribute: string) {
     const flexActive: boolean =
       this.layoutNode.type === 'flex' ||

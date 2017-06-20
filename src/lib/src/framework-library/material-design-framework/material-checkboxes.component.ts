@@ -14,7 +14,7 @@ import { buildFormGroup, buildTitleMap, JsonPointer } from '../../shared';
       [checked]="allChecked"
       [indeterminate]="someChecked"
       (change)="updateAllValues($event)">
-      <span [innerHTML]="options?.name"></span>
+      <span class="checkbox-name" [innerHTML]="options?.name"></span>
     </md-checkbox>
     <label *ngIf="options?.title"
       [class]="options?.labelHtmlClass"
@@ -29,20 +29,19 @@ import { buildFormGroup, buildTitleMap, JsonPointer } from '../../shared';
           [disabled]="controlDisabled || options?.readonly"
           [name]="checkboxItem?.name"
           (change)="updateValue($event)">
-          <span [innerHTML]="checkboxItem?.name"></span>
+          <span class="checkbox-name" [innerHTML]="checkboxItem?.name"></span>
         </md-checkbox>
       </li>
     </ul>`,
   styles: [`
-    .checkbox-list {
-      list-style-type: none;
-    }
+    .checkbox-list { list-style-type: none; }
     .horizontal-list > li {
       display: inline-block;
       margin-right: 10px;
       zoom: 1;
     }
-  `]
+    .checkbox-name { white-space: nowrap; }
+  `],
 })
 export class MaterialCheckboxesComponent implements OnInit {
   formControl: AbstractControl;

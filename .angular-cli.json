@@ -7,9 +7,7 @@
     {
       "root": "src/demo",
       "outDir": "dist/demo",
-      "assets": [
-        "assets"
-      ],
+      "assets": [ "assets", "favicon.ico" ],
       "index": "index.html",
       "main": "main.ts",
       "polyfills": "polyfills.ts",

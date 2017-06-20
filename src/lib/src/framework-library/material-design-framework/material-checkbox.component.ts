@@ -15,9 +15,11 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
       [checked]="controlValue"
       (change)="updateValue($event)">
       <span *ngIf="options?.title"
+        class="checkbox-name"
         [style.display]="options?.notitle ? 'none' : ''"
         [innerHTML]="options?.title"></span>
     </md-checkbox>`,
+  styles: [` .checkbox-name { white-space: nowrap; } `],
 })
 export class MaterialCheckboxComponent implements OnInit {
   formControl: AbstractControl;

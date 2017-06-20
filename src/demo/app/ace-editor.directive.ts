@@ -12,9 +12,7 @@ declare var ace: any;
   selector: '[ace-editor]'
 })
 export class AceEditorDirective {
-  _options: any = {
-    basePath: '/node_modules/brace',
-  };
+  _options: any = {};
   _highlightActiveLine: boolean = false;
   _showGutter: boolean = false;
   _readOnly: boolean = false;

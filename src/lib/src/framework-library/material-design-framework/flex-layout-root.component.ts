@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 
 @Component({
-  selector: 'root-widget',
+  selector: 'flex-layout-root-widget',
   template: `
     <div *ngFor="let layoutItem of layout; let i = index"
       [orderable]="isDraggable(layoutItem)"
@@ -13,7 +13,11 @@ import { Component, Input } from '@angular/core';
       [style.flex-shrink]="getFlexAttribute(layoutItem, 'flex-shrink')"
       [style.flex-basis]="getFlexAttribute(layoutItem, 'flex-basis')"
       [style.align-self]="layoutItem.options['align-self']"
-      [style.order]="layoutItem.options.order">
+      [style.order]="layoutItem.options.order"
+      [fxFlex]="layoutItem.options.fxFlex"
+      [fxFlexOrder]="layoutItem.options.fxFlexOrder"
+      [fxFlexOffset]="layoutItem.options.fxFlexOffset"
+      [fxFlexAlign]="layoutItem.options.fxFlexAlign">
 
       <select-framework-widget
         [formID]="formID"
@@ -44,7 +48,7 @@ import { Component, Input } from '@angular/core';
     }
   `],
 })
-export class RootComponent {
+export class FlexLayoutRootComponent {
   options: any;
   @Input() formID: number;
   @Input() dataIndex: number[];
@@ -59,7 +63,7 @@ export class RootComponent {
   }
 
   // Set attributes for flexbox child
-  // (container attributes are set in section.component)
+  // (container attributes are set in flex-layout-section.component)
   getFlexAttribute(node: any, attribute: string) {
     const index = ['flex-grow', 'flex-shrink', 'flex-basis'].indexOf(attribute);
     return (node.options.flex || '').split(/\s+/)[index] ||

@@ -4,9 +4,7 @@ import { AddReferenceComponent }    from './add-reference.component';
 import { ButtonComponent }          from './button.component';
 import { CheckboxComponent }        from './checkbox.component';
 import { CheckboxesComponent }      from './checkboxes.component';
-import { FieldsetComponent }        from './fieldset.component';
 import { FileComponent }            from './file.component';
-import { FlexComponent }            from './flex.component';
 import { HiddenComponent }          from './hidden.component';
 import { InputComponent }           from './input.component';
 import { MessageComponent }         from './message.component';
@@ -85,29 +83,30 @@ export class WidgetLibraryService {
   // HTML Layout widgets
     // 'label': automatically added to data widgets
     // 'legend': automatically added to fieldsets
-    'fieldset': FieldsetComponent, // A fieldset, with an optional legend
-    'flex': FlexComponent, // A flexbox container
+    'section': SectionComponent, // Just a div <div>
+    'div': 'section', // Still just a div <div>
+    'fieldset': 'section', // A fieldset, with an optional legend <fieldset>
+    'flex': 'section', // A flexbox container <div style="display: flex">
 
   // Non-HTML layout widgets
-    'array': 'fieldset', // A list you can add, remove and reorder
+    'array': 'section', // A list you can add, remove and reorder <fieldset>
     'tabarray': 'tabs', // A tabbed version of array
-    'tab': 'fieldset', // A tab group, similar to a fieldset or section
+    'tab': 'section', // A tab group, similar to a fieldset or section <fieldset>
     'tabs': TabsComponent, // A tabbed set of panels with different controls
-    'help': MessageComponent, // Insert arbitrary html
     'message': MessageComponent, // Insert arbitrary html
-    'msg': MessageComponent, // Insert arbitrary html
-    'html': MessageComponent, // Insert arbitrary html
+    'help': 'message', // Insert arbitrary html
+    'msg': 'message', // Insert arbitrary html
+    'html': 'message', // Insert arbitrary html
     'template': TemplateComponent, // Insert a custom Angular component
 
   // Widgets included for compatibility with JSON Form API
-    'advancedfieldset': 'fieldset', // Adds 'Advanced settings' title
-    'authfieldset': 'fieldset', // Adds 'Authentication settings' title
-    'optionfieldset': 'fieldset', // Option control, displays selected sub-item
-    'selectfieldset': 'fieldset', // Select control, displays selected sub-item
-    'section': SectionComponent, // Just a div
-    'conditional': 'section', // Identical to 'section' (depeciated)
-    'actions': 'section', // Horizontal button list, can only submit, uses buttons as items
-    'tagsinput': 'section', // For entering short text tags
+    'advancedfieldset': 'section', // Adds 'Advanced settings' title <fieldset>
+    'authfieldset': 'section', // Adds 'Authentication settings' title <fieldset>
+    'optionfieldset': 'section', // Option control, displays selected sub-item <fieldset>
+    'selectfieldset': 'section', // Select control, displays selected sub-item <fieldset>
+    'conditional': 'section', // Identical to 'section' (depeciated) <div>
+    'actions': 'section', // Horizontal button list, can only submit, uses buttons as items <div>
+    'tagsinput': 'section', // For entering short text tags <div>
     // See: http://ulion.github.io/jsonform/playground/?example=fields-checkboxbuttons
 
   // Widgets included for compatibility with React JSON Schema Form API
