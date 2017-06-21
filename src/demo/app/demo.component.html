@@ -72,9 +72,10 @@
     </md-menu>
   </div>
 </div>
-<div fxLayout="row" fxLayoutAlign="space-between start"
+<div fxLayout="row" fxLayoutAlign="space-around start" fxLayoutWrap
   fxLayout.lt-sm="column" fxLayoutAlign.lt-sm="flex-start center">
-  <md-card fxFlex="1 1 50%">
+
+  <md-card fxFlex="0 0 calc(50% - 12px)">
     <h4 class="defualt-cursor" (click)="toggleVisible('options')">
       {{visible.options ? '▼' : '▶'}} Selected Framework and Options
     </h4>
@@ -130,7 +131,8 @@
       (loading form specification...)
     </div>
   </md-card>
-  <md-card fxFlex="1 1 50%">
+
+  <md-card fxFlex="0 0 calc(50% - 12px)">
     <h4 class="defualt-cursor" (click)="toggleVisible('form')">
       {{visible.form ? '▼' : '▶'}} Generated Form
     </h4>

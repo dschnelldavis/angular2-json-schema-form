@@ -13,7 +13,7 @@ import { toTitleCase } from '../../shared';
       [layoutNode]="layoutNode"
       [dataIndex]="dataIndex"
       [layoutIndex]="layoutIndex"></select-widget-widget>
-  `
+  `,
 })
 export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
   controlInitialized: boolean = false;
@@ -133,7 +133,7 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
         case 'array':    case 'authfieldset':   case 'optionfieldset':
         case 'tab':      case 'selectfieldset': case 'advancedfieldset':
         case 'section':  case 'wizard':
-          this.controlType = 'fieldset';
+          this.controlType = 'section';
         break;
 
         case 'tabs': case 'tabarray':

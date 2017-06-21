@@ -59,6 +59,6 @@ export class CheckboxComponent implements OnInit {
   }
 
   get isChecked() {
-    return this.jsf.getControlValue(this);
+    return this.jsf.getControlValue(this) === this.trueValue;
   }
 }

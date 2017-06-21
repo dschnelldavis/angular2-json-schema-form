@@ -13,12 +13,16 @@ import { Component, Input, OnInit } from '@angular/core';
         [innerHTML]="options?.title"
         (click)="expand()"></label>
 
-        <root-widget *ngIf="expanded"
+        <flex-layout-root-widget
+          *ngIf="expanded"
           [formID]="formID"
           [layout]="layoutNode.items"
           [dataIndex]="dataIndex"
           [layoutIndex]="layoutIndex"
           [isOrderable]="options?.orderable"
+          [isFlexItem]="getFlexAttribute('is-flex')"
+          [class.form-flex-column]="getFlexAttribute('flex-direction') === 'column'"
+          [class.form-flex-row]="getFlexAttribute('flex-direction') === 'row'"
           [style.display]="getFlexAttribute('display')"
           [style.flex-direction]="getFlexAttribute('flex-direction')"
           [style.flex-wrap]="getFlexAttribute('flex-wrap')"
@@ -29,7 +33,7 @@ import { Component, Input, OnInit } from '@angular/core';
           [fxLayoutWrap]="options.fxLayoutWrap"
           [fxLayoutGap]="options.fxLayoutGap"
           [fxLayoutAlign]="options.fxLayoutAlign"
-          [attr.fxFlexFill]="options.fxLayoutAlign"></root-widget>
+          [attr.fxFlexFill]="options.fxLayoutAlign"></flex-layout-root-widget>
 
     </div>
 
@@ -44,12 +48,16 @@ import { Component, Input, OnInit } from '@angular/core';
         [innerHTML]="options?.title"
         (click)="expand()"></legend>
 
-        <root-widget *ngIf="expanded"
+        <flex-layout-root-widget
+          *ngIf="expanded"
           [formID]="formID"
           [layout]="layoutNode.items"
           [dataIndex]="dataIndex"
           [layoutIndex]="layoutIndex"
           [isOrderable]="options?.orderable"
+          [isFlexItem]="getFlexAttribute('is-flex')"
+          [class.form-flex-column]="getFlexAttribute('flex-direction') === 'column'"
+          [class.form-flex-row]="getFlexAttribute('flex-direction') === 'row'"
           [style.display]="getFlexAttribute('display')"
           [style.flex-direction]="getFlexAttribute('flex-direction')"
           [style.flex-wrap]="getFlexAttribute('flex-wrap')"
@@ -60,7 +68,7 @@ import { Component, Input, OnInit } from '@angular/core';
           [fxLayoutWrap]="options.fxLayoutWrap"
           [fxLayoutGap]="options.fxLayoutGap"
           [fxLayoutAlign]="options.fxLayoutAlign"
-          [attr.fxFlexFill]="options.fxLayoutAlign"></root-widget>
+          [attr.fxFlexFill]="options.fxLayoutAlign"></flex-layout-root-widget>
 
     </fieldset>`,
   styles: [`
@@ -108,6 +116,8 @@ export class FlexLayoutSectionComponent implements OnInit {
       this.options.display === 'flex';
     if (attribute !== 'flex' && !flexActive) { return null; }
     switch (attribute) {
+      case 'is-flex':
+        return flexActive;
       case 'display':
         return flexActive ? 'flex' : 'initial';
       case 'flex-direction': case 'flex-wrap':

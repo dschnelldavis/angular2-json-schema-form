@@ -12,7 +12,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
       [disabled]="controlDisabled || options?.readonly"
       [id]="'control' + layoutNode?._id"
       [name]="controlName"
-      [checked]="controlValue"
+      [checked]="isChecked"
       (change)="updateValue($event)">
       <span *ngIf="options?.title"
         class="checkbox-name"
@@ -43,11 +43,15 @@ export class MaterialCheckboxComponent implements OnInit {
     this.options = this.layoutNode.options;
     this.jsf.initializeControl(this);
     if (this.controlValue === null || this.controlValue === undefined) {
-      this.controlValue = this.options.title;
+      this.controlValue = false;
     }
   }
 
   updateValue(event) {
     this.jsf.updateValue(this, event.checked ? this.trueValue : this.falseValue);
+  }
+
+  get isChecked() {
+    return this.jsf.getControlValue(this) === this.trueValue;
   }
 }

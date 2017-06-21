@@ -21,6 +21,9 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
           [dataIndex]="dataIndex"
           [layoutIndex]="layoutIndex"
           [isOrderable]="options?.orderable"
+          [isFlexItem]="getFlexAttribute('is-flex')"
+          [class.form-flex-column]="getFlexAttribute('flex-direction') === 'column'"
+          [class.form-flex-row]="getFlexAttribute('flex-direction') === 'row'"
           [style.display]="getFlexAttribute('display')"
           [style.flex-direction]="getFlexAttribute('flex-direction')"
           [style.flex-wrap]="getFlexAttribute('flex-wrap')"
@@ -47,6 +50,9 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
           [dataIndex]="dataIndex"
           [layoutIndex]="layoutIndex"
           [isOrderable]="options?.orderable"
+          [isFlexItem]="getFlexAttribute('is-flex')"
+          [class.form-flex-column]="getFlexAttribute('flex-direction') === 'column'"
+          [class.form-flex-row]="getFlexAttribute('flex-direction') === 'row'"
           [style.display]="getFlexAttribute('display')"
           [style.flex-direction]="getFlexAttribute('flex-direction')"
           [style.flex-wrap]="getFlexAttribute('flex-wrap')"
@@ -104,6 +110,8 @@ export class SectionComponent implements OnInit {
       this.options.display === 'flex';
     if (attribute !== 'flex' && !flexActive) { return null; }
     switch (attribute) {
+      case 'is-flex':
+        return flexActive;
       case 'display':
         return flexActive ? 'flex' : 'initial';
       case 'flex-direction': case 'flex-wrap':

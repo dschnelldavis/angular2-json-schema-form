@@ -63,9 +63,9 @@ export class FrameworkLibraryService {
     'material-design': {
       framework: MaterialDesignFrameworkComponent,
       widgets: {
-        '$ref':         MaterialAddReferenceComponent,
         'root':         FlexLayoutRootComponent,
         'section':      FlexLayoutSectionComponent,
+        '$ref':         MaterialAddReferenceComponent,
         'number':       MaterialNumberComponent,
         'slider':       MaterialSliderComponent,
         'text':         MaterialInputComponent,

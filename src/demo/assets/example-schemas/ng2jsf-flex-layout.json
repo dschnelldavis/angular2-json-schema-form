@@ -33,6 +33,7 @@
   "layout": [
     { "type": "flex",
       "flex-flow": "row wrap",
+      "fxLayoutGap": "12px",
       "items": [ "first_name", "last_name" ]
     },
     { "key": "address.street_1", "title": "Address", "placeholder": "Street" },
@@ -40,6 +41,7 @@
     { "type": "div",
       "display": "flex",
       "flex-direction": "row",
+      "fxLayoutGap": "12px",
       "items": [
         { "key": "address.city", "flex": "3 3 150px",
           "notitle": true, "placeholder": "City" },
@@ -55,6 +57,7 @@
         "type": "div",
         "displayFlex": true,
         "flex-direction": "row",
+        "fxLayoutGap": "12px",
         "items": [
           { "key": "phone_numbers[].type", "flex": "1 1 50px", "notitle": true, "required": true },
           { "key": "phone_numbers[].number", "flex": "4 4 200px", "notitle": true }

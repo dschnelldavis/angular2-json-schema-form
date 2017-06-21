@@ -9,6 +9,7 @@ import { Component, Input } from '@angular/core';
       [dataIndex]="layoutItem?.arrayItem ? (dataIndex || []).concat(i) : (dataIndex || [])"
       [layoutIndex]="(layoutIndex || []).concat(i)"
       [layoutNode]="layoutItem"
+      [class.form-flex-item]="isFlexItem"
       [style.flex-grow]="getFlexAttribute(layoutItem, 'flex-grow')"
       [style.flex-shrink]="getFlexAttribute(layoutItem, 'flex-shrink')"
       [style.flex-basis]="getFlexAttribute(layoutItem, 'flex-basis')"
@@ -55,6 +56,7 @@ export class FlexLayoutRootComponent {
   @Input() layoutIndex: number[];
   @Input() layout: any[];
   @Input() isOrderable: boolean;
+  @Input() isFlexItem: boolean = false;
 
   isDraggable(node: any): boolean {
     return this.isOrderable !== false && node.type !== '$ref' &&
