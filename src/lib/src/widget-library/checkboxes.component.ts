@@ -34,7 +34,7 @@ import { buildFormGroup, buildTitleMap, JsonPointer } from '../shared';
     </div>
 
     <!-- 'vertical' = regular checkboxes -->
-    <div *ngIf="layoutOrientation === 'horizontal'">
+    <div *ngIf="layoutOrientation === 'vertical'">
       <div *ngFor="let checkboxItem of checkboxList" [class]="options?.htmlClass">
         <label
           [attr.for]="'control' + layoutNode?._id + '/' + checkboxItem.value"
