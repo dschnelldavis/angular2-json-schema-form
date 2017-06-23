@@ -330,7 +330,7 @@ export function getInputType(schema: any, layoutNode: any = null): string {
     }
     if (schemaType === 'boolean') { return 'checkbox'; }
     if (schemaType === 'object') {
-      if (hasOwn(schema, 'properties')) { return 'fieldset'; }
+      if (hasOwn(schema, 'properties')) { return 'section'; }
       if (hasOwn(schema, '$ref') ||
       JsonPointer.has(schema, '/additionalProperties/$ref')) { return '$ref'; }
       return null; // return 'textarea'; (?)

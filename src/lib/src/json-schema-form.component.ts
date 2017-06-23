@@ -3,6 +3,7 @@ import {
   OnChanges, OnInit,
 } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 import * as _ from 'lodash';
 
@@ -49,7 +50,13 @@ import { JsonPointer } from './shared/jsonpointer.functions';
 @Component({
   selector: 'json-schema-form',
   template: `
-    <form (ngSubmit)="submitForm()">
+    <div *ngFor="let stylesheet of stylesheets">
+      <link rel="stylesheet" [href]="stylesheet">
+    </div>
+    <div *ngFor="let script of scripts">
+      <script type="text/javascript" [src]="script"></script>
+    </div>
+    <form class="json-schema-form" (ngSubmit)="submitForm()">
       <root-widget [formID]="formID" [layout]="jsfObject.layout"></root-widget>
     </form>
     <div *ngIf="debug || jsfObject.globalOptions.debug">
@@ -98,17 +105,28 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
   constructor(
     private frameworkLibrary: FrameworkLibraryService,
     private widgetLibrary: WidgetLibraryService,
-    private jsf: JsonSchemaFormService
+    private jsf: JsonSchemaFormService,
+    private sanitizer: DomSanitizer
   ) {
     this.jsfObject = jsf;
   }
 
-  ngOnInit() {
-    this.initializeForm();
-  }
+  ngOnInit() { }
 
   ngOnChanges() {
     this.initializeForm();
+  }
+
+  get stylesheets(): SafeResourceUrl[] {
+    const load = this.sanitizer.bypassSecurityTrustResourceUrl;
+    return this.frameworkLibrary.getFrameworkStylesheets()
+      .map(stylesheet => load(stylesheet));
+  }
+
+  get scripts(): SafeResourceUrl[] {
+    const load = this.sanitizer.bypassSecurityTrustResourceUrl;
+    return this.frameworkLibrary.getFrameworkStylesheets()
+      .map(script => load(script));
   }
 
   /**

@@ -1,3 +1,4 @@
+// * { border: 1px solid red !important; }
 @import '~@angular/material/theming';
 @include mat-core();
 $demo-app-primary: mat-palette($mat-blue);
@@ -6,10 +7,8 @@ $demo-app-warn:    mat-palette($mat-red);
 $demo-app-theme: mat-light-theme($demo-app-primary, $demo-app-accent, $demo-app-warn);
 @include angular-material-theme($demo-app-theme);
 
-
+$font-family: 'Roboto', 'Noto', 'Helvetica Neue', sans-serif;
 $row-height: 56px;
-$font-size: 1.6rem;
-$line-height: 3.2rem;
 
 md-toolbar {
   &.mat-medium {
@@ -25,19 +24,18 @@ body {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  font-size: $font-size;
+  font-family: $font-family;
   height: 100%;
-  line-height: $line-height;
   margin: 0;
   padding: 0;
 }
 
 .demo-page-header {
   background-color: mat-color($demo-app-primary, lighter);
-  font-size: $font-size;
-  line-height: $line-height;
   margin-bottom: 12px;
   .header-content {
+    font-family: $font-family;
+    line-height: 1.4em;
     padding: 12px;
     .menu-label {
       margin-right: 12px;
@@ -64,8 +62,4 @@ body {
 
 .defualt-cursor:hover { cursor: default; }
 
-.mat-menu-panel { &.example-menu { max-width: 560px; } }
-
-.md-errors-spacer:empty { display: none; }
-
-md-select { margin: 24px 0 12px; }
+.check-row { margin-top: 8px; }

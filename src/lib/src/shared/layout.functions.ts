@@ -232,8 +232,8 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
                   (newNode.options.minItems || 0) <= newNode.items.length,
               },
               dataPointer: newNode.dataPointer + '/-',
-              type: 'fieldset',
-              widget: widgetLibrary.getWidget('fieldset'),
+              type: 'section',
+              widget: widgetLibrary.getWidget('section'),
             });
           }
         } else {
@@ -314,7 +314,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
         JsonPointer.get(jsf.layout, layoutPointer, 0, -2).type;
       if (!hasOwn(newNode, 'type')) {
         newNode.type =
-          inArray(parentType, ['tabs', 'tabarray']) ? 'tab' : 'fieldset';
+          inArray(parentType, ['tabs', 'tabarray']) ? 'tab' : 'array';
       }
       newNode.arrayItem = parentType === 'array';
       newNode.widget = widgetLibrary.getWidget(newNode.type);
@@ -390,17 +390,18 @@ export function buildLayoutFromSchema(
     newNode.options.title = toTitleCase(newNode.name.replace(/_/g, ' '));
   }
   if (newNode.dataType === 'object') {
-    let newFieldset: any[] = [];
-    let newKeys: string[] = [];
+    let newSection: any[] = [];
+    let propertyKeys: string[] = [];
     if (isObject(schema.properties)) {
-      newKeys = isArray(schema.properties['ui:order']) ?
-        schema['properties']['ui:order'] : Object.keys(schema['properties']);
+      propertyKeys = schema['ui:order'] ||
+        schema.properties['ui:order'] ||
+        Object.keys(schema['properties']);
     } else if (hasOwn(schema, 'additionalProperties')) {
       return null;
       // TODO: Figure out what to do with additionalProperties
       // ... possibly provide a way to enter both key names and values?
     }
-    for (let key of newKeys) {
+    for (let key of propertyKeys) {
       if (hasOwn(schema.properties, key)) {
         let newLayoutPointer: string;
         if (newNode.layoutPointer === '' && !forRefLibrary) {
@@ -420,14 +421,14 @@ export function buildLayoutFromSchema(
             innerItem.options.required = true;
             jsf.fieldsRequired = true;
           }
-          newFieldset.push(innerItem);
+          newSection.push(innerItem);
         }
       }
     }
     // if (dataPointer === '' && !forRefLibrary) {
-    //   newNode = newFieldset;
+    //   newNode = newSection;
     // } else {
-      newNode.items = newFieldset;
+      newNode.items = newSection;
     // }
   } else if (newNode.dataType === 'array') {
     newNode.items = [];

@@ -157,9 +157,8 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
 
   setTitle(): string {
     switch (this.layoutNode.type) {
-      case 'array':    case 'button': case 'checkbox': case 'conditional':
-      case 'fieldset': case 'help':   case 'msg':      case 'message':
-      case 'section':  case 'submit': case 'tabarray': case '$ref':
+      case 'button':  case 'checkbox': case 'help':     case 'msg':
+      case 'message': case 'submit':   case 'tabarray': case '$ref':
         return null;
       case 'advancedfieldset':
         this.widgetOptions.expandable = true;

@@ -86,12 +86,13 @@ export class FlexLayoutSectionComponent implements OnInit {
   @Input() dataIndex: number[];
 
   ngOnInit() {
+console.log(this.layoutNode.type);
     switch (this.layoutNode.type) {
-      case 'fieldset': case 'array': case 'tab': case 'advancedfieldset':
-      case 'authfieldset': case 'optionfieldset': case 'selectfieldset':
+      case 'fieldset': case 'advancedfieldset': case 'authfieldset':
+      case 'optionfieldset': case 'selectfieldset':
         this.containerType = 'fieldset';
       break;
-      default: // 'div', 'flex', 'section', 'conditional', 'actions', 'tagsinput'
+      default: // 'div', 'section', 'flex', 'array', 'tab', 'conditional', 'actions', 'tagsinput'
         this.containerType = 'div';
       break;
     }

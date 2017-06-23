@@ -19,7 +19,7 @@
       <!-- http://github.com/joshfire/jsonform/wiki -->
       <a href="http://ulion.github.io/jsonform/playground/">JSON Form</a>.
     </span><br>
-    Choose an example, or create your own, and check out the generated form.<br>
+    Choose an example, or create your own, and check out the generated form.<br><br>
 
     <span class="menu-label">Current example:</span>
     <button md-raised-button
@@ -90,25 +90,25 @@
           {{frameworks[framework]}}
         </md-option>
       </md-select>
-      <div>
+      <div class="check-row">
         <md-checkbox color="primary" [(ngModel)]="jsonFormOptions.returnEmptyFields">
           Return empty fields?
         </md-checkbox>
         (default = true)
       </div>
-      <div>
+      <div class="check-row">
         <md-checkbox color="primary" [(ngModel)]="jsonFormOptions.addSubmit">
           Add submit button?
         </md-checkbox>
         (default = only add if no layout is defined)
       </div>
-      <div>
+      <div class="check-row">
         <md-checkbox color="primary" [(ngModel)]="jsonFormOptions.formDefaults.feedback">
           Show inline fedback?
         </md-checkbox>
         (default = false)
       </div>
-      <div>
+      <div class="check-row">
         <md-checkbox color="primary" [(ngModel)]="jsonFormOptions.debug">
           Show debuging information?
         </md-checkbox>

@@ -125,50 +125,6 @@ export class FrameworkLibraryService {
     return false;
   }
 
-  unloadFrameworkExternalAssets(): void {
-    for (let node of [...(this.scripts || []), ...(this.stylesheets || [])]) {
-      node.parentNode.removeChild(node);
-    }
-    this.scripts = [];
-    this.stylesheets = [];
-  }
-
-  loadFrameworkExternalAssets(framework: Framework): boolean {
-    this.unloadFrameworkExternalAssets();
-    if (framework.hasOwnProperty('scripts')) {
-      for (let script of framework.scripts) {
-        let newScript: HTMLScriptElement = document.createElement('script');
-        if (script.slice(0, 1) === '/' || script.slice(0, 2) === './'
-          || script.slice(0, 4) === 'http'
-        ) { // Attach URL to remote javascript
-          newScript.src = script;
-        } else { // Attach content as javascript
-          newScript.innerHTML = script;
-        }
-        this.scripts.push(newScript);
-        document.head.appendChild(newScript);
-      }
-    }
-    if (framework.hasOwnProperty('stylesheets')) {
-      for (let stylesheet of framework.stylesheets) {
-        let newStylesheet: HTMLStyleElement|HTMLLinkElement;
-        if (stylesheet.slice(0, 1) === '/' || stylesheet.slice(0, 2) === './'
-          || stylesheet.slice(0, 4) === 'http'
-        ) { // Attach URL to remote stylesheet
-          newStylesheet = document.createElement('link');
-          (<HTMLLinkElement>newStylesheet).rel = 'stylesheet';
-          (<HTMLLinkElement>newStylesheet).href = stylesheet;
-        } else { // Attach content as stylesheet
-          newStylesheet = document.createElement('style');
-          newStylesheet.innerHTML = stylesheet;
-        }
-        this.stylesheets.push(newStylesheet);
-        document.head.appendChild(newStylesheet);
-      }
-    }
-    return !!(framework.stylesheets || framework.scripts);
-  }
-
   public setLoadExternalAssets(loadExternalAssets: boolean = true): void {
     this.loadExternalAssets = !!loadExternalAssets;
   }
@@ -190,11 +146,6 @@ export class FrameworkLibraryService {
     }
     if (validNewFramework) {
       this.registerFrameworkWidgets(this.activeFramework);
-      if (loadExternalAssets) {
-        this.loadFrameworkExternalAssets(this.activeFramework);
-      } else {
-        this.unloadFrameworkExternalAssets();
-      }
     }
     return validNewFramework;
   }
@@ -213,11 +164,11 @@ export class FrameworkLibraryService {
     return this.activeFramework.widgets || {};
   }
 
-  public getFrameworkStylesheets(): string[] {
-    return this.activeFramework.stylesheets || [];
+  public getFrameworkStylesheets(load: boolean = this.loadExternalAssets): string[] {
+    return load ? this.activeFramework.stylesheets || [] : [];
   }
 
-  public getFrameworkScritps(): string[] {
-    return this.activeFramework.scripts || [];
+  public getFrameworkScripts(load: boolean = this.loadExternalAssets): string[] {
+    return load ? this.activeFramework.scripts || [] : [];
   }
 }

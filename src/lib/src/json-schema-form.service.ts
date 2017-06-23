@@ -194,13 +194,12 @@ export class JsonSchemaFormService {
 
   compileAjvSchema() {
     if (!this.validateFormData) {
-      // if 'ui:order' exists in properties, remove it before compiling with ajv
-      let testSchema = this.schema;
+      // if 'ui:order' exists in properties, move it to root before compiling with ajv
       if (Array.isArray(this.schema.properties['ui:order'])) {
-        testSchema = _.cloneDeep(this.schema);
-        delete testSchema.properties['ui:order'];
+        this.schema['ui:order'] = this.schema.properties['ui:order'];
+        delete this.schema.properties['ui:order'];
       }
-      this.validateFormData = this.ajv.compile(testSchema);
+      this.validateFormData = this.ajv.compile(this.schema);
     }
   }
 

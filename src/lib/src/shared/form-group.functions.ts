@@ -89,21 +89,20 @@ export function buildFormGroupTemplate(
     case 'FormGroup':
       controls = {};
       if (jsf.globalOptions.setSchemaDefaults) {
-        useValues = mergeValues(
-          JsonPointer.get(schema, '/properties/default'), useValues);
+        useValues = mergeValues(JsonPointer.get(schema, '/properties/default'), useValues);
       }
-      forEach(schema.properties, (item, key) => {
-        if (key !== 'ui:order') {
-          controls[key] = buildFormGroupTemplate(
-            jsf, JsonPointer.get(useValues, [<string>key]), mapArrays,
-            schemaPointer + '/properties/' + key,
-            dataPointer + '/' + key,
-            templatePointer + '/controls/' + key
-          );
-        }
-      });
-      jsf.globalOptions.fieldsRequired =
-        setRequiredFields(schema, controls);
+      let propertyKeys = schema['ui:order'] ||
+        schema.properties['ui:order'] ||
+        Object.keys(schema.properties);
+      for (let key of propertyKeys) {
+        controls[key] = buildFormGroupTemplate(
+          jsf, JsonPointer.get(useValues, [<string>key]), mapArrays,
+          schemaPointer + '/properties/' + key,
+          dataPointer + '/' + key,
+          templatePointer + '/controls/' + key
+        );
+      }
+      jsf.globalOptions.fieldsRequired = setRequiredFields(schema, controls);
       return { controlType, controls, validators };
     case 'FormArray':
       const minItems = schema.minItems || 0;
