@@ -250,7 +250,7 @@ export function buildFormGroup(template: any): AbstractControl {
       }
     });
     if (validatorFns.length &&
-      inArray(['FormGroup', 'FormArray'], template.controlType)
+      inArray(template.controlType, ['FormGroup', 'FormArray'])
     ) {
       validatorFn = validatorFns.length > 1 ?
         JsonValidators.compose(validatorFns) : validatorFns[0];
