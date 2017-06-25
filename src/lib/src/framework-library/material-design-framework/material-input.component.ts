@@ -52,7 +52,7 @@ export class MaterialInputComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.options = this.layoutNode.options;
+    this.options = this.layoutNode.options || {};
     this.jsf.initializeControl(this);
   }
 

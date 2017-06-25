@@ -47,7 +47,7 @@ export class SelectComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.options = this.layoutNode.options;
+    this.options = this.layoutNode.options || {};
     this.selectList = buildTitleMap(
       this.options.titleMap || this.options.enumNames,
       this.options.enum,

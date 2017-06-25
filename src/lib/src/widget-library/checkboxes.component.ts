@@ -75,7 +75,7 @@ export class CheckboxesComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.options = this.layoutNode.options;
+    this.options = this.layoutNode.options || {};
     this.layoutOrientation = (this.layoutNode.type === 'checkboxes-inline' ||
       this.layoutNode.type === 'checkboxbuttons') ? 'horizontal' : 'vertical';
     this.jsf.initializeControl(this);

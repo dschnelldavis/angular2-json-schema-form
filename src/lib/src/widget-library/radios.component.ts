@@ -85,7 +85,7 @@ export class RadiosComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.options = this.layoutNode.options;
+    this.options = this.layoutNode.options || {};
     if (this.layoutNode.type === 'radios-inline' ||
       this.layoutNode.type === 'radiobuttons'
     ) {

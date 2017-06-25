@@ -63,7 +63,7 @@ export class MaterialCheckboxesComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.options = this.layoutNode.options;
+    this.options = this.layoutNode.options || {};
     this.horizontalList = this.layoutNode.type === 'checkboxes-inline' ||
       this.layoutNode.type === 'checkboxbuttons';
     this.jsf.initializeControl(this);

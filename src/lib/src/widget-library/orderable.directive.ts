@@ -59,12 +59,12 @@ export class OrderableDirective implements OnInit {
       event.dataTransfer.effectAllowed = 'move';
       // Hack to bypass stupid HTML drag-and-drop dataTransfer protection
       // so drag source info will be available on dragenter
-      sessionStorage.setItem(
-        this.arrayPointer,
+      sessionStorage.setItem(this.arrayPointer,
         this.dataIndex[this.dataIndex.length - 1] + ''
       );
       event.dataTransfer.setData('text/plain',
-        this.dataIndex[this.dataIndex.length - 1] + this.arrayPointer);
+        this.dataIndex[this.dataIndex.length - 1] + this.arrayPointer
+      );
     }
   }
 
@@ -84,9 +84,9 @@ export class OrderableDirective implements OnInit {
   /**
    * Listeners for stationary items being dragged over:
    *
-   * dragenter: add 'drag-target-...' class to element
-   * dragleave: remove 'drag-target-...' class from element
-   * drop: remove 'drag-target-...' class from element, move dropped array item
+   * dragenter: add 'drag-target-...' classes to element
+   * dragleave: remove 'drag-target-...' classes from element
+   * drop: remove 'drag-target-...' classes from element, move dropped array item
    */
   @HostListener('dragenter', ['$event']) onDragEnter(event) {
     // Part 1 of a hack, inspired by Dragster, to simulate mouseover and mouseout

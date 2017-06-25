@@ -47,7 +47,7 @@ export class TabsComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.options = this.layoutNode.options;
+    this.options = this.layoutNode.options || {};
     this.itemCount = this.layoutNode.items.length - 1;
     this.updateControl();
   }

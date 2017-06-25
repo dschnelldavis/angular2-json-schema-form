@@ -30,7 +30,7 @@ export class AddReferenceComponent implements OnInit, DoCheck {
   ) { }
 
   ngOnInit() {
-    this.options = this.layoutNode.options;
+    this.options = this.layoutNode.options || {};
     this.updateControl();
   }
 

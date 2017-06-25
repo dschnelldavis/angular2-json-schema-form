@@ -50,7 +50,7 @@ export class MaterialButtonGroupComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.options = this.layoutNode.options;
+    this.options = this.layoutNode.options || {};
     if (this.layoutNode.type === 'radios-inline') {
       this.flexDirection = 'row';
     }

@@ -25,7 +25,7 @@ export class MessageComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.options = this.layoutNode.options;
+    this.options = this.layoutNode.options || {};
     this.message = this.options.help || this.options.helpvalue ||
       this.options.msg || this.options.message;
   }

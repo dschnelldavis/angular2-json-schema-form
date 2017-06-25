@@ -32,7 +32,7 @@ export class MaterialAddReferenceComponent implements OnInit, DoCheck {
   ) { }
 
   ngOnInit() {
-    this.options = this.layoutNode.options;
+    this.options = this.layoutNode.options || {};
     this.updateControl();
   }
 

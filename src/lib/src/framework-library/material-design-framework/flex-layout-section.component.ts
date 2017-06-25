@@ -96,7 +96,7 @@ console.log(this.layoutNode.type);
         this.containerType = 'div';
       break;
     }
-    this.options = this.layoutNode.options;
+    this.options = this.layoutNode.options || {};
     this.expanded = !this.options.expandable;
   }
 

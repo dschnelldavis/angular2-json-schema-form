@@ -13,8 +13,8 @@ import { Component, Input } from '@angular/core';
       [style.flex-grow]="getFlexAttribute(layoutItem, 'flex-grow')"
       [style.flex-shrink]="getFlexAttribute(layoutItem, 'flex-shrink')"
       [style.flex-basis]="getFlexAttribute(layoutItem, 'flex-basis')"
-      [style.align-self]="layoutItem.options['align-self']"
-      [style.order]="layoutItem.options.order">
+      [style.align-self]="layoutItem?.options?['align-self']"
+      [style.order]="layoutItem?.options?.order">
 
       <select-framework-widget
         [formID]="formID"
@@ -56,7 +56,7 @@ export class RootComponent {
 
   isDraggable(node: any): boolean {
     return this.isOrderable !== false && node.type !== '$ref' &&
-      node.arrayItem && node.options.arrayItemType === 'list';
+      node.arrayItem && (node.options || {}).arrayItemType === 'list';
       // && (this.layout[this.layout.length - 1].tupleItems || this.layout.length > 2);
   }
 
@@ -64,8 +64,8 @@ export class RootComponent {
   // (container attributes are set in section.component)
   getFlexAttribute(node: any, attribute: string) {
     const index = ['flex-grow', 'flex-shrink', 'flex-basis'].indexOf(attribute);
-    return (node.options.flex || '').split(/\s+/)[index] ||
-      node.options[attribute] || ['1', '1', 'auto'][index];
+    return ((node.options || {}).flex || '').split(/\s+/)[index] ||
+      (node.options || {})[attribute] || ['1', '1', 'auto'][index];
   }
 
   trackByItem(layoutItem: any) {

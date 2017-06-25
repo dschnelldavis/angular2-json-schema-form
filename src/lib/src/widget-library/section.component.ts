@@ -89,7 +89,7 @@ export class SectionComponent implements OnInit {
         this.containerType = 'div';
       break;
     }
-    this.options = this.layoutNode.options;
+    this.options = this.layoutNode.options || {};
     this.expanded = !this.options.expandable;
   }
 

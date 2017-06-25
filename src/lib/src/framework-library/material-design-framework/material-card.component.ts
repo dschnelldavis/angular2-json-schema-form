@@ -45,7 +45,7 @@ export class MaterialCardComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.options = this.layoutNode.options;
+    this.options = this.layoutNode.options || {};
     this.expanded = !this.options.expandable;
   }
 
