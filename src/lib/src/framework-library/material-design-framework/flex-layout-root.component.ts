@@ -13,12 +13,12 @@ import { Component, Input } from '@angular/core';
       [style.flex-grow]="getFlexAttribute(layoutItem, 'flex-grow')"
       [style.flex-shrink]="getFlexAttribute(layoutItem, 'flex-shrink')"
       [style.flex-basis]="getFlexAttribute(layoutItem, 'flex-basis')"
-      [style.align-self]="layoutItem?.options?['align-self']"
-      [style.order]="layoutItem?.options?.order"
-      [fxFlex]="layoutItem?.options?.fxFlex"
-      [fxFlexOrder]="layoutItem?.options?.fxFlexOrder"
-      [fxFlexOffset]="layoutItem?.options?.fxFlexOffset"
-      [fxFlexAlign]="layoutItem?.options?.fxFlexAlign">
+      [style.align-self]="(layoutItem.options || {})['align-self']"
+      [style.order]="(layoutItem.options || {}).order"
+      [fxFlex]="(layoutItem.options || {}).fxFlex"
+      [fxFlexOrder]="(layoutItem.options || {}).fxFlexOrder"
+      [fxFlexOffset]="(layoutItem.options || {}).fxFlexOffset"
+      [fxFlexAlign]="(layoutItem.options || {}).fxFlexAlign">
 
       <select-framework-widget
         [formID]="formID"
