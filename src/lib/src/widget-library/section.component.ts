@@ -22,6 +22,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
           [layoutIndex]="layoutIndex"
           [isOrderable]="options?.orderable"
           [isFlexItem]="getFlexAttribute('is-flex')"
+          [data]="data"
           [class.form-flex-column]="getFlexAttribute('flex-direction') === 'column'"
           [class.form-flex-row]="getFlexAttribute('flex-direction') === 'row'"
           [style.display]="getFlexAttribute('display')"
@@ -51,6 +52,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
           [layoutIndex]="layoutIndex"
           [isOrderable]="options?.orderable"
           [isFlexItem]="getFlexAttribute('is-flex')"
+          [data]="data"
           [class.form-flex-column]="getFlexAttribute('flex-direction') === 'column'"
           [class.form-flex-row]="getFlexAttribute('flex-direction') === 'row'"
           [style.display]="getFlexAttribute('display')"
@@ -74,6 +76,7 @@ export class SectionComponent implements OnInit {
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
+  @Input() data: any;
 
   constructor(
     private jsf: JsonSchemaFormService
