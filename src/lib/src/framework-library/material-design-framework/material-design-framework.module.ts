@@ -14,7 +14,7 @@ import { MATERIAL_DESIGN_COMPONENTS }       from './index';
 
 @NgModule({
   imports: [
-    CommonModule, BrowserAnimationsModule, FlexLayoutModule,
+    CommonModule, FlexLayoutModule,
     FormsModule, ReactiveFormsModule, MaterialModule,
     MdDatepickerModule, MdNativeDateModule, WidgetLibraryModule
   ],
