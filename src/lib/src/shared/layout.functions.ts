@@ -578,8 +578,8 @@ export function buildLayoutFromSchema(
   } else if (newNode.dataType === '$ref') {
     const schemaRef: string = JsonPointer.compile(schema.$ref);
     let buttonText: string = 'Add';
-    if (newNode.options.title) {
-      buttonText += ' ' + newNode.options.title;
+    if (newNode.options.add) {
+      buttonText = newNode.options.add;
     } else if (newNode.name && !/^\d+$/.test(newNode.name)) {
       buttonText += ' ' + toTitleCase(newNode.name.replace(/_/g, ' '));
 
