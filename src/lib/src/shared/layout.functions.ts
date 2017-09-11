@@ -506,7 +506,7 @@ export function buildLayoutFromSchema(
     } else { // 'items' is an object = list items only (no tuple items)
       newNode.tupleItems = false;
       newNode.listItems = schema.maxItems || true;
-      for (let i = 0, l = Math.max(templateArray.length, minItems, 1); i < l; i++) {
+      for (let i = 0, l = Math.max(templateArray.length, minItems, 0); i < l; i++) {
         newNode.items.push(buildLayoutFromSchema(
           jsf, widgetLibrary,
           newNode.layoutPointer + '/items/-',
