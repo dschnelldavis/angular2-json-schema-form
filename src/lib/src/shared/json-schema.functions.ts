@@ -16,6 +16,8 @@ import { JsonValidators } from './json.validators';
  *
  * getFromSchema:
  *
+ * cloneSchemaPointer
+ *
  * getSchemaReference:
  *
  * getInputType:
@@ -169,6 +171,85 @@ export function getFromSchema(
 }
 
 /**
+ * Keep the root reference to handle circular reference scenarios when calling cloneSchemaReference
+ */
+let rootReference;
+
+/**
+ * 'cloneSchemaReference' function
+ *
+ * Deeply clone the sub-section of a schema referred to
+ * by a JSON Pointer, compiling all child $ref nodes schemas.
+ *
+ * @param {string}schemaPointer  - The json pointer to clone
+ * @param {object} schema - The schema to return a sub-section from
+ * @param {string|object} reference - JSON Pointer or '$ref' object
+ * @param {object} schemaRefLibrary - Optional library of resolved refernces
+ * @param {object} recursiveRefMap - Optional map of recursive links
+ * @return {object} - The cloned and arranged schema sub-section
+ */
+export function cloneSchemaReference(schemaPointer: string, schema: any, reference: any, schemaRefLibrary: any, recursiveRefMap: Map<string, string>) {
+  let isRoot = false;
+
+  if (!rootReference) {
+    isRoot = true;
+    rootReference = '#' + reference;
+  }
+
+  let newSchema = _.cloneDeepWith(JsonPointer.get(schema, schemaPointer), (node: any) => {
+    let nodeSchema: any;
+
+    if (isObject(node)) {
+      if (Object.keys(node).length === 1 &&
+        hasOwn(node, 'allOf') && isArray(node.allOf)) {
+        // If newSchema is an allOf array, combine array elements
+        // TODO: Check and fix duplicate elements with different values
+        nodeSchema = node.allOf
+          .map(obj => {
+            node.allOf = null;
+            if (hasOwn(obj, "$ref"))
+              return getSchemaReference(schema, obj, schemaRefLibrary, recursiveRefMap);
+            return obj;
+          })
+          .reduce((schema1, schema2) => {
+            let yo = Object.assign(schema1, schema2);
+            return yo;
+          },
+            {});
+        node.allOf = null;
+      }
+      else if (hasOwn(node, "$ref") ) {
+        if (node.$ref === rootReference)
+        // If its the root, clone it without customization
+          nodeSchema = _.cloneDeep(node.$ref);
+        else
+        // It's not the root, we can compile the reference
+          nodeSchema = getSchemaReference(schema, node.$ref, schemaRefLibrary, recursiveRefMap);
+      }
+      else if (hasOwn(node, "type") &&
+        node.type === 'array' &&
+        hasOwn(node, "items") &&
+        hasOwn(node.items, "$ref") &&
+        node.items.$ref === rootReference) {
+        // If its an array of root, clone it without customization
+        nodeSchema = _.cloneDeep(node);
+      }
+
+      return nodeSchema;
+    }
+  });
+
+  if (isRoot)
+    rootReference = null;
+
+  if (schemaRefLibrary) {
+    schemaRefLibrary[schemaPointer] = _.cloneDeep(newSchema);
+  }
+
+  return newSchema;
+}
+
+/**
  * 'getSchemaReference' function
  *
  * Return the sub-section of a schema referred to
@@ -216,22 +297,7 @@ export function getSchemaReference(
   //    });
 
   } else {
-    newSchema = _.cloneDeep(JsonPointer.get(schema, schemaPointer));
-
-    // If newSchema is an allOf array, combine array elements
-    // TODO: Check and fix duplicate elements with different values
-    if (isObject(newSchema) && Object.keys(newSchema).length === 1 &&
-      hasOwn(newSchema, 'allOf') && isArray(newSchema.allOf)
-    ) {
-      newSchema = newSchema.allOf
-        .map(object => getSchemaReference(schema, object, schemaRefLibrary, recursiveRefMap))
-        .reduce((schema1, schema2) => Object.assign(schema1, schema2), { });
-    }
-
-    if (schemaRefLibrary) {
-      schemaRefLibrary[schemaPointer] = _.cloneDeep(newSchema);
-    }
-    return newSchema;
+    return cloneSchemaReference(schemaPointer, schema, reference, schemaRefLibrary, recursiveRefMap);
   }
 }
 
