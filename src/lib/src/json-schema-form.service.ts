@@ -19,7 +19,14 @@ import {
 } from './shared/form-group.functions';
 import { buildLayout } from './shared/layout.functions';
 
-export type CheckboxItem = { name: string, value: any, checked?: boolean };
+export interface CheckboxItem {
+  name: string,
+  value: any, checked?: boolean
+};
+
+export interface ErrorMessages {
+  [control_name: string]: { message: string, code: string }[]
+};
 
 @Injectable()
 export class JsonSchemaFormService {
@@ -136,18 +143,26 @@ export class JsonSchemaFormService {
   }
 
   /**
+   * 'buildRemoteError' function
+   *
    * Example errors:
    * {
-   *  'last_name': [{'message': 'First name must by start with capital letter.', 'code': 'capital_letter'}],
-   *  'email': [{'message': 'Email must by from example.com domain.', 'code': 'special_domain'}]
-   *  }
-   * @param errors
+   *   'last_name': [ {
+   *     'message': 'First name must by start with capital letter.',
+   *     'code': 'capital_letter'
+   *   }],
+   *   'email': [{
+   *     'message': 'Email must by from example.com domain.',
+   *     'code': 'special_domain'
+   *   }]
+   * }
+   * @param {ErrorMessages} errors
    */
-  buildRemoteError(errors: any) {
+  buildRemoteError(errors: ErrorMessages) {
     forEach(errors, (value, key) => {
       if (key in this.formGroup.controls) {
         for (const error of value) {
-          const err = {};
+          let err = {};
           err[error['code']] = error['message'];
           this.formGroup.get(key).setErrors(err);
         }

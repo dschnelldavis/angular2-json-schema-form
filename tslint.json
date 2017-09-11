@@ -55,9 +55,6 @@
     "whitespace": [ true, "check-branch", "check-decl",
       "check-operator", "check-separator", "check-type"
     ],
-
-    "directive-selector": [true, "attribute", "jsf", "camelCase"],
-    "component-selector": [true, "element", "jsf", "kebab-case"],
     "use-input-property-decorator": true,
     "use-output-property-decorator": true,
     "use-host-property-decorator": true,

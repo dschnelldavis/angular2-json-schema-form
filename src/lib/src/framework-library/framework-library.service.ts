@@ -1,34 +1,34 @@
-import { Inject, Injectable }               from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 
-import { WidgetLibraryService }             from '../widget-library/widget-library.service';
+import { WidgetLibraryService } from '../widget-library/widget-library.service';
 
 // No framework - unmodified HTML controls, with styles from layout only
-import { NoFrameworkComponent }             from './no-framework.component';
+import { NoFrameworkComponent } from './no-framework.component';
 
 // Material Design Framework
 // https://github.com/angular/material2
-import { FlexLayoutRootComponent }          from './material-design-framework/flex-layout-root.component';
-import { FlexLayoutSectionComponent }       from './material-design-framework/flex-layout-section.component';
-import { MaterialAddReferenceComponent }    from './material-design-framework/material-add-reference.component';
-import { MaterialButtonComponent }          from './material-design-framework/material-button.component';
-import { MaterialButtonGroupComponent }     from './material-design-framework/material-button-group.component';
-import { MaterialCardComponent }            from './material-design-framework/material-card.component';
-import { MaterialCheckboxComponent }        from './material-design-framework/material-checkbox.component';
-import { MaterialCheckboxesComponent }      from './material-design-framework/material-checkboxes.component';
-import { MaterialDatepickerComponent }      from './material-design-framework/material-datepicker.component';
-import { MaterialFileComponent }            from './material-design-framework/material-file.component';
-import { MaterialInputComponent }           from './material-design-framework/material-input.component';
-import { MaterialNumberComponent }          from './material-design-framework/material-number.component';
-import { MaterialRadiosComponent }          from './material-design-framework/material-radios.component';
-import { MaterialSelectComponent }          from './material-design-framework/material-select.component';
-import { MaterialSliderComponent }          from './material-design-framework/material-slider.component';
-import { MaterialTabsComponent }            from './material-design-framework/material-tabs.component';
-import { MaterialTextareaComponent }        from './material-design-framework/material-textarea.component';
+import { FlexLayoutRootComponent } from './material-design-framework/flex-layout-root.component';
+import { FlexLayoutSectionComponent } from './material-design-framework/flex-layout-section.component';
+import { MaterialAddReferenceComponent } from './material-design-framework/material-add-reference.component';
+import { MaterialButtonComponent } from './material-design-framework/material-button.component';
+import { MaterialButtonGroupComponent } from './material-design-framework/material-button-group.component';
+import { MaterialCardComponent } from './material-design-framework/material-card.component';
+import { MaterialCheckboxComponent } from './material-design-framework/material-checkbox.component';
+import { MaterialCheckboxesComponent } from './material-design-framework/material-checkboxes.component';
+import { MaterialDatepickerComponent } from './material-design-framework/material-datepicker.component';
+import { MaterialFileComponent } from './material-design-framework/material-file.component';
+import { MaterialInputComponent } from './material-design-framework/material-input.component';
+import { MaterialNumberComponent } from './material-design-framework/material-number.component';
+import { MaterialRadiosComponent } from './material-design-framework/material-radios.component';
+import { MaterialSelectComponent } from './material-design-framework/material-select.component';
+import { MaterialSliderComponent } from './material-design-framework/material-slider.component';
+import { MaterialTabsComponent } from './material-design-framework/material-tabs.component';
+import { MaterialTextareaComponent } from './material-design-framework/material-textarea.component';
 import { MaterialDesignFrameworkComponent } from './material-design-framework/material-design-framework.component';
 
 // Bootstrap 3 Framework
 // https://github.com/valor-software/ng2-bootstrap
-import { Bootstrap3FrameworkComponent }     from './bootstrap-3-framework.component';
+import { Bootstrap3FrameworkComponent } from './bootstrap-3-framework.component';
 
 // Suggested future frameworks:
 

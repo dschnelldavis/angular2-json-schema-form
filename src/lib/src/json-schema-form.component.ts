@@ -1,4 +1,7 @@
-import { ChangeDetectionStrategy, Component, DoCheck, EventEmitter, Input, Output, OnChanges, OnInit, } from '@angular/core';
+import {
+  ChangeDetectionStrategy, Component, DoCheck, EventEmitter, Input, Output,
+  OnChanges, OnInit
+} from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
@@ -99,10 +102,12 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
   @Output() formSchema = new EventEmitter<any>(); // Final schema used to create form
   @Output() formLayout = new EventEmitter<any>(); // Final layout used to create form
 
-  constructor(private frameworkLibrary: FrameworkLibraryService,
-              private widgetLibrary: WidgetLibraryService,
-              private jsf: JsonSchemaFormService,
-              private sanitizer: DomSanitizer) {
+  constructor(
+    private frameworkLibrary: FrameworkLibraryService,
+    private widgetLibrary: WidgetLibraryService,
+    private jsf: JsonSchemaFormService,
+    private sanitizer: DomSanitizer
+  ) {
     this.jsfObject = jsf;
   }
 

@@ -8,7 +8,6 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
   template: `
     <md-input-container
       [floatPlaceholder]="options?.floatPlaceholder || (options?.notitle ? 'never' : 'auto')"
-      [style.margin-top]="'-2px'"
       [style.width]="'100%'">
       <input mdInput #inputControl
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
@@ -58,7 +57,6 @@ export class MaterialInputComponent implements OnInit {
   }
 
   get controlValue(){
-    console.log(this.inputValue);
     return this.inputValue;
   }
 
@@ -70,7 +68,7 @@ export class MaterialInputComponent implements OnInit {
 
   public updateInputValue (value: string) {
     this.inputValue = value;
-    if (this.userInput){
+    if (this.userInput) {
       this.jsf.updateValue(this, value);
     }
   }

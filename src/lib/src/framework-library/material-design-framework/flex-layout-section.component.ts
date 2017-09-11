@@ -86,7 +86,6 @@ export class FlexLayoutSectionComponent implements OnInit {
   @Input() dataIndex: number[];
 
   ngOnInit() {
-console.log(this.layoutNode.type);
     switch (this.layoutNode.type) {
       case 'fieldset': case 'advancedfieldset': case 'authfieldset':
       case 'optionfieldset': case 'selectfieldset':
@@ -115,7 +114,7 @@ console.log(this.layoutNode.type);
       this.layoutNode.type === 'flex' ||
       !!this.options.displayFlex ||
       this.options.display === 'flex';
-    if (attribute !== 'flex' && !flexActive) { return null; }
+    // if (attribute !== 'flex' && !flexActive) { return null; }
     switch (attribute) {
       case 'is-flex':
         return flexActive;
@@ -124,7 +123,7 @@ console.log(this.layoutNode.type);
       case 'flex-direction': case 'flex-wrap':
         const index = ['flex-direction', 'flex-wrap'].indexOf(attribute);
         return (this.options['flex-flow'] || '').split(/\s+/)[index] ||
-          this.options[attribute] || ['row', 'nowrap'][index];
+          this.options[attribute] || ['column', 'nowrap'][index];
       case 'justify-content': case 'align-items': case 'align-content':
         return this.options[attribute];
     }

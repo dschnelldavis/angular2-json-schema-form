@@ -18,7 +18,6 @@ import { buildTitleMap } from '../../shared';
         [id]="'control' + layoutNode?._id"
         [placeholder]="options?.notitle ? options?.placeholder : options?.title"
         [required]="options?.required"
-        [style.margin-top]="'.9em'"
         [style.width]="'100%'"
         (onClose)="updateValue()">
         <md-option *ngFor="let selectItem of selectList"
