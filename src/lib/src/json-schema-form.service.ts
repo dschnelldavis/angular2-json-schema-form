@@ -9,7 +9,7 @@ import { convertJsonSchemaToDraft6 } from './shared/convert-json-schema.function
 import {
   hasValue, isArray, isDefined, isObject, isString
 } from './shared/validator.functions';
-import { hasOwn, parseText } from './shared/utility.functions';
+import { forEach, hasOwn, parseText } from './shared/utility.functions';
 import { JsonPointer } from './shared/jsonpointer.functions';
 import {
   buildSchemaFromData, buildSchemaFromLayout, getSchemaReference
@@ -133,6 +133,26 @@ export class JsonSchemaFormService {
   buildFormGroupTemplate(setValues: boolean = true) {
     this.formGroupTemplate =
       buildFormGroupTemplate(this, this.initialValues, setValues);
+  }
+
+  /**
+   * Example errors:
+   * {
+   *  'last_name': [{'message': 'First name must by start with capital letter.', 'code': 'capital_letter'}],
+   *  'email': [{'message': 'Email must by from example.com domain.', 'code': 'special_domain'}]
+   *  }
+   * @param errors
+   */
+  buildRemoteError(errors: any) {
+    forEach(errors, (value, key) => {
+      if (key in this.formGroup.controls) {
+        for (const error of value) {
+          const err = {};
+          err[error['code']] = error['message'];
+          this.formGroup.get(key).setErrors(err);
+        }
+      }
+    });
   }
 
   validateData(newValue: any, updateSubscriptions: boolean = true): void {
