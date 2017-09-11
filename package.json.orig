@@ -1,0 +1,152 @@
+{
+  "name": "angular2-json-schema-form",
+  "version": "0.4.0-alpha.19",
+  "author": {
+    "name": "David Schnell-Davis",
+    "email": "dschnelldavis@gmail.com"
+  },
+  "description": "Angular JSON Schema Form builder",
+  "keywords": [
+    "Angular",
+    "ng2",
+    "Angular2",
+    "Angular 2",
+    "ng4",
+    "Angular4",
+    "Angular 4",
+    "JSON Schema",
+    "form",
+    "forms",
+    "form builder"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dschnelldavis/angular2-json-schema-form"
+  },
+  "bugs": {
+    "url": "https://github.com/dschnelldavis/angular2-json-schema-form/issues"
+  },
+  "main": "./bundles/angular2-json-schema-form.umd.js",
+  "module": "./angular2-json-schema-form.es5.js",
+  "es2015": "./angular2-json-schema-form.js",
+  "typings": "./angular2-json-schema-form.d.ts",
+  "engines": {
+    "node": ">= 6.9.0",
+    "npm": ">= 3.0.0"
+  },
+  "scripts": {
+    "ng": "ng",
+    "serve": "ng serve",
+    "start": "ng serve",
+    "test": "ng test",
+    "lint": "ng lint",
+    "docs": "typedoc --options typedoc.json lib/src/json-schema-form.module.ts",
+    "clean": "rimraf out-ngc dist/*",
+    "prebuild": "npm run clean",
+    "build": "node build.js",
+    "postbuild": "rimraf out-ngc",
+    "prepublish": "npm run build",
+    "publish": "cd dist && npm publish",
+    "preng-build": "rimraf dist/*",
+    "ng-build": "ng build",
+    "predeploy": "npm run ng-build",
+    "deploy": "firebase deploy",
+    "old-build-demo": "tsc -p src/demo/",
+    "old-build-demo:watch": "tsc -p src/demo/ -w",
+    "old-prestart": "npm run build-demo",
+    "old-build-test": "tsc -p src/lib/tsconfig.spec.json",
+    "old-build-test:watch": "tsc -p src/lib/tsconfig.spec.json -w",
+    "old-pretest": "npm run build-test",
+    "old-preintegration": "npm run build && cd integration && npm run clean && npm install",
+    "old-integration": "npm run integration:aot && npm run integration:jit",
+    "old-integration:jit": "cd integration && npm run e2e",
+    "old-integration:aot": "cd integration && npm run e2e:aot",
+    "old-start": "concurrently \"npm run build-demo:watch\" \"npm run serve\"",
+    "old-serve": "lite-server -c=bs-config.json",
+    "old-test": "concurrently \"npm run build-test:watch\" \"karma start karma.conf.js\"",
+    "old-pretest:once": "npm run build-test",
+    "old-test:once": "karma start karma.conf.js --single-run",
+    "old-lint": "tslint ./src/**/*.ts -t verbose"
+  },
+  "dependencies": {
+    "ajv": "5.x",
+    "hammerjs": "2.x",
+    "lodash": "4.x"
+  },
+  "peerDependencies": {
+<<<<<<< HEAD
+    "@angular/common": "^4.0.0",
+    "@angular/core": "^4.0.0",
+    "@angular/forms": "^4.0.0",
+    "@angular/platform-browser": "^4.0.0",
+=======
+    "@angular/common": ">=2.0.0 <5.0.0",
+    "@angular/core": ">=2.0.0 <5.0.0",
+    "@angular/forms": ">=2.0.0 <5.0.0",
+    "@angular/platform-browser": ">=2.0.0 <5.0.0",
+>>>>>>> 4c6358218c5122b90f638fed83768ceebe2d3b76
+    "rxjs": "5.x"
+  },
+  "devDependencies": {
+    "@angular/animations": "^4.4.0-RC.0",
+<<<<<<< HEAD
+    "@angular/cdk": "^2.0.0-beta.10",
+=======
+>>>>>>> 4c6358218c5122b90f638fed83768ceebe2d3b76
+    "@angular/cli": "^1.0.0",
+    "@angular/common": "^4.4.0-RC.0",
+    "@angular/compiler": "^4.4.0-RC.0",
+    "@angular/compiler-cli": "^4.4.0-RC.0",
+    "@angular/core": "^4.4.0-RC.0",
+<<<<<<< HEAD
+    "@angular/flex-layout": "2.0.0-beta.9",
+    "@angular/forms": "^4.4.0-RC.0",
+    "@angular/http": "^4.4.0-RC.0",
+    "@angular/material": "^2.0.0-beta.10",
+    "@angular/platform-browser": "^4.4.0-RC.0",
+    "@angular/platform-browser-dynamic": "^4.4.0-RC.0",
+    "@angular/router": "^4.4.0-RC.0",
+    "@types/ace": "^0.0.35",
+=======
+    "@angular/flex-layout": "^2.0.0-beta.8",
+    "@angular/forms": "^4.4.0-RC.0",
+    "@angular/http": "^4.4.0-RC.0",
+    "@angular/material": "^2.0.0-beta.7",
+    "@angular/platform-browser": "^4.4.0-RC.0",
+    "@angular/platform-browser-dynamic": "^4.4.0-RC.0",
+    "@angular/router": "^4.4.0-RC.0",
+    "@types/ace": "^0.0.33",
+>>>>>>> 4c6358218c5122b90f638fed83768ceebe2d3b76
+    "@types/jasmine": "^2.5.38",
+    "@types/node": "^8.0.0",
+    "brace": "^0.10.0",
+    "camelcase": "^4.0.0",
+    "codelyzer": "^3.0.0",
+    "concurrently": "^3.2.0",
+    "core-js": "^2.4.1",
+    "glob": "^7.1.1",
+    "jasmine-core": "^2.5.2",
+    "jasmine-spec-reporter": "^4.1.0",
+    "karma": "^1.4.1",
+    "karma-chrome-launcher": "^2.0.0",
+    "karma-cli": "^1.0.1",
+    "karma-coverage-istanbul-reporter": "^1.2.1",
+    "karma-jasmine": "^1.1.0",
+    "karma-jasmine-html-reporter": "^0.2.2",
+    "protractor": "^5.1.0",
+    "rimraf": "^2.6.1",
+    "rollup": "^0.43.0",
+    "rollup-plugin-commonjs": "^8.0.2",
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "rollup-plugin-node-resolve-angular": "^2.0.3",
+    "rollup-plugin-sourcemaps": "^0.4.1",
+    "rollup-plugin-uglify": "^2.0.1",
+    "rxjs": "5.x",
+    "ts-node": "^3.0.0",
+    "tslint": "^5.2.0",
+    "typedoc": "^0.8.0",
+    "typescript": "^2.2.0",
+    "zone.js": "^0.8.4"
+  }
+}
