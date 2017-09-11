@@ -22,6 +22,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
           [layoutIndex]="layoutIndex"
           [isOrderable]="options?.orderable"
           [isFlexItem]="getFlexAttribute('is-flex')"
+          [data]="data"
           [class.form-flex-column]="getFlexAttribute('flex-direction') === 'column'"
           [class.form-flex-row]="getFlexAttribute('flex-direction') === 'row'"
           [style.display]="getFlexAttribute('display')"
@@ -51,6 +52,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
           [layoutIndex]="layoutIndex"
           [isOrderable]="options?.orderable"
           [isFlexItem]="getFlexAttribute('is-flex')"
+          [data]="data"
           [class.form-flex-column]="getFlexAttribute('flex-direction') === 'column'"
           [class.form-flex-row]="getFlexAttribute('flex-direction') === 'row'"
           [style.display]="getFlexAttribute('display')"
@@ -74,20 +76,21 @@ export class SectionComponent implements OnInit {
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
+  @Input() data: any;
 
   constructor(
-    private jsf: JsonSchemaFormService
+      private jsf: JsonSchemaFormService
   ) { }
 
   ngOnInit() {
     switch (this.layoutNode.type) {
       case 'fieldset': case 'array': case 'tab': case 'advancedfieldset':
       case 'authfieldset': case 'optionfieldset': case 'selectfieldset':
-        this.containerType = 'fieldset';
+      this.containerType = 'fieldset';
       break;
       default: // 'div', 'flex', 'section', 'conditional', 'actions', 'tagsinput'
         this.containerType = 'div';
-      break;
+        break;
     }
     this.options = this.layoutNode.options || {};
     this.expanded = !this.options.expandable;
@@ -105,9 +108,9 @@ export class SectionComponent implements OnInit {
   // (child attributes are set in root.component)
   getFlexAttribute(attribute: string) {
     const flexActive: boolean =
-      this.layoutNode.type === 'flex' ||
-      !!this.options.displayFlex ||
-      this.options.display === 'flex';
+        this.layoutNode.type === 'flex' ||
+        !!this.options.displayFlex ||
+        this.options.display === 'flex';
     if (attribute !== 'flex' && !flexActive) { return null; }
     switch (attribute) {
       case 'is-flex':
@@ -115,11 +118,11 @@ export class SectionComponent implements OnInit {
       case 'display':
         return flexActive ? 'flex' : 'initial';
       case 'flex-direction': case 'flex-wrap':
-        const index = ['flex-direction', 'flex-wrap'].indexOf(attribute);
-        return (this.options['flex-flow'] || '').split(/\s+/)[index] ||
+      const index = ['flex-direction', 'flex-wrap'].indexOf(attribute);
+      return (this.options['flex-flow'] || '').split(/\s+/)[index] ||
           this.options[attribute] || ['row', 'nowrap'][index];
       case 'justify-content': case 'align-items': case 'align-content':
-        return this.options[attribute];
+      return this.options[attribute];
     }
   }
 }

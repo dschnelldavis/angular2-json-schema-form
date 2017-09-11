@@ -15,12 +15,13 @@ export class SelectWidgetComponent implements OnChanges, OnInit {
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
+  @Input() data: any;
   @ViewChild('widgetContainer', { read: ViewContainerRef })
-    widgetContainer: ViewContainerRef;
+  widgetContainer: ViewContainerRef;
 
   constructor(
-    private componentFactory: ComponentFactoryResolver,
-    private jsf: JsonSchemaFormService
+      private componentFactory: ComponentFactoryResolver,
+      private jsf: JsonSchemaFormService
   ) { }
 
   ngOnInit() {
@@ -34,11 +35,11 @@ export class SelectWidgetComponent implements OnChanges, OnInit {
   updateComponent() {
     if (!this.newComponent && this.layoutNode.widget) {
       this.newComponent = this.widgetContainer.createComponent(
-        this.componentFactory.resolveComponentFactory(this.layoutNode.widget)
+          this.componentFactory.resolveComponentFactory(this.layoutNode.widget)
       );
     }
     if (this.newComponent) {
-      for (let input of ['formID', 'layoutNode', 'layoutIndex', 'dataIndex']) {
+      for (let input of ['formID', 'layoutNode', 'layoutIndex', 'dataIndex', 'data']) {
         this.newComponent.instance[input] = this[input];
       }
     }

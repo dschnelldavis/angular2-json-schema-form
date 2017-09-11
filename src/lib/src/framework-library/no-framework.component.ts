@@ -9,13 +9,15 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
       [formID]="formID"
       [layoutNode]="layoutNode"
       [dataIndex]="dataIndex"
-      [layoutIndex]="layoutIndex"></select-widget-widget>`,
+      [layoutIndex]="layoutIndex"
+      [data]="data"></select-widget-widget>`,
 })
 export class NoFrameworkComponent implements OnInit, OnChanges {
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
+  @Input() data: any;
 
   constructor(
     private changeDetector: ChangeDetectorRef,

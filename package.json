@@ -70,6 +70,8 @@
     "old-lint": "tslint ./src/**/*.ts -t verbose"
   },
   "dependencies": {
+    "@angular/cdk": "^2.0.0-beta.10",
+    "@angular/material": "^2.0.0-beta.10",
     "ajv": "5.x",
     "hammerjs": "2.x",
     "lodash": "4.x"

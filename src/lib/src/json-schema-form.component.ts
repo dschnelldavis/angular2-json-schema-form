@@ -57,7 +57,7 @@ import { JsonPointer } from './shared/jsonpointer.functions';
       <script type="text/javascript" [src]="script"></script>
     </div>
     <form class="json-schema-form" (ngSubmit)="submitForm()">
-      <root-widget [formID]="formID" [layout]="jsfObject.layout"></root-widget>
+      <root-widget [formID]="formID" [layout]="jsfObject.layout" [data]="jsfObject.data"></root-widget>
     </form>
     <div *ngIf="debug || jsfObject.globalOptions.debug">
       Debug output: <pre>{{debugOutput}}</pre>
