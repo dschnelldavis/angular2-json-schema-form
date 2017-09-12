@@ -29,8 +29,8 @@
     </button>
     <md-menu #exampleMenu="mdMenu" class="example-menu">
       <button md-menu-item class="mat-medium"
-        *ngFor="let example of examples.ng2jsf.schemas"
-        (click)="loadSelectedExample('ng2jsf', '', example.file, example.name)">
+        *ngFor="let example of examples['ng-jsf'].schemas"
+        (click)="loadSelectedExample('ng-jsf', '', example.file, example.name)">
         {{example.name}}
       </button>
       <button md-menu-item class="mat-medium"

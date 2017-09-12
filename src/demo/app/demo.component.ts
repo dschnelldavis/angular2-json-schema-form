@@ -31,9 +31,9 @@ export class DemoComponent implements OnInit {
     'bootstrap-3': 'Bootstrap 3 framework',
     'no-framework': 'No Framework (plain HTML controls)',
   };
-  selectedSet: string = 'ng2jsf';
+  selectedSet: string = 'ng-jsf';
   selectedSetName: string = '';
-  selectedExample: string = 'ng2jsf-flex-layout';
+  selectedExample: string = 'ng-jsf-flex-layout';
   selectedExampleName: string = 'Flexbox layout';
   selectedFramework: string = 'material-design';
   visible: { [item: string]: boolean } = {
@@ -79,10 +79,10 @@ export class DemoComponent implements OnInit {
         if (params['set']) {
           this.selectedSet = params['set'];
           this.selectedSetName = ({
-            ng2jsf: '',
-            asf: 'Angular Schema Form:',
-            rsf: 'React Schema Form:',
-            jsf: 'JSONForm:'
+            'ng-jsf': '',
+            'asf': 'Angular Schema Form:',
+            'rsf': 'React Schema Form:',
+            'jsf': 'JSONForm:'
           })[this.selectedSet];
         }
         if (params['example']) {
