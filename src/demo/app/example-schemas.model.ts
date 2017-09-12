@@ -2,13 +2,16 @@
 //
 // Angular JSON Schema Form examples ('ng-jsf-...') are original
 //
+// JSON Meta-Schemas ('json-schema-draft...') are from
+//   http://json-schema.org/specification-links.html
+//
 // Angular Schema Form (AngularJS) examples ('asf-...') are from
 //   http://schemaform.io/examples/bootstrap-example.html
 //
 // React JSON Schema Form examples ('rjsf-...') are from
 //   https://mozilla-services.github.io/react-jsonschema-form/
 //
-// JSONForm examples ('jsf-...') are from
+// JSONForm (jQuery) examples ('jsf-...') are from
 //   http://ulion.github.io/jsonform/playground/
 //
 //
@@ -19,11 +22,12 @@ export const Examples: any = {
     schemas: [
       { name: 'Flexbox layout',                  file: 'ng-jsf-flex-layout', },
       { name: 'Simple Array',                    file: 'ng-jsf-simple-array', },
+      { name: 'Deep References',                 file: 'ng-jsf-deep-ref', },
       { name: 'Data Only (no Schema or Layout)', file: 'ng-jsf-data-only', },
       // { name: 'Layout Only (no Schema or Data)', file: 'ng-jsf-layout-only', },
-      // { name: 'JSON Meta-Schema - Version 6',    file: 'ng-jsf-json-schema-draft06', },
-      { name: 'JSON Meta-Schema - Version 4',    file: 'ng-jsf-json-schema-draft04', },
-      { name: 'JSON Meta-Schema - Version 3',    file: 'ng-jsf-json-schema-draft03', },
+      // { name: 'JSON Meta-Schema - Version 6',    file: 'json-schema-draft06', },
+      { name: 'JSON Meta-Schema - Version 4',    file: 'json-schema-draft04', },
+      { name: 'JSON Meta-Schema - Version 3',    file: 'json-schema-draft03', },
     ]
   },
   'asf': {

@@ -19,7 +19,7 @@ import { getControl, inArray, isDefined } from '../../shared';
         [thumb-label]="true"
         [value]="controlValue"
         (change)="updateValue($event)"></md-slider>`,
-    styles: [`md-input-container { margin-top: 6px; }`],
+    styles: [`md-form-field { margin-top: 6px; }`],
 })
 export class MaterialSliderComponent implements OnInit {
   formControl: AbstractControl;

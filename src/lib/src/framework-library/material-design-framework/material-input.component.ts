@@ -6,7 +6,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
 @Component({
   selector: 'material-input-widget',
   template: `
-    <md-input-container
+    <md-form-field
       [floatPlaceholder]="options?.floatPlaceholder || (options?.notitle ? 'never' : 'auto')"
       [style.width]="'100%'">
       <input mdInput #inputControl
@@ -31,7 +31,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
         md-suffix>{{options?.fieldAddonRight}}</span>
       <md-hint *ngIf="options?.description && !options?.placeholder && formControl?.dirty"
         align="end">{{options?.description}}</md-hint>
-    </md-input-container>`,
+    </md-form-field>`,
 })
 export class MaterialInputComponent implements OnInit {
   formControl: AbstractControl;
