@@ -181,14 +181,17 @@ let rootReference;
  * Deeply clone the sub-section of a schema referred to
  * by a JSON Pointer, compiling all child $ref nodes schemas.
  *
- * @param {string}schemaPointer  - The json pointer to clone
+ * @param {string} schemaPointer  - The json pointer to clone
  * @param {object} schema - The schema to return a sub-section from
  * @param {string|object} reference - JSON Pointer or '$ref' object
  * @param {object} schemaRefLibrary - Optional library of resolved refernces
  * @param {object} recursiveRefMap - Optional map of recursive links
  * @return {object} - The cloned and arranged schema sub-section
  */
-export function cloneSchemaReference(schemaPointer: string, schema: any, reference: any, schemaRefLibrary: any, recursiveRefMap: Map<string, string>) {
+export function cloneSchemaReference(
+  schemaPointer: string, schema: any, reference: any,
+  schemaRefLibrary: any, recursiveRefMap: Map<string, string>
+) {
   let isRoot = false;
 
   if (!rootReference) {
@@ -202,34 +205,30 @@ export function cloneSchemaReference(schemaPointer: string, schema: any, referen
     if (isObject(node)) {
       if (Object.keys(node).length === 1 &&
         hasOwn(node, 'allOf') && isArray(node.allOf)) {
+
         // If newSchema is an allOf array, combine array elements
         // TODO: Check and fix duplicate elements with different values
         nodeSchema = node.allOf
-          .map(obj => {
-            node.allOf = null;
-            if (hasOwn(obj, "$ref"))
-              return getSchemaReference(schema, obj, schemaRefLibrary, recursiveRefMap);
-            return obj;
-          })
-          .reduce((schema1, schema2) => {
-            let yo = Object.assign(schema1, schema2);
-            return yo;
-          },
-            {});
+          .map(obj => hasOwn(obj, '$ref') ?
+            getSchemaReference(schema, obj, schemaRefLibrary, recursiveRefMap) :
+            obj
+          )
+          .reduce((schema1, schema2) => Object.assign(schema1, schema2), {});
         node.allOf = null;
-      }
-      else if (hasOwn(node, "$ref") ) {
-        if (node.$ref === rootReference)
+      } else if (hasOwn(node, '$ref') ) {
+
         // If its the root, clone it without customization
+        if (node.$ref === rootReference) {
           nodeSchema = _.cloneDeep(node.$ref);
-        else
-        // It's not the root, we can compile the reference
+
+        // It's not the root, compile the reference
+        } else {
           nodeSchema = getSchemaReference(schema, node.$ref, schemaRefLibrary, recursiveRefMap);
-      }
-      else if (hasOwn(node, "type") &&
+        }
+      } else if (hasOwn(node, 'type') &&
         node.type === 'array' &&
-        hasOwn(node, "items") &&
-        hasOwn(node.items, "$ref") &&
+        hasOwn(node, 'items') &&
+        hasOwn(node.items, '$ref') &&
         node.items.$ref === rootReference) {
         // If its an array of root, clone it without customization
         nodeSchema = _.cloneDeep(node);
@@ -239,8 +238,9 @@ export function cloneSchemaReference(schemaPointer: string, schema: any, referen
     }
   });
 
-  if (isRoot)
+  if (isRoot) {
     rootReference = null;
+  }
 
   if (schemaRefLibrary) {
     schemaRefLibrary[schemaPointer] = _.cloneDeep(newSchema);

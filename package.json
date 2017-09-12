@@ -1,6 +1,6 @@
 {
   "name": "angular2-json-schema-form",
-  "version": "0.4.0-alpha.19",
+  "version": "0.5.0-alpha.1",
   "author": {
     "name": "David Schnell-Davis",
     "email": "dschnelldavis@gmail.com"
@@ -8,12 +8,13 @@
   "description": "Angular JSON Schema Form builder",
   "keywords": [
     "Angular",
-    "ng2",
+    "ng",
     "Angular2",
     "Angular 2",
-    "ng4",
+    "ng2",
     "Angular4",
     "Angular 4",
+    "ng4",
     "JSON Schema",
     "form",
     "forms",
@@ -51,23 +52,7 @@
     "preng-build": "rimraf dist/*",
     "ng-build": "ng build",
     "predeploy": "npm run ng-build",
-    "deploy": "firebase deploy",
-    "old-build-demo": "tsc -p src/demo/",
-    "old-build-demo:watch": "tsc -p src/demo/ -w",
-    "old-prestart": "npm run build-demo",
-    "old-build-test": "tsc -p src/lib/tsconfig.spec.json",
-    "old-build-test:watch": "tsc -p src/lib/tsconfig.spec.json -w",
-    "old-pretest": "npm run build-test",
-    "old-preintegration": "npm run build && cd integration && npm run clean && npm install",
-    "old-integration": "npm run integration:aot && npm run integration:jit",
-    "old-integration:jit": "cd integration && npm run e2e",
-    "old-integration:aot": "cd integration && npm run e2e:aot",
-    "old-start": "concurrently \"npm run build-demo:watch\" \"npm run serve\"",
-    "old-serve": "lite-server -c=bs-config.json",
-    "old-test": "concurrently \"npm run build-test:watch\" \"karma start karma.conf.js\"",
-    "old-pretest:once": "npm run build-test",
-    "old-test:once": "karma start karma.conf.js --single-run",
-    "old-lint": "tslint ./src/**/*.ts -t verbose"
+    "deploy": "firebase deploy"
   },
   "dependencies": {
     "ajv": "5.x",
@@ -115,7 +100,7 @@
     "karma-jasmine-html-reporter": "^0.2.2",
     "protractor": "^5.1.0",
     "rimraf": "^2.6.1",
-    "rollup": "^0.43.0",
+    "rollup": "^0.49.0",
     "rollup-plugin-commonjs": "^8.0.2",
     "rollup-plugin-node-resolve": "^3.0.0",
     "rollup-plugin-node-resolve-angular": "^2.0.3",
