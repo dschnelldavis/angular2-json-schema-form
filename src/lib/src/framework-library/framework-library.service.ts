@@ -31,25 +31,24 @@ import { MaterialDesignFrameworkComponent } from './material-design-framework/ma
 import { Bootstrap3FrameworkComponent } from './bootstrap-3-framework.component';
 
 // Suggested future frameworks:
+// - Bootstrap 4:
+//   https://github.com/ng-bootstrap/ng-bootstrap
+//   http://v4-alpha.getbootstrap.com/components/forms/
+// - Foundation 6:
+//   https://github.com/zurb/foundation-sites
+// - Semantic UI:
+//   https://github.com/vladotesanovic/ngSemantic
 
-// Bootstrap 4:
-// https://github.com/ng-bootstrap/ng-bootstrap
-// http://v4-alpha.getbootstrap.com/components/forms/
-
-// Foundation 6:
-// https://github.com/zurb/foundation-sites
-
-// Semantic UI:
-// https://github.com/vladotesanovic/ngSemantic
-
-export type Framework = {
+export interface Framework {
   framework: any,
   widgets?: { [key: string]: any },
   stylesheets?: string[],
   scripts?: string[]
 };
 
-export type FrameworkLibrary = { [key: string]: Framework };
+export interface FrameworkLibrary {
+  [key: string]: Framework
+};
 
 @Injectable()
 export class FrameworkLibraryService {
@@ -132,7 +131,7 @@ export class FrameworkLibraryService {
   public setFramework(
     framework?: string|Framework, loadExternalAssets: boolean = this.loadExternalAssets
   ): boolean {
-    if (!framework) return false;
+    if (!framework) { return false; }
     let validNewFramework: boolean = false;
     if (!framework || framework === 'default') {
       this.activeFramework = this.frameworkLibrary[this.defaultFramework];
@@ -151,12 +150,12 @@ export class FrameworkLibraryService {
   }
 
   public hasFramework(type: string): boolean {
-    if (!type || typeof type !== 'string') return false;
+    if (!type || typeof type !== 'string') { return false; }
     return this.frameworkLibrary.hasOwnProperty(type);
   }
 
   public getFramework(): any {
-    if (!this.activeFramework) this.setFramework('default', true);
+    if (!this.activeFramework) { this.setFramework('default', true); }
     return this.activeFramework.framework;
   }
 

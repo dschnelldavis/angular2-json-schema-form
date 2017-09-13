@@ -39,7 +39,7 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges() {
-    if (!this.controlInitialized) this.initializeControl();
+    if (!this.controlInitialized) { this.initializeControl(); }
   }
 
   initializeControl() {
@@ -70,13 +70,13 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
           if (this.layoutNode.type === 'integer') {
             this.inputType = 'number'
           } else {
-            this.layoutNode.type =
-              this.layoutNode.type === 'updown'       ? 'number'         :
-              this.layoutNode.type === 'alt-date'     ? 'date'           :
-              this.layoutNode.type === 'datetime'     ? 'datetime-local' :
-              this.layoutNode.type === 'date-time'    ? 'datetime-local' :
-              this.layoutNode.type === 'alt-datetime' ? 'datetime-local' :
-              this.layoutNode.type;
+            this.layoutNode.type = {
+              'updown'       : 'number',
+              'alt-date'     : 'date',
+              'datetime'     : 'datetime-local',
+              'date-time'    : 'datetime-local',
+              'alt-datetime' : 'datetime-local',
+            }[this.layoutNode.type] || this.layoutNode.type;
             this.inputType = this.layoutNode.type;
           }
         break;
@@ -89,7 +89,8 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
         break;
 
         case 'hidden': case 'color': case 'image':
-          this.controlType = 'none'; // TODO: add apropriate widgets for hidden, color, and image
+          this.controlType = 'none';
+          // TODO: add apropriate widgets for hidden, color, and image
         break
 
         case 'range':
@@ -174,7 +175,7 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
           toTitleCase(this.layoutNode.name) : null
         );
         this.widgetOptions.title = null;
-        if (!thisTitle) return null;
+        if (!thisTitle) { return null; }
         if (thisTitle.indexOf('{') === -1 || !this.formControl || !this.dataIndex) {
           return thisTitle;
         }

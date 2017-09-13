@@ -117,11 +117,13 @@ Where the `schema` input is a valid JSON schema object (v3 or v4), and the `onSu
 
 For more control over your form, you may provide these additional inputs:
 
-  * `layout` with a custom form layout (see Angular Schema Form's [form definitions](https://github.com/json-schema-form/angular-schema-form/blob/master/docs/index.md#form-definitions) for information about how to construct a form layout)
-  * `data` to populate the form with default or previously submitted values
-  * `options` to set any global options for the form
+  * `layout` - array with a custom form layout (see Angular Schema Form's [form definitions](https://github.com/json-schema-form/angular-schema-form/blob/master/docs/index.md#form-definitions) for information about how to construct a form layout)
+  * `data` - object to populate the form with default or previously submitted values
+  * `options` - object to set any global options for the form
   * `widgets` to add custom widgets
-  * `framework` to set which framework to use
+  * `framework` - string or object to set which framework to use
+    set to 'material-design' (the default), 'bootstrap-3', 'no-framework',
+    or pass in your own custom framework object
 
 If you want more detailed output, you may provide additional functions for `onChanges` to read the values in real time as the form is being filled out, and you may implement your own custom validation indicators from the boolean `isValid` or the detailed `validationErrors` outputs.
 
@@ -134,7 +136,7 @@ Here is an example:
   [data]="yourData"
   [options]="yourGlobalOptionSettings"
   [widgets]="yourCustomWidgets"
-  [framework]="nameOfFrameworkToUse-or-yourCustomFramework"
+  framework="bootstrap-3"
   loadExternalAssets="true"
   (onChanges)="yourOnChangesFn($event)"
   (onSubmit)="yourOnSubmitFn($event)"

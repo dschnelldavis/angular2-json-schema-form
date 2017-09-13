@@ -48,7 +48,7 @@
     "build": "node build.js",
     "postbuild": "rimraf out-ngc",
     "prepare": "npm run build",
-    "publish": "cd dist && npm publish",
+    "publish": "node build.js && cd dist && npm publish",
     "preng-build": "rimraf dist/*",
     "ng-build": "ng build",
     "predeploy": "npm run ng-build",
@@ -110,7 +110,7 @@
     "ts-node": "^3.0.0",
     "tslint": "^5.2.0",
     "typedoc": "^0.8.0",
-    "typescript": "^2.2.0",
+    "typescript": "^2.5.0",
     "zone.js": "^0.8.4"
   }
 }

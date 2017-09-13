@@ -448,14 +448,18 @@ export class JsonSchemaFormService {
   }
 
   getControl(ctx: any): AbstractControl {
-    if (!ctx.layoutNode || !ctx.layoutNode.dataPointer ||
-      ctx.layoutNode.type === '$ref') { return null; }
+    if (
+      !ctx.layoutNode || !ctx.layoutNode.dataPointer ||
+      ctx.layoutNode.type === '$ref'
+    ) { return null; }
     return getControl(this.formGroup, this.getDataPointer(ctx));
   }
 
   getControlValue(ctx: any): AbstractControl {
-    if (!ctx.layoutNode || !ctx.layoutNode.dataPointer ||
-      ctx.layoutNode.type === '$ref') { return null; }
+    if (
+      !ctx.layoutNode || !ctx.layoutNode.dataPointer ||
+      ctx.layoutNode.type === '$ref'
+    ) { return null; }
     const control = getControl(this.formGroup, this.getDataPointer(ctx));
     return control ? control.value : null;
   }
@@ -466,7 +470,9 @@ export class JsonSchemaFormService {
   }
 
   getControlName(ctx: any): string {
-    if (!ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex) { return null; }
+    if (
+      !ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex
+    ) { return null; }
     return JsonPointer.toKey(this.getDataPointer(ctx));
   }
 
@@ -479,31 +485,43 @@ export class JsonSchemaFormService {
   }
 
   getDataPointer(ctx: any): string {
-    if (!ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex) { return null; }
+    if (
+      !ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex
+    ) { return null; }
     return JsonPointer.toIndexedPointer(ctx.layoutNode.dataPointer, ctx.dataIndex, this.arrayMap);
   }
 
   getLayoutPointer(ctx: any): string {
-    if (!ctx.layoutNode || !ctx.layoutNode.layoutPointer || !ctx.layoutIndex) { return null; }
+    if (
+      !ctx.layoutNode || !ctx.layoutNode.layoutPointer || !ctx.layoutIndex
+    ) { return null; }
     return JsonPointer.toIndexedPointer(ctx.layoutNode.layoutPointer, ctx.layoutIndex);
   }
 
   isControlBound(ctx: any): boolean {
-    if (!ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex) { return false; }
+    if (
+      !ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex
+    ) { return false; }
     const controlGroup = this.getControlGroup(ctx);
     const name = this.getControlName(ctx);
     return controlGroup ? controlGroup.controls.hasOwnProperty(name) : false;
   }
 
   addItem(ctx: any): boolean {
-    if (!ctx.layoutNode || !ctx.layoutNode.$ref || !ctx.dataIndex ||
-      !ctx.layoutNode.layoutPointer || !ctx.layoutIndex) { return false; }
-
+    if (
+      !ctx.layoutNode || !ctx.layoutNode.$ref || !ctx.dataIndex ||
+      !ctx.layoutNode.layoutPointer || !ctx.layoutIndex
+    ) { return false; }
+console.log(ctx);
+console.log(this.templateRefLibrary);
+console.log(ctx.layoutNode.$ref);
+console.log(JsonPointer.get(this.templateRefLibrary, [ctx.layoutNode.$ref]));
+console.log(buildFormGroup(JsonPointer.get(this.templateRefLibrary, [ctx.layoutNode.$ref])));
     // Create a new Angular form control from a template in templateRefLibrary
     const newFormGroup = buildFormGroup(JsonPointer.get(
       this.templateRefLibrary, [ctx.layoutNode.$ref]
     ));
-
+console.log(newFormGroup);
     // Add the new form control to the parent formArray or formGroup
     if (ctx.layoutNode.arrayItem) { // Add new array item to formArray
       (<FormArray>this.getControlGroup(ctx))
@@ -517,7 +535,7 @@ export class JsonSchemaFormService {
     const newLayoutNode = _.cloneDeep(JsonPointer.get(
       this.layoutRefLibrary, [ctx.layoutNode.$ref]
     ));
-
+console.log(newLayoutNode);
     JsonPointer.forEachDeep(newLayoutNode, (value, pointer) => {
 
       // Reset all _id's in newLayoutNode to unique values
@@ -542,9 +560,11 @@ export class JsonSchemaFormService {
   }
 
   moveArrayItem(ctx: any, oldIndex: number, newIndex: number): boolean {
-    if (!ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex ||
+    if (
+      !ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex ||
       !ctx.layoutNode.layoutPointer || !ctx.layoutIndex ||
-      !isDefined(oldIndex) || !isDefined(newIndex)) { return false; }
+      !isDefined(oldIndex) || !isDefined(newIndex)
+    ) { return false; }
 
     // Move item in the formArray
     let formArray = <FormArray>this.getControlGroup(ctx);
@@ -561,8 +581,10 @@ export class JsonSchemaFormService {
   }
 
   removeItem(ctx: any): boolean {
-    if (!ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex ||
-      !ctx.layoutNode.layoutPointer || !ctx.layoutIndex) { return false; }
+    if (
+      !ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex ||
+      !ctx.layoutNode.layoutPointer || !ctx.layoutIndex
+    ) { return false; }
 
     // Remove the Angular form control from the parent formArray or formGroup
     if (ctx.layoutNode.arrayItem) { // Remove array item from formArray

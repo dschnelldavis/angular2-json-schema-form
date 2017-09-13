@@ -196,15 +196,16 @@ export function parseText(
   let $index: number = null; // For Angular Schema Form API compatibility
   if (typeof key === 'number') { idx = $index = key + 1; }
   try {
-      return text.replace(/{{.+?}}/g, exp => eval(exp.slice(2, -2)));
+    return text.replace(/{{.+?}}/g, exp => eval(exp.slice(2, -2)));
   } catch (error) {
     try {
-      return (tpldata) ?
+      return tpldata ?
         text.replace(/{{.+?}}/g, exp => eval('tpldata.' + exp.slice(2, -2))) :
         text.replace(/{{.+?}}/g, exp => eval('this.' + exp.slice(2, -2)));
-    } catch (error) { }
-    console.error('parseText error: ');
-    console.error(error);
+    } catch (error) {
+      console.error('parseText error: ');
+      console.error(error);
+    }
     return text;
   }
 }
