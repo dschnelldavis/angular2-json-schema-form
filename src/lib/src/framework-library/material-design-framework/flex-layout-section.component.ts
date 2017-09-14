@@ -1,9 +1,12 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { hasOwn } from './../../shared/utility.functions';
+import { JsonSchemaFormService } from '../../json-schema-form.service';
+
 
 @Component({
   selector: 'flex-layout-section-widget',
   template: `
-    <div *ngIf="containerType === 'div'"
+    <div *ngIf="containerType === 'div' && isConditionallyShown()"
       [class]="options?.htmlClass"
       [class.expandable]="options?.expandable && !expanded"
       [class.expanded]="options?.expandable && expanded">
@@ -37,7 +40,7 @@ import { Component, Input, OnInit } from '@angular/core';
 
     </div>
 
-    <fieldset *ngIf="containerType === 'fieldset'"
+    <fieldset *ngIf="containerType === 'fieldset' && isConditionallyShown()"
       [class]="options?.htmlClass"
       [class.expandable]="options?.expandable && !expanded"
       [class.expanded]="options?.expandable && expanded"
@@ -84,6 +87,11 @@ export class FlexLayoutSectionComponent implements OnInit {
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
+  @Input() data:any;
+
+  constructor(
+      private jsf: JsonSchemaFormService
+  ) { }
 
   ngOnInit() {
     switch (this.layoutNode.type) {
@@ -95,6 +103,7 @@ export class FlexLayoutSectionComponent implements OnInit {
         this.containerType = 'div';
       break;
     }
+
     this.options = this.layoutNode.options || {};
     this.expanded = !this.options.expandable;
   }
@@ -127,5 +136,20 @@ export class FlexLayoutSectionComponent implements OnInit {
       case 'justify-content': case 'align-items': case 'align-content':
         return this.options[attribute];
     }
+  }
+
+  isConditionallyShown(): boolean {
+
+    this.data = this.jsf.data;
+    let result: boolean = true;
+    if (this.data && hasOwn(this.options, 'condition')) {
+      const model = this.data;
+
+      /* tslint:disable */
+      eval('result = ' + this.options.condition);
+      /* tslint:enable */
+    }
+
+    return result;
   }
 }

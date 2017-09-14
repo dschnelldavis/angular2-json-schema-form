@@ -18,6 +18,7 @@ import { JsonSchemaFormComponent } from '../json-schema-form.component';
       [style.align-self]="(layoutItem.options || {})['align-self']"
       [style.order]="(layoutItem.options || {}).order">
 
+
       <select-framework-widget
         *ngIf="isConditionallyShown(layoutItem)"
         [formID]="formID"
@@ -25,6 +26,9 @@ import { JsonSchemaFormComponent } from '../json-schema-form.component';
         [layoutIndex]="(layoutIndex || []).concat(i)"
         [layoutNode]="layoutItem"
         [data]="data"></select-framework-widget>
+
+
+      
 
     </div>`,
   styles: [`
@@ -60,6 +64,9 @@ export class RootComponent {
   @Input() isFlexItem: boolean = false;
   @Input() data: any;
 
+  @Input() layoutIndexTabs: number[];
+  @Input() dataIndexTabs: number[];
+
   isDraggable(node: any): boolean {
     return this.isOrderable !== false && node.type !== '$ref' &&
       node.arrayItem && (node.options || {}).arrayItemType === 'list';
@@ -79,6 +86,7 @@ export class RootComponent {
   }
 
   isConditionallyShown(layoutItem: any): boolean {
+
     let result: boolean = true;
     if (this.data && hasOwn(layoutItem, 'condition')) {
       const model = this.data;
@@ -87,6 +95,7 @@ export class RootComponent {
       eval('result = ' + layoutItem.condition);
       /* tslint:enable */
     }
+
     return result;
   }
 }

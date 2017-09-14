@@ -1,12 +1,14 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
+import { hasOwn } from './../../shared/utility.functions';
+
 
 import { JsonSchemaFormService } from '../../json-schema-form.service';
 
 @Component({
   selector: 'material-checkbox-widget',
   template: `
-    <md-checkbox
+    <md-checkbox *ngIf="isConditionallyShown()"
       align="left"
       [color]="options?.color || 'primary'"
       [disabled]="controlDisabled || options?.readonly"
@@ -34,6 +36,7 @@ export class MaterialCheckboxComponent implements OnInit {
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
+  @Input() data:any;
 
   constructor(
     private jsf: JsonSchemaFormService
@@ -53,5 +56,19 @@ export class MaterialCheckboxComponent implements OnInit {
 
   get isChecked() {
     return this.jsf.getControlValue(this) === this.trueValue;
+  }
+
+  isConditionallyShown(): boolean {
+    this.data = this.jsf.data;
+    let result: boolean = true;
+    if (this.data && hasOwn(this.options, 'condition')) {
+      const model = this.data;
+
+      /* tslint:disable */
+      eval('result = ' + this.options.condition);
+      /* tslint:enable */
+    }
+
+    return result;
   }
 }

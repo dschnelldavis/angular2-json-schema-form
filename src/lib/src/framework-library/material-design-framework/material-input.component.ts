@@ -1,12 +1,14 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
+import { hasOwn } from './../../shared/utility.functions';
+
 
 import { JsonSchemaFormService } from '../../json-schema-form.service';
 
 @Component({
   selector: 'material-input-widget',
   template: `
-    <md-form-field
+    <md-form-field *ngIf="isConditionallyShown()"
       [floatPlaceholder]="options?.floatPlaceholder || (options?.notitle ? 'never' : 'auto')"
       [style.width]="'100%'">
       <input mdInput #inputControl
@@ -46,6 +48,7 @@ export class MaterialInputComponent implements OnInit {
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
+  @Input() data:any;
 
   constructor(
     private jsf: JsonSchemaFormService
@@ -54,6 +57,7 @@ export class MaterialInputComponent implements OnInit {
   ngOnInit() {
     this.options = this.layoutNode.options || {};
     this.jsf.initializeControl(this);
+
   }
 
   get controlValue(){
@@ -71,5 +75,19 @@ export class MaterialInputComponent implements OnInit {
     if (this.userInput) {
       this.jsf.updateValue(this, value);
     }
+  }
+
+  isConditionallyShown(): boolean {
+    this.data = this.jsf.data;
+    let result: boolean = true;
+    if (this.data && hasOwn(this.options, 'condition')) {
+      const model = this.data;
+
+      /* tslint:disable */
+      eval('result = ' + this.options.condition);
+      /* tslint:enable */
+    }
+
+    return result;
   }
 }

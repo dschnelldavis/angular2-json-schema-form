@@ -12,7 +12,8 @@ import { toTitleCase } from '../../shared';
       [formID]="formID"
       [layoutNode]="layoutNode"
       [dataIndex]="dataIndex"
-      [layoutIndex]="layoutIndex"></select-widget-widget>
+      [layoutIndex]="layoutIndex"
+      [data]="data"></select-widget-widget>
   `,
 })
 export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
@@ -28,6 +29,7 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
+  @Input() data: any;
 
   constructor(
     private changeDetector: ChangeDetectorRef,
@@ -52,10 +54,12 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
       this.layoutPointer = this.jsf.getLayoutPointer(this);
       this.formControl = this.jsf.getControl(this);
 
-      this.options.title = this.setTitle();
+      if(this.options){
+        this.options.title = this.setTitle();
 
-      if (this.options.minimum && this.options.maximum) {
-        this.layoutNode.type = 'range';
+        if (this.options.minimum && this.options.maximum) {
+          this.layoutNode.type = 'range';
+        }
       }
 
       // Set control type and associated settings
@@ -168,6 +172,9 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
       case 'authfieldset':
         this.widgetOptions.expandable = true;
         this.widgetOptions.title = 'Authentication settings';
+        return null;
+      case 'tabs':
+      case 'section':
         return null;
       default:
         let thisTitle = this.options.title || (

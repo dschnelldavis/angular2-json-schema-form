@@ -67,6 +67,7 @@ export class FlexLayoutRootComponent {
   // Set attributes for flexbox child
   // (container attributes are set in flex-layout-section.component)
   getFlexAttribute(node: any, attribute: string) {
+
     const index = ['flex-grow', 'flex-shrink', 'flex-basis'].indexOf(attribute);
     return ((node.options || {}).flex || '').split(/\s+/)[index] ||
       (node.options || {})[attribute] || ['1', '1', 'auto'][index];
