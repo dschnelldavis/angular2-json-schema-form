@@ -1,20 +1,20 @@
-import { NgModule }                         from '@angular/core';
-import { CommonModule }                     from '@angular/common';
-import { BrowserAnimationsModule }          from '@angular/platform-browser/animations';
-import { FlexLayoutModule }                 from '@angular/flex-layout';
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+// import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
   MaterialModule, MdDatepickerModule, MdNativeDateModule
 } from '@angular/material';
 
-import { WidgetLibraryModule }              from '../../widget-library/widget-library.module';
-import { JsonSchemaFormService }            from '../../json-schema-form.service';
+import { WidgetLibraryModule } from '../../widget-library/widget-library.module';
+import { JsonSchemaFormService } from '../../json-schema-form.service';
 
-import { MATERIAL_DESIGN_COMPONENTS }       from './index';
+import { MATERIAL_DESIGN_COMPONENTS } from './index';
 
 @NgModule({
   imports: [
-    CommonModule, BrowserAnimationsModule, FlexLayoutModule,
+    CommonModule, FlexLayoutModule,
     FormsModule, ReactiveFormsModule, MaterialModule,
     MdDatepickerModule, MdNativeDateModule, WidgetLibraryModule
   ],

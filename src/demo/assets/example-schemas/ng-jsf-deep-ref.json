@@ -1,0 +1,54 @@
+{
+  "schema": {
+    "definitions": {
+      "int": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 5
+      },
+      "string": {
+        "type": "string",
+        "minLength": 0
+      },
+      "valueItem": {
+        "type": "object",
+        "properties": { "value": { "$ref": "#/definitions/int" } }
+      },
+      "valueItemArray": {
+        "type": "array",
+        "items": { "$ref": "#/definitions/valueItemArray" }
+      },
+      "dtoArray": {
+        "type": "array",
+        "items": { "$ref": "#/definitions/staffLanguageLevelDto" }
+      },
+      "staffLanguageLevelDto": {
+        "type": "object",
+        "properties": {
+          "id": { "$ref": "#/definitions/int" },
+          "staffId": { "allOf" : [
+            { "$ref": "#/definitions/int" },
+            { "maximum": 10,
+              "title": "staffId (overriden maximum)" }
+          ] },
+          "languageId": { "allOf" : [
+            { "$ref": "#/definitions/valueItem" },
+            { "maximum": 16,
+              "title": "languageId (object with overriden title)" }
+          ] },
+          "languageLevelId": { "$ref": "#/definitions/int" },
+          "languageName2": { "allOf" : [
+            { "$ref": "#/definitions/string" },
+            { "default": "ole",
+              "maxLength": 3,
+              "title": "languageName2 (overriden maxLength)" }
+          ] },
+          "languageLevelName": { "$ref": "#/definitions/dtoArray" }
+        }
+      }
+    },
+    "properties": {
+      "staffLanguageLevelDto": { "$ref": "#/definitions/staffLanguageLevelDto" }
+    }
+  }
+}

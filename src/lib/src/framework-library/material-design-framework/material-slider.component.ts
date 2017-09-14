@@ -7,19 +7,18 @@ import { getControl, inArray, isDefined } from '../../shared';
 @Component({
   selector: 'material-slider-widget',
   template: `
-      <md-slider #inputControl
-        [(ngModel)]="controlValue"
-        [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
-        [disabled]="controlDisabled"
-        [id]="'control' + layoutNode?._id"
-        [max]="options?.maximum"
-        [min]="options?.minimum"
-        [step]="options?.multipleOf || options?.step || 'any'"
-        [style.width]="'100%'"
-        [thumb-label]="true"
-        [value]="controlValue"
-        (change)="updateValue($event)"></md-slider>`,
-    styles: [`md-input-container { margin-top: 6px; }`],
+    <md-slider #inputControl
+      [(ngModel)]="controlValue"
+      [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
+      [disabled]="controlDisabled"
+      [id]="'control' + layoutNode?._id"
+      [max]="options?.maximum"
+      [min]="options?.minimum"
+      [step]="options?.multipleOf || options?.step || 'any'"
+      [style.width]="'100%'"
+      [thumb-label]="true"
+      [value]="controlValue"
+      (change)="updateValue($event)"></md-slider>`,
 })
 export class MaterialSliderComponent implements OnInit {
   formControl: AbstractControl;

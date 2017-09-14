@@ -4,7 +4,7 @@
   </md-toolbar>
   <div class="header-content">
     An Angular <a href="http://json-schema.org/">JSON Schema</a> Form builder
-    for Angular 2 and above, similar to, and mostly API compatible with,
+    for Angular 4, similar to, and mostly API compatible with,
     <span class="avoidwrap">
       <!-- JSON Schema Form's Angular Schema Form -->
       <!-- https://github.com/json-schema-form -->
@@ -29,8 +29,8 @@
     </button>
     <md-menu #exampleMenu="mdMenu" class="example-menu">
       <button md-menu-item class="mat-medium"
-        *ngFor="let example of examples.ng2jsf.schemas"
-        (click)="loadSelectedExample('ng2jsf', '', example.file, example.name)">
+        *ngFor="let example of examples['ng-jsf'].schemas"
+        (click)="loadSelectedExample('ng-jsf', '', example.file, example.name)">
         {{example.name}}
       </button>
       <button md-menu-item class="mat-medium"

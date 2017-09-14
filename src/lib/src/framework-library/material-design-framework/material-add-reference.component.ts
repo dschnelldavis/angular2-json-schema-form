@@ -12,7 +12,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
         [disabled]="options?.readonly"
         (click)="addItem($event)">
         <span *ngIf="options?.icon" [class]="options?.icon"></span>
-        <span *ngIf="options?.title" [innerHTML]="setTitle()"></span>
+        <span *ngIf="options?.title" [innerHTML]="buttonText"></span>
       </button>
     </section>`,
 })
@@ -59,11 +59,12 @@ export class MaterialAddReferenceComponent implements OnInit, DoCheck {
       this.itemCount < (this.options.maxItems || 1000000);
   }
 
-  setTitle(): string {
+  get buttonText(): string {
     const parent: any = {
       dataIndex: this.dataIndex.slice(0, -1),
       layoutNode: this.jsf.getParentNode(this)
     };
-    return this.jsf.setTitle(parent, this.layoutNode, this.itemCount);
+    return parent.layoutNode.add ||
+      this.jsf.setTitle(parent, this.layoutNode, this.itemCount);
   }
 }

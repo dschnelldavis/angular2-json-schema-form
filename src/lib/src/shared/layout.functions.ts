@@ -506,7 +506,7 @@ export function buildLayoutFromSchema(
     } else { // 'items' is an object = list items only (no tuple items)
       newNode.tupleItems = false;
       newNode.listItems = schema.maxItems || true;
-      for (let i = 0, l = Math.max(templateArray.length, minItems, 1); i < l; i++) {
+      for (let i = 0, l = Math.max(templateArray.length, minItems, 0); i < l; i++) {
         newNode.items.push(buildLayoutFromSchema(
           jsf, widgetLibrary,
           newNode.layoutPointer + '/items/-',
@@ -578,8 +578,8 @@ export function buildLayoutFromSchema(
   } else if (newNode.dataType === '$ref') {
     const schemaRef: string = JsonPointer.compile(schema.$ref);
     let buttonText: string = 'Add';
-    if (newNode.options.title) {
-      buttonText += ' ' + newNode.options.title;
+    if (newNode.options.add) {
+      buttonText = newNode.options.add;
     } else if (newNode.name && !/^\d+$/.test(newNode.name)) {
       buttonText += ' ' + toTitleCase(newNode.name.replace(/_/g, ' '));
 

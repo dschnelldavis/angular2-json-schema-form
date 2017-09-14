@@ -49,22 +49,6 @@ return Promise.resolve()
     const es5Entry = path.join(es5OutputFolder, `${libName}.js`);
     const es2015Entry = path.join(es2015OutputFolder, `${libName}.js`);
     const rollupBaseConfig = {
-      moduleName: camelCase(libName),
-      sourceMap: true,
-      // ATTENTION:
-      // Add all dependencies and peer dependencies of your library to
-      // `globals` and `external`. This is required for UMD bundle users.
-      globals: {
-        // key   = The library name
-        // value = The global variable name on the window object
-        // https://github.com/rollup/rollup/wiki/JavaScript-API#globals
-        '@angular/common': 'ng.common',
-        '@angular/core': 'ng.core',
-        '@angular/forms': 'ng.forms',
-        '@angular/platform-browser': 'ng.platformBrowser',
-        'ajv': 'Ajv',
-        'lodash': '_'
-      },
       external: [
         // List of dependencies
         // https://github.com/rollup/rollup/wiki/JavaScript-API#external
@@ -77,57 +61,84 @@ return Promise.resolve()
         'lodash',
         'rxjs'
       ],
-      onwarn: function (warning) {
-        if (warning.code === 'THIS_IS_UNDEFINED') return;
-        console.warn( warning.message );
-      },
       plugins: [
         sourcemaps(),
         nodeResolve(),
         commonjs({ namedExports: {
           // list of lodash functions used by your library
-          'node_modules/lodash/index.js': [ 'cloneDeep', 'filter', 'map', 'uniqueId' ]
+          'node_modules/lodash/index.js': [
+            'cloneDeep', 'cloneDeepWith', 'filter', 'map', 'uniqueId'
+          ]
         } })
-      ]
+      ],
+      onwarn: function (warning) {
+        if (warning.code === 'THIS_IS_UNDEFINED') return;
+        console.warn( warning.message );
+      },
+      output: {
+        name: camelCase(libName),
+        // ATTENTION:
+        // Add all dependencies and peer dependencies of your library to
+        // `globals` and `external`. This is required for UMD bundle users.
+        globals: {
+          // key   = The library name
+          // value = The global variable name on the window object
+          // https://github.com/rollup/rollup/wiki/JavaScript-API#globals
+          '@angular/common': 'ng.common',
+          '@angular/core': 'ng.core',
+          '@angular/forms': 'ng.forms',
+          '@angular/platform-browser': 'ng.platformBrowser',
+          'ajv': 'Ajv',
+          'lodash': '_'
+        }
+      }
     };
 
     // UMD bundle
     const umdConfig = Object.assign({}, rollupBaseConfig, {
-      entry: es5Entry,
-      dest: path.join(distFolder, `bundles`, `${libName}.umd.js`),
-      format: 'umd',
+      input: es5Entry,
+      output: Object.assign({}, rollupBaseConfig.output, {
+        file: path.join(distFolder, `bundles`, `${libName}.umd.js`),
+        format: 'umd'
+      })
     });
 
     // Minified UMD bundle
     const minifiedUmdConfig = Object.assign({}, rollupBaseConfig, {
-      entry: es5Entry,
-      dest: path.join(distFolder, `bundles`, `${libName}.umd.min.js`),
-      format: 'umd',
+      input: es5Entry,
+      output: Object.assign({}, rollupBaseConfig.output, {
+        file: path.join(distFolder, `bundles`, `${libName}.umd.min.js`),
+        format: 'umd'
+      }),
       plugins: rollupBaseConfig.plugins.concat([uglify({})])
     });
 
     // ESM+ES5 flat module bundle
     const fesm5config = Object.assign({}, rollupBaseConfig, {
-      entry: es5Entry,
-      dest: path.join(distFolder, `${libName}.es5.js`),
-      format: 'es',
-      intro: `import * as Ajv from 'ajv';\nimport * as _ from 'lodash';`
+      input: es5Entry,
+      output: Object.assign({}, rollupBaseConfig.output, {
+        file: path.join(distFolder, `${libName}.es5.js`),
+        format: 'es',
+        intro: `import * as Ajv from 'ajv';\nimport * as _ from 'lodash';`
+      })
     });
 
     // ESM+ES2015 flat module bundle
     const fesm2015config = Object.assign({}, rollupBaseConfig, {
-      entry: es2015Entry,
-      dest: path.join(distFolder, `${libName}.js`),
-      format: 'es',
-      intro: `import * as Ajv from 'ajv';`
+      input: es2015Entry,
+      output: Object.assign({}, rollupBaseConfig.output, {
+        file: path.join(distFolder, `${libName}.js`),
+        format: 'es',
+        intro: `import * as Ajv from 'ajv';`
+      })
     });
 
-    const allBundles = [
-      umdConfig,
-      minifiedUmdConfig,
-      fesm5config,
-      fesm2015config
-    ].map(cfg => rollup.rollup(cfg).then(bundle => bundle.write(cfg)));
+// return rollup.rollup(fesm5config.input)
+//   .then(bundle => bundle.write(fesm5config.output))
+//   .then(() => console.log('fesm5config bundle generated successfully.'));
+// console.log(umdConfig, minifiedUmdConfig, fesm5config, fesm2015config);
+    const allBundles = [umdConfig, minifiedUmdConfig, fesm5config, fesm2015config]
+      .map(cfg => rollup.rollup(cfg).then(bundle => bundle.write(cfg.output)));
 
     return Promise.all(allBundles)
       .then(() => console.log('All bundles generated successfully.'))

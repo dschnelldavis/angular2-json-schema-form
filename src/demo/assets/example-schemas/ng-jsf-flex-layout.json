@@ -14,6 +14,8 @@
           "zip_code": { "type": "string" }
         }
       },
+      "birthday": { "type": "string" },
+      "notes": { "type": "string" },
       "phone_numbers": {
         "type": "array",
         "items": {
@@ -51,6 +53,8 @@
           "notitle": true, "placeholder": "Zip Code" }
       ]
     },
+    { "key": "birthday", "type": "date" },
+    { "key": "notes", "type": "textarea" },
     { "key": "phone_numbers",
       "type": "array",
       "items": [ {
@@ -59,8 +63,10 @@
         "flex-direction": "row",
         "fxLayoutGap": "12px",
         "items": [
-          { "key": "phone_numbers[].type", "flex": "1 1 50px", "notitle": true, "required": true },
-          { "key": "phone_numbers[].number", "flex": "4 4 200px", "notitle": true }
+          { "key": "phone_numbers[].type", "flex": "1 1 50px",
+            "notitle": true, "required": true },
+          { "key": "phone_numbers[].number", "flex": "4 4 200px",
+            "notitle": true, "required": true }
         ]
       } ]
     }
@@ -70,11 +76,11 @@
     "last_name": "Doe",
     "address": {
       "street_1": "123 Main St.",
-      "street_2": null,
       "city": "Las Vegas",
       "state": "NV",
       "zip_code": "89123"
     },
+    "birthday": "1999-09-09",
     "phone_numbers": [
       { "number": "702-123-4567", "type": "cell" },
       { "number": "702-987-6543", "type": "work" }
