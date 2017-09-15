@@ -1,5 +1,5 @@
 {
-  "JSONSchema": {
+  "schema": {
     "title": "Widgets",
     "type": "object",
     "properties": {
@@ -23,15 +23,18 @@
         "properties": {
           "default": {
             "type": "boolean",
-            "title": "checkbox (default)"
+            "title": "checkbox (default)",
+            "description": "This is the checkbox-description"
           },
           "radio": {
             "type": "boolean",
-            "title": "radio buttons"
+            "title": "radio buttons",
+            "description": "This is the radio-description"
           },
           "select": {
             "type": "boolean",
-            "title": "select box"
+            "title": "select box",
+            "description": "This is the select-description"
           }
         }
       },
@@ -76,56 +79,57 @@
       "selectWidgetOptions": {
         "title": "Custom select widget with options",
         "type": "string",
-        "enum": [
-          "foo",
-          "bar"
-        ],
-        "enumNames": [
-          "Foo",
-          "Bar"
-        ]
+        "enum": ["foo", "bar"],
+        "enumNames": ["Foo", "Bar"]
       }
     }
   },
-  "UISchema": {
+  "uiSchema": {
     "boolean": {
-      "radio": {
-        "ui:widget": "radio"
-      },
-      "select": {
-        "ui:widget": "select"
-      }
+      "radio": { "ui:widget": "radio" },
+      "select": { "ui:widget": "select" }
     },
     "string": {
-      "textarea": {
-        "ui:widget": "textarea"
-      },
-      "color": {
-        "ui:widget": "color"
-      }
+      "textarea": { "ui:widget": "textarea", "ui:options": { "rows": 5 } },
+      "color": { "ui:widget": "color" }
     },
-    "secret": {
-      "ui:widget": "hidden"
-    },
-    "disabled": {
-      "ui:disabled": true
-    },
-    "readonly": {
-      "ui:readonly": true
-    },
+    "secret": { "ui:widget": "hidden" },
+    "disabled": { "ui:disabled": true },
+    "readonly": { "ui:readonly": true },
     "widgetOptions": {
-      "ui:widget": {
-        "options": {
-          "backgroundColor": "yellow"
-        }
-      }
+      "ui:widget": function ({ value, onChange, options }) {
+        const { backgroundColor } = options;
+        return (
+          <input
+            className="form-control"
+            onChange={event => onChange(event.target.value)}
+            style={{ backgroundColor }}
+            value={value}
+          />
+        );
+      },
+      "ui:options": { "backgroundColor": "yellow" }
     },
     "selectWidgetOptions": {
-      "ui:widget": {
-        "options": {
-          "backgroundColor": "pink"
-        }
-      }
+      "ui:widget": function ({ value, onChange, options }) {
+        const { enumOptions, backgroundColor } = options;
+        return (
+          <select
+            className="form-control"
+            style={{ backgroundColor }}
+            value={value}
+            onChange={event => onChange(event.target.value)}>
+            {enumOptions.map(({ label, value }, i) => {
+              return (
+                <option key={i} value={value}>
+                  {label}
+                </option>
+              );
+            })}
+          </select>
+        );
+      },
+      "ui:options": { "backgroundColor": "pink" }
     }
   },
   "formData": {
