@@ -206,7 +206,7 @@ After displaying a form in this mode, you can also use the `formSchema` and `for
 
 If you have previously used another JSON form creation library—Angular Schema Form (for AngularJS), React JSON Schema Form, or JSON Form (for jQuery)—in order to make the transition easier, Angular JSON Schema Form will recognize the input names and custom input objects used by those libraries. It should automatically work with JSON Schemas in [version 6](http://json-schema.org/draft-06/schema), [version 4](http://json-schema.org/draft-04/schema), [version 3](http://json-schema.org/draft-03/schema), or the [truncated version 3 format supported by JSON Form](https://github.com/joshfire/jsonform/wiki#schema-shortcut). So the following will all work:
 
-Angular Schema Form compatibility:
+Angular Schema Form (AngularJS) compatibility:
 ```html
 <json-schema-form
   [schema]="yourJsonSchema"
@@ -215,24 +215,24 @@ Angular Schema Form compatibility:
 </json-schema-form>
 ```
 
-JSON Form compatibility:
-```html
-<json-schema-form
-  [form]="{
-    schema: 'yourJsonSchema',
-    form: 'yourJsonFormLayout',
-    customFormItems: 'yourJsonFormCustomFormItems',
-    value: 'yourData'
-  }">
-</json-schema-form>
-```
-
 React JSON Schema Form compatibility:
 ```html
 <json-schema-form
-  [JSONSchema]="yourJsonSchema"
+  [schema]="yourJsonSchema"
   [UISchema]="yourReactJsonSchemaFormUISchema"
   [formData]="yourData">
+</json-schema-form>
+```
+
+JSON Form (jQuery) compatibility:
+```html
+<json-schema-form
+  [form]="{
+    schema: yourJsonSchema,
+    form: yourJsonFormLayout,
+    customFormItems: yourJsonFormCustomFormItems,
+    value: yourData
+  }">
 </json-schema-form>
 ```
 

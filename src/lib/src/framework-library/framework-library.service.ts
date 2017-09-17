@@ -39,6 +39,8 @@ import { Bootstrap3FrameworkComponent } from './bootstrap-3-framework.component'
 // - Semantic UI:
 //   https://github.com/vladotesanovic/ngSemantic
 
+import { hasOwn } from '../shared/utility.functions';
+
 export interface Framework {
   framework: any,
   widgets?: { [key: string]: any },
@@ -58,7 +60,9 @@ export class FrameworkLibraryService {
   loadExternalAssets: boolean = false;
   defaultFramework: string = 'material-design';
   frameworkLibrary: FrameworkLibrary = {
-    'no-framework': { framework: NoFrameworkComponent },
+    'no-framework': {
+      framework: NoFrameworkComponent
+    },
     'material-design': {
       framework: MaterialDesignFrameworkComponent,
       widgets: {
@@ -90,9 +94,6 @@ export class FrameworkLibraryService {
       stylesheets: [
         '//fonts.googleapis.com/icon?family=Material+Icons',
         '//fonts.googleapis.com/css?family=Roboto:300,400,500,700',
-        // '//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css',
-        // './node_modules/@angular/material/core/theming/prebuilt/deeppurple-amber.css',
-        // './node_modules/@angular/material/core/theming/prebuilt/indigo-pink.css',
       ],
     },
     'bootstrap-3': {
@@ -102,9 +103,7 @@ export class FrameworkLibraryService {
         '//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css',
       ],
       scripts: [
-        // '//code.jquery.com/jquery-2.1.1.min.js',
         '//ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js',
-        // '//code.jquery.com/ui/1.12.1/jquery-ui.min.js',
         '//ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js',
         '//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js',
       ],
@@ -115,15 +114,6 @@ export class FrameworkLibraryService {
     @Inject(WidgetLibraryService) private widgetLibrary: WidgetLibraryService
   ) { }
 
-  registerFrameworkWidgets(framework: Framework): boolean {
-    if (framework.hasOwnProperty('widgets')) {
-      this.widgetLibrary.registerFrameworkWidgets(framework.widgets);
-      return true;
-    }
-    this.widgetLibrary.unRegisterFrameworkWidgets();
-    return false;
-  }
-
   public setLoadExternalAssets(loadExternalAssets: boolean = true): void {
     this.loadExternalAssets = !!loadExternalAssets;
   }
@@ -132,26 +122,30 @@ export class FrameworkLibraryService {
     framework?: string|Framework, loadExternalAssets: boolean = this.loadExternalAssets
   ): boolean {
     if (!framework) { return false; }
-    let validNewFramework: boolean = false;
+    let registerNewWidgets: boolean = false;
     if (!framework || framework === 'default') {
       this.activeFramework = this.frameworkLibrary[this.defaultFramework];
-      validNewFramework = true;
+      registerNewWidgets = true;
     } else if (typeof framework === 'string' && this.hasFramework(framework)) {
       this.activeFramework = this.frameworkLibrary[framework];
-      validNewFramework = true;
-    } else if (typeof framework === 'object' && framework.hasOwnProperty('framework')) {
+      registerNewWidgets = true;
+    } else if (typeof framework === 'object' && hasOwn(framework, 'framework')) {
       this.activeFramework = framework;
-      validNewFramework = true;
+      registerNewWidgets = true;
     }
-    if (validNewFramework) {
-      this.registerFrameworkWidgets(this.activeFramework);
-    }
-    return validNewFramework;
+    return registerNewWidgets ?
+      this.registerFrameworkWidgets(this.activeFramework) :
+      registerNewWidgets;
+  }
+
+  registerFrameworkWidgets(framework: Framework): boolean {
+    return hasOwn(framework, 'widgets') ?
+      this.widgetLibrary.registerFrameworkWidgets(framework.widgets) :
+      this.widgetLibrary.unRegisterFrameworkWidgets();
   }
 
   public hasFramework(type: string): boolean {
-    if (!type || typeof type !== 'string') { return false; }
-    return this.frameworkLibrary.hasOwnProperty(type);
+    return hasOwn(this.frameworkLibrary, type);
   }
 
   public getFramework(): any {
@@ -164,10 +158,10 @@ export class FrameworkLibraryService {
   }
 
   public getFrameworkStylesheets(load: boolean = this.loadExternalAssets): string[] {
-    return load ? this.activeFramework.stylesheets || [] : [];
+    return (load && this.activeFramework.stylesheets) || [];
   }
 
   public getFrameworkScripts(load: boolean = this.loadExternalAssets): string[] {
-    return load ? this.activeFramework.scripts || [] : [];
+    return (load && this.activeFramework.scripts) || [];
   }
 }

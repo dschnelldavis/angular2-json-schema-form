@@ -25,7 +25,7 @@ export class JsonPointer {
   /**
    * 'get' function
    *
-   * Uses a JSON Pointer to retrieve a value from an object
+   * Uses a JSON Pointer to retrieve a value from an object.
    *
    * @param {object} object - Object to get value from
    * @param {Pointer} pointer - JSON Pointer (string or array)
@@ -59,7 +59,7 @@ export class JsonPointer {
           subObject = subObject.get(key);
         } else {
           if (errors) {
-            console.error('get error: "' + key + '" key not found in object.');
+            console.error(`get error: "${key}" key not found in object.`);
             console.error(pointer);
             console.error(object);
           }
@@ -69,10 +69,10 @@ export class JsonPointer {
       return getBoolean ? true : subObject;
     }
     if (errors && keyArray === null) {
-      console.error('get error: Invalid JSON Pointer: ' + pointer);
+      console.error(`get error: Invalid JSON Pointer: ${pointer}`);
     }
     if (errors && typeof object !== 'object') {
-      console.error('get error: Invalid object:=');
+      console.error('get error: Invalid object:');
       console.error(object);
     }
     return getBoolean ? false : undefined;
@@ -81,8 +81,9 @@ export class JsonPointer {
   /**
    * 'getFirst' function
    *
-   * Takes an array of JSON Pointers and objects, and returns the value
-   * from the first pointer to find a value in its object.
+   * Takes an array of JSON Pointers and objects,
+   * checks each object for a value specified by the pointer,
+   * and returns the first value found.
    *
    * @param {[object, pointer][]} items - array of objects and pointers to check
    * @param {any} defaultValue - Optional value to return if nothing found
@@ -120,15 +121,21 @@ export class JsonPointer {
   /**
    * 'set' function
    *
-   * Uses a JSON Pointer to set a value on an object
+   * Uses a JSON Pointer to set a value on an object.
+   * Also creates any missing sub objects or arrays to contain that value.
    *
    * If the optional fourth parameter is TRUE and the inner-most container
    * is an array, the function will insert the value as a new item at the
-   * specified location in the array, rather than overwriting the existing value
+   * specified location in the array, rather than overwriting the existing
+   * value (if any) at that location.
+   *
+   * So set([1, 2, 3], '/1', 4) => [1, 4, 3]
+   * and
+   * So set([1, 2, 3], '/1', 4, true) => [1, 4, 2, 3]
    *
    * @param {object} object - The object to set value in
    * @param {Pointer} pointer - The JSON Pointer (string or array)
-   * @param {any} value - The value to set
+   * @param {any} value - The new value to set
    * @return {object} - The original object, modified with the set value
    */
   static set(
@@ -163,13 +170,14 @@ export class JsonPointer {
       }
       return object;
     }
-    console.error('set error: Invalid JSON Pointer: ' + pointer);
+    console.error(`set error: Invalid JSON Pointer: ${pointer}`);
   }
 
   /**
    * 'setCopy' function
    *
    * Copies an object and uses a JSON Pointer to set a value on the copy.
+   * Also creates any missing sub objects or arrays to contain that value.
    *
    * If the optional fourth parameter is TRUE and the inner-most container
    * is an array, the function will insert the value as a new item at the
@@ -215,7 +223,7 @@ export class JsonPointer {
       }
       return newObject;
     }
-    console.error('setCopy error: Invalid JSON Pointer: ' + pointer);
+    console.error(`setCopy error: Invalid JSON Pointer: ${pointer}`);
   }
 
   /**
@@ -268,7 +276,7 @@ export class JsonPointer {
       }
       return object;
     }
-    console.error('remove error: Invalid JSON Pointer: ' + pointer);
+    console.error(`remove error: Invalid JSON Pointer: ${pointer}`);
   }
 
   /**
@@ -359,12 +367,12 @@ export class JsonPointer {
    * @param {string = ''} pointer - optional, JSON Pointer to object within rootObject
    */
   static forEachDeepCopy(
-    object: any, fn: (v: any, p?: string, o?: any) => any,
+    object: any, fn: (v: any, p?: string, o?: any) => any = (v) => v,
     bottomUp: boolean = false, pointer: string = '', rootObject: any = object
   ): void {
     if (typeof fn === 'function') {
       if (isObject(object) || isArray(object)) {
-        let newObject = Object.assign(isArray(object) ? [] : {}, object);
+        let newObject = isArray(object) ? [ ...object ] : { ...object };
         if (!bottomUp) { fn(newObject, pointer, rootObject); }
         for (let key of Object.keys(newObject)) {
           const newPointer: string = pointer + '/' + this.escape(key);
@@ -416,8 +424,7 @@ export class JsonPointer {
       if ((<string>pointer)[0] === '#') { pointer = pointer.slice(1); }
       if (<string>pointer === '') { return []; }
       if ((<string>pointer)[0] !== '/') {
-        console.error('parse error: Invalid JSON Pointer, does not start with "/": ' +
-          pointer);
+        console.error(`parse error: Invalid JSON Pointer, does not start with "/": ${pointer}`);
         return;
       }
       return (<string>pointer).slice(1).split('/').map(this.unescape);
@@ -447,8 +454,7 @@ export class JsonPointer {
     if (typeof keyArray === 'string') {
       if (keyArray[0] === '#') { keyArray = keyArray.slice(1); }
       if (keyArray.length && keyArray[0] !== '/') {
-        console.error('compile error: Invalid JSON Pointer, does not start with "/": ' +
-          keyArray);
+        console.error(`compile error: Invalid JSON Pointer, does not start with "/": ${keyArray}`);
         return;
       }
       return keyArray;
@@ -535,11 +541,11 @@ export class JsonPointer {
     }
     if (this.isJsonPointer(genericPointer) && isArray(indexArray)) {
       if (isMap(arrayMap)) {
-        let arrayIndex: number = 0;
-        return genericPointer.replace(/\/\-(?=\/|$)/g, (key, stringIndex) => {
-          const subPointer = genericPointer.slice(0, stringIndex);
-          if (arrayMap.has(subPointer)) { return '/' + indexArray[arrayIndex++]; }
-        });
+        let arrayIndex = 0;
+        return genericPointer.replace(/\/\-(?=\/|$)/g, (key, stringIndex) =>
+          arrayMap.has(genericPointer.slice(0, stringIndex)) ?
+            '/' + indexArray[arrayIndex++] : key
+        );
       } else {
         let indexedPointer = genericPointer;
         for (let pointerIndex of indexArray) {
@@ -548,8 +554,8 @@ export class JsonPointer {
         return indexedPointer;
       }
     }
-    console.error('toIndexedPointer error: genericPointer must be ' +
-      'a JSON Pointer and indexArray must be an array.');
+    console.error('toIndexedPointer error: ' +
+      'genericPointer must be a JSON Pointer and indexArray must be an array.');
     console.error(genericPointer);
     console.error(indexArray);
   };
@@ -562,10 +568,11 @@ export class JsonPointer {
    * numeric keys) to create a generic pointer.
    *
    * For example, using the indexed pointer '/foo/1/bar/2/baz/3' and
-   * the arrayMap [['/foo', 0], ['/foo/-/bar', 3], ['/foo/-/bar/2/baz', 0]]
+   * the arrayMap [['/foo', 0], ['/foo/-/bar', 3], ['/foo/-/bar/-/baz', 0]]
    * would result in the generic pointer '/foo/-/bar/2/baz/-'
    * Using the indexed pointer '/foo/1/bar/4/baz/3' and the same arrayMap
    * would result in the generic pointer '/foo/-/bar/-/baz/-'
+   * (the bar array has 3 tuple items, so index 2 is retained, but 4 is removed)
    *
    * The structure of the arrayMap is: [['path to array', number of tuple items]...]
    *
@@ -609,19 +616,18 @@ export class JsonPointer {
     let subGroup = formGroup;
     if (dataPointerArray !== null) {
       for (let key of dataPointerArray) {
-        if (subGroup.hasOwnProperty('controls')) {
+        if (hasOwn(subGroup, 'controls')) {
           controlPointerArray.push('controls');
           subGroup = subGroup.controls;
         }
         if (isArray(subGroup) && (key === '-')) {
           controlPointerArray.push((subGroup.length - 1).toString());
           subGroup = subGroup[subGroup.length - 1];
-        } else if (subGroup.hasOwnProperty(key)) {
+        } else if (hasOwn(subGroup, key)) {
           controlPointerArray.push(key);
           subGroup = subGroup[key];
         } else {
-          console.error('toControlPointer error: Unable to find "' + key +
-            '" item in FormGroup.');
+          console.error(`toControlPointer error: Unable to find "${key}" item in FormGroup.`);
           console.error(dataPointer);
           console.error(formGroup);
           return;
@@ -629,7 +635,7 @@ export class JsonPointer {
       }
       return this.compile(controlPointerArray);
     }
-    console.error('getControl error: Invalid JSON Pointer: ' + dataPointer);
+    console.error(`getControl error: Invalid JSON Pointer: ${dataPointer}`);
   }
 
   /**
@@ -638,7 +644,7 @@ export class JsonPointer {
    * Parses a JavaScript object path into an array of keys, which
    * can then be passed to compile() to convert into a string JSON Pointer.
    *
-   * Based on mike-marcacci's objectpath parse function:
+   * Based on mike-marcacci's excellent objectpath parse function:
    * https://github.com/mike-marcacci/objectpath
    *
    * @param {string} path - The object path to parse
@@ -646,6 +652,7 @@ export class JsonPointer {
    */
   static parseObjectPath(path: string | string[]): string[] {
     if (isArray(path)) { return <string[]>path; }
+    if (this.isJsonPointer(path)) { return this.parse(path); }
     if (typeof path === 'string') {
       let index: number = 0;
       let parts: string[] = [];

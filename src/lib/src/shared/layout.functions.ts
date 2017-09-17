@@ -60,14 +60,8 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
 
       // If newNode has a key, change it to a dataPointer
       if (hasOwn(newNode, 'key')) {
-        if (newNode.key === '*') {
-          newNode.dataPointer = newNode.key;
-        } else if (JsonPointer.isJsonPointer(newNode.key)) {
-          newNode.dataPointer = JsonPointer.compile(newNode.key);
-        } else {
-          newNode.dataPointer =
-            JsonPointer.compile(JsonPointer.parseObjectPath(newNode.key), '-');
-        }
+        newNode.dataPointer = newNode.key === '*' ? newNode.key :
+          JsonPointer.compile(JsonPointer.parseObjectPath(newNode.key), '-');
         delete newNode.key;
 
       // If newNode is an array, search for dataPointer in child nodes
@@ -77,9 +71,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
           if (hasOwn(items, 'dataPointer')) { return items.dataPointer; }
           if (isArray(items.items)) {
             for (let item of items.items) {
-              if (hasOwn(item, 'dataPointer') &&
-                item.dataPointer.indexOf('/-') !== -1
-              ) {
+              if (hasOwn(item, 'dataPointer') && item.dataPointer.includes('/-')) {
                 return item.dataPointer;
               }
               if (hasOwn(item, 'items')) {
@@ -105,10 +97,8 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
       }
       newNode.dataPointer =
         JsonPointer.toGenericPointer(newNode.dataPointer, jsf.arrayMap);
-      const LastKey: string = JsonPointer.toKey(newNode.dataPointer);
-      if (isString(LastKey) && LastKey !== '-') {
-        newNode.name = LastKey;
-      }
+      const LastKey = JsonPointer.toKey(newNode.dataPointer);
+      if (isString(LastKey) && LastKey !== '-') { newNode.name = LastKey; }
       if (!jsf.dataMap.has(newNode.dataPointer)) {
         jsf.dataMap.set(newNode.dataPointer, new Map);
       } else if (
@@ -127,8 +117,8 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
         } else if (!widgetLibrary.hasWidget(newNode.type)) {
           const oldWidgetType = newNode.type;
           newNode.type = getInputType(itemSchema, newNode);
-          console.error('error: widget type "' + oldWidgetType +
-            '" not found in library. Replacing with "' + newNode.type + '".');
+          console.error(`error: widget type "${oldWidgetType}" not found` +
+            `in library. Replacing with "${newNode.type}".`);
         } else {
           newNode.type = checkInlineType(newNode.type, itemSchema, newNode);
         }
@@ -154,7 +144,9 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
         }
         if (!newNode.options.title && newNode.options.legend) {
           newNode.options.title = newNode.options.legend;
-        } else if (!newNode.options.title && !/^\d+$/.test(newNode.name)) {
+        } else if (
+          !newNode.options.title && newNode.name && !/^\d+$/.test(newNode.name)
+        ) {
           newNode.options.title = toTitleCase(newNode.name.replace(/_/g, ' '));
         }
         if (isInputRequired(jsf.schema, newNode.dataPointer)) {
@@ -172,9 +164,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
         }
         if (isArray(newNode.options.copyValueTo)) {
           newNode.options.copyValueTo = newNode.options.copyValueTo.map(item =>
-            JsonPointer.isJsonPointer(item) ?
-              JsonPointer.compile(item) :
-              JsonPointer.compile(JsonPointer.parseObjectPath(item), '-')
+            JsonPointer.compile(JsonPointer.parseObjectPath(item), '-')
           );
         }
       }
@@ -403,12 +393,9 @@ export function buildLayoutFromSchema(
     }
     for (let key of propertyKeys) {
       if (hasOwn(schema.properties, key)) {
-        let newLayoutPointer: string;
-        if (newNode.layoutPointer === '' && !forRefLibrary) {
-          newLayoutPointer = '/-';
-        } else {
-          newLayoutPointer = newNode.layoutPointer + '/items/-';
-        }
+        const newLayoutPointer =
+          newNode.layoutPointer === '/-' && !forRefLibrary ?
+            '/-' : newNode.layoutPointer + '/items/-';
         let innerItem = buildLayoutFromSchema(
           jsf, widgetLibrary,
           newLayoutPointer,
@@ -425,17 +412,16 @@ export function buildLayoutFromSchema(
         }
       }
     }
-    // if (dataPointer === '' && !forRefLibrary) {
-    //   newNode = newSection;
-    // } else {
+    if (dataPointer === '' && !forRefLibrary) {
+      newNode = newSection;
+    } else {
       newNode.items = newSection;
-    // }
+    }
   } else if (newNode.dataType === 'array') {
     newNode.items = [];
     let templateArray: any[] = [];
     if (!forRefLibrary) {
-      const templateControl: any =
-        getControl(jsf.formGroupTemplate, dataPointer);
+      const templateControl: any = getControl(jsf.formGroupTemplate, dataPointer);
       if (hasOwn(templateControl, 'controls')) {
         templateArray = templateControl['controls'];
       }
@@ -667,13 +653,13 @@ export function buildLayoutFromSchema(
  * an iteratee. Recursively maps within array elements 'items' and 'tabs'.
  * The iteratee is invoked with four arguments: (value, index, layout, path)
  *
- * THe returned layout may be longer (or shorter) then the source layout.
+ * The returned layout may be longer (or shorter) then the source layout.
  *
  * If an item from the source layout returns multiple items (as '*' usually will),
  * this function will keep all returned items in-line with the surrounding items.
  *
  * If an item from the source layout causes an error and returns null, it is
- * simply skipped, and the function will still return all non-null items.
+ * skipped without error, and the function will still return all non-null items.
  *
  * @param {any[]} layout - the layout to map
  * @param {(v: any, i?: number, l?: any, p?: string) => any}
@@ -782,7 +768,7 @@ export function buildTitleMap(
     newTitleMap = [{ name: 'True', value: true }, { name: 'False', value: false }];
   }
   if (!fieldRequired && !hasEmptyValue) {
-    newTitleMap.unshift({ name: '', value: '' });
+    newTitleMap.unshift({ name: '<em>None</em>', value: null });
   }
   return newTitleMap;
 }

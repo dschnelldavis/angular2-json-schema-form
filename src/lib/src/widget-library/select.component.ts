@@ -22,10 +22,12 @@ import { buildTitleMap } from '../shared';
         [disabled]="controlDisabled"
         [id]="'control' + layoutNode?._id"
         [name]="controlName"
-        (input)="updateValue($event)">
+        (change)="updateValue($event)">
         <option *ngFor="let selectItem of selectList"
-           [value]="selectItem.value"
-           [selected]="selectItem.value === controlValue">{{selectItem.name}}</option>
+          [selected]="selectItem.value === controlValue"
+          [value]="selectItem.value">
+          <span [innerHTML]="selectItem?.name"></span>
+        </option>
       </select>
     </div>`,
 })

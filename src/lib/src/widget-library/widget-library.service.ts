@@ -22,6 +22,8 @@ import { TabsComponent } from './tabs.component';
 import { TemplateComponent } from './template.component';
 import { TextareaComponent } from './textarea.component';
 
+import { hasOwn } from '../shared/utility.functions';
+
 @Injectable()
 export class WidgetLibraryService {
 
@@ -139,7 +141,7 @@ export class WidgetLibraryService {
     this.setActiveWidgets();
   }
 
-  setActiveWidgets() {
+  setActiveWidgets(): boolean {
     this.activeWidgets = Object.assign(
       { }, this.widgetLibrary, this.frameworkWidgets, this.registeredWidgets
     );
@@ -157,6 +159,7 @@ export class WidgetLibraryService {
         }
       }
     }
+    return true;
   }
 
   setDefaultWidget(type: string): boolean {
@@ -167,7 +170,7 @@ export class WidgetLibraryService {
 
   hasWidget(type: string, widgetSet: string = 'activeWidgets'): boolean {
     if (!type || typeof type !== 'string') { return false; }
-    return this[widgetSet].hasOwnProperty(type);
+    return hasOwn(this[widgetSet], type);
   }
 
   hasDefaultWidget(type: string): boolean {
@@ -177,38 +180,33 @@ export class WidgetLibraryService {
   registerWidget(type: string, widget: any): boolean {
     if (!type || !widget || typeof type !== 'string') { return false; }
     this.registeredWidgets[type] = widget;
-    this.setActiveWidgets();
-    return true;
+    return this.setActiveWidgets();
   }
 
   unRegisterWidget(type: string): boolean {
-    if (!type || typeof type !== 'string' ||
-      !this.registeredWidgets.hasOwnProperty(type)) { return false; }
+    if (!hasOwn(this.registeredWidgets, type)) { return false; }
     delete this.registeredWidgets[type];
-    this.setActiveWidgets();
-    return true;
+    return this.setActiveWidgets();
   }
 
   unRegisterAllWidgets(unRegisterFrameworkWidgets: boolean = true): boolean {
     this.registeredWidgets = { };
     if (unRegisterFrameworkWidgets) { this.frameworkWidgets = { }; }
-    this.setActiveWidgets();
-    return true;
+    return this.setActiveWidgets();
   }
 
   registerFrameworkWidgets(widgets: any): boolean {
-    if (widgets === null || typeof widgets !== 'object') { return false; }
+    if (widgets === null || typeof widgets !== 'object') { widgets = { }; }
     this.frameworkWidgets = widgets;
-    this.setActiveWidgets();
-    return true;
+    return this.setActiveWidgets();
   }
 
   unRegisterFrameworkWidgets(): boolean {
     if (Object.keys(this.frameworkWidgets).length) {
       this.frameworkWidgets = { };
-      this.setActiveWidgets();
+      return this.setActiveWidgets();
     }
-    return true;
+    return false;
   }
 
   getWidget(type?: string, widgetSet: string = 'activeWidgets'): any {

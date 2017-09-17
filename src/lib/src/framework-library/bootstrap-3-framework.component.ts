@@ -122,12 +122,13 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
   initializeControl() {
     if (this.layoutNode) {
       this.options = _.cloneDeep(this.layoutNode.options);
-      this.widgetLayoutNode = Object.assign(
-        {}, this.layoutNode, { options: _.cloneDeep(this.layoutNode.options) }
-      );
+      this.widgetLayoutNode = {
+        ...this.layoutNode,
+        options: _.cloneDeep(this.layoutNode.options)
+      };
       this.widgetOptions = this.widgetLayoutNode.options;
       this.layoutPointer = this.jsf.getLayoutPointer(this);
-      this.formControl = this.jsf.getControl(this);
+      this.formControl = this.jsf.getFormControl(this);
       this.updateArrayItems();
 
       this.options.isInputWidget = inArray(this.layoutNode.type, [
@@ -256,8 +257,8 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
 
   }
 
-  updateHelpBlock(value){
-    this.options.helpBlock = this.options.description|| this.options.help || false;
+  updateHelpBlock(value) {
+    this.options.helpBlock = this.options.description || this.options.help || false;
     if (this.options.enableErrorState && value === 'INVALID' && this.formControl.errors &&
       (this.formControl.dirty || this.options.feedbackOnRender)
     ) {
@@ -316,8 +317,8 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
         }
         return this.jsf.parseText(
           thisTitle,
-          this.jsf.getControlValue(this),
-          this.jsf.getControlGroup(this).value,
+          this.jsf.getFormControlValue(this),
+          this.jsf.getFormControlGroup(this).value,
           this.dataIndex[this.dataIndex.length - 1]
         );
     }

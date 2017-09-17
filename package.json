@@ -1,6 +1,6 @@
 {
   "name": "angular2-json-schema-form",
-  "version": "0.5.0-alpha.4",
+  "version": "0.5.0-alpha.5",
   "author": {
     "name": "David Schnell-Davis",
     "email": "dschnelldavis@gmail.com"
@@ -57,6 +57,7 @@
   "dependencies": {
     "ajv": "5.x",
     "hammerjs": "2.x",
+    "json-schema-ref-parser": "^3.3.1",
     "lodash": "4.x"
   },
   "peerDependencies": {
@@ -67,22 +68,22 @@
     "rxjs": "5.x"
   },
   "devDependencies": {
-    "@angular/animations": "^4.4.0-RC.0",
+    "@angular/animations": "^4.4.1",
     "@angular/cdk": "^2.0.0-beta.10",
-    "@angular/cli": "^1.4.1",
-    "@angular/common": "^4.4.0-RC.0",
-    "@angular/compiler": "^4.4.0-RC.0",
-    "@angular/compiler-cli": "^4.4.0-RC.0",
-    "@angular/core": "^4.4.0-RC.0",
+    "@angular/cli": "^1.4.2",
+    "@angular/common": "^4.4.1",
+    "@angular/compiler": "^4.4.1",
+    "@angular/compiler-cli": "^4.4.1",
+    "@angular/core": "^4.4.1",
     "@angular/flex-layout": "2.0.0-beta.9",
-    "@angular/forms": "^4.4.0-RC.0",
-    "@angular/http": "^4.4.0-RC.0",
+    "@angular/forms": "^4.4.1",
+    "@angular/http": "^4.4.1",
     "@angular/material": "^2.0.0-beta.10",
-    "@angular/platform-browser": "^4.4.0-RC.0",
-    "@angular/platform-browser-dynamic": "^4.4.0-RC.0",
-    "@angular/router": "^4.4.0-RC.0",
+    "@angular/platform-browser": "^4.4.1",
+    "@angular/platform-browser-dynamic": "^4.4.1",
+    "@angular/router": "^4.4.1",
     "@types/ace": "^0.0.35",
-    "@types/jasmine": "^2.5.38",
+    "@types/jasmine": "^2.6.0",
     "@types/node": "^8.0.0",
     "brace": "^0.10.0",
     "camelcase": "^4.0.0",
@@ -100,7 +101,7 @@
     "karma-jasmine-html-reporter": "^0.2.2",
     "protractor": "^5.1.0",
     "rimraf": "^2.6.1",
-    "rollup": "^0.49.0",
+    "rollup": "^0.50.0",
     "rollup-plugin-commonjs": "^8.0.2",
     "rollup-plugin-node-resolve": "^3.0.0",
     "rollup-plugin-node-resolve-angular": "^2.0.3",

@@ -18,6 +18,8 @@ import { toTitleCase } from '../../shared';
 export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
   controlInitialized: boolean = false;
   controlType: string;
+  showArrayItem: boolean = false;
+  showCloseButton: boolean = false;
   inputType: string;
   options: any; // Options used in this framework
   widgetLayoutNode: any; // layoutNode passed to child widget
@@ -36,21 +38,26 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     this.initializeControl();
+    this.showArrayItem = this.layoutNode.arrayItem && this.layoutNode.type !== '$ref';
+    this.showCloseButton = !!this.options.removable;
   }
 
   ngOnChanges() {
     if (!this.controlInitialized) { this.initializeControl(); }
+    this.showArrayItem = this.layoutNode.arrayItem && this.layoutNode.type !== '$ref';
+    this.showCloseButton = !!this.options.removable;
   }
 
   initializeControl() {
     if (this.layoutNode) {
       this.options = _.cloneDeep(this.layoutNode.options);
-      this.widgetLayoutNode = Object.assign(
-        { }, this.layoutNode, { options: _.cloneDeep(this.layoutNode.options) }
-      );
+      this.widgetLayoutNode = {
+        ...this.layoutNode,
+        options: _.cloneDeep(this.layoutNode.options)
+      };
       this.widgetOptions = this.widgetLayoutNode.options;
       this.layoutPointer = this.jsf.getLayoutPointer(this);
-      this.formControl = this.jsf.getControl(this);
+      this.formControl = this.jsf.getFormControl(this);
 
       this.options.title = this.setTitle();
 
@@ -181,8 +188,8 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
         }
         return this.jsf.parseText(
           thisTitle,
-          this.jsf.getControlValue(this),
-          this.jsf.getControlGroup(this).value,
+          this.jsf.getFormControlValue(this),
+          this.jsf.getFormControlGroup(this).value,
           this.dataIndex[this.dataIndex.length - 1]
         );
     }

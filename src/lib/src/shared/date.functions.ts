@@ -4,42 +4,36 @@
  * @param  {Date} date
  * @return {string}
  */
-export function dateToString(
-  date: Date|string, options: { format?: string, locale?: string } = {}
-): string {
-  if (!options.format) { options.format = 'YYYY-MM-DD'; }
+export function dateToString(date: Date|string, options: any = {}): string {
+  const dateFormat = options.dateFormat || 'YYYY-MM-DD';
   // TODO: Use options.locale to change default format and names
-  // if (!options.locale) { options.locale = 'en-US'; }
+  // const locale = options.locale || 'en-US';
   if (typeof date === 'string') { date = stringToDate(date); }
   if (Object.prototype.toString.call(date) !== '[object Date]') { return null; }
-  const [year, month, day] = [date.getFullYear(), date.getMonth() + 1, date.getDate()];
-  const longMonth = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
-    'August', 'September', 'October', 'November', 'December'][date.getMonth()];
-  const shortMonth = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
-    'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][date.getMonth()];
-  const longDay = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][date.getDay()];
-  const shortDay = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()];
-  return options.format
-    .replace(/YYYY/ig, year + '')
-    .replace(/YY/ig, (year + '').slice(-2))
-    .replace(/MMMM/ig, longMonth)
-    .replace(/MMM/ig, shortMonth)
-    .replace(/MM/ig, ('0' + month).slice(-2))
-    .replace(/M/ig, month + '')
-    .replace(/DDDD/ig, longDay)
-    .replace(/DDD/ig, shortDay)
-    .replace(/DD/ig, ('0' + day).slice(-2))
-    .replace(/D/ig, day + '')
-    .replace(/DS/ig, day + ordinal(day));
+  const longMonths = ['January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'];
+  const shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const longDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const shortDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  return dateFormat
+    .replace(/YYYY/ig, date.getFullYear() + '')
+    .replace(/YY/ig, (date.getFullYear() + '').slice(-2))
+    .replace(/MMMM/ig, longMonths[date.getMonth()])
+    .replace(/MMM/ig, shortMonths[date.getMonth()])
+    .replace(/MM/ig, ('0' + (date.getMonth() + 1)).slice(-2))
+    .replace(/M/ig, (date.getMonth() + 1) + '')
+    .replace(/DDDD/ig, longDays[date.getDay()])
+    .replace(/DDD/ig, shortDays[date.getDay()])
+    .replace(/DD/ig, ('0' + date.getDate()).slice(-2))
+    .replace(/D/ig, date.getDate() + '')
+    .replace(/S/ig, ordinal(date.getDate()));
 }
 
 export function ordinal(number: number|string): string {
   if (typeof number === 'number') { number = number + ''; }
   const last = number.slice(-1);
   const nextToLast = number.slice(-2, 1);
-  return last === '1' && nextToLast !== '1' ? 'st' :
-         last === '2' && nextToLast !== '1' ? 'nd' :
-         last === '3' && nextToLast !== '1' ? 'rd' : 'th';
+  return (nextToLast !== '1' && { '1': 'st', '2': 'nd', '3': 'rd' }[last]) || 'th';
 }
 
 /**

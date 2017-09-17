@@ -21,14 +21,14 @@ export const Examples: any = {
     name: 'Angular JSON Schema Form examples',
     schemas: [
       { name: 'Flexbox layout',                  file: 'ng-jsf-flex-layout', },
-      { name: 'Simple Array',                    file: 'ng-jsf-simple-array', },
+      // { name: 'Simple Array',                    file: 'ng-jsf-simple-array', },
       { name: 'Nested Arrays',                   file: 'ng-jsf-nested-arrays', },
       { name: 'Deep References',                 file: 'ng-jsf-deep-ref', },
       { name: 'Data Only (no Schema or Layout)', file: 'ng-jsf-data-only', },
       // { name: 'Layout Only (no Schema or Data)', file: 'ng-jsf-layout-only', },
       // { name: 'JSON Meta-Schema - Version 6',    file: 'json-schema-draft06', },
-      { name: 'JSON Meta-Schema - Version 4',    file: 'json-schema-draft04', },
-      { name: 'JSON Meta-Schema - Version 3',    file: 'json-schema-draft03', },
+      // { name: 'JSON Meta-Schema - Version 4',    file: 'json-schema-draft04', },
+      // { name: 'JSON Meta-Schema - Version 3',    file: 'json-schema-draft03', },
     ]
   },
   'asf': {

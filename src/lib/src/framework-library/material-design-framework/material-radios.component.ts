@@ -22,18 +22,16 @@ import { buildTitleMap } from '../../shared';
       [disabled]="controlDisabled"
       [name]="controlName"
       [value]="controlValue">
-      <div *ngFor="let radioItem of radiosList">
-        <md-radio-button
-          [id]="'control' + layoutNode?._id + '/' + radioItem?.name"
-          [value]="radioItem?.value"
-          (click)="updateValue(radioItem?.value)">
-          <span [innerHTML]="radioItem?.name"></span>
-        </md-radio-button>
-      </div>
+      <md-radio-button *ngFor="let radioItem of radiosList"
+        [id]="'control' + layoutNode?._id + '/' + radioItem?.name"
+        [value]="radioItem?.value"
+        (click)="updateValue(radioItem?.value)">
+        <span [innerHTML]="radioItem?.name"></span>
+      </md-radio-button>
     </md-radio-group>`,
   styles: [`
     md-radio-group { display: inline-flex; }
-    md-radio-button { margin: 0 5px; }
+    md-radio-button { margin: 2px; }
   `]
 })
 export class MaterialRadiosComponent implements OnInit {

@@ -69,10 +69,6 @@ export class MaterialDatepickerComponent implements OnInit, OnChanges {
   }
 
   updateValue(event) {
-    let options: { format?: string, locale?: string } = {};
-    if (this.layoutNode.dateFormat || this.layoutNode['date-format']) {
-      options.format = this.layoutNode.dateFormat || this.layoutNode['date-format'];
-    }
-    this.jsf.updateValue(this, dateToString(event, options));
+    this.jsf.updateValue(this, dateToString(event, this.options));
   }
 }

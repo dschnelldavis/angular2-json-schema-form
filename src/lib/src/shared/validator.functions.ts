@@ -332,7 +332,7 @@ export function isType(value: PrimitiveValue, type: SchemaPrimitiveType): boolea
     case 'null':
       return !hasValue(value);
     default:
-      console.error('isType error: "' + type + '" is not a recognized type.');
+      console.error(`isType error: "${type}" is not a recognized type.`);
       return null;
   }
 }
