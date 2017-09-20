@@ -40,6 +40,12 @@ export class SubmitComponent implements OnInit {
   ngOnInit() {
     this.options = this.layoutNode.options || {};
     this.jsf.initializeControl(this);
+    if (this.options.hasOwnProperty('disabled')) {
+      this.controlDisabled = this.options.disabled;
+    } else if (this.jsf.globalOptions.disableInvalidSubmit) {
+      this.controlDisabled = !this.jsf.isValid;
+      this.jsf.isValidChanges.subscribe(isValid => this.controlDisabled = !isValid);
+    }
     if (this.controlValue === null || this.controlValue === undefined) {
       this.controlValue = this.options.title;
     }

@@ -50,10 +50,10 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
 
   initializeControl() {
     if (this.layoutNode) {
-      this.options = _.cloneDeep(this.layoutNode.options);
+      this.options = _.cloneDeep(this.layoutNode.options || {});
       this.widgetLayoutNode = {
         ...this.layoutNode,
-        options: _.cloneDeep(this.layoutNode.options)
+        options: _.cloneDeep(this.layoutNode.options || {})
       };
       this.widgetOptions = this.widgetLayoutNode.options;
       this.layoutPointer = this.jsf.getLayoutPointer(this);

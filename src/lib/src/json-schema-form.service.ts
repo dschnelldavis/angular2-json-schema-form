@@ -75,6 +75,7 @@ export class JsonSchemaFormService {
     loadExternalAssets: false, // Load external css and JavaScript for framework?
     pristine: { errors: true, success: true },
     supressPropertyTitles: false,
+    disableInvalidSubmit: true, // Disable submit if form invalid?
     setSchemaDefaults: true,
     validateOnRender: false,
     formDefaults: { // Default options for form controls
@@ -181,15 +182,9 @@ export class JsonSchemaFormService {
     this.validData = this.isValid ? this.data : null;
     this.validationErrors = this.validateFormData.errors;
     if (updateSubscriptions) {
-      if (this.dataChanges.observers.length) {
-        this.dataChanges.next(this.data);
-      }
-      if (this.isValidChanges.observers.length) {
-        this.isValidChanges.next(this.isValid);
-      }
-      if (this.validationErrorChanges.observers.length) {
-        this.validationErrorChanges.next(this.validationErrors);
-      }
+      this.dataChanges.next(this.data);
+      this.isValidChanges.next(this.isValid);
+      this.validationErrorChanges.next(this.validationErrors);
     }
   }
 
@@ -197,10 +192,12 @@ export class JsonSchemaFormService {
     this.formGroup = <FormGroup>buildFormGroup(this.formGroupTemplate);
     if (this.formGroup) {
       this.compileAjvSchema();
-      this.validateData(this.formGroup.value, false);
+      this.validateData(this.formGroup.value);
 
       // Set up observables to emit data and validation info when form data changes
-      if (this.formValueSubscription) { this.formValueSubscription.unsubscribe(); }
+      if (this.formValueSubscription) {
+        this.formValueSubscription.unsubscribe();
+      }
       this.formValueSubscription = this.formGroup.valueChanges.subscribe(
         formValue => this.validateData(formValue)
       );
