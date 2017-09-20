@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 
-import { isDefined, isEmpty, isObject, isArray, isMap } from './validator.functions';
+import {
+  isDefined, isEmpty, isObject, isArray, isMap, isNumber, isString
+} from './validator.functions';
 import { hasOwn, copy } from './utility.functions';
 
 /**
@@ -12,7 +14,7 @@ import { hasOwn, copy } from './utility.functions';
  * get, getFirst, set, setCopy, insert, insertCopy, remove, has, dict,
  * forEachDeep, forEachDeepCopy, escape, unescape, parse, compile, toKey,
  * isJsonPointer, isSubPointer, toIndexedPointer, toGenericPointer,
- * toControlPointer, parseObjectPath
+ * toControlPointer, toSchemaPointer, parseObjectPath
  *
  * Partly based on manuelstofer's json-pointer utilities
  * https://github.com/manuelstofer/json-pointer
@@ -481,15 +483,17 @@ export class JsonPointer {
   /**
    * 'isJsonPointer' function
    *
-   * Checks a string value to determine if it is a valid JSON Pointer.
-   * This function only checks for valid JSON Pointer strings, not arrays.
-   * (Any array of string values is assumed to be a potentially valid JSON Pointer.)
+   * Checks a string or array value to determine if it is a valid JSON Pointer.
+   * Returns true if a string is empty, or starts with '/' or '#/'.
+   * Returns true if an array contains only string values.
    *
    * @param {any} value - value to check
    * @returns {boolean} - true if value is a valid JSON Pointer, otherwise false
    */
   static isJsonPointer(value: any): boolean {
-    if (typeof value === 'string') {
+    if (isArray(value)) {
+      return value.every(key => typeof key === 'string');
+    } else if (isString(value)) {
       if (value === '') { return true; }
       if (value[0] === '#') { value = value.slice(1); }
       if (value[0] === '/') { return true; }
@@ -515,7 +519,9 @@ export class JsonPointer {
       if (typeof longPointer !== 'string') { console.error(longPointer); }
       return;
     }
-    return shortPointer === longPointer.slice(0, shortPointer.length);
+    return shortPointer === longPointer.slice(0, shortPointer.length) &&
+      (shortPointer.length === longPointer.length ||
+        longPointer.slice(shortPointer.length)[0] === '/');
   }
 
   /**
@@ -534,30 +540,29 @@ export class JsonPointer {
    * @return {string} - The merged pointer with indexes
    */
   static toIndexedPointer(
-    genericPointer: string, indexArray: number[], arrayMap: Map<string, number> = null
+    genericPointer: Pointer, indexArray: number[], arrayMap: Map<string, number> = null
   ) {
-    if (genericPointer[0] === '#') {
-      genericPointer = genericPointer.slice(1);
-    }
     if (this.isJsonPointer(genericPointer) && isArray(indexArray)) {
+      let indexedPointer = this.compile(genericPointer);
       if (isMap(arrayMap)) {
         let arrayIndex = 0;
-        return genericPointer.replace(/\/\-(?=\/|$)/g, (key, stringIndex) =>
-          arrayMap.has(genericPointer.slice(0, stringIndex)) ?
+        return indexedPointer.replace(/\/\-(?=\/|$)/g, (key, stringIndex) =>
+          arrayMap.has((<string>indexedPointer).slice(0, stringIndex)) ?
             '/' + indexArray[arrayIndex++] : key
         );
       } else {
-        let indexedPointer = genericPointer;
         for (let pointerIndex of indexArray) {
           indexedPointer = indexedPointer.replace('/-', '/' + pointerIndex);
         }
         return indexedPointer;
       }
     }
-    console.error('toIndexedPointer error: ' +
-      'genericPointer must be a JSON Pointer and indexArray must be an array.');
-    console.error(genericPointer);
-    console.error(indexArray);
+    if (!this.isJsonPointer(genericPointer)) {
+      console.error(`toIndexedPointer error: Invalid JSON Pointer: ${genericPointer}`);
+    }
+    if (!isArray(indexArray)) {
+      console.error(`toIndexedPointer error: Invalid indexArray: ${indexArray}`);
+    }
   };
 
   /**
@@ -594,11 +599,13 @@ export class JsonPointer {
       }
       return this.compile(pointerArray);
     }
-    console.error('toGenericPointer error: ' +
-      'indexedPointer must be a JSON Pointer and arrayMap must be a Map.');
-    console.error(indexedPointer);
-    console.error(arrayMap);
-  };
+    if (!this.isJsonPointer(indexedPointer)) {
+      console.error(`toGenericPointer error: invalid JSON Pointer: ${indexedPointer}`);
+    }
+    if (!isMap(arrayMap)) {
+      console.error(`toGenericPointer error: invalid arrayMap: ${arrayMap}`);
+    }
+  }
 
   /**
    * 'toControlPointer' function
@@ -606,11 +613,11 @@ export class JsonPointer {
    * Accepts a JSON Pointer for a data object and returns a JSON Pointer for the
    * matching control in an Angular FormGroup.
    *
-   * @param {FormGroup} formGroup - Angular FormGroup to get value from
    * @param {Pointer} dataPointer - JSON Pointer (string or array) to a data object
+   * @param {FormGroup} formGroup - Angular FormGroup to get value from
    * @return {Pointer} - JSON Pointer (string) to the formGroup object
    */
-  static toControlPointer(formGroup: any, dataPointer: Pointer): string {
+  static toControlPointer(dataPointer: Pointer, formGroup: any): string {
     const dataPointerArray: string[] = this.parse(dataPointer);
     let controlPointerArray: string[] = [];
     let subGroup = formGroup;
@@ -635,7 +642,61 @@ export class JsonPointer {
       }
       return this.compile(controlPointerArray);
     }
-    console.error(`getControl error: Invalid JSON Pointer: ${dataPointer}`);
+    console.error(`toControlPointer error: Invalid JSON Pointer: ${dataPointer}`);
+  }
+
+  /**
+   * 'toSchemaPointer' function
+   *
+   * Accepts a JSON Pointer to a value within a data object and returns a
+   * JSON Pointer to the sub-schma for that value within the object's JSON schema.
+   *
+   * @param {Pointer} dataPointer - JSON Pointer (string or array) to an object
+   * @param {any} schema - JSON schema for the object
+   * @return {Pointer} - JSON Pointer (string) to the object's schema
+   */
+  static toSchemaPointer(dataPointer: Pointer, schema: any): string {
+    if (this.isJsonPointer(dataPointer) && typeof schema === 'object') {
+      const pointerArray = this.parse(dataPointer);
+      const firstKey = pointerArray.shift();
+      if (firstKey === undefined) { return ''; }
+      if (schema.type === 'object' || schema.properties || schema.additionalProperties) {
+        const subSchema =
+          (schema.properties || schema.additionalProperties || {})[firstKey];
+        if (subSchema) {
+          return `/properties/${this.escape(firstKey)}` +
+            this.toSchemaPointer(pointerArray, subSchema);
+        }
+      }
+      if ((schema.type === 'array' || schema.items) &&
+        (isNumber(firstKey) || firstKey === '-' || firstKey === '')
+      ) {
+        const arrayItem = firstKey === '-' || firstKey === '' ? 0 : +firstKey;
+        if (isArray(schema.items)) {
+          if (arrayItem < schema.items.length) {
+            return `/items/${arrayItem}` +
+              this.toSchemaPointer(pointerArray, schema.items[arrayItem]);
+          } else if (schema.additionalItems) {
+            return '/additionalItems' +
+              this.toSchemaPointer(pointerArray, schema.additionalItems);
+          }
+        } else if (isObject(schema.items)) {
+          return '/items' + this.toSchemaPointer(pointerArray, schema.items);
+        } else if (isObject(schema.additionalItems)) {
+          return '/additionalItems' +
+            this.toSchemaPointer(pointerArray, schema.additionalItems);
+        }
+      }
+      console.error(`toSchemaPointer error: Unable to find matching sub-schema for pointer ${dataPointer}`);
+      console.error(schema);
+    }
+    if (!this.isJsonPointer(dataPointer)) {
+      console.error(`toSchemaPointer error: Invalid JSON Pointer: ${dataPointer}`);
+    }
+    if (typeof schema !== 'object') {
+      console.error(`toSchemaPointer error: Invalid JSON Schema: ${schema}`);
+    }
+    return null;
   }
 
   /**
