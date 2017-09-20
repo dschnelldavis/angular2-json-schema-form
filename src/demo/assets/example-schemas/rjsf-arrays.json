@@ -82,15 +82,11 @@
     "listOfStrings": { "items": { "ui:emptyValue": "" } },
     "multipleChoicesList": { "ui:widget": "checkboxes" },
     "fixedItemsList": {
-      "items": [{ "ui:widget": "textarea" }, { "ui:widget": "select" }],
+      "items": [ { "ui:widget": "textarea" }, { "ui:widget": "select" } ],
       "additionalItems": { "ui:widget": "updown" }
     },
-    "unorderable": { "ui:options": {
-      "orderable": false
-    } },
-    "unremovable": { "ui:options": {
-      "removable": false
-    } },
+    "unorderable": { "ui:options": { "orderable": false } },
+    "unremovable": { "ui:options": { "removable": false } },
     "noToolbar": { "ui:options": {
       "addable": false,
       "orderable": false,
@@ -106,10 +102,10 @@
     "listOfStrings": ["foo", "bar"],
     "multipleChoicesList": ["foo", "bar"],
     "fixedItemsList": ["Some text", true, 123],
-    "nestedList": [["lorem", "ipsum"], ["dolor"]],
+    "nestedList": [ ["lorem", "ipsum"], ["dolor"] ],
     "unorderable": ["one", "two"],
     "unremovable": ["one", "two"],
     "noToolbar": ["one", "two"],
-    "fixedNoToolbar": [42, true, "additional item one", "additional item two"]
+    "fixedNoToolbar": [ 42, true, "additional item one", "additional item two" ]
   }
 }

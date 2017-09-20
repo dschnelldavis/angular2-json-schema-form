@@ -1,7 +1,7 @@
 {
   "schema": {
     "title": "Custom validation",
-    description:
+    "description" :
       "This form defines custom validation rules checking that the two passwords match.",
     "type": "object",
     "properties": {

@@ -53,7 +53,7 @@
     },
     "tree": {
       "name": "root",
-      "children": [{ "name": "leaf" }]
+      "children": [ { "name": "leaf" } ]
     }
   }
 }
