@@ -27,7 +27,7 @@ import { hasOwn } from '../shared/utility.functions';
 @Injectable()
 export class WidgetLibraryService {
 
-  defaultWidget: string = 'none';
+  defaultWidget: string = 'text';
   widgetLibrary: any = {
 
   // Angular JSON Schema Form administrative widgets
@@ -119,6 +119,9 @@ export class WidgetLibraryService {
 
   // Widgets included for compatibility with Angular Schema Form API
     'wizard': 'section', // TODO: Sequential panels with "Next" and "Previous" buttons
+
+  // Widgets included for compatibility with other libraries
+    'textline': 'text',
 
   // Recommended 3rd-party add-on widgets (TODO: create wrappers for these...)
     // 'ng2-select': Select control replacement - http://valor-software.com/ng2-select/
