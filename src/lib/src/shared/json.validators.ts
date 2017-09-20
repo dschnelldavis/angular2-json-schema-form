@@ -596,7 +596,7 @@ export class JsonValidators {
         _executeValidators(control, presentValidators, invert).filter(isDefined);
       let isValid: boolean = validators.length > arrayOfErrors.length;
       return xor(isValid, invert) ?
-        null : _mergeObjects.apply(arrayOfErrors.concat({ 'anyOf': !invert }));
+        null : _mergeObjects(...arrayOfErrors, { 'anyOf': !invert });
     };
   }
 
@@ -624,8 +624,8 @@ export class JsonValidators {
       if (xor(isValid, invert)) { return null; }
       let arrayOfValids: PlainObject[] =
         _executeValidators(control, presentValidators, invert);
-      return _mergeObjects.apply(
-        arrayOfErrors.concat(arrayOfValids).concat({ 'oneOf': !invert })
+      return _mergeObjects(
+        ...arrayOfErrors, ...arrayOfValids, { 'oneOf': !invert }
       );
     };
   }
@@ -661,8 +661,8 @@ export class JsonValidators {
    * Returns valid if the submitted validator is invalid, and
    * returns invalid if the submitted validator is valid.
    * (Note: this function can itself be inverted
-   * - e.g. composeNot(composeNot(validator)) -
-   * but this can be confusing and is therefore not recommended.)
+   *   - e.g. composeNot(composeNot(validator)) -
+   *   but this can be confusing and is therefore not recommended.)
    *
    * @param {IValidatorFn[]} validators - validator(s) to invert
    * @return {IValidatorFn} - new validator function that returns opposite result

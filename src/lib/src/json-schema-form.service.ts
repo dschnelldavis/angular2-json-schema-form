@@ -229,6 +229,7 @@ export class JsonSchemaFormService {
 
   compileAjvSchema() {
     if (!this.validateFormData) {
+
       // if 'ui:order' exists in properties, move it to root before compiling with ajv
       if (Array.isArray(this.schema.properties['ui:order'])) {
         this.schema['ui:order'] = this.schema.properties['ui:order'];
@@ -242,9 +243,9 @@ export class JsonSchemaFormService {
   resolveSchemaRefLinks() {
 
     // Search schema for $ref links
-    JsonPointer.forEachDeep(this.schema, (value, pointer) => {
-      if (hasOwn(value, '$ref') && isString(value['$ref'])) {
-        const newReference: string = JsonPointer.compile(value['$ref']);
+    JsonPointer.forEachDeep(this.schema, (subSchema, pointer) => {
+      if (hasOwn(subSchema, '$ref') && isString(subSchema['$ref'])) {
+        const newReference: string = JsonPointer.compile(subSchema['$ref']);
         const isRecursive: boolean = JsonPointer.isSubPointer(newReference, pointer);
 
         // Save new target schemas in schemaRefLibrary
@@ -262,10 +263,11 @@ export class JsonSchemaFormService {
         // If a $ref link is not recursive,
         // remove link and replace with copy of target schema
         if (!isRecursive) {
-          delete value['$ref'];
-          const targetSchema: any = Object.assign(
-            _.cloneDeep(this.schemaRefLibrary[newReference]), value
-          );
+          delete subSchema['$ref'];
+          const targetSchema: any = {
+            ..._.cloneDeep(this.schemaRefLibrary[newReference]),
+            ...subSchema
+          };
           this.schema = JsonPointer.set(this.schema, pointer, targetSchema);
 
           // Save partial link in schemaRecursiveRefMap,
@@ -355,7 +357,7 @@ export class JsonSchemaFormService {
     const parentNode: any = parentCtx.layoutNode;
     let text: string;
     let childValue: any;
-    let parentValues: any = this.getControlValue(parentCtx);
+    let parentValues: any = this.getFormControlValue(parentCtx);
     const isArrayItem: boolean =
       parentNode.type.slice(-5) === 'array' && isArray(parentValues);
     if (isArrayItem && childNode.type !== '$ref') {
@@ -384,10 +386,10 @@ export class JsonSchemaFormService {
   }
 
   initializeControl(ctx: any): boolean {
-    ctx.formControl = this.getControl(ctx);
+    ctx.formControl = this.getFormControl(ctx);
     ctx.boundControl = !!ctx.formControl;
     if (ctx.boundControl) {
-      ctx.controlName = this.getControlName(ctx);
+      ctx.controlName = this.getFormControlName(ctx);
       ctx.controlValue = ctx.formControl.value;
       ctx.formControl.valueChanges.subscribe(v => ctx.controlValue = v);
       ctx.controlDisabled = ctx.formControl.disabled;
@@ -399,8 +401,7 @@ export class JsonSchemaFormService {
       ctx.controlValue = ctx.layoutNode.value;
       const dataPointer = this.getDataPointer(ctx);
       if (dataPointer) {
-        console.error('warning: control "' + dataPointer +
-          '" is not bound to the Angular FormGroup.');
+        console.error(`warning: control "${dataPointer}" is not bound to the Angular FormGroup.`);
       }
     }
     return ctx.boundControl;
@@ -429,7 +430,7 @@ export class JsonSchemaFormService {
   }
 
   updateArrayCheckboxList(ctx: any, checkboxList: CheckboxItem[]): void {
-    let formArray = <FormArray>this.getControl(ctx);
+    let formArray = <FormArray>this.getFormControl(ctx);
 
     // Remove all existing items
     while (formArray.value.length) { formArray.removeAt(0); }
@@ -447,7 +448,7 @@ export class JsonSchemaFormService {
     formArray.markAsDirty();
   }
 
-  getControl(ctx: any): AbstractControl {
+  getFormControl(ctx: any): AbstractControl {
     if (
       !ctx.layoutNode || !ctx.layoutNode.dataPointer ||
       ctx.layoutNode.type === '$ref'
@@ -455,7 +456,7 @@ export class JsonSchemaFormService {
     return getControl(this.formGroup, this.getDataPointer(ctx));
   }
 
-  getControlValue(ctx: any): AbstractControl {
+  getFormControlValue(ctx: any): AbstractControl {
     if (
       !ctx.layoutNode || !ctx.layoutNode.dataPointer ||
       ctx.layoutNode.type === '$ref'
@@ -464,12 +465,12 @@ export class JsonSchemaFormService {
     return control ? control.value : null;
   }
 
-  getControlGroup(ctx: any): FormArray | FormGroup {
+  getFormControlGroup(ctx: any): FormArray | FormGroup {
     if (!ctx.layoutNode || !ctx.layoutNode.dataPointer) { return null; }
     return getControl(this.formGroup, this.getDataPointer(ctx), true);
   }
 
-  getControlName(ctx: any): string {
+  getFormControlName(ctx: any): string {
     if (
       !ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex
     ) { return null; }
@@ -488,23 +489,27 @@ export class JsonSchemaFormService {
     if (
       !ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex
     ) { return null; }
-    return JsonPointer.toIndexedPointer(ctx.layoutNode.dataPointer, ctx.dataIndex, this.arrayMap);
+    return JsonPointer.toIndexedPointer(
+      ctx.layoutNode.dataPointer, ctx.dataIndex, this.arrayMap
+    );
   }
 
   getLayoutPointer(ctx: any): string {
     if (
       !ctx.layoutNode || !ctx.layoutNode.layoutPointer || !ctx.layoutIndex
     ) { return null; }
-    return JsonPointer.toIndexedPointer(ctx.layoutNode.layoutPointer, ctx.layoutIndex);
+    return JsonPointer.toIndexedPointer(
+      ctx.layoutNode.layoutPointer, ctx.layoutIndex
+    );
   }
 
   isControlBound(ctx: any): boolean {
     if (
       !ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex
     ) { return false; }
-    const controlGroup = this.getControlGroup(ctx);
-    const name = this.getControlName(ctx);
-    return controlGroup ? controlGroup.controls.hasOwnProperty(name) : false;
+    const controlGroup = this.getFormControlGroup(ctx);
+    const name = this.getFormControlName(ctx);
+    return controlGroup ? hasOwn(controlGroup.controls, name) : false;
   }
 
   addItem(ctx: any): boolean {
@@ -512,50 +517,44 @@ export class JsonSchemaFormService {
       !ctx.layoutNode || !ctx.layoutNode.$ref || !ctx.dataIndex ||
       !ctx.layoutNode.layoutPointer || !ctx.layoutIndex
     ) { return false; }
-console.log(ctx);
-console.log(this.templateRefLibrary);
-console.log(ctx.layoutNode.$ref);
-console.log(JsonPointer.get(this.templateRefLibrary, [ctx.layoutNode.$ref]));
-console.log(buildFormGroup(JsonPointer.get(this.templateRefLibrary, [ctx.layoutNode.$ref])));
+
     // Create a new Angular form control from a template in templateRefLibrary
     const newFormGroup = buildFormGroup(JsonPointer.get(
       this.templateRefLibrary, [ctx.layoutNode.$ref]
     ));
-console.log(newFormGroup);
+
     // Add the new form control to the parent formArray or formGroup
     if (ctx.layoutNode.arrayItem) { // Add new array item to formArray
-      (<FormArray>this.getControlGroup(ctx))
+      (<FormArray>this.getFormControlGroup(ctx))
         .push(newFormGroup);
     } else { // Add new $ref item to formGroup
-      (<FormGroup>this.getControlGroup(ctx))
-        .addControl(this.getControlName(ctx), newFormGroup);
+      (<FormGroup>this.getFormControlGroup(ctx))
+        .addControl(this.getFormControlName(ctx), newFormGroup);
     }
 
     // Copy a new layoutNode from layoutRefLibrary
     const newLayoutNode = _.cloneDeep(JsonPointer.get(
       this.layoutRefLibrary, [ctx.layoutNode.$ref]
     ));
-console.log(newLayoutNode);
-    JsonPointer.forEachDeep(newLayoutNode, (value, pointer) => {
+    JsonPointer.forEachDeep(newLayoutNode, (subNode, pointer) => {
 
       // Reset all _id's in newLayoutNode to unique values
-      if (hasOwn(value, '_id')) { value._id = _.uniqueId(); }
+      if (hasOwn(subNode, '_id')) { subNode._id = _.uniqueId(); }
 
       // If adding a recursive item, prefix current dataPointer
       // and layoutPointer to all pointers in new layoutNode
       if (!ctx.layoutNode.arrayItem || ctx.layoutNode.recursiveReference) {
-        if (hasOwn(value, 'dataPointer')) {
-          value.dataPointer = ctx.layoutNode.dataPointer + value.dataPointer;
+        if (hasOwn(subNode, 'dataPointer')) {
+          subNode.dataPointer = ctx.layoutNode.dataPointer + subNode.dataPointer;
         }
-        if (hasOwn(value, 'layoutPointer')) {
-          value.layoutPointer =
-            ctx.layoutNode.layoutPointer.slice(0, -2) + value.layoutPointer;
+        if (hasOwn(subNode, 'layoutPointer')) {
+          subNode.layoutPointer =
+            ctx.layoutNode.layoutPointer.slice(0, -2) + subNode.layoutPointer;
         }
       }
     });
-
-    // Add the new layoutNode to the layout
-    JsonPointer.insert(this.layout, this.getLayoutPointer(ctx), newLayoutNode);
+    let layoutPointer: string | string[] = this.getLayoutPointer(ctx);
+    JsonPointer.insert(this.layout, layoutPointer, newLayoutNode);
     return true;
   }
 
@@ -567,12 +566,11 @@ console.log(newLayoutNode);
     ) { return false; }
 
     // Move item in the formArray
-    let formArray = <FormArray>this.getControlGroup(ctx);
-    formArray.controls.splice(newIndex, 0, // add to new index
-      formArray.controls.splice(oldIndex, 1)[0] // remove from old index
-    );
+    let formArray = <FormArray>this.getFormControlGroup(ctx);
+    const controlToMove = formArray.at(oldIndex);
+    formArray.removeAt(oldIndex);
+    formArray.insert(newIndex, controlToMove);
     formArray.updateValueAndValidity();
-    (<any>formArray)._onCollectionChange();
 
     // Move layout item
     let layoutArray = this.getLayoutArray(ctx);
@@ -588,11 +586,11 @@ console.log(newLayoutNode);
 
     // Remove the Angular form control from the parent formArray or formGroup
     if (ctx.layoutNode.arrayItem) { // Remove array item from formArray
-      (<FormArray>this.getControlGroup(ctx))
+      (<FormArray>this.getFormControlGroup(ctx))
         .removeAt(ctx.dataIndex[ctx.dataIndex.length - 1]);
     } else { // Remove $ref item from formGroup
-      (<FormGroup>this.getControlGroup(ctx))
-        .removeControl(this.getControlName(ctx));
+      (<FormGroup>this.getFormControlGroup(ctx))
+        .removeControl(this.getFormControlName(ctx));
     }
 
     // Remove layoutNode from layout

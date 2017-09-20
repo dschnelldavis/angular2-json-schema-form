@@ -10,21 +10,24 @@ import { buildTitleMap } from '../../shared';
   selector: 'material-select-widget',
   template: `
     <section [style.width]="'100%'" [class]="options?.htmlClass || null">
-      <md-select #inputControl *ngIf="isConditionallyShown()"
-        [(ngModel)]="controlValue"
+	<md-select #inputControl *ngIf="isConditionallyShown()"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.name]="controlName"
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [disabled]="controlDisabled"
         [floatPlaceholder]="options?.floatPlaceholder || (options?.notitle ? 'never' : 'auto')"
         [id]="'control' + layoutNode?._id"
+        [multiple]="options?.multiple"
         [placeholder]="options?.notitle ? options?.placeholder : options?.title"
         [required]="options?.required"
         [style.width]="'100%'"
-        (onClose)="updateValue()">
+        [value]="controlValue"
+        (change)="updateValue($event)">
         <md-option *ngFor="let selectItem of selectList"
-          [value]="selectItem.value"
-          [attr.selected]="selectItem.value === controlValue">{{selectItem.name}}</md-option>
+          [attr.selected]="selectItem.value === controlValue"
+          [value]="selectItem.value">
+        <span [innerHTML]="selectItem?.name"></span>
+        </md-option>
       </md-select>
     </section>`,
 })
@@ -56,8 +59,8 @@ export class MaterialSelectComponent implements OnInit {
     this.jsf.initializeControl(this);
   }
 
-  updateValue() {
-    this.jsf.updateValue(this, this.controlValue === '' ? null : this.controlValue);
+  updateValue(event) {
+    this.jsf.updateValue(this, event.value);
   }
 
   isConditionallyShown(): boolean {

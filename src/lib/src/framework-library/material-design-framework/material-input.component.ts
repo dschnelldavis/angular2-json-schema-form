@@ -25,8 +25,8 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
         [required]="options?.required"
         [style.width]="'100%'"
         [type]="layoutNode?.type"
-        [ngModel]="inputValue"
-        (ngModelChange)="updateInputValue($event)">
+        [value]="controlValue"
+        (input)="updateValue($event)">
       <span *ngIf="options?.fieldAddonLeft"
         md-prefix>{{options?.fieldAddonLeft}}</span>
       <span *ngIf="options?.fieldAddonRight"
@@ -38,8 +38,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
 export class MaterialInputComponent implements OnInit {
   formControl: AbstractControl;
   controlName: string;
-  private userInput: boolean = true;
-  public  inputValue: string;
+  controlValue: string;
   controlDisabled: boolean = false;
   boundControl: boolean = false;
   options: any;
@@ -60,21 +59,8 @@ export class MaterialInputComponent implements OnInit {
 
   }
 
-  get controlValue(){
-    return this.inputValue;
-  }
-
-  set controlValue(value: string){
-    this.userInput = false;
-    this.updateInputValue(value);
-    this.userInput = true;
-  }
-
-  public updateInputValue (value: string) {
-    this.inputValue = value;
-    if (this.userInput) {
-      this.jsf.updateValue(this, value);
-    }
+  updateValue(event) {
+    this.jsf.updateValue(this, event.target.value);
   }
 
   isConditionallyShown(): boolean {

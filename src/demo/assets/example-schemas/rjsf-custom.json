@@ -1,5 +1,5 @@
 {
-  "JSONSchema": {
+  "schema": {
     "title": "A localisation form",
     "type": "object",
     "required": [ "lat", "lon" ],
@@ -8,11 +8,6 @@
       "lon": { "type": "number" }
     }
   },
-  "UISchema": {
-    "ui:field": "geo"
-  },
-  "formData": {
-    "lat": 0,
-    "lon": 0
-  }
+  "uiSchema": { "ui:field": "geo" },
+  "formData": { "lat": 0, "lon": 0 }
 }

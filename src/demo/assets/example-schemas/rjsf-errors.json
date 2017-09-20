@@ -1,5 +1,5 @@
 {
-  "JSONSchema": {
+  "schema": {
     "title": "Contextualized errors",
     "type": "object",
     "properties": {
@@ -27,16 +27,16 @@
         "maxItems": 2,
         "items": {
           "type": "string",
-          "enum": ["foo", "bar", "fuzz"]
+          "enum": [ "foo", "bar", "fuzz" ]
         }
       }
     }
   },
-  "UISchema": { },
+  "uiSchema": {},
   "formData": {
     "firstName": "Chuck",
     "active": "wrong",
-    "skills": ["karate", "budo", "aikido"],
-    "multipleChoicesList": ["foo", "bar", "fuzz"]
+    "skills": [ "karate", "budo", "aikido" ],
+    "multipleChoicesList": [ "foo", "bar", "fuzz" ]
   }
 }

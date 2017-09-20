@@ -4,6 +4,9 @@ import { FormArray, AbstractControl } from '@angular/forms';
 import { JsonSchemaFormService, CheckboxItem } from '../../json-schema-form.service';
 import { buildFormGroup, buildTitleMap, JsonPointer } from '../../shared';
 
+// TODO: Change this to use a Selection List instead?
+// https://material.angular.io/components/list/overview
+
 @Component({
   selector: 'material-checkboxes-widget',
   template: `
@@ -35,11 +38,7 @@ import { buildFormGroup, buildTitleMap, JsonPointer } from '../../shared';
     </ul>`,
   styles: [`
     .checkbox-list { list-style-type: none; }
-    .horizontal-list > li {
-      display: inline-block;
-      margin-right: 10px;
-      zoom: 1;
-    }
+    .horizontal-list > li { display: inline-block; margin-right: 10px; zoom: 1; }
     .checkbox-name { white-space: nowrap; }
   `],
 })
@@ -71,9 +70,9 @@ export class MaterialCheckboxesComponent implements OnInit {
       this.options.titleMap || this.options.enumNames, this.options.enum, true
     );
     if (this.boundControl) {
-      const formArray = this.jsf.getControl(this);
+      const formArray = this.jsf.getFormControl(this);
       for (let checkboxItem of this.checkboxList) {
-        checkboxItem.checked = formArray.value.indexOf(checkboxItem.value) !== -1;
+        checkboxItem.checked = formArray.value.includes(checkboxItem.value);
       }
     }
   }

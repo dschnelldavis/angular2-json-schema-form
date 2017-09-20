@@ -1,33 +1,34 @@
-// Sources:
-//
-// Angular JSON Schema Form examples ('ng-jsf-...') are original
-//
-// JSON Meta-Schemas ('json-schema-draft...') are from
-//   http://json-schema.org/specification-links.html
-//
-// Angular Schema Form (AngularJS) examples ('asf-...') are from
-//   http://schemaform.io/examples/bootstrap-example.html
-//
-// React JSON Schema Form examples ('rjsf-...') are from
-//   https://mozilla-services.github.io/react-jsonschema-form/
-//
-// JSONForm (jQuery) examples ('jsf-...') are from
-//   http://ulion.github.io/jsonform/playground/
-//
-//
+/**
+ * Sources:
+ *
+ * Angular JSON Schema Form examples ('ng-jsf-...') are original
+ *
+ * JSON Meta-Schemas ('json-schema-...') are from
+ *   http://json-schema.org/specification-links.html
+ *
+ * Angular Schema Form (AngularJS) examples ('asf-...') are from
+ *   http://schemaform.io/examples/bootstrap-example.html
+ *
+ * React JSON Schema Form examples ('rjsf-...') are from
+ *   https://mozilla-services.github.io/react-jsonschema-form/
+ *
+ * JSONForm (jQuery) examples ('jsf-...') are from
+ *   http://ulion.github.io/jsonform/playground/
+ */
 
 export const Examples: any = {
   'ng-jsf': {
     name: 'Angular JSON Schema Form examples',
     schemas: [
       { name: 'Flexbox layout',                  file: 'ng-jsf-flex-layout', },
-      { name: 'Simple Array',                    file: 'ng-jsf-simple-array', },
+      // { name: 'Simple Array',                    file: 'ng-jsf-simple-array', },
+      { name: 'Nested Arrays',                   file: 'ng-jsf-nested-arrays', },
       { name: 'Deep References',                 file: 'ng-jsf-deep-ref', },
       { name: 'Data Only (no Schema or Layout)', file: 'ng-jsf-data-only', },
       // { name: 'Layout Only (no Schema or Data)', file: 'ng-jsf-layout-only', },
       // { name: 'JSON Meta-Schema - Version 6',    file: 'json-schema-draft06', },
-      { name: 'JSON Meta-Schema - Version 4',    file: 'json-schema-draft04', },
-      { name: 'JSON Meta-Schema - Version 3',    file: 'json-schema-draft03', },
+      // { name: 'JSON Meta-Schema - Version 4',    file: 'json-schema-draft04', },
+      // { name: 'JSON Meta-Schema - Version 3',    file: 'json-schema-draft03', },
     ]
   },
   'asf': {
@@ -49,19 +50,22 @@ export const Examples: any = {
     name: 'React JSON Schema Form examples',
     url: 'https://mozilla-services.github.io/react-jsonschema-form/',
     schemas: [
-      { name: 'Simple',      file: 'rjsf-simple', },
-      { name: 'Nested',      file: 'rjsf-nested', },
-      { name: 'Arrays',      file: 'rjsf-arrays', },
-      { name: 'Numbers',     file: 'rjsf-numbers', },
-      { name: 'Widgets',     file: 'rjsf-widgets', },
-      { name: 'Ordering',    file: 'rjsf-ordering', },
-      { name: 'References',  file: 'rjsf-references', },
-      { name: 'Custom',      file: 'rjsf-custom', },
-      { name: 'Errors',      file: 'rjsf-errors', },
-      { name: 'Large',       file: 'rjsf-large', },
-      { name: 'Date & Time', file: 'rjsf-date-and-time', },
-      { name: 'Validation',  file: 'rjsf-validation', },
-      { name: 'Files',       file: 'rjsf-files', },
+      { name: 'Simple',                     file: 'rjsf-simple', },
+      { name: 'Nested',                     file: 'rjsf-nested', },
+      { name: 'Arrays',                     file: 'rjsf-arrays', },
+      { name: 'Numbers',                    file: 'rjsf-numbers', },
+      { name: 'Widgets',                    file: 'rjsf-widgets', },
+      { name: 'Ordering',                   file: 'rjsf-ordering', },
+      { name: 'References',                 file: 'rjsf-references', },
+      { name: 'Custom',                     file: 'rjsf-custom', },
+      { name: 'Errors',                     file: 'rjsf-errors', },
+      { name: 'Large',                      file: 'rjsf-large', },
+      { name: 'Date & Time',                file: 'rjsf-date-and-time', },
+      { name: 'Validation',                 file: 'rjsf-validation', },
+      { name: 'Files',                      file: 'rjsf-files', },
+      { name: 'Single',                     file: 'rjsf-single', },
+      // { name: 'Custom Array',               file: 'rjsf-custom-array', },
+      { name: 'Alternatives',               file: 'rjsf-alternatives', },
     ]
   },
   'jsf': {

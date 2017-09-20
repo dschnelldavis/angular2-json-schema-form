@@ -21,14 +21,12 @@ import { buildTitleMap } from '../../shared';
       [disabled]="controlDisabled"
       [name]="controlName"
       [value]="controlValue">
-      <div *ngFor="let radioItem of radiosList">
-        <md-button-toggle
-          [id]="'control' + layoutNode?._id + '/' + radioItem?.name"
-          [value]="radioItem?.value"
-          (click)="updateValue(radioItem?.value)">
-          <span [innerHTML]="radioItem?.name"></span>
-        </md-button-toggle>
-      </div>
+      <md-button-toggle *ngFor="let radioItem of radiosList"
+        [id]="'control' + layoutNode?._id + '/' + radioItem?.name"
+        [value]="radioItem?.value"
+        (click)="updateValue(radioItem?.value)">
+        <span [innerHTML]="radioItem?.name"></span>
+      </md-button-toggle>
     </md-button-toggle-group>`,
 })
 export class MaterialButtonGroupComponent implements OnInit {

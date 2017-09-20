@@ -46,7 +46,7 @@ export function addClasses(
 export function copy(object: any): any {
   if (typeof object !== 'object' || object === null) { return object; }
   if (isObject(object)) { return Object.assign({}, object); }
-  if (isArray(object)) { return [].concat(object); }
+  if (isArray(object)) { return [...object]; }
   if (isMap(object)) { return new Map(object); }
   if (isSet(object)) { return new Set(object); }
   console.error('copy error: Object to copy must be a JavaScript object or value.');
@@ -135,14 +135,21 @@ export function forEachCopy(
 /**
  * 'hasOwn' utility function
  *
- * Checks whether an object has a particular property.
+ * Checks whether an object or array has a particular property.
  *
  * @param {any} object - the object to check
  * @param {string} property - the property to look for
  * @return {boolean} - true if object has property, false if not
  */
 export function hasOwn(object: any, property: string): boolean {
-  if (!isObject(object) && !isArray(object)) { return false; }
+  if (!object || !property || (!isObject(object) && !isArray(object))) {
+    return false;
+  }
+  if (typeof property === 'number') {
+    property = property + '';
+  } else if (typeof property !== 'string' && typeof property !== 'symbol') {
+    return false;
+  }
   return object.hasOwnProperty(property);
 }
 

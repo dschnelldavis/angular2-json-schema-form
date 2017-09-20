@@ -1,5 +1,5 @@
 {
-  "JSONSchema": {
+  "schema": {
     "title": "Files",
     "type": "object",
     "properties": {
@@ -18,6 +18,6 @@
       }
     }
   },
-  "UISchema": { },
+  "uiSchema": { },
   "formData": { }
 }

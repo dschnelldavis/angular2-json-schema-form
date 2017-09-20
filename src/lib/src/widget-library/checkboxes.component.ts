@@ -83,7 +83,7 @@ export class CheckboxesComponent implements OnInit {
       this.options.titleMap || this.options.enumNames, this.options.enum, true
     );
     if (this.boundControl) {
-      const formArray = this.jsf.getControl(this);
+      const formArray = this.jsf.getFormControl(this);
       for (let checkboxItem of this.checkboxList) {
         checkboxItem.checked = formArray.value.indexOf(checkboxItem.value) !== -1;
       }

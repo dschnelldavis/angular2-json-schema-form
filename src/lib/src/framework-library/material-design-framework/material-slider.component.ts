@@ -8,7 +8,6 @@ import { getControl, inArray, isDefined } from '../../shared';
   selector: 'material-slider-widget',
   template: `
     <md-slider #inputControl
-      [(ngModel)]="controlValue"
       [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
       [disabled]="controlDisabled"
       [id]="'control' + layoutNode?._id"

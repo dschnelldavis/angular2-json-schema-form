@@ -21,10 +21,10 @@ import { JsonPointer } from './shared/jsonpointer.functions';
  * an Angular library which generates an HTML form from a JSON schema
  * structured data model and/or a JSON Schema Form layout description.
  *
- * This library also validates input data by the user, both using individual
- * validators which provide real-time feedback while the user is filling out
- * the form, and then using the entire schema when the form is submitted,
- * to make sure the returned JSON data object is valid.
+ * This library also validates input data by the user, using both validators on
+ * individual controls to provide real-time feedback while the user is filling
+ * out the form, and then validating the entire input against the schema when
+ * the form is submitted to make sure the returned JSON data object is valid.
  *
  * This library is similar to, and mostly API compatible with:
  *
@@ -32,18 +32,19 @@ import { JsonPointer } from './shared/jsonpointer.functions';
  *   http://schemaform.io
  *   http://schemaform.io/examples/bootstrap-example.html (examples)
  *
- * - Joshfire's JSON Form library for jQuery
- *   https://github.com/joshfire/jsonform
- *   http://ulion.github.io/jsonform/playground (examples)
- *
  * - Mozilla's react-jsonschema-form library for React
  *   https://github.com/mozilla-services/react-jsonschema-form
  *   https://mozilla-services.github.io/react-jsonschema-form (examples)
+ *
+ * - Joshfire's JSON Form library for jQuery
+ *   https://github.com/joshfire/jsonform
+ *   http://ulion.github.io/jsonform/playground (examples)
  *
  * This library depends on:
  *  - Angular (obviously)                  https://angular.io
  *  - lodash, JavaScript utility library   https://github.com/lodash/lodash
  *  - ajv, Another JSON Schema validator   https://github.com/epoberezkin/ajv
+ *
  * In addition, the Example Playground also depends on:
  *  - brace, Browserified Ace editor       http://thlorenz.github.io/brace
  */
@@ -57,7 +58,10 @@ import { JsonPointer } from './shared/jsonpointer.functions';
       <script type="text/javascript" [src]="script"></script>
     </div>
     <form class="json-schema-form" (ngSubmit)="submitForm()">
-      <root-widget [formID]="formID" [layout]="jsfObject.layout" [data]="jsfObject.data"></root-widget>
+      <root-widget
+        [formID]="formID"
+        [layout]="jsfObject.layout"
+        [data]="jsfObject.data"></root-widget>
     </form>
     <div *ngIf="debug || jsfObject.globalOptions.debug">
       Debug output: <pre>{{debugOutput}}</pre>
@@ -175,7 +179,7 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
    * 5. form - For testing single schema-only inputs
    * TODO: 6. (none) no schema - construct form entirely from layout instead
    */
-  private initializeSchema(){
+  private initializeSchema() {
     if (isObject(this.schema)) {
       this.jsf.AngularSchemaFormCompatibility = true;
       this.jsf.schema = _.cloneDeep(this.schema);
@@ -189,6 +193,8 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
       this.jsf.schema = _.cloneDeep(this.form.JSONSchema);
     } else if (hasOwn(this.form, 'properties') && isObject(this.form.properties)) {
       this.jsf.schema = _.cloneDeep(this.form);
+    } else if (isObject(this.form)) {
+
     }
 
     if (!isEmpty(this.jsf.schema)) {
@@ -265,6 +271,9 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
     } else if (hasOwn(this.form, 'UISchema')) {
       this.jsf.ReactJsonSchemaFormCompatibility = true;
       alternateLayout = _.cloneDeep(this.form.UISchema);
+    } else if (hasOwn(this.form, 'uiSchema')) {
+      this.jsf.ReactJsonSchemaFormCompatibility = true;
+      alternateLayout = _.cloneDeep(this.form.uiSchema);
     } else if (hasOwn(this.form, 'customFormItems')) {
       this.jsf.JsonFormCompatibility = true;
       alternateLayout =
@@ -274,23 +283,24 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
     // if alternate layout found, copy options into schema
     if (alternateLayout) {
       JsonPointer.forEachDeep(alternateLayout, (value, pointer) => {
-        const schemaPointer: string = pointer.replace(/\//g, '/properties/')
+        const schemaPointer: string = pointer
+          .replace(/\//g, '/properties/')
           .replace(/\/properties\/items\/properties\//g, '/items/properties/')
           .replace(/\/properties\/titleMap\/properties\//g, '/titleMap/properties/');
         if (hasValue(value) && hasValue(pointer)) {
-          const groupPointer: string[] =
-            JsonPointer.parse(schemaPointer).slice(0, -2);
+          const groupPointer = JsonPointer.parse(schemaPointer).slice(0, -2);
           let key = JsonPointer.toKey(schemaPointer);
           let itemPointer: string | string[];
-          // If 'ui:order' object found, copy into schema root
-          if (key === 'ui:order') {
-            itemPointer = schemaPointer;
-            // Copy other alternate layout options to schema 'x-schema-form',
-            // (like Angular Schema Form options) and remove any 'ui:' prefixes
+
+          // If 'ui:order' object found, copy into object schema root
+          if (key.toLowerCase() === 'ui:order') {
+            itemPointer = [...groupPointer, 'ui:order'];
+
+          // Copy other alternate layout options to schema 'x-schema-form',
+          // (like Angular Schema Form options) and remove any 'ui:' prefixes
           } else {
-            itemPointer = groupPointer.concat(['x-schema-form',
-              key.slice(0, 3) === 'ui:' ? key.slice(3) : key
-            ]);
+            if (key.slice(0, 3).toLowerCase() === 'ui:') { key = key.slice(3); }
+            itemPointer = [...groupPointer, 'x-schema-form', key];
           }
           if (JsonPointer.has(this.jsf.schema, groupPointer) &&
             !JsonPointer.has(this.jsf.schema, itemPointer)
@@ -403,10 +413,11 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
    *
    * - Create 'schemaRefLibrary' to resolve schema $ref links.
    *
-   * - Create 'layoutRefLibrary' to use when dynamically adding
-   *   form components to arrays and recursive $ref points.
+   * - Create 'layoutRefLibrary' and 'templateRefLibrary' to store
+   *   new layout nodes and formGroup elements to use when dynamically
+   *   adding form components to arrays and recursive $ref points.
    *
-   * - Create 'formGroupTemplate', then from it 'formGroup',
+   * - Create the master 'formGroupTemplate', then from it 'formGroup',
    *   the Angular formGroup used to control the reactive form.
    *
    * @return {void}
@@ -450,6 +461,7 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
       const vars: any[] = [];
       // vars.push(this.jsf.schema);
       // vars.push(this.jsf.layout);
+      // vars.push(this.options);
       // vars.push(this.jsf.initialValues);
       // vars.push(this.jsf.formGroup.value);
       // vars.push(this.jsf.formGroupTemplate);

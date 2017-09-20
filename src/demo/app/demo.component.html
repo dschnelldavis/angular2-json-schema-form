@@ -33,9 +33,7 @@
         (click)="loadSelectedExample('ng-jsf', '', example.file, example.name)">
         {{example.name}}
       </button>
-      <button md-menu-item class="mat-medium"
-        [mdMenuTriggerFor]="asfMenu">
-        <md-icon>menu</md-icon>
+      <button md-menu-item class="mat-medium" [mdMenuTriggerFor]="asfMenu">
         <span>Angular Schema Form (AngularJS) examples</span>
       </button>
       <md-menu #asfMenu="mdMenu" class="example-menu">
@@ -45,9 +43,7 @@
           {{example.name}}
         </button>
       </md-menu>
-      <button md-menu-item class="mat-medium"
-        [mdMenuTriggerFor]="rjsfMenu">
-        <md-icon>menu</md-icon>
+      <button md-menu-item class="mat-medium" [mdMenuTriggerFor]="rjsfMenu">
         <span>React JSON Schema Form examples</span>
       </button>
       <md-menu #rjsfMenu="mdMenu" class="example-menu">
@@ -57,9 +53,7 @@
           {{example.name}}
         </button>
       </md-menu>
-      <button md-menu-item class="mat-medium"
-        [mdMenuTriggerFor]="jsfMenu">
-        <md-icon>menu</md-icon>
+      <button md-menu-item class="mat-medium" [mdMenuTriggerFor]="jsfMenu">
         <span>JSONForm (jQuery) examples</span>
       </button>
       <md-menu #jsfMenu="mdMenu" class="example-menu">
@@ -72,7 +66,7 @@
     </md-menu>
   </div>
 </div>
-<div fxLayout="row" fxLayoutAlign="space-around start" fxLayoutWrap
+<div fxLayout="row" fxLayoutAlign="space-around start"
   fxLayout.lt-sm="column" fxLayoutAlign.lt-sm="flex-start center">
 
   <md-card fxFlex="0 0 calc(50% - 12px)">

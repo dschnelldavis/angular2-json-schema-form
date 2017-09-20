@@ -69,16 +69,14 @@ export class OrderableDirective implements OnInit {
   }
 
   @HostListener('dragover', ['$event']) onDragOver(event) {
-    if (event.preventDefault) event.preventDefault();
+    if (event.preventDefault) { event.preventDefault(); }
     event.dataTransfer.dropEffect = 'move';
     return false;
   }
 
   @HostListener('dragend', ['$event']) onDragEnd(event) {
-    event.preventDefault();
-    if (this.listen) {
-      this.element.classList.remove('dragging');
-    }
+    if (event.preventDefault) { event.preventDefault(); }
+    if (this.listen) { this.element.classList.remove('dragging'); }
   }
 
   /**
@@ -128,7 +126,7 @@ export class OrderableDirective implements OnInit {
       this.element.classList.remove('drag-target-top');
       this.element.classList.remove('drag-target-bottom');
       // Confirm that drop target is another item in the same array as source item
-      const sourceArrayIndex: number = +sessionStorage.getItem(this.arrayPointer);
+      const sourceArrayIndex = +sessionStorage.getItem(this.arrayPointer);
       if (sourceArrayIndex !== this.dataIndex[this.dataIndex.length - 1]) {
         // Move array item
         this.jsf.moveArrayItem(

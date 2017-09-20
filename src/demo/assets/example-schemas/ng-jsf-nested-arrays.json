@@ -1,0 +1,33 @@
+{
+  "schema": {
+    "definitions": {
+      "tiers_obj": {
+        "type": "object",
+        "title": "Tier",
+        "properties": {
+          "min_amount": { "type": "integer" },
+          "max_amount": { "type": "integer" },
+          "Fees": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/fees_obj" }
+          }
+        }
+      },
+      "fees_obj": {
+        "type": "object",
+        "title": "Fees",
+        "properties": {
+          "ongoing_fee": { "type": "integer", "title": "Ongoing" },
+          "application_fee": { "type": "integer", "title": "Application" }
+        }
+      }
+    },
+    "type": "object",
+    "properties": {
+      "tiers": {
+        "type": "array",
+        "items": { "$ref": "#/definitions/tiers_obj", "extendRefs": true }
+      }
+    }
+  }
+}
