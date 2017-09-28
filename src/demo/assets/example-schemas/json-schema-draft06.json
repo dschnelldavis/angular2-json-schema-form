@@ -15,7 +15,7 @@
       "type": "array", "items": { "type": "string" }, "uniqueItems": true, "default": []
     }
   },
-  "type": ["object", "boolean"],
+  "type": [ "object", "boolean" ],
   "properties": {
     "$id": { "type": "string", "format": "uri-reference" },
     "$schema": { "type": "string", "format": "uri" },

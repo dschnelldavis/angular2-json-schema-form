@@ -2,29 +2,32 @@
   "schema": {
     "title": "A list of tasks",
     "type": "object",
-    "required": ["title"],
+    "required": [ "title" ],
     "properties": {
-      "title": { "type": "string", "title": "Task list title" },
+      "title": {
+        "title": "Task list title",
+        "type": "string"
+      },
       "tasks": {
-        "type": "array",
         "title": "Tasks",
+        "type": "array",
         "items": {
           "type": "object",
-          "required": ["title"],
+          "required": [ "title" ],
           "properties": {
             "title": {
-              "type": "string",
               "title": "Title",
+              "type": "string",
               "description": "A sample title"
             },
             "details": {
-              "type": "string",
               "title": "Task details",
+              "type": "string",
               "description": "Enter the task details"
             },
             "done": {
-              "type": "boolean",
               "title": "Done?",
+              "type": "boolean",
               "default": false
             }
           }

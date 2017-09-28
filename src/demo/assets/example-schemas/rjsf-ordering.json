@@ -2,17 +2,17 @@
   "schema": {
     "title": "A registration form",
     "type": "object",
-    "required": ["firstName", "lastName"],
     "properties": {
-      "password": { "type": "string", "title": "Password" },
-      "lastName": { "type": "string", "title": "Last name" },
-      "bio": { "type": "string", "title": "Bio" },
-      "firstName": { "type": "string", "title": "First name" },
-      "age": { "type": "integer", "title": "Age" }
-    }
+      "password":  { "type": "string",  "title": "Password" },
+      "lastName":  { "type": "string",  "title": "Last name" },
+      "bio":       { "type": "string",  "title": "Bio" },
+      "firstName": { "type": "string",  "title": "First name" },
+      "age":       { "type": "integer", "title": "Age" }
+    },
+    "required": [ "firstName", "lastName" ]
   },
   "uiSchema": {
-    "ui:order": ["firstName", "lastName", "*", "password"],
+    "ui:order": [ "firstName", "lastName", "*", "password" ],
     "age": { "ui:widget": "updown" },
     "bio": { "ui:widget": "textarea" },
     "password": { "ui:widget": "password" }

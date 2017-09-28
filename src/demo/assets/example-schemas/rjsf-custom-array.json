@@ -6,7 +6,7 @@
       "type": "string"
     }
   },
-  "formData": ["react", "jsonschema", "form"],
+  "formData": [ "react", "jsonschema", "form" ],
   "ArrayFieldTemplate": function (props) {
     return (
       <div className={props.className}>

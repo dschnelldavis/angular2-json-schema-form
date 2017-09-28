@@ -24,6 +24,8 @@ export const Examples: any = {
       // { name: 'Simple Array',                    file: 'ng-jsf-simple-array', },
       { name: 'Nested Arrays',                   file: 'ng-jsf-nested-arrays', },
       { name: 'Deep References',                 file: 'ng-jsf-deep-ref', },
+      { name: 'Select Control Lists',            file: 'ng-jsf-select-list-examples', },
+      // { name: 'Select Control Widgets',          file: 'ng-jsf-select-widget-examples', },
       { name: 'Data Only (no Schema or Layout)', file: 'ng-jsf-data-only', },
       // { name: 'Layout Only (no Schema or Data)', file: 'ng-jsf-layout-only', },
       // { name: 'JSON Meta-Schema - Version 6',    file: 'json-schema-draft06', },

@@ -8,7 +8,7 @@
           "city": { "type": "string" },
           "state": { "type": "string" }
         },
-        "required": ["street_address", "city", "state"]
+        "required": [ "street_address", "city", "state" ]
       },
       "node": {
         "type": "object",
@@ -38,7 +38,7 @@
     }
   },
   "uiSchema": {
-    "ui:order": ["shipping_address", "billing_address", "tree"]
+    "ui:order": [ "shipping_address", "billing_address", "tree" ]
   },
   "formData": {
     "billing_address": {

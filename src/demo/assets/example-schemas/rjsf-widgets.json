@@ -79,8 +79,8 @@
       "selectWidgetOptions": {
         "title": "Custom select widget with options",
         "type": "string",
-        "enum": ["foo", "bar"],
-        "enumNames": ["Foo", "Bar"]
+        "enum": [ "foo", "bar" ],
+        "enumNames": [ "Foo", "Bar" ]
       }
     }
   },

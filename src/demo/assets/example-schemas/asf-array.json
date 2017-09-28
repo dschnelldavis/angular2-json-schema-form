@@ -1,10 +1,8 @@
 {
   "schema": {
-    "type": "object",
     "title": "Comment",
-    "required": [
-      "comments"
-    ],
+    "type": "object",
+    "required": [ "comments" ],
     "properties": {
       "comments": {
         "type": "array",
@@ -34,39 +32,34 @@
               "validationMessage": "Don't be greedy!"
             }
           },
-          "required": ["name", "comment"]
+          "required": [ "name", "comment" ]
         }
       }
     }
   },
   "form": [
-    {
-      "type": "help",
+    { "type": "help",
       "helpvalue": "<h4>Array Example</h4><p>Try adding a couple of forms, reorder by drag'n'drop.</p>"
     },
-    {
-      "key": "comments",
+    { "key": "comments",
       "add": "New",
       "style": { "add": "btn-success" },
       "items": [
         "comments[].name",
         "comments[].email",
-        {
-          "key": "comments[].spam",
+        { "title": "Yes I want spam.",
           "type": "checkbox",
-          "title": "Yes I want spam.",
+          "key": "comments[].spam",
           "condition": "model.comments[arrayIndex].email"
         },
-        {
-          "key": "comments[].comment",
-          "type": "textarea"
+        { "type": "textarea",
+          "key": "comments[].comment"
         }
       ]
     },
-    {
+    { "title": "OK",
       "type": "submit",
-      "style": "btn-info",
-      "title": "OK"
+      "style": "btn-info"
     }
   ]
 }

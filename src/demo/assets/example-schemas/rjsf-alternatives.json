@@ -5,26 +5,25 @@
         "title": "Color",
         "type": "string",
         "anyOf": [
-          { "type": "string", "enum": ["#ff0000"], "title": "Red" },
-          { "type": "string", "enum": ["#00ff00"], "title": "Green" },
-          { "type": "string", "enum": ["#0000ff"], "title": "Blue" }
+          { "type": "string", "enum": [ "#ff0000" ], "title": "Red" },
+          { "type": "string", "enum": [ "#00ff00" ], "title": "Green" },
+          { "type": "string", "enum": [ "#0000ff" ], "title": "Blue" }
         ]
       }
     },
     "title": "Image editor",
     "type": "object",
-    "required": [ "currentColor", "colorMask", "blendMode" ],
     "properties": {
       "currentColor": { "$ref": "#/definitions/Color", "title": "Brush color" },
       "colorMask": {
+        "title": "Color mask",
         "type": "array",
-        "uniqueItems": true,
         "items": { "$ref": "#/definitions/Color" },
-        "title": "Color mask"
+        "uniqueItems": true
       },
       "colorPalette": {
-        "type": "array",
         "title": "Color palette",
+        "type": "array",
         "items": { "$ref": "#/definitions/Color" }
       },
       "blendMode": {
@@ -33,7 +32,8 @@
         "enum": [ "screen", "multiply", "overlay" ],
         "enumNames": [ "Screen", "Multiply", "Overlay" ]
       }
-    }
+    },
+    "required": [ "currentColor", "colorMask", "blendMode" ]
   },
   "uiSchema": {},
   "formData": {
