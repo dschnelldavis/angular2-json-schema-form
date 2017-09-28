@@ -1,10 +1,12 @@
 import * as _ from 'lodash';
 
+import { TitleMapItem } from '../json-schema-form.service';
+
 import {
   inArray, isArray, isEmpty, isNumber, isObject, isDefined, isString
 } from './validator.functions';
 
-import { copy, forEach, hasOwn, toTitleCase } from './utility.functions';
+import { copy, fixTitle, forEach, hasOwn } from './utility.functions';
 
 import { Pointer, JsonPointer } from './jsonpointer.functions';
 
@@ -47,6 +49,9 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
       console.error('buildLayout error: Form layout element not recognized:');
       console.error(layoutItem);
       return null;
+    }
+    if (hasOwn(newNode, 'widget') && !hasOwn(newNode, 'type')) {
+      newNode.type = newNode.widget;
     }
     Object.assign(newNode, {
       _id: _.uniqueId(),
@@ -98,7 +103,9 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
       newNode.dataPointer =
         JsonPointer.toGenericPointer(newNode.dataPointer, jsf.arrayMap);
       const LastKey = JsonPointer.toKey(newNode.dataPointer);
-      if (isString(LastKey) && LastKey !== '-') { newNode.name = LastKey; }
+      if (!newNode.name && isString(LastKey) && LastKey !== '-') {
+        newNode.name = LastKey;
+      }
       if (!jsf.dataMap.has(newNode.dataPointer)) {
         jsf.dataMap.set(newNode.dataPointer, new Map);
       } else if (
@@ -147,9 +154,12 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
         } else if (
           !newNode.options.title && newNode.name && !/^\d+$/.test(newNode.name)
         ) {
-          newNode.options.title = toTitleCase(newNode.name.replace(/_/g, ' '));
+          newNode.options.title = fixTitle(newNode.name);
         }
-        if (isInputRequired(jsf.schema, newNode.dataPointer)) {
+        const schemaPointer =
+          jsf.dataMap.get(newNode.dataPointer).get('schemaPointer') ||
+          getFromSchema(jsf.schema, newNode.dataPointer, 'schemaPointer');
+        if (isInputRequired(jsf.schema, schemaPointer)) {
           newNode.options.required = true;
           jsf.fieldsRequired = true;
         }
@@ -174,12 +184,17 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
       jsf.dataMap.get(newNode.dataPointer).set('widget', newNode.widget);
 
       if (newNode.dataType === 'array' && hasOwn(newNode, 'items')) {
-        if (newNode.options.required && !newNode.minItems) { newNode.minItems = 1; }
         let arrayPointer: string = newNode.dataPointer + '/-';
         if (!jsf.dataMap.has(arrayPointer)) {
           jsf.dataMap.set(arrayPointer, new Map);
         }
         jsf.dataMap.get(arrayPointer).set('inputType', 'section');
+        if (newNode.options.required && !newNode.minItems) {
+          newNode.minItems = 1;
+        }
+        if (isDefined(newNode.options.maxItems) && newNode.options.maxItems < 2) {
+          newNode.options.orderable = false;
+        }
 
         // Fix insufficiently nested array item groups
         if (newNode.items.length > 1) {
@@ -232,10 +247,13 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
             newNode.items[0].dataPointer =
               JsonPointer.toGenericPointer(arrayPointer, jsf.arrayMap);
           }
-          if (newNode.options.minItems) {
+          if ((newNode.options.minItems || 0) > 0) {
             newNode.items[0].options.removable = false;
           } else if (!JsonPointer.has(newNode, '/items/0/options/removable')) {
             newNode.items[0].options.removable = true;
+          }
+          if (newNode.options.orderable === false) {
+            newNode.items[0].options.orderable = false;
           }
           newNode.items[0].options.arrayItemType =
             newNode.tupleItems ? 'tuple' : 'list';
@@ -258,16 +276,27 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
           }
           let buttonText: string = 'Add';
           if (newNode.options.title) {
-            buttonText += ' ' + newNode.options.title;
+            if (newNode.options.title.match(/$add\b/i)) {
+              buttonText = newNode.options.title;
+            } else {
+              buttonText += ' ' + newNode.options.title;
+            }
           } else if (newNode.name && !/^\d+$/.test(newNode.name)) {
-            buttonText += ' ' + toTitleCase(newNode.name.replace(/_/g, ' '));
+            if (newNode.name.match(/$add\b/i)) {
+              buttonText += ' ' + fixTitle(newNode.name);
+            } else {
+              buttonText = fixTitle(newNode.name);
+            }
 
           // If newNode doesn't have a title, look for title of parent array item
           } else {
             const parentSchema =
-              getFromSchema(jsf.schema, newNode.dataPointer, true);
+              getFromSchema(jsf.schema, newNode.dataPointer, 'parentSchema');
             if (hasOwn(parentSchema, 'title')) {
               buttonText += ' to ' + parentSchema.title;
+            } else {
+              const pointerArray = JsonPointer.parse(newNode.dataPointer);
+              buttonText += ' to ' + fixTitle(pointerArray[pointerArray.length - 2]);
             }
           }
           const dataPointer = JsonPointer.toGenericPointer(arrayPointer, jsf.arrayMap);
@@ -315,9 +344,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
   });
   if (!hasSubmitButton) {
     formLayout.push({
-      options: {
-        title: 'Submit',
-      },
+      options: { title: 'Submit' },
       type: 'submit',
       widget: widgetLibrary.getWidget('submit'),
     });
@@ -377,7 +404,7 @@ export function buildLayoutFromSchema(
   if (!newNode.options.title && newNode.options.legend) {
     newNode.options.title = newNode.options.legend;
   } else if (!newNode.options.title && newNode.name && !/^\d+$/.test(newNode.name)) {
-    newNode.options.title = toTitleCase(newNode.name.replace(/_/g, ' '));
+    newNode.options.title = fixTitle(newNode.name);
   }
   if (newNode.dataType === 'object') {
     let newSection: any[] = [];
@@ -473,7 +500,7 @@ export function buildLayoutFromSchema(
               jsf, null, false,
               schemaPointer + '/additionalItems',
               dataPointer + '/' + i,
-              JsonPointer.toControlPointer(jsf.formGroupTemplate, dataPointer + '/' + i)
+              JsonPointer.toControlPointer(dataPointer + '/' + i, jsf.formGroupTemplate)
             ));
           }
         }
@@ -519,15 +546,8 @@ export function buildLayoutFromSchema(
       jsf.layoutRefLibrary[dataPointer + '/-'] = additionalItems;
       delete jsf.layoutRefLibrary[dataPointer + '/-']['key'];
       delete jsf.layoutRefLibrary[dataPointer + '/-']['name'];
-      let buttonText: string = 'Add ';
-      if (additionalItems.options.title) {
-        buttonText += additionalItems.options.title;
-      } else if (schema.title) {
-        buttonText += 'to ' + schema.title;
-      } else {
-        buttonText += 'to ' +
-          toTitleCase(JsonPointer.toKey(dataPointer).replace(/_/g, ' '));
-      }
+      const buttonText = additionalItems.options.title ||
+        schema.title || fixTitle(JsonPointer.toKey(dataPointer));
       let newNodeRef: any = {
         arrayItem: true,
         dataPointer: dataPointer + '/-',
@@ -567,14 +587,22 @@ export function buildLayoutFromSchema(
     if (newNode.options.add) {
       buttonText = newNode.options.add;
     } else if (newNode.name && !/^\d+$/.test(newNode.name)) {
-      buttonText += ' ' + toTitleCase(newNode.name.replace(/_/g, ' '));
+      if (newNode.name.match(/$add\b/i)) {
+        buttonText = fixTitle(newNode.name);
+      } else {
+        buttonText += ' ' + fixTitle(newNode.name);
+      }
 
     // If newNode doesn't have a title, look for title of parent array item
-    } else if (
-      hasOwn(JsonPointer.get(jsf.schema, schemaPointer, 0, -1), 'title')
-    ) {
-      buttonText += ' to ' +
-        JsonPointer.get(jsf.schema, schemaPointer, 0, -1).title;
+    } else {
+      const parentSchema =
+        JsonPointer.get(jsf.schema, schemaPointer, 0, -1);
+      if (hasOwn(parentSchema, 'title')) {
+        buttonText += ' to ' + parentSchema.title;
+      } else {
+        const pointerArray = JsonPointer.parse(newNode.dataPointer);
+        buttonText += ' to ' + fixTitle(pointerArray[pointerArray.length - 2]);
+      }
     }
     Object.assign(newNode, {
       recursiveReference: true,
@@ -709,37 +737,43 @@ export function mapLayout(
  *
  * @param {any} titleMap -
  * @param {any} enumList -
- * @param {boolean = false} fieldRequired -
- * @return {{name: string, value: any}[]}
+ * @param {boolean = true} fieldRequired -
+ * @param {boolean = true} flatList -
+ * @return { { name: string, value: any }[] }
+ *   || { { group: string, items: { name: string, value: any }[] }[] }
  */
 export function buildTitleMap(
-  titleMap: any, enumList: any, fieldRequired: boolean = true
-): { name: string, value: any }[] {
-  let newTitleMap: { name: string, value: any }[] = [];
-  let hasEmptyValue: boolean = false;
+  titleMap: any, enumList: any, fieldRequired: boolean = true, flatList: boolean = true
+): TitleMapItem[] {
+  let newTitleMap: TitleMapItem[] = [];
+  let hasEmptyValue = false;
   if (titleMap) {
     if (isArray(titleMap)) {
       if (enumList) {
         for (let i of Object.keys(titleMap)) {
-          if (isObject(titleMap[i])) { // JSON Form / Angular Schema Form style
+          if (isObject(titleMap[i])) { // JSON Form style
             const value: any = titleMap[i].value;
             if (enumList.indexOf(value) !== -1) {
               const name: string = titleMap[i].name;
               newTitleMap.push({ name, value });
-              if (!value) { hasEmptyValue = true; }
+              if (value === undefined || value === null) { hasEmptyValue = true; }
             }
           } else if (isString(titleMap[i])) { // React Jsonschema Form style
             if (i < enumList.length) {
               const name: string = titleMap[i];
               const value: any = enumList[i];
               newTitleMap.push({ name, value });
-              if (!value) { hasEmptyValue = true; }
+              if (value === undefined || value === null) { hasEmptyValue = true; }
             }
           }
         }
-      } else { // If array titleMap and no enum list, just return the titleMap
+      } else { // If array titleMap and no enum list, just return the titleMap - Angular Schema Form style
         newTitleMap = titleMap;
-        if (!fieldRequired) { hasEmptyValue = !!newTitleMap.filter(i => !i.value).length; }
+        if (!fieldRequired) {
+          hasEmptyValue = !!newTitleMap
+            .filter(i => i.value === undefined || i.value === null)
+            .length;
+        }
       }
     } else if (enumList) { // Alternate JSON Form style, with enum list
       for (let i of Object.keys(enumList)) {
@@ -747,14 +781,14 @@ export function buildTitleMap(
         if (hasOwn(titleMap, value)) {
           let name: string = titleMap[value];
           newTitleMap.push({ name, value });
-          if (!value) { hasEmptyValue = true; }
+          if (value === undefined || value === null) { hasEmptyValue = true; }
         }
       }
     } else { // Alternate JSON Form style, without enum list
       for (let value of Object.keys(titleMap)) {
         let name: string = titleMap[value];
         newTitleMap.push({ name, value });
-        if (!value) { hasEmptyValue = true; }
+        if (value === undefined || value === null) { hasEmptyValue = true; }
       }
     }
   } else if (enumList) { // Build map from enum list alone
@@ -762,10 +796,71 @@ export function buildTitleMap(
       let name: string = enumList[i];
       let value: any = enumList[i];
       newTitleMap.push({ name, value});
-      if (!value) { hasEmptyValue = true; }
+      if (value === undefined || value === null) { hasEmptyValue = true; }
     }
   } else { // If no titleMap and no enum list, return default map of boolean values
-    newTitleMap = [{ name: 'True', value: true }, { name: 'False', value: false }];
+    newTitleMap = [ { name: 'True', value: true }, { name: 'False', value: false } ];
+  }
+
+  // Does titleMap have groups?
+  if (newTitleMap.some(title => hasOwn(title, 'group'))) {
+    hasEmptyValue = false;
+
+    // If flatList = true, flatten items & update name to group: name
+    if (flatList) {
+      newTitleMap = newTitleMap.reduce((groupTitleMap, title) => {
+        if (hasOwn(title, 'group')) {
+          if (isArray(title.items)) {
+            groupTitleMap = [
+              ...groupTitleMap,
+              ...title.items.map(item => (
+                { ...item, ...{ name: `${title.group}: ${item.name}` } }
+              ))
+            ];
+            if (title.items.some(item => item.value === undefined || item.value === null)) {
+              hasEmptyValue = true;
+            }
+          }
+          if (hasOwn(title, 'name') && hasOwn(title, 'value')) {
+            title.name = `${title.group}: ${title.name}`;
+            delete title.group;
+            groupTitleMap.push(title);
+            if (title.value === undefined || title.value === null) {
+              hasEmptyValue = true;
+            }
+          }
+        } else {
+          groupTitleMap.push(title);
+          if (title.value === undefined || title.value === null) {
+            hasEmptyValue = true;
+          }
+        }
+        return groupTitleMap;
+      }, []);
+
+    // If flatList = false, combine items from matching groups
+    } else {
+      newTitleMap = newTitleMap.reduce((groupTitleMap, title) => {
+        if (hasOwn(title, 'group')) {
+          if (title.group !== (groupTitleMap[groupTitleMap.length - 1] || {}).group) {
+            groupTitleMap.push({ group: title.group, items: title.items || [] });
+          }
+          if (hasOwn(title, 'name') && hasOwn(title, 'value')) {
+            groupTitleMap[groupTitleMap.length - 1].items
+              .push({ name: title.name, value: title.value });
+            if (title.value === undefined || title.value === null) {
+              hasEmptyValue = true;
+            }
+          }
+        } else {
+          groupTitleMap.push(title);
+          if (title.value === undefined || title.value === null) {
+            hasEmptyValue = true;
+          }
+        }
+        return groupTitleMap;
+      }, []);
+    }
   }
   if (!fieldRequired && !hasEmptyValue) {
     newTitleMap.unshift({ name: '<em>None</em>', value: null });

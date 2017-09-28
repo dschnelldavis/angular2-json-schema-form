@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormArray, AbstractControl } from '@angular/forms';
 
-import { JsonSchemaFormService, CheckboxItem } from '../json-schema-form.service';
+import { JsonSchemaFormService, TitleMapItem } from '../json-schema-form.service';
 import { buildFormGroup, buildTitleMap, JsonPointer } from '../shared';
 
 @Component({
@@ -25,7 +25,7 @@ import { buildFormGroup, buildTitleMap, JsonPointer } from '../shared';
           [class]="options?.fieldHtmlClass"
           [disabled]="controlDisabled"
           [id]="'control' + layoutNode?._id + '/' + checkboxItem.value"
-          [name]="formControlName"
+          [name]="checkboxItem?.name"
           [readonly]="options?.readonly ? 'readonly' : null"
           [value]="checkboxItem.value"
           (change)="updateValue($event)">
@@ -47,7 +47,7 @@ import { buildFormGroup, buildTitleMap, JsonPointer } from '../shared';
             [class]="options?.fieldHtmlClass"
             [disabled]="controlDisabled"
             [id]="options?.name + '/' + checkboxItem.value"
-            [name]="options?.name"
+            [name]="checkboxItem?.name"
             [readonly]="options?.readonly ? 'readonly' : null"
             [value]="checkboxItem.value"
             (change)="updateValue($event)">
@@ -60,11 +60,12 @@ export class CheckboxesComponent implements OnInit {
   formControl: AbstractControl;
   controlName: string;
   controlValue: any;
+  controlDisabled: boolean = false;
   boundControl: boolean = false;
   options: any;
   layoutOrientation: string;
   formArray: AbstractControl;
-  checkboxList: CheckboxItem[] = [];
+  checkboxList: TitleMapItem[] = [];
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
