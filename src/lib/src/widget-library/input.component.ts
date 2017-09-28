@@ -6,14 +6,27 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
 @Component({
   selector: 'input-widget',
   template: `
-    <div
-      [class]="options?.htmlClass">
+    <div [class]="options?.htmlClass">
       <label *ngIf="options?.title"
         [attr.for]="'control' + layoutNode?._id"
         [class]="options?.labelHtmlClass"
         [style.display]="options?.notitle ? 'none' : ''"
         [innerHTML]="options?.title"></label>
-      <input #inputControl
+      <input #inputControl *ngIf="boundControl"
+        [formControl]="formControl"
+        [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
+        [attr.list]="'control' + layoutNode?._id + 'Autocomplete'"
+        [attr.maxlength]="options?.maxLength"
+        [attr.minlength]="options?.minLength"
+        [attr.pattern]="options?.pattern"
+        [attr.placeholder]="options?.placeholder"
+        [attr.required]="options?.required"
+        [class]="options?.fieldHtmlClass"
+        [id]="'control' + layoutNode?._id"
+        [name]="controlName"
+        [readonly]="options?.readonly ? 'readonly' : null"
+        [type]="layoutNode?.type">
+      <input #inputControl *ngIf="!boundControl"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.list]="'control' + layoutNode?._id + 'Autocomplete'"
         [attr.maxlength]="options?.maxLength"

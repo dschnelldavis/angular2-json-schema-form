@@ -1,4 +1,5 @@
 import { Component, Input, Host } from '@angular/core';
+
 import { hasOwn } from './../shared/utility.functions';
 import { JsonSchemaFormComponent } from '../json-schema-form.component';
 
@@ -83,10 +84,14 @@ export class RootComponent {
     let result: boolean = true;
     if (this.data && hasOwn(layoutItem, 'condition')) {
       const model = this.data;
-
-      /* tslint:disable */
-      eval('result = ' + layoutItem.condition);
-      /* tslint:enable */
+      try {
+        /* tslint:disable */
+        eval('result = ' + layoutItem.condition);
+        /* tslint:enable */
+      } catch (error) {
+        console.error('Error evaluating condition:');
+        console.error(error);
+      }
     }
     return result;
   }

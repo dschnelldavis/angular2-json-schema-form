@@ -113,9 +113,9 @@ export class WidgetLibraryService {
 
   // Widgets included for compatibility with React JSON Schema Form API
     'updown': 'number',
-    'date-time': 'text',
-    'alt-datetime': 'text',
-    'alt-date': 'text',
+    'date-time': 'datetime-local',
+    'alt-datetime': 'datetime-local',
+    'alt-date': 'date',
 
   // Widgets included for compatibility with Angular Schema Form API
     'wizard': 'section', // TODO: Sequential panels with "Next" and "Previous" buttons

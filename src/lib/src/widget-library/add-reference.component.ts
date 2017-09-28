@@ -1,4 +1,6 @@
-import { Component, DoCheck, Input, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy, Component, Input, OnInit, OnChanges
+} from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
@@ -13,8 +15,9 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
       <span *ngIf="options?.icon" [class]="options?.icon"></span>
       <span *ngIf="options?.title" [innerHTML]="buttonText"></span>
     </button>`,
+    changeDetection: ChangeDetectionStrategy.Default,
 })
-export class AddReferenceComponent implements OnInit, DoCheck {
+export class AddReferenceComponent implements OnInit, OnChanges {
   options: any;
   itemCount: number;
   showAddButton: boolean = true;
@@ -34,7 +37,7 @@ export class AddReferenceComponent implements OnInit, DoCheck {
     this.updateControl();
   }
 
-  ngDoCheck() {
+  ngOnChanges() {
     if (this.previousLayoutIndex !== this.layoutIndex ||
       this.previousDataIndex !== this.dataIndex
     ) {

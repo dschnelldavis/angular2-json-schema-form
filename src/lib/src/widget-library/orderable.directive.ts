@@ -55,7 +55,6 @@ export class OrderableDirective implements OnInit {
    */
   @HostListener('dragstart', ['$event']) onDragStart(event) {
     if (this.listen) {
-      this.element.classList.add('dragging');
       event.dataTransfer.effectAllowed = 'move';
       // Hack to bypass stupid HTML drag-and-drop dataTransfer protection
       // so drag source info will be available on dragenter
@@ -72,11 +71,6 @@ export class OrderableDirective implements OnInit {
     if (event.preventDefault) { event.preventDefault(); }
     event.dataTransfer.dropEffect = 'move';
     return false;
-  }
-
-  @HostListener('dragend', ['$event']) onDragEnd(event) {
-    if (event.preventDefault) { event.preventDefault(); }
-    if (this.listen) { this.element.classList.remove('dragging'); }
   }
 
   /**

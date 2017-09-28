@@ -30,7 +30,7 @@ import { JsonPointer } from '../shared';
         [layoutNode]="layoutItem"></select-framework-widget>
 
     </div>`,
-  styles: [`a { cursor: pointer; }`],
+  styles: [` a { cursor: pointer; } `],
 })
 export class TabsComponent implements OnInit {
   options: any;
