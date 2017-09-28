@@ -7,7 +7,15 @@ import { getControl, inArray, isDefined } from '../../shared';
 @Component({
   selector: 'material-slider-widget',
   template: `
-    <md-slider #inputControl
+    <mat-slider thumbLabel #inputControl *ngIf="boundControl"
+      [formControl]="formControl"
+      [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
+      [id]="'control' + layoutNode?._id"
+      [max]="options?.maximum"
+      [min]="options?.minimum"
+      [step]="options?.multipleOf || options?.step || 'any'"
+      [style.width]="'100%'"></mat-slider>
+    <mat-slider thumbLabel #inputControl *ngIf="!boundControl"
       [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
       [disabled]="controlDisabled"
       [id]="'control' + layoutNode?._id"
@@ -15,9 +23,8 @@ import { getControl, inArray, isDefined } from '../../shared';
       [min]="options?.minimum"
       [step]="options?.multipleOf || options?.step || 'any'"
       [style.width]="'100%'"
-      [thumb-label]="true"
       [value]="controlValue"
-      (change)="updateValue($event)"></md-slider>`,
+      (change)="updateValue($event)"></mat-slider>`,
 })
 export class MaterialSliderComponent implements OnInit {
   formControl: AbstractControl;

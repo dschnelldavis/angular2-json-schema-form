@@ -6,11 +6,11 @@ import { JsonPointer } from '../../shared';
 @Component({
   selector: 'material-tabs-widget',
   template: `
-    <nav md-tab-nav-bar
+    <nav mat-tab-nav-bar
       [attr.aria-label]="options?.label || options?.title"
       [style.width]="'100%'">
         <a *ngFor="let item of layoutNode?.items; let i = index"
-          md-tab-link
+          mat-tab-link
           [active]="selectedItem === i"
           (click)="select(i)">
           <span *ngIf="showAddTab || item.type !== '$ref'"
@@ -28,7 +28,7 @@ import { JsonPointer } from '../../shared';
         [layoutNode]="layoutItem"></select-framework-widget>
 
     </div>`,
-  styles: [`a { cursor: pointer; }`],
+  styles: [` a { cursor: pointer; } `],
 })
 export class MaterialTabsComponent implements OnInit {
   options: any;

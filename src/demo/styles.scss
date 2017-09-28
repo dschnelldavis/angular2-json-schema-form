@@ -10,10 +10,10 @@ $demo-app-theme: mat-light-theme($demo-app-primary, $demo-app-accent, $demo-app-
 $font-family: 'Roboto', 'Noto', 'Helvetica Neue', sans-serif;
 $row-height: 56px;
 
-md-toolbar {
+mat-toolbar {
   &.mat-medium {
     min-height: $row-height;
-    md-toolbar-row { height: $row-height; }
+    mat-toolbar-row { height: $row-height; }
   }
 }
 

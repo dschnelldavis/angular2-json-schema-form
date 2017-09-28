@@ -7,13 +7,12 @@ import { Component, Input, OnInit } from '@angular/core';
       [class]="options?.htmlClass"
       [class.expandable]="options?.expandable && !expanded"
       [class.expanded]="options?.expandable && expanded">
-      <label *ngIf="options?.title"
+      <label
         [class]="options?.labelHtmlClass"
         [style.display]="options?.notitle ? 'none' : ''"
         [innerHTML]="options?.title"
         (click)="expand()"></label>
-      <flex-layout-root-widget
-        *ngIf="expanded"
+      <flex-layout-root-widget *ngIf="expanded"
         [formID]="formID"
         [layout]="layoutNode.items"
         [dataIndex]="dataIndex"
@@ -35,22 +34,53 @@ import { Component, Input, OnInit } from '@angular/core';
         [attr.fxFlexFill]="options.fxLayoutAlign"></flex-layout-root-widget>
     </div>
 
-    <md-card *ngIf="containerType === 'fieldset'">
-      <fieldset
-        [class]="options?.htmlClass"
-        [class.expandable]="options?.expandable && !expanded"
-        [class.expanded]="options?.expandable && expanded"
-        [disabled]="options?.readonly">
-        <md-card-header>
-          <legend
+    <fieldset *ngIf="containerType === 'fieldset'"
+      [class]="options?.htmlClass"
+      [class.expandable]="options?.expandable && !expanded"
+      [class.expanded]="options?.expandable && expanded"
+      [disabled]="options?.readonly">
+      <legend
+        [class]="options?.labelHtmlClass"
+        [style.display]="legendDisplay()"
+        [innerHTML]="options?.title"
+        (click)="expand()"></legend>
+      <flex-layout-root-widget *ngIf="expanded"
+        [formID]="formID"
+        [layout]="layoutNode.items"
+        [dataIndex]="dataIndex"
+        [layoutIndex]="layoutIndex"
+        [isOrderable]="options?.orderable"
+        [isFlexItem]="getFlexAttribute('is-flex')"
+        [class.form-flex-column]="getFlexAttribute('flex-direction') === 'column'"
+        [class.form-flex-row]="getFlexAttribute('flex-direction') === 'row'"
+        [style.display]="getFlexAttribute('display')"
+        [style.flex-direction]="getFlexAttribute('flex-direction')"
+        [style.flex-wrap]="getFlexAttribute('flex-wrap')"
+        [style.justify-content]="getFlexAttribute('justify-content')"
+        [style.align-items]="getFlexAttribute('align-items')"
+        [style.align-content]="getFlexAttribute('align-content')"
+        [fxLayout]="options.fxLayout"
+        [fxLayoutWrap]="options.fxLayoutWrap"
+        [fxLayoutGap]="options.fxLayoutGap"
+        [fxLayoutAlign]="options.fxLayoutAlign"
+        [attr.fxFlexFill]="options.fxLayoutAlign"></flex-layout-root-widget>
+    </fieldset>
+
+    <fieldset *ngIf="containerType === 'card'"
+      [class]="options?.htmlClass"
+      [class.expandable]="options?.expandable && !expanded"
+      [class.expanded]="options?.expandable && expanded"
+      [disabled]="options?.readonly">
+      <mat-card>
+        <legend [style.display]="legendDisplay()">
+          <mat-card-header
             [class]="options?.labelHtmlClass"
-            [style.display]="legendDisplay()"
             [innerHTML]="options?.title"
-            (click)="expand()"></legend>
-        </md-card-header>
-        <md-card-content>
+            (click)="expand()">
+          </mat-card-header>
+        </legend>
+        <mat-card-content *ngIf="expanded">
           <flex-layout-root-widget
-            *ngIf="expanded"
             [formID]="formID"
             [layout]="layoutNode.items"
             [dataIndex]="dataIndex"
@@ -70,10 +100,11 @@ import { Component, Input, OnInit } from '@angular/core';
             [fxLayoutGap]="options.fxLayoutGap"
             [fxLayoutAlign]="options.fxLayoutAlign"
             [attr.fxFlexFill]="options.fxLayoutAlign"></flex-layout-root-widget>
-        </md-card-content>
-      </fieldset>
-    </md-card>`,
+        </mat-card-content>
+      </mat-card>
+    </fieldset>`,
   styles: [`
+    fieldset { border: 0; margin: 0; padding: 0; }
     .expandable > legend:before { content: '▶'; padding-right: .3em; }
     .expanded > legend:before { content: '▼'; padding-right: .2em; }
   `],
@@ -81,7 +112,7 @@ import { Component, Input, OnInit } from '@angular/core';
 export class FlexLayoutSectionComponent implements OnInit {
   options: any;
   expanded: boolean = true;
-  containerType: string;
+  containerType: string = 'div';
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
@@ -92,6 +123,9 @@ export class FlexLayoutSectionComponent implements OnInit {
       case 'fieldset': case 'advancedfieldset': case 'authfieldset':
       case 'optionfieldset': case 'selectfieldset':
         this.containerType = 'fieldset';
+      break;
+      case 'card':
+        this.containerType = 'card';
       break;
       default: // 'div', 'section', 'flex', 'array', 'tab', 'conditional', 'actions', 'tagsinput'
         this.containerType = 'div';

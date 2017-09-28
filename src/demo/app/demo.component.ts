@@ -195,7 +195,9 @@ export class DemoComponent implements OnInit {
         // If entered content is not valid JSON,
         // parse as JavaScript instead to include functions
         let newFormObject: any = null;
+        /* tslint:disable */
         eval('newFormObject = ' + newFormString);
+        /* tslint:enable */
         this.jsonFormObject = newFormObject;
         this.jsonFormValid = true;
       } catch (javascriptError) {

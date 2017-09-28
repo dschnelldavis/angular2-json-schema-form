@@ -1,4 +1,6 @@
-import { Component, DoCheck, Input, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy, Component, Input, OnInit, OnChanges
+} from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 import { JsonSchemaFormService } from '../../json-schema-form.service';
@@ -7,7 +9,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
   selector: 'material-add-reference-widget',
   template: `
     <section [class]="options?.htmlClass" align="end">
-      <button md-raised-button *ngIf="showAddButton"
+      <button mat-raised-button *ngIf="showAddButton"
         [color]="options?.color || 'accent'"
         [disabled]="options?.readonly"
         (click)="addItem($event)">
@@ -15,8 +17,9 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
         <span *ngIf="options?.title" [innerHTML]="buttonText"></span>
       </button>
     </section>`,
+    changeDetection: ChangeDetectionStrategy.Default,
 })
-export class MaterialAddReferenceComponent implements OnInit, DoCheck {
+export class MaterialAddReferenceComponent implements OnInit, OnChanges {
   options: any;
   itemCount: number;
   showAddButton: boolean = true;
@@ -36,7 +39,7 @@ export class MaterialAddReferenceComponent implements OnInit, DoCheck {
     this.updateControl();
   }
 
-  ngDoCheck() {
+  ngOnChanges() {
     if (this.previousLayoutIndex !== this.layoutIndex ||
       this.previousDataIndex !== this.dataIndex
     ) {
@@ -62,6 +65,7 @@ export class MaterialAddReferenceComponent implements OnInit, DoCheck {
   get buttonText(): string {
     const parent: any = {
       dataIndex: this.dataIndex.slice(0, -1),
+      layoutIndex: this.layoutIndex.slice(0, -1),
       layoutNode: this.jsf.getParentNode(this)
     };
     return parent.layoutNode.add ||

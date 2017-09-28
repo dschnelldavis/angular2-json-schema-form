@@ -5,6 +5,10 @@ import { WidgetLibraryService } from '../widget-library/widget-library.service';
 // No framework - unmodified HTML controls, with styles from layout only
 import { NoFrameworkComponent } from './no-framework.component';
 
+// Bootstrap 3 Framework
+// https://github.com/valor-software/ng2-bootstrap
+import { Bootstrap3FrameworkComponent } from './bootstrap-3-framework/bootstrap-3-framework.component';
+
 // Material Design Framework
 // https://github.com/angular/material2
 import { FlexLayoutRootComponent } from './material-design-framework/flex-layout-root.component';
@@ -12,7 +16,6 @@ import { FlexLayoutSectionComponent } from './material-design-framework/flex-lay
 import { MaterialAddReferenceComponent } from './material-design-framework/material-add-reference.component';
 import { MaterialButtonComponent } from './material-design-framework/material-button.component';
 import { MaterialButtonGroupComponent } from './material-design-framework/material-button-group.component';
-import { MaterialCardComponent } from './material-design-framework/material-card.component';
 import { MaterialCheckboxComponent } from './material-design-framework/material-checkbox.component';
 import { MaterialCheckboxesComponent } from './material-design-framework/material-checkboxes.component';
 import { MaterialDatepickerComponent } from './material-design-framework/material-datepicker.component';
@@ -25,10 +28,6 @@ import { MaterialSliderComponent } from './material-design-framework/material-sl
 import { MaterialTabsComponent } from './material-design-framework/material-tabs.component';
 import { MaterialTextareaComponent } from './material-design-framework/material-textarea.component';
 import { MaterialDesignFrameworkComponent } from './material-design-framework/material-design-framework.component';
-
-// Bootstrap 3 Framework
-// https://github.com/valor-software/ng2-bootstrap
-import { Bootstrap3FrameworkComponent } from './bootstrap-3-framework.component';
 
 // Suggested future frameworks:
 // - Bootstrap 4:
@@ -81,8 +80,8 @@ export class FrameworkLibraryService {
         'textarea':     MaterialTextareaComponent,
         'checkboxes':   MaterialCheckboxesComponent,
         'radios':       MaterialRadiosComponent,
-        'card':         MaterialCardComponent,
         'tabs':         MaterialTabsComponent,
+        'card':         'section',
         'alt-date':     'date',
         'range':        'slider',
         'submit':       'button',

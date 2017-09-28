@@ -56,7 +56,6 @@ import { FlexLayoutSectionComponent } from './src/framework-library/material-des
 import { MaterialAddReferenceComponent } from './src/framework-library/material-design-framework/material-add-reference.component';
 import { MaterialButtonComponent } from './src/framework-library/material-design-framework/material-button.component';
 import { MaterialButtonGroupComponent } from './src/framework-library/material-design-framework/material-button-group.component';
-import { MaterialCardComponent } from './src/framework-library/material-design-framework/material-card.component';
 import { MaterialCheckboxComponent } from './src/framework-library/material-design-framework/material-checkbox.component';
 import { MaterialCheckboxesComponent } from './src/framework-library/material-design-framework/material-checkboxes.component';
 import { MaterialDatepickerComponent } from './src/framework-library/material-design-framework/material-datepicker.component';

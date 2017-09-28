@@ -1,10 +1,13 @@
 import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { BrowserModule } from '@angular/platform-browser';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
-import { MaterialModule } from '@angular/material';
+import {
+  MdButtonModule, MdCardModule, MdCheckboxModule, MdIconModule, MdMenuModule,
+  MdSelectModule, MdToolbarModule, MATERIAL_COMPATIBILITY_MODE
+} from '@angular/material';
 import { RouterModule } from '@angular/router';
 
 import { JsonSchemaFormModule } from '../../lib/src/json-schema-form.module';
@@ -18,15 +21,14 @@ import { DemoRootComponent } from './demo-root.component';
 import { routes } from './demo.routes';
 
 @NgModule({
-  declarations: [
-    AceEditorDirective, DemoComponent, DemoRootComponent
-  ],
+  declarations: [ AceEditorDirective, DemoComponent, DemoRootComponent ],
   imports: [
-    BrowserModule, BrowserAnimationsModule, FlexLayoutModule,
-    FormsModule, HttpModule, MaterialModule,
-    RouterModule.forRoot(routes), JsonSchemaFormModule
+    BrowserModule, BrowserAnimationsModule, FlexLayoutModule, FormsModule,
+    HttpModule, MdButtonModule, MdCardModule, MdCheckboxModule, MdIconModule,
+    MdMenuModule, MdSelectModule, MdToolbarModule, RouterModule.forRoot(routes),
+    JsonSchemaFormModule
   ],
-  providers: [ ],
+  providers: [ { provide: MATERIAL_COMPATIBILITY_MODE, useValue: true } ],
   bootstrap: [ DemoRootComponent ]
 })
 export class DemoModule { }

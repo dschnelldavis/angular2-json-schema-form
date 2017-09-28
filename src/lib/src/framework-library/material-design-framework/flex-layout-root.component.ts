@@ -23,13 +23,17 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
         [dataIndex]="layoutItem?.arrayItem ? (dataIndex || []).concat(i) : (dataIndex || [])"
         [layoutIndex]="(layoutIndex || []).concat(i)"
         [layoutNode]="layoutItem">
-        <div *ngIf="layoutItem.options.removable"
+        <svg *ngIf="layoutItem.options.removable"
+          xmlns="http://www.w3.org/2000/svg"
+          height="18" width="18" viewBox="0 0 24 24"
           class="close-button"
           (click)="removeItem({
             dataIndex: layoutItem.arrayItem ? (dataIndex || []).concat(i) : (dataIndex || []),
             layoutIndex: (layoutIndex || []).concat(i),
             layoutNode: layoutItem
-          })">x</div>
+          })">
+          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/>
+        </svg>
         <select-framework-widget
           [formID]="formID"
           [dataIndex]="layoutItem?.arrayItem ? (dataIndex || []).concat(i) : (dataIndex || [])"
@@ -49,14 +53,15 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
       transition: all 280ms cubic-bezier(.4, 0, .2, 1);
     }
     .close-button {
+      cursor: pointer;
       position: absolute;
-      top: 0;
-      right: 0;
-      padding: 0 5px;
+      top: 6px;
+      right: 6px;
+      fill: rgba(0,0,0,.4);
       visibility: hidden;
     }
+    .close-button:hover { fill: rgba(0,0,0,.8); }
     .array-item:hover > .close-button { visibility: visible; }
-    .close-button:hover { cursor: pointer; font-weight: bold; }
     .spacer { margin: 6px 0; }
     [draggable=true]:hover {
       box-shadow: 0 5px 5px -3px rgba(0,0,0,.2),
