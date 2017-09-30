@@ -13,76 +13,86 @@
  */
 export function convertJsonSchemaToDraft6(schema: any): any {
 
-  const convertTypes = (types, replace: boolean = false): boolean | any[] => {
-    let newTypes: any[] = [];
-    for (let type of Array.isArray(types) ? types : [types]) {
-      if (typeof type === 'object') {
-        newTypes.push(type);
-        replace = true;
-      } else {
-        newTypes.push({ 'type': type });
-      }
-    }
-    return replace && newTypes;
-  };
-
   if (typeof schema !== 'object') { return schema; }
-  let newSchema = Array.isArray(schema) ? [ ...schema ] : { ...schema };
+  if (Array.isArray(schema)) {
+    return [ ...schema.map(subSchema => convertJsonSchemaToDraft6(subSchema)) ];
+  }
+  const newSchema = { ...schema };
 
-  // convert multiple types to anyOf
-  if (newSchema.type) {
-    if (typeof newSchema.type !== 'string') {
-      let anyOf = convertTypes(newSchema.type);
-      if (anyOf) {
-        newSchema.anyOf = anyOf;
-        delete newSchema.type;
-      }
-    } else if (newSchema.type === 'any') {
-      delete newSchema.type;
-    }
+  if (newSchema.$ref && typeof newSchema.$ref === 'string') {
+
+    // return regular $ref object
+    if (Object.keys(newSchema).length === 1) { return newSchema; }
+
+    // convert overloaded $ref object to allOf
+    const refLink = newSchema.$ref;
+    delete newSchema.$ref;
+    return {
+      'allOf': [
+        { $ref: refLink },
+        convertJsonSchemaToDraft6(newSchema)
+      ]
+    };
   }
 
   // convert extends to allOf
   if (newSchema.extends) {
     newSchema.allOf = Array.isArray(newSchema.extends) ?
-      newSchema.extends : [newSchema.extends];
+      newSchema.extends.map(subSchema => convertJsonSchemaToDraft6(subSchema)) :
+      [ convertJsonSchemaToDraft6(newSchema.extends) ];
     delete newSchema.extends;
   }
 
   // convert disallow to not
   if (newSchema.disallow) {
-    newSchema.not = (typeof newSchema.disallow === 'string') ?
-      { 'type': newSchema.disallow } :
-      { 'anyOf': convertTypes(newSchema.disallow, true) };
+    if (typeof newSchema.disallow === 'string') {
+      newSchema.not = { type: newSchema.disallow };
+    } else if (Array.isArray(newSchema.disallow)) {
+      newSchema.not = {
+        anyOf: newSchema.disallow
+          .map(type => typeof type === 'string' ? { type } : type)
+      };
+    }
     delete newSchema.disallow;
-  }
-
-  // move required from individual items to required array
-  if (newSchema.properties) {
-    let requiredArray = Array.isArray(newSchema.required) ? newSchema.required : [];
-    for (let key of Object.keys(newSchema.properties)) {
-      if (typeof newSchema.properties[key].required === 'boolean') {
-        if (newSchema.properties[key].required) {
-          requiredArray.push(key);
-        }
-        delete newSchema.properties[key].required;
-      }
-    }
-    if (requiredArray.length) { newSchema.required = requiredArray; }
-  }
-
-  // convert dependencies to arrays
-  if (newSchema.dependencies) {
-    for (let key of Object.keys(newSchema.dependencies)) {
-      if (typeof newSchema.dependencies[key] === 'string') {
-          newSchema.dependencies[key] = [newSchema.dependencies[key]];
-      }
-    }
   }
 
   // delete boolean required key
   if (typeof newSchema.required === 'boolean') {
     delete newSchema.required;
+  }
+
+  // move required from individual items to required array
+  if (newSchema.properties) {
+    const requiredKeys = new Set(newSchema.required || []);
+    Object.keys(newSchema.properties)
+      .filter(key => newSchema.properties[key].required === true)
+      .forEach(key => requiredKeys.add(key));
+    if (requiredKeys.size) { newSchema.required = Array.from(requiredKeys); }
+
+  // move incorrectly placed required list inside array object
+  } else if (Array.isArray(newSchema.required) &&
+    ((newSchema.items || {}).properties || (newSchema.additionalItems || {}).properties)
+  ) {
+    const getRequired = (object, key) => Array.isArray(object[key].required) ?
+      Array.from(new Set([ ...object[key].required, ...object.required ])) :
+      [ ...object.required ];
+    if ((newSchema.items || {}).properties) {
+      newSchema.items = { ...newSchema.items };
+      newSchema.items.required = getRequired(newSchema, 'items');
+      delete newSchema.required;
+    } else { // (newSchema.additionalItems || {}).properties
+      newSchema.additionalItems = { ...newSchema.additionalItems };
+      newSchema.additionalItems.required = getRequired(newSchema, 'additionalItems');
+      delete newSchema.required;
+    }
+  }
+
+  // convert dependencies to arrays
+  if (newSchema.dependencies) {
+    newSchema.dependencies = { ...newSchema.dependencies };
+    Object.keys(newSchema.dependencies)
+      .filter(key => typeof newSchema.dependencies[key] === 'string')
+      .forEach(key => newSchema.dependencies[key] = [ newSchema.dependencies[key] ]);
   }
 
   // convert divisibleBy to multipleOf
@@ -95,7 +105,7 @@ export function convertJsonSchemaToDraft6(schema: any): any {
   if (newSchema.minimum && newSchema.exclusiveMinimum === true) {
     newSchema.exclusiveMinimum = newSchema.minimum;
     delete newSchema.minimum;
-  } else  if (typeof newSchema.exclusiveMinimum !== 'number') {
+  } else if (typeof newSchema.exclusiveMinimum !== 'number') {
     delete newSchema.exclusiveMinimum;
   }
 
@@ -103,7 +113,7 @@ export function convertJsonSchemaToDraft6(schema: any): any {
   if (newSchema.maximum && newSchema.exclusiveMaximum === true) {
     newSchema.exclusiveMaximum = newSchema.maximum;
     delete newSchema.maximum;
-  } else  if (typeof newSchema.exclusiveMaximum !== 'number') {
+  } else if (typeof newSchema.exclusiveMaximum !== 'number') {
     delete newSchema.exclusiveMaximum;
   }
 
@@ -114,31 +124,41 @@ export function convertJsonSchemaToDraft6(schema: any): any {
   ) {
     newSchema.$schema = 'http://json-schema.org/draft-06/schema#';
   } else if (newSchema.$schema) {
+    const description = 'Converted to draft 6 from ' + newSchema.$schema;
+    if (newSchema.description) {
+      newSchema.description += '\n' + description;
+    } else {
+      newSchema.description = description
+    }
     delete newSchema.$schema;
   }
 
   // convert id to $id
-  if (newSchema.id) {
+  if (newSchema.id && !newSchema.$id) {
     newSchema.$id = newSchema.id + '-CONVERTED-TO-DRAFT-06';
     delete newSchema.id;
   }
 
   // convert sub schemas
-  for (let key of Object.keys(newSchema)) {
-    if (['properties', 'patternProperties', 'dependencies'].indexOf(key) > -1) {
-      for (let subKey of Object.keys(newSchema[key])) {
-        newSchema[key][subKey] = convertJsonSchemaToDraft6(newSchema[key][subKey]);
-      }
-    } else if (key !== 'enum') {
-      if (Array.isArray(newSchema[key])) {
-        for (let subSchema of newSchema[key]) {
-          subSchema = convertJsonSchemaToDraft6(subSchema);
+  Object.keys(newSchema)
+    .filter(key => typeof newSchema[key] === 'object')
+    .forEach(key => {
+      if (
+        [ 'definitions', 'dependencies', 'properties', 'patternProperties' ]
+          .includes(key) && !Array.isArray(newSchema[key])
+      ) {
+        const newKey = {};
+        for (const subKey of Object.keys(newSchema[key])) {
+          newKey[subKey] = convertJsonSchemaToDraft6(newSchema[key][subKey]);
         }
-      } else if (typeof newSchema[key] === 'object') {
+        newSchema[key] = newKey;
+      } else if (
+        [ 'items', 'additionalItems', 'additionalProperties',
+          'allOf', 'anyOf', 'oneOf', 'not' ].includes(key)
+      ) {
         newSchema[key] = convertJsonSchemaToDraft6(newSchema[key]);
       }
-    }
-  }
+    });
 
   return newSchema;
 }
