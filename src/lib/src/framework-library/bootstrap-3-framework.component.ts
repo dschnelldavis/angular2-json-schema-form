@@ -165,7 +165,7 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
         this.options.fieldAddonRight || this.options.append;
 
       // Add asterisk to titles if required
-      if (this.options.title && this.layoutNode.type !=- 'tab' &&
+      if (this.options.title && this.layoutNode.type !== 'tab' &&
           !this.options.notitle && this.options.required  &&
           this.options.title.indexOf('*') === -1) {
 
