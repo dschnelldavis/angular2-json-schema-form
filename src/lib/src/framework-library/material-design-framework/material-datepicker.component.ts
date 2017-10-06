@@ -7,15 +7,15 @@ import { dateToString, stringToDate } from '../../shared';
 @Component({
   selector: 'material-datepicker-widget',
   template: `
-    <md-form-field [style.width]="'100%'">
-      <input mdInput #inputControl
+    <mat-form-field [style.width]="'100%'">
+      <input matInput #inputControl
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.list]="'control' + layoutNode?._id + 'Autocomplete'"
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [disabled]="controlDisabled"
         [id]="'control' + layoutNode?._id"
         [max]="options?.maximum"
-        [mdDatepicker]="picker"
+        [matDatepicker]="picker"
         [min]="options?.minimum"
         [name]="controlName"
         [placeholder]="options?.title"
@@ -24,17 +24,17 @@ import { dateToString, stringToDate } from '../../shared';
         [value]="dateValue"
         (change)="updateValue(inputControl.value)">
       <span *ngIf="options?.fieldAddonLeft"
-        md-prefix>{{options?.fieldAddonLeft}}</span>
+        mat-prefix>{{options?.fieldAddonLeft}}</span>
       <span *ngIf="options?.fieldAddonRight"
-        md-suffix>{{options?.fieldAddonRight}}</span>
-      <md-hint *ngIf="options?.description && !options?.placeholder && formControl?.dirty"
-        align="end">{{options?.description}}</md-hint>
-      <md-hint *ngIf="!options?.description && options?.placeholder && !formControl?.dirty"
-        align="end">{{options?.placeholder}}</md-hint>
-      <md-datepicker-toggle mdSuffix [for]="picker"></md-datepicker-toggle>
-    </md-form-field>
-    <md-datepicker #picker
-      (selectedChanged)="updateValue($event)"></md-datepicker>`,
+        mat-suffix>{{options?.fieldAddonRight}}</span>
+      <mat-hint *ngIf="options?.description && !options?.placeholder && formControl?.dirty"
+        align="end">{{options?.description}}</mat-hint>
+      <mat-hint *ngIf="!options?.description && options?.placeholder && !formControl?.dirty"
+        align="end">{{options?.placeholder}}</mat-hint>
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    </mat-form-field>
+    <mat-datepicker #picker
+      (selectedChanged)="updateValue($event)"></mat-datepicker>`,
 })
 export class MaterialDatepickerComponent implements OnInit, OnChanges {
   formControl: AbstractControl;

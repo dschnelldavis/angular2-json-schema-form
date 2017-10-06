@@ -4,7 +4,15 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
-import { MaterialModule } from '@angular/material';
+import {
+  MatButtonModule,
+  MatCardModule,
+  MatCheckboxModule,
+  MatIconModule,
+  MatMenuModule,
+  MatSelectModule,
+  MatToolbarModule
+} from '@angular/material';
 import { RouterModule } from '@angular/router';
 
 import { JsonSchemaFormModule } from '../../lib/src/json-schema-form.module';
@@ -23,7 +31,8 @@ import { routes } from './demo.routes';
   ],
   imports: [
     BrowserModule, BrowserAnimationsModule, FlexLayoutModule,
-    FormsModule, HttpModule, MaterialModule,
+    FormsModule, HttpModule, MatButtonModule, MatCardModule, MatCheckboxModule,
+    MatIconModule, MatMenuModule, MatSelectModule, MatToolbarModule,
     RouterModule.forRoot(routes), JsonSchemaFormModule
   ],
   providers: [ ],

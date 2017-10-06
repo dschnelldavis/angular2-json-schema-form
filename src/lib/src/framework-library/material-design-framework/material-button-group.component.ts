@@ -14,20 +14,20 @@ import { buildTitleMap } from '../../shared';
         [style.display]="options?.notitle ? 'none' : ''"
         [innerHTML]="options?.title"></label>
     </div>
-    <md-button-toggle-group
+    <mat-button-toggle-group
       [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
       [attr.readonly]="options?.readonly ? 'readonly' : null"
       [attr.required]="options?.required"
       [disabled]="controlDisabled"
       [name]="controlName"
       [value]="controlValue">
-      <md-button-toggle *ngFor="let radioItem of radiosList"
+      <mat-button-toggle *ngFor="let radioItem of radiosList"
         [id]="'control' + layoutNode?._id + '/' + radioItem?.name"
         [value]="radioItem?.value"
         (click)="updateValue(radioItem?.value)">
         <span [innerHTML]="radioItem?.name"></span>
-      </md-button-toggle>
-    </md-button-toggle-group>`,
+      </mat-button-toggle>
+    </mat-button-toggle-group>`,
 })
 export class MaterialButtonGroupComponent implements OnInit {
   formControl: AbstractControl;

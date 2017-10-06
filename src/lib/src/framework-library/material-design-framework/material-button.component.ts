@@ -7,7 +7,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
   selector: 'material-button-widget',
   template: `
     <div class="button-row" [class]="options?.htmlClass">
-      <button md-raised-button
+      <button mat-raised-button
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [color]="options?.color || 'primary'"
@@ -17,7 +17,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
         [type]="layoutNode?.type"
         [value]="controlValue"
         (click)="updateValue($event)">
-        <md-icon *ngIf="options?.icon" class="md-24">{{options?.icon}}</md-icon>
+        <mat-icon *ngIf="options?.icon" class="md-24">{{options?.icon}}</mat-icon>
         <span *ngIf="options?.title" [innerHTML]="options?.title"></span>
       </button>
     </div>`,

@@ -6,7 +6,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
 @Component({
   selector: 'material-checkbox-widget',
   template: `
-    <md-checkbox
+    <mat-checkbox
       align="left"
       [color]="options?.color || 'primary'"
       [disabled]="controlDisabled || options?.readonly"
@@ -18,7 +18,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
         class="checkbox-name"
         [style.display]="options?.notitle ? 'none' : ''"
         [innerHTML]="options?.title"></span>
-    </md-checkbox>`,
+    </mat-checkbox>`,
   styles: [` .checkbox-name { white-space: nowrap; } `],
 })
 export class MaterialCheckboxComponent implements OnInit {

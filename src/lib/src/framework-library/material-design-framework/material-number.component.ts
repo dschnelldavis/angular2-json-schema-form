@@ -7,8 +7,8 @@ import { getControl, inArray, isDefined } from '../../shared';
 @Component({
   selector: 'material-number-widget',
   template: `
-    <md-form-field [style.width]="'100%'">
-      <input mdInput #inputControl
+    <mat-form-field [style.width]="'100%'">
+      <input matInput #inputControl
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.max]="options?.maximum"
         [attr.min]="options?.minimum"
@@ -25,15 +25,15 @@ import { getControl, inArray, isDefined } from '../../shared';
         [value]="controlValue"
         (input)="updateValue($event)">
       <span *ngIf="options?.fieldAddonLeft"
-        md-prefix>{{options?.fieldAddonLeft}}</span>
+        mat-prefix>{{options?.fieldAddonLeft}}</span>
       <span *ngIf="options?.fieldAddonRight"
-        md-suffix>{{options?.fieldAddonRight}}</span>
-      <md-hint *ngIf="options?.description && !options?.placeholder && formControl?.dirty"
-        align="end">{{options?.description}}</md-hint>
-      <md-hint *ngIf="!options?.description && options?.placeholder && !formControl?.dirty"
-        align="end">{{options?.placeholder}}</md-hint>
+        mat-suffix>{{options?.fieldAddonRight}}</span>
+      <mat-hint *ngIf="options?.description && !options?.placeholder && formControl?.dirty"
+        align="end">{{options?.description}}</mat-hint>
+      <mat-hint *ngIf="!options?.description && options?.placeholder && !formControl?.dirty"
+        align="end">{{options?.placeholder}}</mat-hint>
       {{layoutNode?.type === 'range' ? controlValue : ''}}
-    </md-form-field>`,
+    </mat-form-field>`,
 })
 export class MaterialNumberComponent implements OnInit {
   formControl: AbstractControl;

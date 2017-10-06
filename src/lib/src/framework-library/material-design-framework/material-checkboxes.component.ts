@@ -10,7 +10,7 @@ import { buildFormGroup, buildTitleMap, JsonPointer } from '../../shared';
 @Component({
   selector: 'material-checkboxes-widget',
   template: `
-    <md-checkbox type="checkbox"
+    <mat-checkbox type="checkbox"
       [color]="options?.color || 'primary'"
       [disabled]="controlDisabled || options?.readonly"
       [name]="options?.name"
@@ -18,7 +18,7 @@ import { buildFormGroup, buildTitleMap, JsonPointer } from '../../shared';
       [indeterminate]="someChecked"
       (change)="updateAllValues($event)">
       <span class="checkbox-name" [innerHTML]="options?.name"></span>
-    </md-checkbox>
+    </mat-checkbox>
     <label *ngIf="options?.title"
       [class]="options?.labelHtmlClass"
       [style.display]="options?.notitle ? 'none' : ''"
@@ -26,14 +26,14 @@ import { buildFormGroup, buildTitleMap, JsonPointer } from '../../shared';
     <ul class="checkbox-list" [class.horizontal-list]="horizontalList">
       <li *ngFor="let checkboxItem of checkboxList"
         [class]="options?.htmlClass">
-        <md-checkbox type="checkbox"
+        <mat-checkbox type="checkbox"
           [(ngModel)]="checkboxItem.checked"
           [color]="options?.color || 'primary'"
           [disabled]="controlDisabled || options?.readonly"
           [name]="checkboxItem?.name"
           (change)="updateValue($event)">
           <span class="checkbox-name" [innerHTML]="checkboxItem?.name"></span>
-        </md-checkbox>
+        </mat-checkbox>
       </li>
     </ul>`,
   styles: [`
