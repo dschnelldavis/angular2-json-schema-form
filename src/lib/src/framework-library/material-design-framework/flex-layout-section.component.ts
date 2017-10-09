@@ -73,8 +73,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
     <mat-card *ngIf="containerType === 'card' && isConditionallyShown()"
       [class]="options?.htmlClass"
       [class.expandable]="options?.expandable && !expanded"
-      [class.expanded]="options?.expandable && expanded"
-      [disabled]="options?.readonly">
+      [class.expanded]="options?.expandable && expanded">
       <mat-card-header>
         <legend
           [class]="options?.labelHtmlClass"
@@ -84,7 +83,8 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
         </legend>
       </mat-card-header>
       <mat-card-content *ngIf="expanded">
-        <fieldset>
+        <fieldset
+          [disabled]="options?.readonly">
           <flex-layout-root-widget
             [formID]="formID"
             [layout]="layoutNode.items"

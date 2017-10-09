@@ -16,7 +16,7 @@ import { hasOwn, copy } from './utility.functions';
  * isJsonPointer, isSubPointer, toIndexedPointer, toGenericPointer,
  * toControlPointer, toSchemaPointer, toDataPointer, parseObjectPath
  *
- * Parts based on manuelstofer's json-pointer utilities
+ * Some functions based on manuelstofer's json-pointer utilities
  * https://github.com/manuelstofer/json-pointer
  */
 export type Pointer = string | string[];

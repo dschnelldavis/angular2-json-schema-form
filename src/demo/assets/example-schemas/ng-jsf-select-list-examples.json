@@ -8,18 +8,16 @@
         "title": "Favorite captain 1",
         "description": "enum array in schema (JSON Schema v1+)",
         "type": "string",
-        "enum": [
-          "William Shatner",
-          "Patrick Stewart",
-          "John Barrowman",
-          "Nathan Fillion"
-        ]
+        "enum": [ "William Shatner",
+                  "Patrick Stewart",
+                  "John Barrowman",
+                  "Nathan Fillion" ]
       },
       "captain2": {
         "title": "Favorite captain 2",
         "description": "oneOf array with enum items in schema (JSON Schema v4+)",
         "type": "string",
-        "oneOf": [
+        "oneOf":  [
           { "title": "James T. Kirk",    "enum": [ "William Shatner" ] },
           { "title": "Jean-Luc Picard",  "enum": [ "Patrick Stewart" ] },
           { "title": "Jack Harkness",    "enum": [ "John Barrowman"  ] },
@@ -30,11 +28,11 @@
         "title": "Favorite captain 3",
         "description": "oneOf array with const items in schema (JSON Schema v6+)",
         "type": "string",
-        "oneOf": [
+        "oneOf":  [
           { "title": "James T. Kirk",    "const": "William Shatner" },
           { "title": "Jean-Luc Picard",  "const": "Patrick Stewart" },
           { "title": "Jack Harkness",    "const": "John Barrowman"  },
-          { "title": "Malcolm Reynolds", "const": "Nathan Fillion"  },
+          { "title": "Malcolm Reynolds", "const": "Nathan Fillion"  }
         ]
       },
       "captain4": {
@@ -46,18 +44,14 @@
         "title": "Favorite captain 5",
         "description": "enum + enumNames in schema (<a href=\"https://mozilla-services.github.io/react-jsonschema-form/\">React jsonschema form</a>)",
         "type": "string",
-        "enum": [
-          "William Shatner",
-          "Patrick Stewart",
-          "John Barrowman",
-          "Nathan Fillion"
-        ],
-        "enumNames": [
-          "James T. Kirk",
-          "Jean-Luc Picard",
-          "Jack Harkness",
-          "Malcolm Reynolds"
-        ]
+        "enum":       [ "William Shatner",
+                        "Patrick Stewart",
+                        "John Barrowman",
+                        "Nathan Fillion" ],
+        "enumNames":  [ "James T. Kirk",
+                        "Jean-Luc Picard",
+                        "Jack Harkness",
+                        "Malcolm Reynolds" ]
       },
       "captain6": {
         "title": "Favorite captain 6",
@@ -82,7 +76,7 @@
           { "title": "Star Trek: James T. Kirk",   "const": "William Shatner" },
           { "title": "Star Trek: Jean-Luc Picard", "const": "Patrick Stewart" },
           { "title": "Torchwood: Jack Harkness",   "const": "John Barrowman"  },
-          { "title": "Firefly: Malcolm Reynolds",  "const": "Nathan Fillion"  },
+          { "title": "Firefly: Malcolm Reynolds",  "const": "Nathan Fillion"  }
         ]
       }
     }
@@ -106,8 +100,8 @@
       "titleMap": {
         "William Shatner": "James T. Kirk",
         "Patrick Stewart": "Jean-Luc Picard",
-        "John Barrowman": "Jack Harkness",
-        "Nathan Fillion": "Malcolm Reynolds"
+        "John Barrowman" : "Jack Harkness",
+        "Nathan Fillion" : "Malcolm Reynolds"
       }
     },
     { "widget": "message", "message": "<h3>Groups, Names, &amp; Values</h3>" },
@@ -122,20 +116,14 @@
     { "key": "captain8",
       "titleMap": [
         { "group": "Star Trek",
-          "items": [
-            { "name": "James T. Kirk",    "value": "William Shatner" },
-            { "name": "Jean-Luc Picard",  "value": "Patrick Stewart" }
-          ]
+          "items": [ { "name": "James T. Kirk",    "value": "William Shatner" },
+                     { "name": "Jean-Luc Picard",  "value": "Patrick Stewart" } ]
         },
         { "group": "Torchwood",
-          "items": [
-            { "name": "Jack Harkness",    "value": "John Barrowman"  }
-          ]
+          "items": [ { "name": "Jack Harkness",    "value": "John Barrowman"  } ]
         },
         { "group": "Firefly",
-          "items": [
-            { "name": "Malcolm Reynolds", "value": "Nathan Fillion"  }
-          ]
+          "items": [ { "name": "Malcolm Reynolds", "value": "Nathan Fillion"  } ]
         }
       ]
     },
