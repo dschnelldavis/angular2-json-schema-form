@@ -39,10 +39,7 @@ import { addClasses, inArray, JsonPointer, toTitleCase } from '../../shared';
         [attr.for]="'control' + layoutNode?._id"
         [class]="options?.labelHtmlClass"
         [class.sr-only]="options?.notitle"
-        [innerHTML]="options?.title">
-        <strong *ngIf="options?.title && !options?.notitle && options?.required"
-          class="text-danger">*</strong>
-        </label>
+        [innerHTML]="options?.title"></label>
       <p *ngIf="layoutNode?.type === 'submit' && jsf?.globalOptions?.fieldsRequired">
         <strong class="text-danger">*</strong> = required fields
       </p>
@@ -167,6 +164,14 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
       this.options.fieldAddonRight =
         this.options.fieldAddonRight || this.options.append;
 
+      // Add asterisk to titles if required
+      if (this.options.title && this.layoutNode.type !== 'tab' &&
+          !this.options.notitle && this.options.required  &&
+          this.options.title.indexOf('*') === -1) {
+
+          this.options.title += ' <strong class="text-danger">*</strong>';
+
+        }
       // Set miscelaneous styles and settings for each control type
       switch (this.layoutNode.type) {
         // Checkbox controls
@@ -214,11 +219,6 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
         case 'advancedfieldset': case 'authfieldset':
         case 'selectfieldset': case 'optionfieldset':
           this.options.messageLocation = 'top';
-          if (this.options.title && this.options.required &&
-            this.options.title.indexOf('*') === -1
-          ) {
-            this.options.title += ' <strong class="text-danger">*</strong>';
-          }
         break;
         case 'tabarray': case 'tabs':
           this.widgetOptions.htmlClass = addClasses(
