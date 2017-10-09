@@ -6,8 +6,8 @@ import {
 /**
  * Utility function library:
  *
- * addClasses, copy, forEach, forEachCopy, hasOwn,
- * mergeFilteredObject, parseText, toTitleCase
+ * addClasses,copy, forEach, forEachCopy, hasOwn, mergeFilteredObject,
+ * parseText, uniqueItems, commonItems, fixTitle, toTitleCase
 */
 
 /**
@@ -203,18 +203,70 @@ export function parseText(
   let $index: number = null; // For Angular Schema Form API compatibility
   if (typeof key === 'number') { idx = $index = key + 1; }
   try {
+    /* tslint:disable */
     return text.replace(/{{.+?}}/g, exp => eval(exp.slice(2, -2)));
+    /* tslint:enable */
   } catch (error) {
     try {
+      /* tslint:disable */
       return tpldata ?
         text.replace(/{{.+?}}/g, exp => eval('tpldata.' + exp.slice(2, -2))) :
         text.replace(/{{.+?}}/g, exp => eval('this.' + exp.slice(2, -2)));
+      /* tslint:enable */
     } catch (error) {
       console.error('parseText error: ');
       console.error(error);
     }
     return text;
   }
+}
+
+/**
+ * 'uniqueItems' function
+ *
+ * Accepts any number of string value inputs,
+ * and returns an array of all input vaues, excluding duplicates.
+ *
+ * @param {...string} ...items -
+ * @return {string[]} -
+ */
+export function uniqueItems(...items): string[] {
+  const returnItems = [];
+  for (const item of items) {
+    if (!returnItems.includes(item)) { returnItems.push(item); }
+  }
+  return returnItems;
+}
+
+/**
+ * 'commonItems' function
+ *
+ * Accepts any number of strings or arrays of string values,
+ * and returns a single array containing only values present in all inputs.
+ *
+ * @param {...string|string[]} ...arrays -
+ * @return {string[]} -
+ */
+export function commonItems(...arrays): string[] {
+  let returnItems = null;
+  for (let array of arrays) {
+    if (isString(array)) { array = [array]; }
+    returnItems = returnItems ?
+      returnItems.filter(item => array.includes(item)) :
+      [ ...array ];
+  }
+  return returnItems;
+}
+
+/**
+ * 'fixTitle' function
+ *
+ *
+ * @param {string} input -
+ * @return {string} -
+ */
+export function fixTitle(name: string): string {
+  return toTitleCase(name.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/_/g, ' '));
 }
 
 /**

@@ -1,6 +1,6 @@
 import {
-  ChangeDetectionStrategy, Component, DoCheck, EventEmitter, Input, Output,
-  OnChanges, OnInit
+  ChangeDetectionStrategy, Component, EventEmitter, Input, Output, OnChanges,
+  OnInit
 } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -10,8 +10,10 @@ import * as _ from 'lodash';
 import { FrameworkLibraryService } from './framework-library/framework-library.service';
 import { WidgetLibraryService } from './widget-library/widget-library.service';
 import { JsonSchemaFormService } from './json-schema-form.service';
+import { convertSchemaToDraft6 } from './shared/convert-schema-to-draft6.function';
+import { resolveSchemaReferences } from './shared/json-schema.functions';
 import { hasValue, isArray, isEmpty, isObject } from './shared/validator.functions';
-import { hasOwn } from './shared/utility.functions';
+import { forEach, hasOwn } from './shared/utility.functions';
 import { JsonPointer } from './shared/jsonpointer.functions';
 
 /**
@@ -44,6 +46,7 @@ import { JsonPointer } from './shared/jsonpointer.functions';
  *  - Angular (obviously)                  https://angular.io
  *  - lodash, JavaScript utility library   https://github.com/lodash/lodash
  *  - ajv, Another JSON Schema validator   https://github.com/epoberezkin/ajv
+ *  - JSON Schema $ref Parser              https://github.com/BigstickCarpet/json-schema-ref-parser
  *
  * In addition, the Example Playground also depends on:
  *  - brace, Browserified Ace editor       http://thlorenz.github.io/brace
@@ -66,10 +69,9 @@ import { JsonPointer } from './shared/jsonpointer.functions';
     <div *ngIf="debug || jsfObject.globalOptions.debug">
       Debug output: <pre>{{debugOutput}}</pre>
     </div>`,
-  providers: [ JsonSchemaFormService ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
+export class JsonSchemaFormComponent implements OnChanges, OnInit {
   formID: number; // Unique ID for displayed form
   debugOutput: any; // Debug information, if requested
   formValueSubscription: any = null;
@@ -129,11 +131,92 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
 
   get scripts(): SafeResourceUrl[] {
     const load = this.sanitizer.bypassSecurityTrustResourceUrl;
-    return this.frameworkLibrary.getFrameworkStylesheets()
+    return this.frameworkLibrary.getFrameworkScripts()
       .map(script => load(script));
   }
 
+  submitForm() {
+    this.onSubmit.emit(this.jsf.validData);
+  }
+
   /**
+   * 'initializeForm' function
+   *
+   * - Update 'schema', 'layout', and 'initialValues', from inputs.
+   *
+   * - Create 'schemaRefLibrary' and 'schemaRecursiveRefMap'
+   *   to resolve schema $ref links, including recursive $ref links.
+   *
+   * - Create 'dataRecursiveRefMap' to resolve recursive links in data
+   *   and corectly set output formats for recursively nested values.
+   *
+   * - Create 'layoutRefLibrary' and 'templateRefLibrary' to store
+   *   new layout nodes and formGroup elements to use when dynamically
+   *   adding form components to arrays and recursive $ref points.
+   *
+   * - Create 'dataMap' to map the data to the schema and template.
+   *
+   * - Create the master 'formGroupTemplate' then from it 'formGroup'
+   *   the Angular formGroup used to control the reactive form.
+   *
+   * @return {void}
+   */
+  initializeForm(): void {
+    if (this.schema || this.layout || this.data || this.form || this.JSONSchema || this.UISchema) {
+
+      this.jsf.resetAllValues();  // Reset all form values to defaults
+      this.initializeOptions();   // Update options
+      this.initializeSchema();    // Update schema, schemaRefLibrary,
+                                  // schemaRecursiveRefMap, & dataRecursiveRefMap
+      this.initializeLayout();    // Update layout, layoutRefLibrary,
+      this.initializeData();      // Update initialValues
+      this.activateForm();        // Update dataMap, templateRefLibrary,
+                                  // formGroupTemplate, formGroup
+
+      // Uncomment individual lines to output debugging information to browser:
+      // (These only work if the 'debug' option has also been set to 'true'.)
+      if (this.debug || this.jsf.globalOptions.debug) {
+        const vars: any[] = [];
+        // vars.push(this.jsf.schema);
+        // vars.push(this.jsf.layout);
+        // vars.push(this.options);
+        // vars.push(this.jsf.initialValues);
+        // vars.push(this.jsf.formGroup.value);
+        // vars.push(this.jsf.formGroupTemplate);
+        // vars.push(this.jsf.formGroup);
+        // vars.push(this.jsf.schemaRefLibrary);
+        // vars.push(this.jsf.layoutRefLibrary);
+        // vars.push(this.jsf.templateRefLibrary);
+        // vars.push(this.jsf.dataMap);
+        // vars.push(this.jsf.arrayMap);
+        // vars.push(this.jsf.schemaRecursiveRefMap);
+        // vars.push(this.jsf.dataRecursiveRefMap);
+        this.debugOutput = vars.map(v => JSON.stringify(v, null, 2)).join('\n');
+      }
+
+      // Uncomment individual lines to output debugging information to console:
+      // (These always work.)
+      // console.log('loading form...');
+      // console.log('schema', this.jsf.schema);
+      // console.log('layout', this.jsf.layout);
+      // console.log('options', this.options);
+      // console.log('initialValues', this.jsf.initialValues);
+      // console.log('formGroupTemplate', this.jsf.formGroupTemplate);
+      // console.log('formGroup', this.jsf.formGroup);
+      // console.log('formGroup.value', this.jsf.formGroup.value);
+      // console.log('schemaRefLibrary', this.jsf.schemaRefLibrary);
+      // console.log('layoutRefLibrary', this.jsf.layoutRefLibrary);
+      // console.log('templateRefLibrary', this.jsf.templateRefLibrary);
+      // console.log('dataMap', this.jsf.dataMap);
+      // console.log('arrayMap', this.jsf.arrayMap);
+      // console.log('schemaRecursiveRefMap', this.jsf.schemaRecursiveRefMap);
+      // console.log('dataRecursiveRefMap', this.jsf.dataRecursiveRefMap);
+    }
+  }
+
+  /**
+   * 'initializeOptions' function
+   *
    * Initialize 'options' (global form options) and set framework
    * Combine available inputs:
    * 1. options - recommended
@@ -170,6 +253,8 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
   }
 
   /**
+   * 'initializeSchema' function
+   *
    * Initialize 'schema'
    * Use first available input:
    * 1. schema - recommended / Angular Schema Form style
@@ -177,9 +262,16 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
    * 3. JSONSchema - React JSON Schema Form style
    * 4. form.JSONSchema - For testing single input React JSON Schema Forms
    * 5. form - For testing single schema-only inputs
-   * TODO: 6. (none) no schema - construct form entirely from layout instead
+   *
+   * ... if no schema input found, the 'activateForm' function, below,
+   *     will make two additional attempts to build a schema
+   * 6. If layout input - build schema from layout
+   * 7. If data input - build schema from data
    */
   private initializeSchema() {
+
+    // TODO: update to allow non-object schemas
+
     if (isObject(this.schema)) {
       this.jsf.AngularSchemaFormCompatibility = true;
       this.jsf.schema = _.cloneDeep(this.schema);
@@ -194,17 +286,19 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
     } else if (hasOwn(this.form, 'properties') && isObject(this.form.properties)) {
       this.jsf.schema = _.cloneDeep(this.form);
     } else if (isObject(this.form)) {
-
+      // TODO: Handle other types of form input
     }
 
     if (!isEmpty(this.jsf.schema)) {
 
-      // Allow for JSON schema shorthand (JSON Form style)
+      // Add type = 'object' if missing
       if (!hasOwn(this.jsf.schema, 'type') &&
         hasOwn(this.jsf.schema, 'properties') &&
         isObject(this.jsf.schema.properties)
       ) {
         this.jsf.schema.type = 'object';
+
+      // Allow JSON schema shorthand (JSON Form style)
       } else if (!hasOwn(this.jsf.schema, 'type') ||
         this.jsf.schema.type !== 'object' ||
         !hasOwn(this.jsf.schema, 'properties')
@@ -213,28 +307,67 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
         this.jsf.schema = { 'type': 'object', 'properties': this.jsf.schema };
       }
 
-      // Convert JSON Schemas version 3 (JSON Form style)
-      // or version 4 (Angular Schema Form style) to version 6
-      this.jsf.convertJsonSchemaToDraft6();
+      // Update JSON Schema to version 6 format,
+      // inluding v3 (JSON Form style) and v4 (Angular Schema Form style)
+      this.jsf.schema = convertSchemaToDraft6(this.jsf.schema);
 
       // Initialize ajv and compile schema
       this.jsf.compileAjvSchema();
 
-      // Resolve all schema $ref links
-      this.jsf.resolveSchemaRefLinks();
+      // Create schemaRefLibrary, schemaRecursiveRefMap, & dataRecursiveRefMap
+      this.jsf.schema = resolveSchemaReferences(
+        this.jsf.schema, this.jsf.schemaRefLibrary,
+        this.jsf.schemaRecursiveRefMap, this.jsf.dataRecursiveRefMap
+      );
+
+      // TODO: (?) Resolve external $ref links
+      // // Create schemaRefLibrary & schemaRecursiveRefMap
+      // this.parser.bundle(this.schema)
+      //   .then(schema => this.schema = resolveSchemaReferences(
+      //     schema, this.jsf.schemaRefLibrary,
+      //     this.jsf.schemaRecursiveRefMap, this.jsf.dataRecursiveRefMap
+      //   ));
     }
   }
 
   /**
+   * 'initializeLayout' function
+   *
    * Initialize 'layout'
    * Use first available array input:
    * 1. layout - recommended
    * 2. form - Angular Schema Form style
    * 3. form.form - JSON Form style
    * 4. form.layout - Single input style
-   * 5. (none) no input - use default layout instead
+   * 5. (none) no layout - set default layout instead
+   *    (full layout will be built later from the schema)
+   *
+   * Also, if alternate layout formats are available,
+   * import from 'UISchema' or 'customFormItems'
+   * used for React JSON Schema Form and JSON Form API compatibility
+   * Use first available input:
+   * 1. UISchema - React JSON Schema Form style
+   * 2. form.UISchema - For testing single input React JSON Schema Forms
+   * 2. form.customFormItems - JSON Form style
+   * 3. (none) no input - don't import
    */
   private initializeLayout() {
+
+    // Rename JSON Form-style 'options' lists to
+    // Angular Schema Form-style 'titleMap' lists.
+    const fixJsonFormOptions = (layout: any): any => {
+      if (isObject(layout) || isArray(layout)) {
+        forEach(layout, (value, key) => {
+          if (isObject(value) && hasOwn(value, 'options') && isObject(value.options)) {
+            value.titleMap = value.options;
+            delete value.options;
+          }
+        }, 'top-down');
+      }
+      return layout;
+    }
+
+    // Check for layout inputs and, if found, initialize form layout
     if (isArray(this.layout)) {
       this.jsf.layout = _.cloneDeep(this.layout);
     } else if (isArray(this.form)) {
@@ -243,27 +376,16 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
     } else if (this.form && isArray(this.form.form)) {
       this.jsf.JsonFormCompatibility = true;
       this.jsf.layout =
-        this.jsf.fixJsonFormOptions(_.cloneDeep(this.form.form));
+        fixJsonFormOptions(_.cloneDeep(this.form.form));
     } else if (this.form && isArray(this.form.layout)) {
       this.jsf.layout = _.cloneDeep(this.form.layout);
     } else {
-      this.jsf.layout =
-        this.jsf.globalOptions.addSubmit === false ?
-          [ '*' ] :
-          [ '*', { type: 'submit', title: 'Submit' } ];
+      this.jsf.layout = this.jsf.globalOptions.addSubmit === false ?
+        [ '*' ] :
+        [ '*', { type: 'submit', title: 'Submit' } ];
     }
-  }
 
-  /**
-   * Import alternate layout formats 'UISchema' or 'customFormItems'
-   * used for React JSON Schema Form and JSON Form API compatibility
-   * Use first available input:
-   * 1. UISchema - React JSON Schema Form style
-   * 2. form.UISchema - For testing single input React JSON Schema Forms
-   * 2. form.customFormItems - JSON Form style
-   * 3. (none) no input - don't import
-   */
-  private importAlternateLayout() {
+    // Check for alternate layout inputs
     let alternateLayout: any = null;
     if (isObject(this.UISchema)) {
       this.jsf.ReactJsonSchemaFormCompatibility = true;
@@ -277,16 +399,17 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
     } else if (hasOwn(this.form, 'customFormItems')) {
       this.jsf.JsonFormCompatibility = true;
       alternateLayout =
-        this.jsf.fixJsonFormOptions(_.cloneDeep(this.form.customFormItems));
+        fixJsonFormOptions(_.cloneDeep(this.form.customFormItems));
     }
 
-    // if alternate layout found, copy options into schema
+    // if alternate layout found, copy alternate layout options into schema
     if (alternateLayout) {
       JsonPointer.forEachDeep(alternateLayout, (value, pointer) => {
-        const schemaPointer: string = pointer
-          .replace(/\//g, '/properties/')
-          .replace(/\/properties\/items\/properties\//g, '/items/properties/')
-          .replace(/\/properties\/titleMap\/properties\//g, '/titleMap/properties/');
+        const schemaPointer = JsonPointer.toSchemaPointer(pointer, this.jsf.schema);
+        // const schemaPointer = pointer
+        //   .replace(/\//g, '/properties/')
+        //   .replace(/\/properties\/items\/properties\//g, '/items/properties/')
+        //   .replace(/\/properties\/titleMap\/properties\//g, '/titleMap/properties/');
         if (hasValue(value) && hasValue(pointer)) {
           const groupPointer = JsonPointer.parse(schemaPointer).slice(0, -2);
           let key = JsonPointer.toKey(schemaPointer);
@@ -313,7 +436,10 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
   }
 
   /**
+   * 'initializeData' function
+   *
    * Initialize 'initialValues'
+   * defulat or previously submitted values used to populate form
    * Use first available input:
    * 1. data - recommended
    * 2. model - Angular Schema Form style
@@ -323,7 +449,7 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
    * 6. form.formData - For easier testing of React JSON Schema Forms
    * 7. (none) no data - initialize data from schema and layout defaults only
    */
-  private initialValues() {
+  private initializeData() {
     if (isObject(this.data)) {
       this.jsf.initialValues = _.cloneDeep(this.data);
     } else if (isObject(this.model)) {
@@ -341,15 +467,33 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
       this.jsf.ReactJsonSchemaFormCompatibility = true;
       this.jsf.initialValues = _.cloneDeep(this.form.formData);
     }
+  }
 
+  /**
+   * 'activateForm' function
+   *
+   * ...continued from 'initializeSchema' function, above
+   * If 'schema' has not been initialized (i.e. no schema input found)
+   * 6. If layout input - build schema from layout input
+   * 7. If data input - build schema from data input
+   *
+   * Create final layout,
+   * build the FormGroup template and the Angular FormGroup,
+   * subscribe to changes,
+   * and activate the form.
+   */
+  private activateForm() {
+
+    // If 'schema' not initialized
     if (isEmpty(this.jsf.schema)) {
 
-      // TODO: If layout, but no schema, build schema from layout
-      if (this.jsf.layout.indexOf('*') === -1) {
-        this.jsf.buildSchemaFromLayout();
+      // TODO: If full layout input (with no '*'), build schema from layout
+      // if (this.jsf.layout.indexOf('*') === -1) {
+      //   this.jsf.buildSchemaFromLayout();
+      // } else
 
-        // If no schema and no layout, build schema from data
-      } else if (!isEmpty(this.jsf.initialValues)) {
+      // If data input, build schema from data
+      if (!isEmpty(this.jsf.initialValues)) {
         this.jsf.buildSchemaFromData();
       }
     }
@@ -373,7 +517,9 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
 
     if (this.jsf.formGroup) {
 
-      // // Calculate references to other fields
+      // TODO: Figure out how to display calculated values without changing object data
+      // See http://ulion.github.io/jsonform/playground/?example=templating-values
+      // Calculate references to other fields
       // if (!isEmpty(this.jsf.formGroup.value)) {
       //   forEach(this.jsf.formGroup.value, (value, key, object, rootObject) => {
       //     if (typeof value === 'string') {
@@ -381,10 +527,8 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
       //     }
       //   }, 'top-down');
       // }
-      // // TODO: Figure out how to display calculated values without changing object data
-      // // See http://ulion.github.io/jsonform/playground/?example=templating-values
 
-      // TODO: (re-)render the form
+      // TODO: (?) (re-)render the form
 
       // Subscribe to form changes to output live data, validation, and errors
       this.jsf.dataChanges.subscribe(data => this.onChanges.emit(data));
@@ -402,82 +546,5 @@ export class JsonSchemaFormComponent implements DoCheck, OnChanges, OnInit {
         this.validationErrors.emit(this.jsf.validationErrors);
       }
     }
-  }
-
-  /**
-   * 'initializeForm' function
-   *
-   * - Update 'schema', 'layout', and 'initialValues', from inputs.
-   *
-   * - Create 'dataMap' to map the data to the schema and template.
-   *
-   * - Create 'schemaRefLibrary' to resolve schema $ref links.
-   *
-   * - Create 'layoutRefLibrary' and 'templateRefLibrary' to store
-   *   new layout nodes and formGroup elements to use when dynamically
-   *   adding form components to arrays and recursive $ref points.
-   *
-   * - Create the master 'formGroupTemplate', then from it 'formGroup',
-   *   the Angular formGroup used to control the reactive form.
-   *
-   * @return {void}
-   */
-  public initializeForm(): void {
-    if (this.schema || this.layout || this.data || this.form || this.JSONSchema || this.UISchema) {
-      // Reset all form values to defaults
-      this.jsf.resetAllValues();
-      this.initializeOptions();
-      this.initializeSchema();
-      this.initializeLayout();
-      this.importAlternateLayout();
-      this.initialValues();
-
-      // Uncomment individual lines to output debugging information to console:
-      // (These always work.)
-      // console.log('loading form...');
-      // console.log(this.jsf.schema);
-      // console.log(this.jsf.layout);
-      // console.log(this.options);
-      // console.log(this.jsf.initialValues);
-      // console.log(this.jsf.formGroup.value);
-      // console.log(this.jsf.formGroupTemplate);
-      // console.log(this.jsf.formGroup);
-      // console.log(this.jsf.schemaRefLibrary);
-      // console.log(this.jsf.layoutRefLibrary);
-      // console.log(this.jsf.templateRefLibrary);
-      // console.log(this.jsf.dataMap);
-      // console.log(this.jsf.arrayMap);
-      // console.log(this.jsf.schemaRecursiveRefMap);
-      // console.log(this.jsf.dataRecursiveRefMap);
-    } else {
-      // TODO: Display error message
-    }
-  }
-
-  // Uncomment individual lines to output debugging information to browser:
-  // (These only work if the 'debug' option has also been set to 'true'.)
-  ngDoCheck() {
-    if (this.debug || this.jsf.globalOptions.debug) {
-      const vars: any[] = [];
-      // vars.push(this.jsf.schema);
-      // vars.push(this.jsf.layout);
-      // vars.push(this.options);
-      // vars.push(this.jsf.initialValues);
-      // vars.push(this.jsf.formGroup.value);
-      // vars.push(this.jsf.formGroupTemplate);
-      // vars.push(this.jsf.formGroup);
-      // vars.push(this.jsf.schemaRefLibrary);
-      // vars.push(this.jsf.layoutRefLibrary);
-      // vars.push(this.jsf.templateRefLibrary);
-      // vars.push(this.jsf.dataMap);
-      // vars.push(this.jsf.arrayMap);
-      // vars.push(this.jsf.schemaRecursiveRefMap);
-      // vars.push(this.jsf.dataRecursiveRefMap);
-      this.debugOutput = vars.map(v => JSON.stringify(v, null, 2)).join('\n');
-    }
-  }
-
-  submitForm() {
-    this.onSubmit.emit(this.jsf.validData);
   }
 }

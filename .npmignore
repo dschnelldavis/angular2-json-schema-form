@@ -25,3 +25,8 @@ npm-debug.log
 Thumbs.db
 Desktop.ini
 .DS_Store
+
+# Misc
+.firebaserc
+firebase.json
+firebase-debug.log

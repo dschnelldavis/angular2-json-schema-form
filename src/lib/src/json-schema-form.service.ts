@@ -4,26 +4,26 @@ import { Subject } from 'rxjs/Subject';
 
 import * as Ajv from 'ajv';
 import * as _ from 'lodash';
+import * as $RefParser from 'json-schema-ref-parser';
 
-import { convertJsonSchemaToDraft6 } from './shared/convert-json-schema.functions';
+import { convertSchemaToDraft6 } from './shared/convert-schema-to-draft6.function';
 import {
   hasValue, isArray, isDefined, isObject, isString
 } from './shared/validator.functions';
-import { forEach, hasOwn, parseText } from './shared/utility.functions';
+import { forEach, hasOwn, parseText, toTitleCase } from './shared/utility.functions';
 import { JsonPointer } from './shared/jsonpointer.functions';
 import {
-  buildSchemaFromData, buildSchemaFromLayout, getSchemaReference
+  buildSchemaFromData, buildSchemaFromLayout, removeRecursiveReferences,
+  resolveSchemaReferences
 } from './shared/json-schema.functions';
 import {
-  buildFormGroup, buildFormGroupTemplate, fixJsonFormOptions, formatFormData, getControl
+  buildFormGroup, buildFormGroupTemplate, formatFormData, getControl
 } from './shared/form-group.functions';
 import { buildLayout } from './shared/layout.functions';
 
-export interface CheckboxItem {
-  name: string,
-  value: any, checked?: boolean
+export interface TitleMapItem {
+  name?: string, value?: any, checked?: boolean, group?: string, items?: TitleMapItem[]
 };
-
 export interface ErrorMessages {
   [control_name: string]: { message: string, code: string }[]
 };
@@ -37,6 +37,8 @@ export class JsonSchemaFormService {
 
   ajvOptions: any = { allErrors: true, unknownFormats: 'ignore' };
   ajv: any = new Ajv(this.ajvOptions); // AJV: Another JSON Schema Validator
+  parser = new $RefParser(); // JSON Schema $ref Parser
+
   validateFormData: any = null; // Compiled AJV function to validate active form's schema
 
   initialValues: any = {}; // The initial data model (e.g. previously submitted data)
@@ -130,12 +132,8 @@ export class JsonSchemaFormService {
     this.globalOptions = _.cloneDeep(this.globalOptionDefaults);
   }
 
-  convertJsonSchemaToDraft6() {
-    this.schema = convertJsonSchemaToDraft6(this.schema);
-  }
-
-  fixJsonFormOptions(layout: any): any {
-    return fixJsonFormOptions(layout);
+  convertSchemaToDraft6() {
+    this.schema = convertSchemaToDraft6(this.schema);
   }
 
   buildFormGroupTemplate(setValues: boolean = true) {
@@ -149,13 +147,16 @@ export class JsonSchemaFormService {
    * Example errors:
    * {
    *   'last_name': [ {
-   *     'message': 'First name must by start with capital letter.',
+   *     'message': 'Last name must by start with capital letter.',
    *     'code': 'capital_letter'
-   *   }],
-   *   'email': [{
-   *     'message': 'Email must by from example.com domain.',
+   *   } ],
+   *   'email': [ {
+   *     'message': 'Email must be from example.com domain.',
    *     'code': 'special_domain'
-   *   }]
+   *   }, {
+   *     'message': 'Email must contain an @ symbol.',
+   *     'code': 'at_symbol'
+   *   } ]
    * }
    * @param {ErrorMessages} errors
    */
@@ -236,98 +237,6 @@ export class JsonSchemaFormService {
     }
   }
 
-  // Resolve all schema $ref links
-  resolveSchemaRefLinks() {
-
-    // Search schema for $ref links
-    JsonPointer.forEachDeep(this.schema, (subSchema, pointer) => {
-      if (hasOwn(subSchema, '$ref') && isString(subSchema['$ref'])) {
-        const newReference: string = JsonPointer.compile(subSchema['$ref']);
-        const isRecursive: boolean = JsonPointer.isSubPointer(newReference, pointer);
-
-        // Save new target schemas in schemaRefLibrary
-        if (hasValue(newReference) && !hasOwn(this.schemaRefLibrary, newReference)) {
-          this.schemaRefLibrary[newReference] = getSchemaReference(
-            this.schema, newReference, this.schemaRefLibrary
-          );
-        }
-
-        // Save link in schemaRecursiveRefMap
-        if (!this.schemaRecursiveRefMap.has(pointer)) {
-          this.schemaRecursiveRefMap.set(pointer, newReference);
-        }
-
-        // If a $ref link is not recursive,
-        // remove link and replace with copy of target schema
-        if (!isRecursive) {
-          delete subSchema['$ref'];
-          const targetSchema: any = {
-            ..._.cloneDeep(this.schemaRefLibrary[newReference]),
-            ...subSchema
-          };
-          this.schema = JsonPointer.set(this.schema, pointer, targetSchema);
-
-          // Save partial link in schemaRecursiveRefMap,
-          // so it can be matched later if it is recursive
-          this.schemaRecursiveRefMap.set(newReference, pointer);
-        } else {
-
-          // If a matching partial link exists, complete it
-          const mappedReference: string = this.schemaRecursiveRefMap.get(newReference);
-          if (this.schemaRecursiveRefMap.has(newReference) &&
-            JsonPointer.isSubPointer(mappedReference, newReference)
-          ) {
-            this.schemaRecursiveRefMap.set(newReference, mappedReference);
-          }
-        }
-      }
-    }, true);
-
-    // Add redirects for links to shared schemas (such as definitions)
-    let addRedirects: Map<string, string> = new Map<string, string>();
-    this.schemaRecursiveRefMap.forEach((toRef1, fromRef1) =>
-      this.schemaRecursiveRefMap.forEach((toRef2, fromRef2) => {
-        if (fromRef1 !== fromRef2 && fromRef1 !== toRef2 &&
-          JsonPointer.isSubPointer(toRef2, fromRef1)
-        ) {
-          const newRef: string = fromRef2 + fromRef1.slice(toRef2.length);
-          if (!this.schemaRecursiveRefMap.has(newRef)) {
-            addRedirects.set(newRef, toRef1);
-          }
-        }
-      })
-    );
-    addRedirects.forEach((toRef, fromRef) => this.schemaRecursiveRefMap.set(fromRef, toRef));
-
-    // Fix recursive references pointing to shared schemas
-    this.schemaRecursiveRefMap.forEach((toRef1, fromRef1) =>
-      this.schemaRecursiveRefMap.forEach((toRef2, fromRef2) => {
-        if (fromRef1 !== fromRef2 && toRef1 === toRef2 &&
-          JsonPointer.isSubPointer(fromRef1, fromRef2)
-        ) {
-          this.schemaRecursiveRefMap.set(fromRef2, fromRef1);
-        }
-      })
-    );
-
-    // Remove unmatched (non-recursive) partial links
-    this.schemaRecursiveRefMap.forEach((toRef, fromRef) => {
-      if (!JsonPointer.isSubPointer(toRef, fromRef) &&
-        !hasOwn(this.schemaRefLibrary, toRef)
-      ) {
-        this.schemaRecursiveRefMap.delete(fromRef);
-      }
-    });
-
-    // // TODO: Create dataRecursiveRefMap from schemaRecursiveRefMap
-    // this.schemaRecursiveRefMap.forEach((toRef, fromRef) => {
-    //   this.dataRecursiveRefMap.set(
-    //     JsonPointer.toDataPointer(fromRef, this.schema),
-    //     JsonPointer.toDataPointer(toRef, this.schema)
-    //   );
-    // });
-  }
-
   buildSchemaFromData(data?: any, requireAllFields: boolean = false): any {
     if (data) { return buildSchemaFromData(data, requireAllFields); }
     this.schema = buildSchemaFromData(this.initialValues, requireAllFields);
@@ -337,6 +246,7 @@ export class JsonSchemaFormService {
     if (layout) { return buildSchemaFromLayout(layout); }
     this.schema = buildSchemaFromLayout(this.layout);
   }
+
 
   setTpldata(newTpldata: any = {}): void {
     this.tpldata = newTpldata;
@@ -356,7 +266,7 @@ export class JsonSchemaFormService {
     let childValue: any;
     let parentValues: any = this.getFormControlValue(parentCtx);
     const isArrayItem: boolean =
-      parentNode.type.slice(-5) === 'array' && isArray(parentValues);
+      (parentNode.type || '').slice(-5) === 'array' && isArray(parentValues);
     if (isArrayItem && childNode.type !== '$ref') {
       text = JsonPointer.getFirst([
         [childNode, '/options/legend'],
@@ -374,9 +284,7 @@ export class JsonSchemaFormService {
         [parentNode, '/title'],
         [parentNode, '/options/title'],
         [parentNode, '/options/legend']
-      ]);
-      if (childNode.type === '$ref') { text = '+ ' + text; }
-    }
+      ]);    }
     if (!text) { return text; }
     childValue = isArrayItem ? parentValues[index] : parentValues;
     return this.parseText(text, childValue, parentValues, index);
@@ -390,9 +298,26 @@ export class JsonSchemaFormService {
       ctx.controlValue = ctx.formControl.value;
       ctx.formControl.valueChanges.subscribe(v => ctx.controlValue = v);
       ctx.controlDisabled = ctx.formControl.disabled;
-      // TODO: subscribe to status changes
-      // TODO: emit / display error messages
-      // ctx.formControl.statusChanges.subscribe(v => ...);
+      ctx.formControl.statusChanges.subscribe(status => {
+        if (status === 'VALID' && (ctx.options || {}).errorMessage) {
+          ctx.options.errorMessage = null;
+        } else {
+          const messages = [];
+          const splitKey = string => string[0].toUpperCase() + (string.slice(1) || '')
+            .replace(/([a-z])([A-Z])/g, '$1 $2').replace(/_/g, ' ');
+          const toText = object => typeof object !== 'object' ?
+            object.toString() :
+            Object.keys(object || {}).map(key => {
+              const value = object[key];
+              return value === false ? 'Not ' + splitKey(key) :
+                splitKey(key) + (value === true ? '' : ': ' + toText(value));
+            }).join(', ');
+          ctx.options.errorMessage = toText(ctx.formControl.errors);
+        }
+      });
+      ctx.formControl.valueChanges.subscribe(value => {
+        if (!_.isEqual(ctx.controlValue, value)) { ctx.controlValue = value; }
+      });
     } else {
       ctx.controlName = ctx.layoutNode.name;
       ctx.controlValue = ctx.layoutNode.value;
@@ -426,18 +351,19 @@ export class JsonSchemaFormService {
     }
   }
 
-  updateArrayCheckboxList(ctx: any, checkboxList: CheckboxItem[]): void {
+  updateArrayCheckboxList(ctx: any, checkboxList: TitleMapItem[]): void {
     let formArray = <FormArray>this.getFormControl(ctx);
 
     // Remove all existing items
     while (formArray.value.length) { formArray.removeAt(0); }
 
     // Re-add an item for each checked box
+    const refPointer = removeRecursiveReferences(
+      ctx.layoutNode.dataPointer + '/-', this.dataRecursiveRefMap, this.arrayMap
+    );
     for (let checkboxItem of checkboxList) {
       if (checkboxItem.checked) {
-        let newFormControl = buildFormGroup(JsonPointer.get(
-          this.templateRefLibrary, [ctx.layoutNode.dataPointer + '/-']
-        ));
+        let newFormControl = buildFormGroup(this.templateRefLibrary[refPointer]);
         newFormControl.setValue(checkboxItem.value);
         formArray.push(newFormControl);
       }
@@ -516,9 +442,7 @@ export class JsonSchemaFormService {
     ) { return false; }
 
     // Create a new Angular form control from a template in templateRefLibrary
-    const newFormGroup = buildFormGroup(JsonPointer.get(
-      this.templateRefLibrary, [ctx.layoutNode.$ref]
-    ));
+    const newFormGroup = buildFormGroup(this.templateRefLibrary[ctx.layoutNode.$ref]);
 
     // Add the new form control to the parent formArray or formGroup
     if (ctx.layoutNode.arrayItem) { // Add new array item to formArray
@@ -537,10 +461,9 @@ export class JsonSchemaFormService {
 
       // Reset all _id's in newLayoutNode to unique values
       if (hasOwn(subNode, '_id')) { subNode._id = _.uniqueId(); }
-
       // If adding a recursive item, prefix current dataPointer
       // and layoutPointer to all pointers in new layoutNode
-      if (!ctx.layoutNode.arrayItem || ctx.layoutNode.recursiveReference) {
+      if (ctx.layoutNode.recursiveReference) {
         if (hasOwn(subNode, 'dataPointer')) {
           subNode.dataPointer = ctx.layoutNode.dataPointer + subNode.dataPointer;
         }
@@ -550,8 +473,11 @@ export class JsonSchemaFormService {
         }
       }
     });
-    let layoutPointer: string | string[] = this.getLayoutPointer(ctx);
+
+    // Add the new layoutNode to the form layout
+    let layoutPointer = this.getLayoutPointer(ctx);
     JsonPointer.insert(this.layout, layoutPointer, newLayoutNode);
+
     return true;
   }
 
@@ -559,14 +485,13 @@ export class JsonSchemaFormService {
     if (
       !ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex ||
       !ctx.layoutNode.layoutPointer || !ctx.layoutIndex ||
-      !isDefined(oldIndex) || !isDefined(newIndex)
+      !isDefined(oldIndex) || !isDefined(newIndex) || oldIndex === newIndex
     ) { return false; }
 
     // Move item in the formArray
     let formArray = <FormArray>this.getFormControlGroup(ctx);
-    const controlToMove = formArray.at(oldIndex);
-    formArray.removeAt(oldIndex);
-    formArray.insert(newIndex, controlToMove);
+    formArray.insert(newIndex, formArray.at(oldIndex));
+    formArray.removeAt(oldIndex + (oldIndex < newIndex ? 0 : 1));
     formArray.updateValueAndValidity();
 
     // Move layout item

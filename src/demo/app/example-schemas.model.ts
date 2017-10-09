@@ -23,7 +23,7 @@ export const Examples: any = {
       { name: 'Flexbox layout',                  file: 'ng-jsf-flex-layout', },
       // { name: 'Simple Array',                    file: 'ng-jsf-simple-array', },
       { name: 'Nested Arrays',                   file: 'ng-jsf-nested-arrays', },
-      { name: 'Deep References',                 file: 'ng-jsf-deep-ref', },
+      { name: 'Deep Recursive References',       file: 'ng-jsf-deep-ref', },
       { name: 'Select Control Lists',            file: 'ng-jsf-select-list-examples', },
       // { name: 'Select Control Widgets',          file: 'ng-jsf-select-widget-examples', },
       { name: 'Data Only (no Schema or Layout)', file: 'ng-jsf-data-only', },
@@ -31,6 +31,8 @@ export const Examples: any = {
       // { name: 'JSON Meta-Schema - Version 6',    file: 'json-schema-draft06', },
       // { name: 'JSON Meta-Schema - Version 4',    file: 'json-schema-draft04', },
       // { name: 'JSON Meta-Schema - Version 3',    file: 'json-schema-draft03', },
+      // { name: 'JSON Meta-Schema - Version 2',    file: 'json-schema-draft02', },
+      // { name: 'JSON Meta-Schema - Version 1',    file: 'json-schema-draft01', },
     ]
   },
   'asf': {

@@ -7,13 +7,12 @@ import { buildTitleMap, isArray } from '../../shared';
 @Component({
   selector: 'material-select-widget',
   template: `
-    <section [style.width]="'100%'" [class]="options?.htmlClass || null">
+    <mat-form-field [style.width]="'100%'" [class]="options?.htmlClass || null">
       <mat-select #inputControl *ngIf="boundControl"
         [formControl]="formControl"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.name]="controlName"
         [attr.readonly]="options?.readonly ? 'readonly' : null"
-        [floatPlaceholder]="options?.floatPlaceholder || (options?.notitle ? 'never' : 'auto')"
         [id]="'control' + layoutNode?._id"
         [multiple]="options?.multiple"
         [placeholder]="options?.notitle ? options?.placeholder : options?.title"
@@ -38,7 +37,6 @@ import { buildTitleMap, isArray } from '../../shared';
         [attr.name]="controlName"
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [disabled]="controlDisabled"
-        [floatPlaceholder]="options?.floatPlaceholder || (options?.notitle ? 'never' : 'auto')"
         [id]="'control' + layoutNode?._id"
         [multiple]="options?.multiple"
         [placeholder]="options?.notitle ? options?.placeholder : options?.title"
@@ -62,21 +60,13 @@ import { buildTitleMap, isArray } from '../../shared';
           </mat-optgroup>
         </ng-template>
       </mat-select>
-      <div class="mat-input-hint-wrapper mat-form-field-hint-wrapper">
-        <mat-hint class="mat-hint mat-left"></mat-hint>
-        <div class="mat-input-hint-spacer mat-form-field-hint-spacer"></div>
-        <mat-hint *ngIf="options?.description && (!options?.showErrors || !options?.errorMessage)"
-          class="mat-hint mat-right"
-          [innerHTML]="options?.description"></mat-hint>
-        <mat-hint *ngIf="options?.showErrors && options?.errorMessage"
-          class="mat-hint mat-right mat-error"
-          [innerHTML]="options?.errorMessage"></mat-hint>
-      </div>
-    </section>`,
-    styles: [`
-      mat-hint { font-size: 75%; }
-      mat-hint.mat-error { color: red; }
-    `],
+      <span matSuffix *ngIf="options?.suffix || options?.fieldAddonRight"
+        [innerHTML]="options?.suffix || options?.fieldAddonRight"></span>
+      <mat-hint *ngIf="options?.description" align="end"
+        [innerHTML]="options?.description"></mat-hint>
+      <mat-error *ngIf="options?.showErrors && options?.errorMessage"
+        [innerHTML]="options?.errorMessage"></mat-error>
+    </mat-form-field>`,
 })
 export class MaterialSelectComponent implements OnInit {
   formControl: AbstractControl;

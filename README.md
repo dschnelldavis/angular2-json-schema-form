@@ -49,7 +49,12 @@ If, after playing with the examples, you decide this library is functional enoug
 
 ```shell
 npm install angular2-json-schema-form --save
+npm install @angular/cdk --save
+npm install @angular/flex-layout --save
+npm install @angular/material --save
 ```
+
+IMPORTANT NOTE ABOUT PEER DEPENDANCIES: For now, Angular Material is a required peer dependency for the current version. This will be fixed in a future version, which will offer separate installers for the Bootstrap and Material Design frameworks. But until that happens, even if you don't intend to use Material Design framework, you may need to install Angular Material and its related modules through NPM for your project to build correctly. If you want to try building your project without these modules, go ahead, and depending on your build process it might work. But if your build fails, chances are you need to install these additional modules to make angular2-json-schema-form work.
 
 Then import JsonSchemaFormModule in your main application module:
 
@@ -57,21 +62,36 @@ Then import JsonSchemaFormModule in your main application module:
 import { JsonSchemaFormModule } from 'angular2-json-schema-form';
 ```
 
-And finally, add `JsonSchemaFormModule` to the `imports` array in your @NgModule declaration.
+If you want to use the Material Design framework, also add:
+
+```javascript
+import { FlexLayoutModule }                   from '@angular/flex-layout';
+import { MaterialModule, MdDatepickerModule } from '@angular/material';
+```
+
+If you don't want to use the Material Design framework, you don't need to import these modules. (To get the project to build correctly, you may need to install the Angular Material libraries through NPM, as described above, but you don't need to actually import them.)
+
+Finally, edit the `imports` array in your @NgModule declaration to add `JsonSchemaFormModule`, and the Angular Material modules if you want to use that framework.
 
 Your final app.module.ts should look something like this:
 
 ```javascript
-import { NgModule }             from '@angular/core';
-import { BrowserModule }        from '@angular/platform-browser';
+import { BrowserModule }                      from '@angular/platform-browser';
+import { NgModule }                           from '@angular/core';
+import { FlexLayoutModule }                   from '@angular/flex-layout';
+import { MaterialModule, MdDatepickerModule } from '@angular/material';
 
-import { JsonSchemaFormModule } from 'angular2-json-schema-form';
+import { JsonSchemaFormModule }               from 'angular2-json-schema-form';
 
-import { AppComponent }         from './app.component';
+import { AppComponent }                       from './app.component';
 
 @NgModule({
-  imports:      [ BrowserModule, JsonSchemaFormModule ],
   declarations: [ AppComponent ],
+  imports:      [
+    BrowserModule, FlexLayoutModule, MaterialModule,
+    MdDatepickerModule, JsonSchemaFormModule
+  ],
+  providers:    [],
   bootstrap:    [ AppComponent ]
 })
 export class AppModule { }
@@ -90,6 +110,7 @@ If you use SystemJS, you will also need to make the following changes to your sy
 Add these lines to the 'map' section of systemjs.config.js, if they do not already exist:
 ```javascript
 '@angular/animations':       'npm:@angular/animations/bundles/animations.umd.js',
+'@angular/cdk':              'npm:@angular/cdk/bundles/cdk.umd.js',
 '@angular/material':         'npm:@angular/material/bundles/material.umd.js',
 'angular2-json-schema-form': 'npm:angular2-json-schema-form/bundles/angular2-json-schema-form.umd.js',
 'ajv':                       'npm:ajv/dist/ajv.min.js',

@@ -9,8 +9,8 @@ import { Component, Input, OnInit } from '@angular/core';
       [class.expanded]="options?.expandable && expanded">
       <label
         [class]="options?.labelHtmlClass"
-        [style.display]="options?.notitle ? 'none' : ''"
-        [innerHTML]="options?.title"
+        [style.display]="legendDisplay()"
+        [innerHTML]="options?.notitle ? '&nbsp;' : options?.title"
         (click)="expand()"></label>
       <flex-layout-root-widget *ngIf="expanded"
         [formID]="formID"
@@ -42,7 +42,7 @@ import { Component, Input, OnInit } from '@angular/core';
       <legend
         [class]="options?.labelHtmlClass"
         [style.display]="legendDisplay()"
-        [innerHTML]="options?.title"
+        [innerHTML]="options?.notitle ? '&nbsp;' : options?.title"
         (click)="expand()"></legend>
       <flex-layout-root-widget *ngIf="expanded"
         [formID]="formID"
@@ -75,7 +75,7 @@ import { Component, Input, OnInit } from '@angular/core';
         <legend [style.display]="legendDisplay()">
           <mat-card-header
             [class]="options?.labelHtmlClass"
-            [innerHTML]="options?.title"
+            [innerHTML]="options?.notitle ? '&nbsp;' : options?.title"
             (click)="expand()">
           </mat-card-header>
         </legend>
@@ -136,6 +136,7 @@ export class FlexLayoutSectionComponent implements OnInit {
   }
 
   legendDisplay(): string {
+    if (this.options.removable) { return ''; }
     return this.options.notitle || !this.options.title ? 'none' : '';
   }
 

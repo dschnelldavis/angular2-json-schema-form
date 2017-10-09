@@ -40,8 +40,11 @@ export class MaterialAddReferenceComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges() {
-    if (this.previousLayoutIndex !== this.layoutIndex ||
-      this.previousDataIndex !== this.dataIndex
+    if (
+      this.layoutIndex.length !== this.previousLayoutIndex.length ||
+      !this.layoutIndex.every(i => i === this.previousLayoutIndex[i]) ||
+      this.dataIndex.length !== this.previousDataIndex.length ||
+      !this.dataIndex.every(i => i === this.previousDataIndex[i])
     ) {
       this.updateControl();
     }
@@ -56,8 +59,8 @@ export class MaterialAddReferenceComponent implements OnInit, OnChanges {
 
   updateControl() {
     this.itemCount = this.layoutIndex[this.layoutIndex.length - 1];
-    this.previousLayoutIndex = this.layoutIndex;
-    this.previousDataIndex = this.dataIndex;
+    this.previousLayoutIndex = [ ...this.layoutIndex ];
+    this.previousDataIndex = [ ...this.dataIndex ];
     this.showAddButton = this.layoutNode.arrayItem &&
       this.itemCount < (this.options.maxItems || 1000000);
   }

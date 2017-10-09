@@ -8,7 +8,12 @@
         "title": "Favorite captain 1",
         "description": "enum array in schema (JSON Schema v1+)",
         "type": "string",
-        "enum": [ "William Shatner", "Patrick Stewart", "John Barrowman", "Nathan Fillion" ]
+        "enum": [
+          "William Shatner",
+          "Patrick Stewart",
+          "John Barrowman",
+          "Nathan Fillion"
+        ]
       },
       "captain2": {
         "title": "Favorite captain 2",
@@ -17,8 +22,8 @@
         "oneOf": [
           { "title": "James T. Kirk",    "enum": [ "William Shatner" ] },
           { "title": "Jean-Luc Picard",  "enum": [ "Patrick Stewart" ] },
-          { "title": "Jack Harkness",    "enum": [ "John Barrowman" ]  },
-          { "title": "Malcolm Reynolds", "enum": [ "Nathan Fillion" ]  }
+          { "title": "Jack Harkness",    "enum": [ "John Barrowman"  ] },
+          { "title": "Malcolm Reynolds", "enum": [ "Nathan Fillion"  ] }
         ]
       },
       "captain3": {
@@ -41,8 +46,18 @@
         "title": "Favorite captain 5",
         "description": "enum + enumNames in schema (<a href=\"https://mozilla-services.github.io/react-jsonschema-form/\">React jsonschema form</a>)",
         "type": "string",
-        "enum": [ "William Shatner", "Patrick Stewart", "John Barrowman", "Nathan Fillion" ],
-        "enumNames": [ "James T. Kirk", "Jean-Luc Picard", "Jack Harkness", "Malcolm Reynolds" ]
+        "enum": [
+          "William Shatner",
+          "Patrick Stewart",
+          "John Barrowman",
+          "Nathan Fillion"
+        ],
+        "enumNames": [
+          "James T. Kirk",
+          "Jean-Luc Picard",
+          "Jack Harkness",
+          "Malcolm Reynolds"
+        ]
       },
       "captain6": {
         "title": "Favorite captain 6",
@@ -106,16 +121,22 @@
     },
     { "key": "captain8",
       "titleMap": [
-        { "group": "Star Trek", "items": [
-          { "name": "James T. Kirk",    "value": "William Shatner" },
-          { "name": "Jean-Luc Picard",  "value": "Patrick Stewart" }
-        ] },
-        { "group": "Torchwood", "items": [
-          { "name": "Jack Harkness",    "value": "John Barrowman"  }
-        ] },
-        { "group": "Firefly", "items": [
-          { "name": "Malcolm Reynolds", "value": "Nathan Fillion"  }
-        ] }
+        { "group": "Star Trek",
+          "items": [
+            { "name": "James T. Kirk",    "value": "William Shatner" },
+            { "name": "Jean-Luc Picard",  "value": "Patrick Stewart" }
+          ]
+        },
+        { "group": "Torchwood",
+          "items": [
+            { "name": "Jack Harkness",    "value": "John Barrowman"  }
+          ]
+        },
+        { "group": "Firefly",
+          "items": [
+            { "name": "Malcolm Reynolds", "value": "Nathan Fillion"  }
+          ]
+        }
       ]
     },
     "captain9"

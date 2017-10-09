@@ -11,7 +11,9 @@ import {
 import { forEach, hasOwn } from './utility.functions';
 import { Pointer, JsonPointer } from './jsonpointer.functions';
 import { JsonValidators } from './json.validators';
-import { getControlValidators, resolveRecursiveReferences } from './json-schema.functions';
+import {
+  combineAllOf, getControlValidators, getSubSchema, removeRecursiveReferences
+} from './json-schema.functions';
 
 /**
  * FormGroup function library:
@@ -26,9 +28,7 @@ import { getControlValidators, resolveRecursiveReferences } from './json-schema.
  *
  * getControl:
  *
- * fixJsonFormOptions:
- *
- * ---- Coming soon: ----
+ * ---- TODO: ----
  * TODO: add buildFormGroupTemplateFromLayout function
  * buildFormGroupTemplateFromLayout: Builds a FormGroupTemplate from a form layout
  */
@@ -52,19 +52,33 @@ import { getControlValidators, resolveRecursiveReferences } from './json-schema.
 export function buildFormGroupTemplate(
   jsf: any, setValues: any = null, mapArrays: boolean = true,
   schemaPointer: string = '', dataPointer: string = '', templatePointer: any = ''
-): any {
-  const schema: any = JsonPointer.get(jsf.schema, schemaPointer);
+) {
+  // if (dataPointer !== '') {
+  //   const shortDataPointer =
+  //     removeRecursiveReferences(dataPointer, jsf.dataRecursiveRefMap, jsf.arrayMap);
+  //   if (hasOwn(jsf.templateRefLibrary, shortDataPointer)) {
+  //     const template = _.cloneDeep(jsf.templateRefLibrary[dataPointer]);
+  //     if (setValues !== null) {
+  //       // TODO: add values to template before returning
+  //     }
+  //     return template;
+  //   }
+  // }
+  const schema = getSubSchema(
+    jsf.schema, schemaPointer, jsf.schemaRefLibrary, jsf.schemaRecursiveRefMap
+  );
   let useValues: any = jsf.globalOptions.setSchemaDefaults ?
     mergeValues(JsonPointer.get(schema, '/default'), setValues) : setValues;
   const schemaType: string | string[] = JsonPointer.get(schema, '/type');
   let controlType: 'FormGroup' | 'FormArray' | 'FormControl' | '$ref';
   controlType =
-    schemaType === 'object' && hasOwn(schema, 'properties') ? 'FormGroup'  :
-    schemaType === 'array'  && hasOwn(schema, 'items')      ? 'FormArray'  :
-    !schemaType             && hasOwn(schema, '$ref')       ? '$ref'       :
-                                                              'FormControl';
+    (hasOwn(schema, 'properties') || hasOwn(schema, 'additionalProperties')) &&
+      schemaType === 'object' ? 'FormGroup' :
+    (hasOwn(schema, 'items') || hasOwn(schema, 'additionalItems')) &&
+      schemaType === 'array' ? 'FormArray' :
+    !schemaType && hasOwn(schema, '$ref') ? '$ref' : 'FormControl';
   if (dataPointer !== '' && !jsf.dataMap.has(dataPointer)) {
-    jsf.dataMap.set(dataPointer, new Map);
+    jsf.dataMap.set(dataPointer, new Map());
     jsf.dataMap.get(dataPointer).set('schemaPointer', schemaPointer);
     jsf.dataMap.get(dataPointer).set('schemaType', schema.type);
     if (controlType) {
@@ -74,7 +88,7 @@ export function buildFormGroupTemplate(
     const genericDataPointer =
       JsonPointer.toGenericPointer(dataPointer, jsf.arrayMap);
     if (!jsf.dataMap.has(genericDataPointer)) {
-      jsf.dataMap.set(genericDataPointer, new Map);
+      jsf.dataMap.set(genericDataPointer, new Map());
       jsf.dataMap.get(genericDataPointer).set('schemaPointer', schemaPointer);
       jsf.dataMap.get(genericDataPointer).set('schemaType', schema.type);
     }
@@ -90,8 +104,8 @@ export function buildFormGroupTemplate(
       let propertyKeys = schema['ui:order'] ||
         schema.properties['ui:order'] ||
         Object.keys(schema.properties);
-      if (
-        propertyKeys.includes('*') && !Object.keys(schema.properties).includes('*')
+      if (propertyKeys.includes('*') &&
+        !Object.keys(schema.properties).includes('*')
       ) {
         const unnamedKeys = Object.keys(schema.properties)
           .filter(key => !propertyKeys.includes(key));
@@ -124,16 +138,19 @@ export function buildFormGroupTemplate(
         }
         controls = [];
         for (let i = 0, l = schema.items.length; i < l; i++) {
-          if (i >= minItems &&
-            !JsonPointer.has(jsf.templateRefLibrary, [dataPointer + '/' + i])
-          ) {
-            jsf.templateRefLibrary[dataPointer + '/' + i] =
-              buildFormGroupTemplate(
-                jsf, null, mapArrays,
-                schemaPointer + '/items/' + i,
-                dataPointer + '/' + i,
-                templatePointer + '/controls/' + i
-              );
+          if (i >= minItems && !hasOwn(jsf.templateRefLibrary, `${schemaPointer}/${i}`)) {
+            const itemRefPointer = removeRecursiveReferences(
+              dataPointer + '/' + i, jsf.dataRecursiveRefMap, jsf.arrayMap
+            );
+            if (!hasOwn(jsf.templateRefLibrary, itemRefPointer)) {
+              jsf.templateRefLibrary[itemRefPointer] =
+                buildFormGroupTemplate(
+                  jsf, null, mapArrays,
+                  schemaPointer + '/items/' + i,
+                  dataPointer + '/' + i,
+                  templatePointer + '/controls/' + i
+                );
+            }
           }
           if (i < maxItems) {
             const useValue = isArray(useValues) ? useValues[i] : useValues;
@@ -147,7 +164,7 @@ export function buildFormGroupTemplate(
         }
         if (schema.items.length < maxItems &&
           hasOwn(schema, 'additionalItems') && isObject(schema.additionalItems)
-        ) { // 'additionalItems' is an object = additional list items
+        ) { // 'additionalItems' is an object = additional list items (after tuple items)
           const l = Math.max(
             schema.items.length + 1,
             isArray(useValues) ? useValues.length : 0
@@ -162,16 +179,19 @@ export function buildFormGroupTemplate(
             ));
             if (isArray(useValues)) { useValues = null; }
           }
-          if (
-            !JsonPointer.has(jsf, ['templateRefLibrary', dataPointer + '/-'])
-          ) {
-            jsf.templateRefLibrary[dataPointer + '/-'] =
-              buildFormGroupTemplate(
-                jsf, null, mapArrays,
-                schemaPointer + '/additionalItems',
-                dataPointer + '/-',
-                templatePointer + '/controls/-'
-              );
+          if (!hasOwn(jsf.templateRefLibrary, `${schemaPointer}/additionalItems`)) {
+            const itemRefPointer = removeRecursiveReferences(
+              dataPointer + '/-', jsf.dataRecursiveRefMap, jsf.arrayMap
+            );
+            if (!hasOwn(jsf.templateRefLibrary, itemRefPointer)) {
+              jsf.templateRefLibrary[itemRefPointer] =
+                buildFormGroupTemplate(
+                  jsf, null, mapArrays,
+                  schemaPointer + '/additionalItems',
+                  dataPointer + '/-',
+                  templatePointer + '/controls/-'
+                );
+            }
           }
         }
       } else { // 'items' is an object = list items only (no tuple items)
@@ -179,15 +199,21 @@ export function buildFormGroupTemplate(
           jsf.arrayMap.set(dataPointer, 0);
         }
         if (
-          !JsonPointer.has(jsf.templateRefLibrary, [dataPointer + '/-'])
+          !hasOwn(jsf.templateRefLibrary, `${schemaPointer}/items`)
+          && templatePointer.length < 200
         ) {
-          jsf.templateRefLibrary[dataPointer + '/-'] =
-            buildFormGroupTemplate(
-              jsf, null, mapArrays,
-              schemaPointer + '/items',
-              dataPointer + '/-',
-              templatePointer + '/controls/-'
-            );
+          const itemRefPointer = removeRecursiveReferences(
+            dataPointer + '/-', jsf.dataRecursiveRefMap, jsf.arrayMap
+          );
+          if (!hasOwn(jsf.templateRefLibrary, itemRefPointer)) {
+            jsf.templateRefLibrary[itemRefPointer] =
+              buildFormGroupTemplate(
+                jsf, null, mapArrays,
+                schemaPointer + '/items',
+                dataPointer + '/-',
+                templatePointer + '/controls/-'
+              );
+          }
         }
         controls = [];
         if (jsf.globalOptions.setSchemaDefaults) {
@@ -228,16 +254,19 @@ export function buildFormGroupTemplate(
       };
       return { controlType, value, validators };
     case '$ref':
-      const schemaRef: string = JsonPointer.compile(schema.$ref);
-      if (!hasOwn(jsf.templateRefLibrary, schemaRef)) {
-
+      const schemaRef = JsonPointer.compile(schema.$ref);
+      const dataRef = JsonPointer.toDataPointer(schemaRef, schema);
+      const refPointer = removeRecursiveReferences(
+        dataRef, jsf.dataRecursiveRefMap, jsf.arrayMap
+      );
+      if (refPointer && !hasOwn(jsf.templateRefLibrary, refPointer)) {
         // Set to null first to prevent recursive reference from causing endless loop
-        jsf.templateRefLibrary[schemaRef] = null;
+        jsf.templateRefLibrary[refPointer] = null;
         const newTemplate: any = buildFormGroupTemplate(jsf, null, false, schemaRef);
         if (newTemplate) {
-          jsf.templateRefLibrary[schemaRef] = newTemplate;
+          jsf.templateRefLibrary[refPointer] = newTemplate;
         } else {
-          delete jsf.templateRefLibrary[schemaRef];
+          delete jsf.templateRefLibrary[refPointer];
         }
       }
       return null;
@@ -385,7 +414,7 @@ export function formatFormData(
       let genericPointer: string =
         JsonPointer.has(dataMap, [dataPointer, 'schemaType']) ?
           dataPointer :
-          resolveRecursiveReferences(dataPointer, recursiveRefMap, arrayMap);
+          removeRecursiveReferences(dataPointer, recursiveRefMap, arrayMap);
       if (JsonPointer.has(dataMap, [genericPointer, 'schemaType'])) {
         const schemaType: SchemaPrimitiveType | SchemaPrimitiveType[] =
           dataMap.get(genericPointer).get('schemaType');
@@ -426,53 +455,56 @@ export function formatFormData(
  * @param {FormGroup} formGroup - Angular FormGroup to get value from
  * @param {Pointer} dataPointer - JSON Pointer (string or array)
  * @param {boolean = false} returnGroup - If true, return group containing control
- * @return {group} - Located value (or true or false, if returnError = true)
+ * @return {group} - Located value (or null, if no control found)
  */
 export function getControl(
-  formGroup: any, dataPointer: Pointer, returnGroup: boolean = false
+  formGroup: any, dataPointer: Pointer | string, returnGroup = false
 ): any {
-  const dataPointerArray: string[] = JsonPointer.parse(dataPointer);
-  let subGroup = formGroup;
-  if (dataPointerArray !== null) {
-    let l = dataPointerArray.length - (returnGroup ? 1 : 0);
-    for (let i = 0; i < l; ++i) {
-      let key = dataPointerArray[i];
-      if (hasOwn(subGroup, 'controls')) {
-        subGroup = subGroup.controls;
+  if (!isObject(formGroup) || !JsonPointer.isJsonPointer(dataPointer)) {
+    if (!JsonPointer.isJsonPointer(dataPointer)) {
+      // If dataPointer input is not a valid JSON pointer, check to
+      // see if it is instead a valid object path, using dot notaion
+      if (typeof dataPointer === 'string') {
+        const formControl = formGroup.get(dataPointer);
+        if (formControl) { return formControl; }
       }
-      if (isArray(subGroup) && (key === '-')) {
-        subGroup = subGroup[subGroup.length - 1];
-      } else if (hasOwn(subGroup, key)) {
-        subGroup = subGroup[key];
-      } else {
-        console.error(`getControl error: Unable to find "${key}" item in FormGroup.`);
-        console.error(dataPointer);
-        console.error(formGroup);
-        return;
-      }
+      console.error(`getControl error: Invalid JSON Pointer: ${dataPointer}`);
     }
-    return subGroup;
+    if (!isObject(formGroup)) {
+      console.error(`getControl error: Invalid formGroup: ${formGroup}`);
+    }
+    return null;
   }
-  console.error(`getControl error: Invalid JSON Pointer: ${dataPointer}`);
-}
+  let dataPointerArray: string[] = JsonPointer.parse(dataPointer);
+  if (returnGroup) {
+    dataPointerArray = dataPointerArray.slice(0, -1);
+  }
 
-/**
- * 'fixJsonFormOptions' function
- *
- * Rename JSON Form-style 'options' lists to
- * Angular Schema Form-style 'titleMap' lists.
- *
- * @param  {any} formObject
- * @return {any}
- */
-export function fixJsonFormOptions(layout: any): any {
-  if (isObject(layout) || isArray(layout)) {
-    forEach(layout, (value, key) => {
-      if (isObject(value) && hasOwn(value, 'options') && isObject(value.options)) {
-        value.titleMap = value.options;
-        delete value.options;
-      }
-    }, 'top-down');
+  // If formGroup input is a real formGroup (not a formGroup template)
+  // try using formGroup.get() to return the control
+  if (typeof formGroup.get === 'function') {
+    const formControl = formGroup.get(dataPointerArray.join('.'));
+    if (formControl) { return formControl; }
   }
-  return layout;
+
+  // If formGroup input is a formGroup template,
+  // or formGroup.get() failed to return the control,
+  // search the formGroup object for dataPointer's control
+  let subGroup = formGroup;
+  for (let key of dataPointerArray) {
+    if (hasOwn(subGroup, 'controls')) {
+      subGroup = subGroup.controls;
+    }
+    if (isArray(subGroup) && (key === '-')) {
+      subGroup = subGroup[subGroup.length - 1];
+    } else if (hasOwn(subGroup, key)) {
+      subGroup = subGroup[key];
+    } else {
+      console.error(`getControl error: Unable to find "${key}" item in FormGroup.`);
+      console.error(dataPointer);
+      console.error(formGroup);
+      return;
+    }
+  }
+  return subGroup;
 }

@@ -24,39 +24,39 @@
     <span class="menu-label">Current example:</span>
     <button mat-raised-button
       color="primary"
-      [mdMenuTriggerFor]="exampleMenu">
+      [matMenuTriggerFor]="exampleMenu">
       <mat-icon>menu</mat-icon> {{selectedSetName}} {{selectedExampleName}}
     </button>
-    <mat-menu #exampleMenu="mdMenu" class="example-menu">
+    <mat-menu #exampleMenu="matMenu" class="example-menu">
       <button mat-menu-item class="mat-medium"
         *ngFor="let example of examples['ng-jsf'].schemas"
         (click)="loadSelectedExample('ng-jsf', '', example.file, example.name)">
         {{example.name}}
       </button>
-      <button mat-menu-item class="mat-medium" [mdMenuTriggerFor]="asfMenu">
+      <button mat-menu-item class="mat-medium" [matMenuTriggerFor]="asfMenu">
         <span>Angular Schema Form (AngularJS) examples</span>
       </button>
-      <mat-menu #asfMenu="mdMenu" class="example-menu">
+      <mat-menu #asfMenu="matMenu" class="example-menu">
         <button mat-menu-item class="mat-medium"
           *ngFor="let example of examples.asf.schemas"
           (click)="loadSelectedExample('asf', 'Angular Schema Form:', example.file, example.name)">
           {{example.name}}
         </button>
       </mat-menu>
-      <button mat-menu-item class="mat-medium" [mdMenuTriggerFor]="rjsfMenu">
+      <button mat-menu-item class="mat-medium" [matMenuTriggerFor]="rjsfMenu">
         <span>React JSON Schema Form examples</span>
       </button>
-      <mat-menu #rjsfMenu="mdMenu" class="example-menu">
+      <mat-menu #rjsfMenu="matMenu" class="example-menu">
         <button mat-menu-item class="mat-medium"
           *ngFor="let example of examples.rjsf.schemas"
           (click)="loadSelectedExample('rjsf', 'React JSON Schema Form:', example.file, example.name)">
           {{example.name}}
         </button>
       </mat-menu>
-      <button mat-menu-item class="mat-medium" [mdMenuTriggerFor]="jsfMenu">
+      <button mat-menu-item class="mat-medium" [matMenuTriggerFor]="jsfMenu">
         <span>JSONForm (jQuery) examples</span>
       </button>
-      <mat-menu #jsfMenu="mdMenu" class="example-menu">
+      <mat-menu #jsfMenu="matMenu" class="example-menu">
         <button mat-menu-item class="mat-medium"
           *ngFor="let example of examples.jsf.schemas"
           (click)="loadSelectedExample('jsf', 'JSONForm:', example.file, example.name)">

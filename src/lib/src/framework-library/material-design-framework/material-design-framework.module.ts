@@ -4,9 +4,9 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
-  MdButtonModule, MdButtonToggleModule, MdCheckboxModule, MatDatepickerModule,
-  MdInputModule, MatNativeDateModule, MdRadioModule, MdSelectModule,
-  MdSliderModule, MdSlideToggleModule, MatStepperModule, MdTabsModule,
+  MatButtonModule, MatButtonToggleModule, MatCheckboxModule, MatDatepickerModule,
+  MatInputModule, MatNativeDateModule, MatRadioModule, MatSelectModule,
+  MatSliderModule, MatSlideToggleModule, MatStepperModule, MatTabsModule,
   MATERIAL_COMPATIBILITY_MODE
 } from '@angular/material';
 
@@ -18,9 +18,9 @@ import { MATERIAL_DESIGN_COMPONENTS } from './index';
 @NgModule({
   imports: [
     CommonModule, FlexLayoutModule, FormsModule, ReactiveFormsModule,
-    MdButtonModule, MdButtonToggleModule, MdCheckboxModule, MatDatepickerModule,
-    MdInputModule, MatNativeDateModule, MdRadioModule, MdSelectModule,
-    MdSliderModule, MdSlideToggleModule, MatStepperModule, MdTabsModule,
+    MatButtonModule, MatButtonToggleModule, MatCheckboxModule, MatDatepickerModule,
+    MatInputModule, MatNativeDateModule, MatRadioModule, MatSelectModule,
+    MatSliderModule, MatSlideToggleModule, MatStepperModule, MatTabsModule,
     WidgetLibraryModule
   ],
   declarations:    [ ...MATERIAL_DESIGN_COMPONENTS ],

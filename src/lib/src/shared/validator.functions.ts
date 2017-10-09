@@ -41,10 +41,10 @@ export type JavaScriptType =
   'map' | 'set' | 'arguments' | 'date' | 'error' | 'function' | 'json' |
   'math' | 'regexp'; // Note: this list is incomplete
 export type PrimitiveValue = string | number | boolean | null | undefined;
-export type PlainObject = { [k: string]: any };
+export interface PlainObject { [k: string]: any };
 
-export interface IValidatorFn { (c: AbstractControl, i?: boolean): PlainObject; }
-export interface AsyncIValidatorFn { (c: AbstractControl, i?: boolean): any; }
+export type IValidatorFn = (c: AbstractControl, i?: boolean) => PlainObject;
+export type AsyncIValidatorFn = (c: AbstractControl, i?: boolean) => any;
 
 /**
  * '_executeValidators' utility function

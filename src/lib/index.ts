@@ -1,4 +1,3 @@
-import { convertJsonSchemaToDraft6 } from './src/shared/convert-json-schema.functions';
 import {
   _executeValidators, _executeAsyncValidators, _mergeObjects, _mergeErrors,
   isDefined, hasValue, isEmpty, isString, isNumber, isInteger, isBoolean,
@@ -8,19 +7,22 @@ import {
   PrimitiveValue, PlainObject, IValidatorFn, AsyncIValidatorFn
 } from './src/shared/validator.functions';
 import {
-  addClasses, copy, forEach, forEachCopy, hasOwn,
-  mergeFilteredObject, parseText, toTitleCase
+  addClasses, copy, forEach, forEachCopy, hasOwn, mergeFilteredObject,
+  parseText, uniqueItems, commonItems, fixTitle, toTitleCase
 } from './src/shared/utility.functions';
 import { Pointer, JsonPointer } from './src/shared/jsonpointer.functions';
 import { JsonValidators } from './src/shared/json.validators';
 import {
-  buildSchemaFromLayout, buildSchemaFromData, getFromSchema,
-  getSchemaReference, getInputType, checkInlineType, isInputRequired,
-  updateInputOptions, getControlValidators
+  buildSchemaFromLayout, buildSchemaFromData, getFromSchema, getInputType,
+  removeRecursiveReferences, checkInlineType, isInputRequired,
+  updateInputOptions, getControlValidators, resolveSchemaReferences,
+  getSubSchema, combineAllOf
 } from './src/shared/json-schema.functions';
+import { convertSchemaToDraft6 } from './src/shared/convert-schema-to-draft6.function';
+export { mergeSchemas } from './src/shared/merge-schemas.function';
 import {
   buildFormGroupTemplate, buildFormGroup, setRequiredFields,
-  formatFormData, getControl, fixJsonFormOptions
+  formatFormData, getControl
 } from './src/shared/form-group.functions';
 import {
   buildLayout, buildLayoutFromSchema, mapLayout, buildTitleMap

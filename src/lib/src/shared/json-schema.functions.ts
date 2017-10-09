@@ -2,9 +2,13 @@ import * as _ from 'lodash';
 import * as $RefParser from 'json-schema-ref-parser';
 
 import {
-  getType, hasValue, inArray, isArray, isFunction, isNumber, isObject, isString
+  getType, hasValue, inArray, isArray, isEmpty, isFunction, isNumber, isObject,
+  isString
 } from './validator.functions';
-import { forEach, hasOwn, mergeFilteredObject } from './utility.functions';
+import {
+  forEach, hasOwn, mergeFilteredObject, uniqueItems, commonItems
+} from './utility.functions';
+import { mergeSchemas } from './merge-schemas.function';
 import { JsonPointer, Pointer } from './jsonpointer.functions';
 import { JsonValidators } from './json.validators';
 
@@ -17,11 +21,7 @@ import { JsonValidators } from './json.validators';
  *
  * getFromSchema:
  *
- * combineAllOf:
- *
- * cloneSchemaReference:
- *
- * getSchemaReference:
+ * removeRecursiveReferences:
  *
  * getInputType:
  *
@@ -29,11 +29,13 @@ import { JsonValidators } from './json.validators';
  *
  * isInputRequired:
  *
- * updateInputOptions:
- *
  * getControlValidators:
  *
- * resolveSchemaRefLinks:
+ * resolveSchemaReferences:
+ *
+ * getSubSchema:
+ *
+ * combineAllOf:
  */
 
 /**
@@ -111,13 +113,13 @@ export function buildSchemaFromData(
 /**
  * 'getFromSchema' function
  *
- * Uses a JSON Pointer for a data object to retrieve a sub-schema
- * from a JSON Schema which describes that data object.
+ * Uses a JSON Pointer for a value within a data object to retrieve
+ * the schema for that value within schema for the data object.
  *
  * The optional third parameter can also be set to return something else:
  * 'schema' (default): the schema for the value indicated by the data pointer
  * 'parentSchema': the schema for the value's parent object or array
- * 'pointer': a pointer to the value's schema
+ * 'pointer': a pointer to the value's schema within the object's schema
  * 'parentPointer': a pointer to the schema for the value's parent object or array
  *
  * @param {JSON Schema} schema - The schema to get the sub-schema from
@@ -196,7 +198,7 @@ export function getFromSchema(
 }
 
 /**
- * 'combineAllOf' function
+ * 'combineSchemas' function
  *
  * Attempt to combine two schemas from an allOf array into a single schema
  * with the same rules.
@@ -205,11 +207,13 @@ export function getFromSchema(
  * @param {any} schema2 -
  * @return {any} -
  */
-export function combineAllOf(schema1, schema2) {
-  if (schema1 === undefined) { return _.cloneDeep(schema2); }
+export function combineSchemas(schema1, schema2) {
+  if (isEmpty(schema1)) { return _.cloneDeep(schema2); }
+  if (isEmpty(schema2)) { return _.cloneDeep(schema1); }
+  if (!isObject(schema1) || !isObject(schema2)) {
+    return { 'allOf': [schema1, schema2] };
+  }
   const combinedSchema = _.cloneDeep(schema1);
-  if (schema2 === undefined) { return combinedSchema; }
-  // TODO: handle non-object inputs
   for (let key of Object.keys(schema2)) {
     let value1 = schema1[key];
     let value2 = schema2[key];
@@ -227,12 +231,12 @@ export function combineAllOf(schema1, schema2) {
             );
           // If objects, combine
           } else if (isObject(value1) && isObject(value2)) {
-            combinedSchema[key] = combineAllOf(value1, value2);
+            combinedSchema[key] = combineSchemas(value1, value2);
           // If object + array, combine object with each array item
           } else if (isArray(value1) && isObject(value2)) {
-            combinedSchema[key] = value1.map(item => combineAllOf(item, value2));
+            combinedSchema[key] = value1.map(item => combineSchemas(item, value2));
           } else if (isObject(value1) && isArray(value2)) {
-            combinedSchema[key] = value2.map(item => combineAllOf(item, value1));
+            combinedSchema[key] = value2.map(item => combineSchemas(item, value1));
           } else {
             combined = false;
           }
@@ -248,6 +252,7 @@ export function combineAllOf(schema1, schema2) {
           }
         break;
         case 'multipleOf':
+          // If numbers, set to least common multiple
           if (isNumber(value1) && isNumber(value2)) {
             const gcd = (x, y) => !y ? x : gcd(y, x % y);
             const lcm = (x, y) => (x * y) / gcd(x, y);
@@ -258,20 +263,31 @@ export function combineAllOf(schema1, schema2) {
         break;
         case 'maximum': case 'exclusiveMaximum': case 'maxLength':
         case 'maxItems': case 'maxProperties':
-          combinedSchema[key] = Math.min(value1, value2);
+          // If numbers, set to lowest value
+          if (isNumber(value1) && isNumber(value2)) {
+            combinedSchema[key] = Math.min(value1, value2);
+          } else {
+            combined = false;
+          }
         break;
         case 'minimum': case 'exclusiveMinimum': case 'minLength':
         case 'minItems': case 'minProperties':
-          combinedSchema[key] = Math.max(value1, value2);
+          // If numbers, set to highest value
+          if (isNumber(value1) && isNumber(value2)) {
+            combinedSchema[key] = Math.max(value1, value2);
+          } else {
+            combined = false;
+          }
         break;
         case 'uniqueItems':
+          // Set true if either true
           combinedSchema[key] = !!value1 || !!value2;
         break;
         default:
           combined = false;
       }
       if (!combined) {
-        return { 'allOf': [schema1, schema2] }
+        return { 'allOf': [schema1, schema2] };
       }
     }
   }
@@ -279,120 +295,7 @@ export function combineAllOf(schema1, schema2) {
 };
 
 /**
- * Keep the root reference to handle circular references correctly
- * when calling cloneSchemaReference
- */
-let rootReference: string = null;
-
-/**
- * 'cloneSchemaReference' function
- *
- * Deeply clone the sub-section of a schema referred to
- * by a JSON Pointer, compiling all child $ref nodes schemas.
- *
- * @param {object} schema - The schema to return a sub-section from
- * @param {string|object} reference - JSON Pointer or '$ref' object
- * @param {object} schemaRefLibrary - Optional library of resolved refernces
- * @param {object} recursiveRefMap - Optional map of recursive links
- * @return {object} - The cloned and arranged schema sub-section
- */
-export function cloneSchemaReference(
-  schema: any, reference: any, schemaRefLibrary: any = null,
-  recursiveRefMap: Map<string, string> = null
-) {
-  let isRoot = !rootReference;
-  if (isRoot) { rootReference = '#' + reference; }
-  let newSchema = _.cloneDeepWith(JsonPointer.get(schema, reference), (node: any) => {
-    let nodeSchema: any;
-    if (isObject(node)) {
-
-      // If newSchema is an allOf array, combine the array elements
-      if (Object.keys(node).length === 1 && isArray((node || {}).allOf)) {
-        nodeSchema = node.allOf
-          .map(obj => !hasOwn(obj, '$ref') ? obj :
-            getSchemaReference(schema, obj, schemaRefLibrary, recursiveRefMap)
-          )
-          .reduce((schema1, schema2) => combineAllOf(schema1, schema2), {});
-
-      // If it's a reference to the root, clone the schema without customization
-      // If it's a reference to something else, compile the reference
-      } else if (hasOwn(node, '$ref') ) {
-        nodeSchema = node.$ref === rootReference ? _.cloneDeep(node.$ref) :
-          getSchemaReference(schema, node.$ref, schemaRefLibrary, recursiveRefMap);
-
-      // If it's an array of roots, clone it without customization
-      } else if ((node || {}).type === 'array' &&
-        ((node || {}).items || {}).$ref === rootReference
-      ) {
-        nodeSchema = _.cloneDeep(node);
-      }
-      return nodeSchema;
-    }
-  });
-  if (isRoot) { rootReference = null; }
-  if (schemaRefLibrary) {
-    schemaRefLibrary[reference] = _.cloneDeep(newSchema);
-  }
-  return newSchema;
-}
-
-/**
- * 'getSchemaReference' function
- *
- * Return the sub-section of a schema referred to
- * by a JSON Pointer or '$ref' object.
- *
- * @param {object} schema - The schema to return a sub-section from
- * @param {string|object} reference - JSON Pointer or '$ref' object
- * @param {object} schemaRefLibrary - Optional library of resolved refernces
- * @param {object} recursiveRefMap - Optional map of recursive links
- * @return {object} - The refernced schema sub-section
- */
-export function getSchemaReference(
-  schema: any, reference: any, schemaRefLibrary: any = null,
-  recursiveRefMap: Map<string, string> = null
-): any {
-  let schemaPointer: string;
-  let newSchema: any;
-  if (isArray(reference) || typeof reference === 'string') {
-    schemaPointer = JsonPointer.compile(reference);
-  } else if (isObject(reference) && Object.keys(reference).length === 1 &&
-    hasOwn(reference, '$ref') && typeof reference.$ref === 'string'
-  ) {
-    schemaPointer = JsonPointer.compile(reference.$ref);
-  } else {
-    console.error('getSchemaReference error: ' +
-      'reference must be a JSON Pointer or $ref link');
-    console.error(reference);
-    return reference;
-  }
-  if (recursiveRefMap) {
-    schemaPointer = resolveRecursiveReferences(schemaPointer, recursiveRefMap);
-  }
-  if (schemaPointer === '') {
-    return _.cloneDeep(schema);
-  } else {
-    if (!hasOwn(schemaRefLibrary, schemaPointer)) {
-      schemaRefLibrary[schemaPointer] =
-        cloneSchemaReference(schema, schemaPointer, schemaRefLibrary, recursiveRefMap);
-    }
-    return schemaRefLibrary[schemaPointer];
-  }
-  // TODO: Remove this function and use json-schema-ref-parser instead?
-  // https://github.com/BigstickCarpet/json-schema-ref-parser/blob/master/docs/README.md
-  // https://www.npmjs.com/package/json-schema-ref-parser
-  // TODO: Add ability to download remote schema, if necessary
-  // schemaPointer.slice(0, 4) === 'http' ?
-  //   http.get(schemaPointer).subscribe(response => {
-  //     // TODO: check for recursive references
-  //     // TODO: test and adjust to allow for for async response
-  //     if (schemaRefLibrary) schemaRefLibrary[schemaPointer] = response.json();
-  //     return response.json();
-  //   })
-}
-
-/**
- * 'resolveRecursiveReferences' function
+ * 'removeRecursiveReferences' function
  *
  * Checks a JSON Pointer against a map of recursive references and returns
  * a JSON Pointer to the shallowest equivalent location in the same object.
@@ -414,32 +317,23 @@ export function getSchemaReference(
  * @param  {Map<string, number>} arrayMap - optional
  * @return {string} -
  */
-export function resolveRecursiveReferences(
+export function removeRecursiveReferences(
   pointer: Pointer, recursiveRefMap: Map<string, string>,
   arrayMap: Map<string, number> = new Map<string, number>()
 ): string {
+  if (!pointer) { return ''; }
   let genericPointer =
     JsonPointer.toGenericPointer(JsonPointer.compile(pointer), arrayMap);
+  if (genericPointer.indexOf('/') === -1) { return genericPointer; }
   let possibleReferences = true;
-  let previousPointerValues: Pointer[] = [];
-  const catchCircularLinks = (newPointer) => {
-    if (previousPointerValues.indexOf(newPointer) !== -1) {
-      console.error('resolveRecursiveReferences error: ' +
-        'recursive reference map contains circular links');
-      console.error(recursiveRefMap);
-      return;
-    }
-    previousPointerValues.push(genericPointer);
-    return newPointer;
-  };
   while (possibleReferences) {
     possibleReferences = false;
     recursiveRefMap.forEach((toPointer, fromPointer) => {
       if (JsonPointer.isSubPointer(toPointer, fromPointer)) {
-        while (JsonPointer.isSubPointer(fromPointer, genericPointer)) {
-          genericPointer = catchCircularLinks(JsonPointer.toGenericPointer(
+        while (JsonPointer.isSubPointer(fromPointer, genericPointer, true)) {
+          genericPointer = JsonPointer.toGenericPointer(
             toPointer + genericPointer.slice(fromPointer.length), arrayMap
-          ));
+          );
           possibleReferences = true;
         }
       }
@@ -571,49 +465,19 @@ export function isInputRequired(schema: any, schemaPointer: string): boolean {
     if (!listPointerArray.length) { return schema.required === true; }
     const keyName = listPointerArray.pop();
     const nextToLastKey = listPointerArray[listPointerArray.length - 1];
-    if (['properties', 'additionalProperties', 'items', 'additionalItems']
+    if (['properties', 'additionalProperties', 'patternProperties', 'items', 'additionalItems']
       .includes(nextToLastKey)
     ) {
       listPointerArray.pop();
     }
     const parentSchema = JsonPointer.get(schema, listPointerArray) || {};
-    if (parentSchema.required) {
-      return isArray(parentSchema.required) ?
-        parentSchema.required.includes(keyName) :
-        parentSchema.required === keyName;
+    if (isArray(parentSchema.required)) {
+      return parentSchema.required.includes(keyName);
     }
     if (parentSchema.type === 'array') {
-      if (parentSchema.minItems && isNumber(keyName) &&
-        +parentSchema.minItems >= +keyName
-      ) {
-        return true;
-      }
-      let required = null;
-      if (isObject(parentSchema.items) && parentSchema.items.required) {
-        required = parentSchema.items.required;
-      } else if (isArray(parentSchema.items) &&
-        (keyName === '' || keyName === '-') &&
-        isObject(parentSchema.additionalItems) &&
-        parentSchema.additionalItems.required
-      ) {
-        required = parentSchema.additionalItems.required;
-      } else if (
-        isArray(parentSchema.required) || isString(parentSchema.required)
-      ) {
-        // Note: Technically, this is not the correct place to list required
-        // properties for an object inside an array, but it is a somewhat
-        // common error, and the intent is clear, so we'll support it anyway.
-        required = parentSchema.required;
-      }
-      if (required) {
-        return isArray(required) ?
-          required.includes(keyName) : required === keyName;
-      }
-    }
-    // JSON Schema 3 style
-    const itemSchema = JsonPointer.get(schema, schemaPointer) || {};
-    if (itemSchema.required === true || itemSchema.required === false) {
-      return itemSchema.required === true;
+      return hasOwn(parentSchema, 'minItems') &&
+        isNumber(keyName) &&
+        +parentSchema.minItems > +keyName;
     }
   }
   return false;
@@ -810,105 +674,187 @@ export function getControlValidators(schema: any) {
 }
 
 /**
- * 'resolveSchemaRefLinks' function
+ * 'resolveSchemaReferences' function
  *
- * Resolve all schema $ref links
+ * Find all $ref links in schema and save links and referenced schemas in
+ * schemaRefLibrary, schemaRecursiveRefMap, and dataRecursiveRefMap
  *
  * @param {schema} schema
- * @return {validators}
+ * @return {void}
  */
-export function resolveSchemaRefLinks(
-  inputSchema: any, schemaRefLibrary: any, schemaRecursiveRefMap: any
-) {
-  let schema = _.cloneDeep(inputSchema);
+export function resolveSchemaReferences(
+  schema: any, schemaRefLibrary: any,
+  schemaRecursiveRefMap: Map<string, string>,
+  dataRecursiveRefMap: Map<string, string>
+): any {
+  if (!isObject(schema)) {
+    console.error('resolveSchemaReferences error: schema must be an object.');
+    return;
+  }
+  const refLinks = new Set<string>();
+  const refMapSet = new Set<string>();
+  const refMap = new Map<string, string>();
+  const recursiveRefMap = new Map<string, string>();
+  const refLibrary: any = {};
 
-  // Search schema for $ref links
+  // Search schema for all $ref links, and build full refLibrary
   JsonPointer.forEachDeep(schema, (subSchema, thisPointer) => {
     if (hasOwn(subSchema, '$ref') && isString(subSchema['$ref'])) {
-      const refPointer: string = JsonPointer.compile(subSchema['$ref']);
-      const isRecursive: boolean = JsonPointer.isSubPointer(refPointer, thisPointer);
+      const refPointer = JsonPointer.compile(subSchema['$ref']);
+      refLinks.add(refPointer);
+      refMapSet.add(thisPointer + '~~' + refPointer);
+      refMap.set(thisPointer, refPointer);
+    }
+  });
+  refLinks.forEach(ref => refLibrary[ref] = getSubSchema(schema, ref));
 
-      // Save new target schemas in schemaRefLibrary
-      if (hasValue(refPointer) && !hasOwn(schemaRefLibrary, refPointer)) {
-        schemaRefLibrary[refPointer] = getSchemaReference(
-          schema, refPointer, schemaRefLibrary
-        );
+  // Follow all ref links and save in refMapSet,
+  // to find any multi-link recursive refernces
+  let checkRefLinks = true;
+  while (checkRefLinks) {
+    checkRefLinks = false;
+    Array.from(refMap).forEach(([fromRef1, toRef1]) => Array.from(refMap)
+      .filter(([fromRef2, toRef2]) =>
+        JsonPointer.isSubPointer(toRef1, fromRef2, true) &&
+        !JsonPointer.isSubPointer(toRef2, toRef1, true) &&
+        !refMapSet.has(fromRef1 + fromRef2.slice(toRef1.length) + '~~' + toRef2)
+      )
+      .forEach(([fromRef2, toRef2]) => {
+        refMapSet.add(fromRef1 + fromRef2.slice(toRef1.length) + '~~' + toRef2);
+        checkRefLinks = true;
+      })
+    );
+  }
+
+  // Build full recursiveRefMap
+  // First pass - save all internally recursive refs from refMapSet
+  Array.from(refMapSet)
+    .map(refLink => refLink.split('~~'))
+    .filter(([fromRef, toRef]) => JsonPointer.isSubPointer(toRef, fromRef))
+    .forEach(([fromRef, toRef]) => recursiveRefMap.set(fromRef, toRef));
+  // Second pass - create recursive versions of any other refs that link to recursive refs
+  Array.from(refMap)
+    .filter(([fromRef1, toRef1]) => Array.from(recursiveRefMap.keys())
+      .every(fromRef2 => !JsonPointer.isSubPointer(fromRef1, fromRef2, true))
+    )
+    .forEach(([fromRef1, toRef1]) => Array.from(recursiveRefMap)
+      .filter(([fromRef2, toRef2]) =>
+        !recursiveRefMap.has(fromRef1 + fromRef2.slice(toRef1.length)) &&
+        JsonPointer.isSubPointer(toRef1, fromRef2, true) &&
+        !JsonPointer.isSubPointer(toRef1, fromRef1, true)
+      )
+      .forEach(([fromRef2, toRef2]) => recursiveRefMap.set(
+        fromRef1 + fromRef2.slice(toRef1.length),
+        fromRef1 + toRef2.slice(toRef1.length)
+      ))
+    );
+
+  // Create compiled schema by replacing all non-recursive $ref links with
+  // thieir linked schemas and, where possible, combining schemas in allOf arrays.
+  let compiledSchema = { ...schema };
+  delete compiledSchema.definitions;
+  compiledSchema =
+    getSubSchema(compiledSchema, '', refLibrary, recursiveRefMap);
+
+  // Make sure all remaining schema $refs are recursive, and build final
+  // schemaRefLibrary, schemaRecursiveRefMap, and dataRecursiveRefMap
+  JsonPointer.forEachDeep(compiledSchema, (subSchema, thisPointer) => {
+    if (hasOwn(subSchema, '$ref') && isString(subSchema['$ref'])) {
+      let refPointer = JsonPointer.compile(subSchema['$ref']);
+      if (!JsonPointer.isSubPointer(refPointer, thisPointer, true)) {
+        refPointer = removeRecursiveReferences(thisPointer, recursiveRefMap);
+        JsonPointer.set(compiledSchema, thisPointer, { $ref: `#${refPointer}` });
       }
-
-      // Save link in schemaRecursiveRefMap
-      if (!schemaRecursiveRefMap.has(thisPointer)) {
-        schemaRecursiveRefMap.set(thisPointer, refPointer);
-      }
-
-      // If a $ref link is not recursive in this location,
-      // remove link and replace with copy of target schema
-      if (!isRecursive) {
-        const targetSchema: any = _.cloneDeep(schemaRefLibrary[refPointer]);
-        if (isObject(targetSchema) && Object.keys(subSchema).length > 1) {
-          for (let key in Object.keys(subSchema)) {
-            if (key !== '$ref') { targetSchema[key] = subSchema[key]; }
-          }
-        }
-        schema = JsonPointer.set(schema, thisPointer, targetSchema);
-
-        // Save partial link in schemaRecursiveRefMap,
-        // so it can be matched later if it is recursive somewhere else
-        schemaRecursiveRefMap.set(refPointer, thisPointer);
-      } else {
-
-        // If a matching partial link exists, complete it
-        let mappedReference: string = schemaRecursiveRefMap.get(refPointer);
-        if (schemaRecursiveRefMap.has(refPointer) &&
-          JsonPointer.isSubPointer(mappedReference, refPointer)
-        ) {
-          schemaRecursiveRefMap.set(refPointer, mappedReference);
-        }
+      schemaRefLibrary[refPointer] =
+        getSubSchema(compiledSchema, refPointer, schemaRefLibrary, recursiveRefMap);
+      schemaRecursiveRefMap.set(thisPointer, refPointer);
+      const fromDataRef = JsonPointer.toDataPointer(thisPointer, compiledSchema);
+      const toDataRef = JsonPointer.toDataPointer(refPointer, compiledSchema);
+      if (fromDataRef && toDataRef) {
+        dataRecursiveRefMap.set(fromDataRef, toDataRef);
       }
     }
   }, true);
 
-  // Add redirects for links to shared schemas (such as definitions)
-  let addRedirects: Map<string, string> = new Map<string, string>();
-  schemaRecursiveRefMap.forEach((toRef1, fromRef1) =>
-    schemaRecursiveRefMap.forEach((toRef2, fromRef2) => {
-      if (fromRef1 !== fromRef2 && fromRef1 !== toRef2) {
-        if (JsonPointer.isSubPointer(toRef2, fromRef1)) {
-          const newRef: string = fromRef2 + fromRef1.slice(toRef2.length);
-          if (!schemaRecursiveRefMap.has(newRef)) {
-            addRedirects.set(newRef, toRef1);
+  return compiledSchema;
+}
+
+/**
+ * 'getSubSchema' function
+ *
+ * @param {schema} schema
+ * @param {Pointer} pointer
+ * @param {object} schemaRefLibrary
+ * @param {Map<string, string>} schemaRecursiveRefMap
+ * @param {boolean = true} compile
+ * @param {Pointer = pointer} initialPointer
+ * @return {schema}
+ */
+export function getSubSchema(
+  schema: any, pointer: Pointer, schemaRefLibrary: any = null,
+  schemaRecursiveRefMap: Map<string, string> = null, usedPointers: string[] = []
+): any {
+  if (!schemaRefLibrary || !schemaRecursiveRefMap) {
+    return JsonPointer.getCopy(schema, pointer);
+  }
+  if (typeof pointer !== 'string') { pointer = JsonPointer.compile(pointer); }
+  usedPointers = [ ...usedPointers, pointer ];
+  let newSchema: any = null;
+  if (pointer === '') {
+    newSchema = _.cloneDeep(schema);
+  } else {
+    const shortPointer = removeRecursiveReferences(pointer, schemaRecursiveRefMap);
+    if (shortPointer !== pointer) { usedPointers = [ ...usedPointers, shortPointer ]; }
+    newSchema = JsonPointer.getFirstCopy([
+      [schemaRefLibrary, [shortPointer]],
+      [schema, pointer],
+      [schema, shortPointer]
+    ]);
+  }
+  return JsonPointer.forEachDeepCopy(newSchema, (subSchema, subPointer) => {
+    if (isObject(subSchema)) {
+
+      // Replace non-recursive subSchemas
+      if (isString(subSchema.$ref)) {
+        const refPointer = JsonPointer.compile(subSchema.$ref);
+        if (refPointer.length && usedPointers.every(ptr =>
+          !JsonPointer.isSubPointer(refPointer, ptr, true)
+        )) {
+          const refSchema = getSubSchema(
+            schema, refPointer, schemaRefLibrary, schemaRecursiveRefMap, usedPointers
+          );
+          if (Object.keys(subSchema).length === 1) {
+            return refSchema;
+          } else {
+            delete subSchema.$ref;
+            return mergeSchemas(subSchema, refSchema);
           }
         }
       }
-    })
-  );
-  addRedirects.forEach((toRef, fromRef) => schemaRecursiveRefMap.set(fromRef, toRef));
 
-  // Fix recursive references pointing to shared schemas
-  schemaRecursiveRefMap.forEach((toRef1, fromRef1) =>
-    schemaRecursiveRefMap.forEach((toRef2, fromRef2) => {
-      if (fromRef1 !== fromRef2 && toRef1 === toRef2 &&
-        JsonPointer.isSubPointer(fromRef1, fromRef2)
-      ) {
-        schemaRecursiveRefMap.set(fromRef2, fromRef1);
-      }
-    })
-  );
-
-  // Remove unmatched (non-recursive) partial links
-  schemaRecursiveRefMap.forEach((toRef, fromRef) => {
-    if (!JsonPointer.isSubPointer(toRef, fromRef)
-      && !hasOwn(schemaRefLibrary, toRef)
-    ) {
-      schemaRecursiveRefMap.delete(fromRef);
+      // Combine allOf subSchemas
+      if (isArray(subSchema.allOf)) { return combineAllOf(subSchema); }
     }
-  });
+    return subSchema;
+  }, true, pointer);
+}
 
-  // // TODO: Create dataRecursiveRefMap from schemaRecursiveRefMap
-  // this.schemaRecursiveRefMap.forEach((toRef, fromRef) => {
-  //   this.dataRecursiveRefMap.set(
-  //     JsonPointer.toDataPointer(fromRef, this.schema),
-  //     JsonPointer.toDataPointer(toRef, this.schema)
-  //   );
-  // });
-  return schema;
+/**
+ * 'combineAllOf' function
+ *
+ * Attempt to convert an allOf schema object into
+ * a non-allOf schema object with equivalent rules.
+ *
+ * @param {any} schema - allOf schema object
+ * @return {any} - converted schema object
+ */
+export function combineAllOf(schema: any): any {
+  if (!isObject(schema) || !isArray(schema.allOf)) { return schema; }
+  let mergedSchema = mergeSchemas(...schema.allOf);
+  if (Object.keys(schema).length > 1) {
+    const extraKeys = { ...schema };
+    delete extraKeys.allOf;
+    mergedSchema = mergeSchemas(mergedSchema, extraKeys);
+  }
+  return mergedSchema;
 }
