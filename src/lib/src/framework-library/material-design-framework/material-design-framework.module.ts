@@ -4,12 +4,16 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
-  MatButtonModule, MatButtonToggleModule, MatCheckboxModule, MatDatepickerModule,
-  MatInputModule, MatNativeDateModule, MatRadioModule, MatSelectModule,
-  MatSliderModule, MatSlideToggleModule, MatStepperModule, MatTabsModule,
-  MATERIAL_COMPATIBILITY_MODE
+  MatAutocompleteModule, MatButtonModule, MatButtonToggleModule,
+  MatCardModule, MatCheckboxModule, MatChipsModule, MatDatepickerModule,
+  MatDialogModule, MatExpansionModule, MatFormFieldModule, MatGridListModule,
+  MatIconModule, MatInputModule, MatListModule, MatMenuModule,
+  MatNativeDateModule, MatPaginatorModule, MatProgressBarModule,
+  MatProgressSpinnerModule, MatRadioModule, MatSelectModule, MatSidenavModule,
+  MatSliderModule, MatSlideToggleModule, MatSnackBarModule, MatSortModule,
+  MatTableModule, MatTabsModule, MatToolbarModule, MatTooltipModule,
+  MatStepperModule, MATERIAL_COMPATIBILITY_MODE,
 } from '@angular/material';
-
 import { WidgetLibraryModule } from '../../widget-library/widget-library.module';
 import { JsonSchemaFormService } from '../../json-schema-form.service';
 
@@ -18,9 +22,15 @@ import { MATERIAL_DESIGN_COMPONENTS } from './index';
 @NgModule({
   imports: [
     CommonModule, FlexLayoutModule, FormsModule, ReactiveFormsModule,
-    MatButtonModule, MatButtonToggleModule, MatCheckboxModule, MatDatepickerModule,
-    MatInputModule, MatNativeDateModule, MatRadioModule, MatSelectModule,
-    MatSliderModule, MatSlideToggleModule, MatStepperModule, MatTabsModule,
+    MatAutocompleteModule, MatButtonModule, MatButtonToggleModule,
+    MatCardModule, MatCheckboxModule, MatChipsModule, MatTableModule,
+    MatDatepickerModule, MatDialogModule, MatExpansionModule,
+    MatFormFieldModule, MatGridListModule, MatIconModule, MatInputModule,
+    MatListModule, MatMenuModule, MatPaginatorModule, MatProgressBarModule,
+    MatProgressSpinnerModule, MatRadioModule, MatSelectModule, MatSidenavModule,
+    MatSlideToggleModule, MatSliderModule, MatSnackBarModule, MatSortModule,
+    MatStepperModule, MatTabsModule, MatToolbarModule, MatTooltipModule,
+    MatNativeDateModule,
     WidgetLibraryModule
   ],
   declarations:    [ ...MATERIAL_DESIGN_COMPONENTS ],

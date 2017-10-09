@@ -7,7 +7,10 @@ import { getControl, inArray, isDefined } from '../../shared';
 @Component({
   selector: 'material-number-widget',
   template: `
-    <mat-form-field [style.width]="'100%'">
+    <mat-form-field
+      [class]="options?.htmlClass || null"
+      [floatPlaceholder]="options?.floatPlaceholder || (options?.notitle ? 'never' : 'auto')"
+      [style.width]="'100%'">
       <span matPrefix *ngIf="options?.prefix || options?.fieldAddonLeft"
         [innerHTML]="options?.prefix || options?.fieldAddonLeft"></span>
       <input matInput #inputControl *ngIf="boundControl"

@@ -7,6 +7,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
   selector: 'material-input-widget',
   template: `
     <mat-form-field
+      [class]="options?.htmlClass || null"
       [floatPlaceholder]="options?.floatPlaceholder || (options?.notitle ? 'never' : 'auto')"
       [style.width]="'100%'">
       <span matPrefix *ngIf="options?.prefix || options?.fieldAddonLeft"

@@ -66,20 +66,21 @@ import { Component, Input, OnInit } from '@angular/core';
         [attr.fxFlexFill]="options.fxLayoutAlign"></flex-layout-root-widget>
     </fieldset>
 
-    <fieldset *ngIf="containerType === 'card'"
+    <mat-card *ngIf="containerType === 'card'"
       [class]="options?.htmlClass"
       [class.expandable]="options?.expandable && !expanded"
       [class.expanded]="options?.expandable && expanded"
       [disabled]="options?.readonly">
-      <mat-card>
-        <legend [style.display]="legendDisplay()">
-          <mat-card-header
-            [class]="options?.labelHtmlClass"
-            [innerHTML]="options?.notitle ? '&nbsp;' : options?.title"
-            (click)="expand()">
-          </mat-card-header>
+      <mat-card-header>
+        <legend
+          [class]="options?.labelHtmlClass"
+          [style.display]="legendDisplay()"
+          [innerHTML]="options?.notitle ? '&nbsp;' : options?.title"
+          (click)="expand()">
         </legend>
-        <mat-card-content *ngIf="expanded">
+      </mat-card-header>
+      <mat-card-content *ngIf="expanded">
+        <fieldset>
           <flex-layout-root-widget
             [formID]="formID"
             [layout]="layoutNode.items"
@@ -100,9 +101,9 @@ import { Component, Input, OnInit } from '@angular/core';
             [fxLayoutGap]="options.fxLayoutGap"
             [fxLayoutAlign]="options.fxLayoutAlign"
             [attr.fxFlexFill]="options.fxLayoutAlign"></flex-layout-root-widget>
-        </mat-card-content>
-      </mat-card>
-    </fieldset>`,
+          </fieldset>
+      </mat-card-content>
+    </mat-card>`,
   styles: [`
     fieldset { border: 0; margin: 0; padding: 0; }
     .expandable > legend:before { content: '▶'; padding-right: .3em; }

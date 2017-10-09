@@ -7,7 +7,12 @@ import { buildTitleMap, isArray } from '../../shared';
 @Component({
   selector: 'material-select-widget',
   template: `
-    <mat-form-field [style.width]="'100%'" [class]="options?.htmlClass || null">
+    <mat-form-field
+      [class]="options?.htmlClass || null"
+      [floatPlaceholder]="options?.floatPlaceholder || (options?.notitle ? 'never' : 'auto')"
+      [style.width]="'100%'">
+      <span matPrefix *ngIf="options?.prefix || options?.fieldAddonLeft"
+        [innerHTML]="options?.prefix || options?.fieldAddonLeft"></span>
       <mat-select #inputControl *ngIf="boundControl"
         [formControl]="formControl"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"

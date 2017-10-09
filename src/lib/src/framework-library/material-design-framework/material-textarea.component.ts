@@ -6,7 +6,10 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
 @Component({
   selector: 'material-textarea-widget',
   template: `
-    <mat-form-field [style.width]="'100%'">
+    <mat-form-field
+      [class]="options?.htmlClass || null"
+      [floatPlaceholder]="options?.floatPlaceholder || (options?.notitle ? 'never' : 'auto')"
+      [style.width]="'100%'">
       <span matPrefix *ngIf="options?.prefix || options?.fieldAddonLeft"
         [innerHTML]="options?.prefix || options?.fieldAddonLeft"></span>
       <textarea matInput #inputControl *ngIf="boundControl"
