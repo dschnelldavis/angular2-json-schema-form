@@ -1,6 +1,4 @@
-import {
-  ChangeDetectionStrategy, Component, Input, OnInit, OnChanges
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 import { JsonSchemaFormService } from '../../json-schema-form.service';
@@ -17,12 +15,12 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
         <span *ngIf="options?.title" [innerHTML]="buttonText"></span>
       </button>
     </section>`,
-    changeDetection: ChangeDetectionStrategy.Default,
+  changeDetection: ChangeDetectionStrategy.Default,
 })
-export class MaterialAddReferenceComponent implements OnInit, OnChanges {
+export class MaterialAddReferenceComponent implements OnInit {
   options: any;
   itemCount: number;
-  showAddButton: boolean = true;
+  // showAddButton: boolean = true;
   previousLayoutIndex: number[];
   previousDataIndex: number[];
   @Input() formID: number;
@@ -37,33 +35,16 @@ export class MaterialAddReferenceComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     this.options = this.layoutNode.options || {};
-    this.updateControl();
   }
 
-  ngOnChanges() {
-    if (
-      this.layoutIndex.length !== this.previousLayoutIndex.length ||
-      !this.layoutIndex.every(i => i === this.previousLayoutIndex[i]) ||
-      this.dataIndex.length !== this.previousDataIndex.length ||
-      !this.dataIndex.every(i => i === this.previousDataIndex[i])
-    ) {
-      this.updateControl();
-    }
+  get showAddButton(): boolean {
+    return this.layoutNode.arrayItem &&
+      this.layoutIndex[this.layoutIndex.length - 1] < (this.options.maxItems || 1000);
   }
 
   addItem(event) {
     event.preventDefault();
-    this.itemCount = this.layoutIndex[this.layoutIndex.length - 1] + 1;
     this.jsf.addItem(this);
-    this.updateControl();
-  }
-
-  updateControl() {
-    this.itemCount = this.layoutIndex[this.layoutIndex.length - 1];
-    this.previousLayoutIndex = [ ...this.layoutIndex ];
-    this.previousDataIndex = [ ...this.dataIndex ];
-    this.showAddButton = this.layoutNode.arrayItem &&
-      this.itemCount < (this.options.maxItems || 1000000);
   }
 
   get buttonText(): string {

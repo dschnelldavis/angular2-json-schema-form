@@ -70,7 +70,7 @@ export class TabsComponent implements OnInit {
   updateControl() {
     const lastItem = this.layoutNode.items[this.layoutNode.items.length - 1];
     if (lastItem.type === '$ref' &&
-      this.itemCount >= (lastItem.options.maxItems || 1000000)
+      this.itemCount >= (lastItem.options.maxItems || 1000)
     ) {
       this.showAddTab = false;
     }

@@ -1,7 +1,7 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
 
 import { JsonSchemaFormService } from '../../json-schema-form.service';
-import { hasOwn } from '../../shared';
+import { hasOwn, isArray } from '../../shared';
 
 @Component({
   selector: 'flex-layout-root-widget',
@@ -24,7 +24,7 @@ import { hasOwn } from '../../shared';
         [dataIndex]="layoutItem?.arrayItem ? (dataIndex || []).concat(i) : (dataIndex || [])"
         [layoutIndex]="(layoutIndex || []).concat(i)"
         [layoutNode]="layoutItem">
-        <svg *ngIf="layoutItem.options.removable"
+        <svg *ngIf="showRemoveButton(layoutItem)"
           xmlns="http://www.w3.org/2000/svg"
           height="18" width="18" viewBox="0 0 24 24"
           class="close-button"
@@ -81,9 +81,11 @@ import { hasOwn } from '../../shared';
       position: relative; z-index: 20;
     }
   `],
+  changeDetection: ChangeDetectionStrategy.Default,
 })
-export class FlexLayoutRootComponent {
+export class FlexLayoutRootComponent implements OnInit {
   options: any;
+  minItems: number = 0;
   @Input() formID: number;
   @Input() dataIndex: number[];
   @Input() layoutIndex: number[];
@@ -95,6 +97,19 @@ export class FlexLayoutRootComponent {
   constructor(
     private jsf: JsonSchemaFormService
   ) { }
+
+  ngOnInit() {
+    if (isArray(this.layout) &&
+      this.layout[this.layout.length - 1].type === '$ref' &&
+      hasOwn(this.layout[this.layout.length - 1].options, 'minItems')
+    ) {
+      this.minItems = this.layout[this.layout.length - 1].options.minItems;
+    }
+  }
+
+  showRemoveButton(node: any): boolean {
+    return node.options.removable && (this.layout.length - 1 > this.minItems);
+  }
 
   isDraggable(node: any): boolean {
     return this.isOrderable !== false && node.type !== '$ref' &&

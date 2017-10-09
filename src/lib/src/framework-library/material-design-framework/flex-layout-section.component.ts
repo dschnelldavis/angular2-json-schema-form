@@ -12,7 +12,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
       <label
         [class]="options?.labelHtmlClass"
         [style.display]="legendDisplay()"
-        [innerHTML]="options?.notitle ? '&nbsp;' : options?.title"
+        [innerHTML]="options?.notitle ? '&nbsp;' : options?.title || '&nbsp;'"
         (click)="expand()"></label>
       <flex-layout-root-widget *ngIf="expanded"
         [formID]="formID"
@@ -45,7 +45,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
       <legend
         [class]="options?.labelHtmlClass"
         [style.display]="legendDisplay()"
-        [innerHTML]="options?.notitle ? '&nbsp;' : options?.title"
+        [innerHTML]="options?.notitle ? '&nbsp;' : options?.title || '&nbsp;'"
         (click)="expand()"></legend>
       <flex-layout-root-widget *ngIf="expanded"
         [formID]="formID"
@@ -78,7 +78,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
         <legend
           [class]="options?.labelHtmlClass"
           [style.display]="legendDisplay()"
-          [innerHTML]="options?.notitle ? '&nbsp;' : options?.title"
+          [innerHTML]="options?.notitle ? '&nbsp;' : options?.title || '&nbsp;'"
           (click)="expand()">
         </legend>
       </mat-card-header>

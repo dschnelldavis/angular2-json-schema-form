@@ -197,7 +197,7 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
       // (These always work.)
       // console.log('loading form...');
       // console.log('schema', this.jsf.schema);
-      // console.log('layout', this.jsf.layout);
+      console.log('layout', this.jsf.layout);
       // console.log('options', this.options);
       // console.log('initialValues', this.jsf.initialValues);
       // console.log('formGroupTemplate', this.jsf.formGroupTemplate);

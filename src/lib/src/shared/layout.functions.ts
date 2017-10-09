@@ -341,8 +341,11 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
             widget: widgetLibrary.getWidget('$ref'),
             $ref: refPointer,
           };
-          if (isDefined(newNode.options.maxItems)) {
+          if (hasOwn(newNode.options, 'maxItems')) {
             newNodeRef.options.maxItems = newNode.options.maxItems;
+          }
+          if (hasOwn(newNode.options, 'minItems')) {
+            newNodeRef.options.minItems = newNode.options.minItems;
           }
           if (isString(JsonPointer.get(newNode, '/style/add'))) {
             newNodeRef.options.fieldStyle = newNode.style.add;
@@ -488,7 +491,7 @@ export function buildLayoutFromSchema(
       newNode.minItems = 1;
     }
     const minItems: number = newNode.minItems || 0;
-    const maxItems: number = newNode.maxItems || 1000000;
+    const maxItems: number = newNode.maxItems || 1000;
     if (isDefined(newNode.options.removable)) {
       removable = newNode.options.removable;
     } else if (!isDefined(removable)) {
@@ -508,15 +511,15 @@ export function buildLayoutFromSchema(
       } else {
         newNode.listItems = false;
       }
-      newNode.items = _.filter(_.map(schema.items, (item: any, i) => {
-        return buildLayoutFromSchema(
+      newNode.items = _.filter(_.map(schema.items, (item, i) =>
+        buildLayoutFromSchema(
           jsf, widgetLibrary,
           newNode.layoutPointer + '/items/-',
           schemaPointer + '/items/' + i,
           dataPointer + '/' + i,
           true, 'tuple', removable && i >= minItems, forRefLibrary, dataPointerPrefix
-        );
-      }));
+        )
+      ));
       if (newNode.items.length < maxItems &&
         hasOwn(schema, 'additionalItems') && isObject(schema.additionalItems)
       ) { // 'additionalItems' is an object = additional list items (after tuple items)
@@ -617,8 +620,11 @@ export function buildLayoutFromSchema(
         widget: widgetLibrary.getWidget('$ref'),
         $ref: refPointer,
       };
-      if (isDefined(newNode.options.maxItems)) {
+      if (hasOwn(newNode.options, 'maxItems')) {
         newNodeRef.options.maxItems = newNode.options.maxItems;
+      }
+      if (hasOwn(newNode.options, 'minItems')) {
+        newNodeRef.options.minItems = newNode.options.minItems;
       }
       newNode.items.push(newNodeRef);
     } else if (
