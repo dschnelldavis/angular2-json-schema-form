@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { hasOwn } from './../../shared/utility.functions';
 
 import { JsonSchemaFormService } from '../../json-schema-form.service';
 import { JsonPointer } from '../../shared';
@@ -17,16 +18,14 @@ import { JsonPointer } from '../../shared';
             [innerHTML]="setTitle(item, i)"></span>
         </a>
     </nav>
-
     <div *ngFor="let layoutItem of layoutNode?.items; let i = index"
       [class]="options?.htmlClass">
-
-      <select-framework-widget *ngIf="selectedItem === i"
+      <select-framework-widget *ngIf="selectedItem === i && isConditionallyShown(layoutItem)"
         [class]="options?.fieldHtmlClass + ' ' + options?.activeClass + ' ' + options?.style?.selected"
         [dataIndex]="layoutNode?.dataType === 'array' ? (dataIndex || []).concat(i) : dataIndex"
         [layoutIndex]="(layoutIndex || []).concat(i)"
-        [layoutNode]="layoutItem"></select-framework-widget>
-
+        [layoutNode]="layoutItem"
+        [data]="data"></select-framework-widget>
     </div>`,
   styles: [` a { cursor: pointer; } `],
 })
@@ -39,6 +38,7 @@ export class MaterialTabsComponent implements OnInit {
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
+  @Input() data: any;
 
   constructor(
     private jsf: JsonSchemaFormService
@@ -75,5 +75,16 @@ export class MaterialTabsComponent implements OnInit {
 
   setTitle(item: any = null, index: number = null): string {
     return this.jsf.setTitle(this, item, index);
+  }
+
+  isConditionallyShown(layoutItem: any): boolean {
+    let result: boolean = true;
+    if (this.data && hasOwn(layoutItem, 'condition')) {
+      const model = this.data;
+      /* tslint:disable */
+      eval('result = ' + layoutItem.condition);
+      /* tslint:enable */
+    }
+    return result;
   }
 }

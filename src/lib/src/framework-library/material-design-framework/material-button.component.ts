@@ -2,11 +2,14 @@ import { Component, Input, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 
 import { JsonSchemaFormService } from '../../json-schema-form.service';
+import { hasOwn } from '../../shared';
 
 @Component({
   selector: 'material-button-widget',
   template: `
-    <div class="button-row" [class]="options?.htmlClass">
+    <div *ngIf="isConditionallyShown()"
+      class="button-row"
+      [class]="options?.htmlClass">
       <button mat-raised-button
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
@@ -34,6 +37,7 @@ export class MaterialButtonComponent implements OnInit {
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
+  @Input() data: any;
 
   constructor(
     private jsf: JsonSchemaFormService
@@ -56,5 +60,17 @@ export class MaterialButtonComponent implements OnInit {
     } else {
       this.jsf.updateValue(this, event.target.value);
     }
+  }
+
+  isConditionallyShown(): boolean {
+    this.data = this.jsf.data;
+    let result: boolean = true;
+    if (this.data && hasOwn(this.options, 'condition')) {
+      const model = this.data;
+      /* tslint:disable */
+      eval('result = ' + this.options.condition);
+      /* tslint:enable */
+    }
+    return result;
   }
 }

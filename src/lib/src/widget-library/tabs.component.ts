@@ -41,6 +41,7 @@ export class TabsComponent implements OnInit {
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
+  @Input() data: any;
 
   constructor(
     private jsf: JsonSchemaFormService

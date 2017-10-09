@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 
 import { JsonSchemaFormService } from '../../json-schema-form.service';
+import { hasOwn } from '../../shared';
 
 @Component({
   selector: 'flex-layout-root-widget',
@@ -34,8 +35,9 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
           })">
           <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/>
         </svg>
-        <select-framework-widget
+        <select-framework-widget *ngIf="isConditionallyShown(layoutItem)"
           [formID]="formID"
+          [data]="data"
           [dataIndex]="layoutItem?.arrayItem ? (dataIndex || []).concat(i) : (dataIndex || [])"
           [layoutIndex]="(layoutIndex || []).concat(i)"
           [layoutNode]="layoutItem"></select-framework-widget>
@@ -88,6 +90,7 @@ export class FlexLayoutRootComponent {
   @Input() layout: any[];
   @Input() isOrderable: boolean;
   @Input() isFlexItem: boolean = false;
+  @Input() data: any;
 
   constructor(
     private jsf: JsonSchemaFormService
@@ -113,5 +116,21 @@ export class FlexLayoutRootComponent {
 
   removeItem(item) {
     this.jsf.removeItem(item);
+  }
+
+  isConditionallyShown(layoutItem: any): boolean {
+    let result: boolean = true;
+    if (this.data && hasOwn(layoutItem, 'condition')) {
+      const model = this.data;
+      try {
+        /* tslint:disable */
+        eval('result = ' + layoutItem.condition);
+        /* tslint:enable */
+      } catch (error) {
+        console.error('Error evaluating condition:');
+        console.error(error);
+      }
+    }
+    return result;
   }
 }

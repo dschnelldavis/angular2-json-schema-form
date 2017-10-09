@@ -2,33 +2,35 @@ import { Component, Input, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 
 import { JsonSchemaFormService } from '../../json-schema-form.service';
-import { buildTitleMap } from '../../shared';
+import { buildTitleMap, hasOwn } from '../../shared';
 
 @Component({
   selector: 'material-button-group-widget',
   template: `
-    <div *ngIf="options?.title">
-      <label
-        [attr.for]="'control' + layoutNode?._id"
-        [class]="options?.labelHtmlClass"
-        [style.display]="options?.notitle ? 'none' : ''"
-        [innerHTML]="options?.title"></label>
-    </div>
-    <mat-button-toggle-group
-      [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
-      [attr.readonly]="options?.readonly ? 'readonly' : null"
-      [attr.required]="options?.required"
-      [disabled]="controlDisabled"
-      [name]="controlName"
-      [value]="controlValue"
-      [vertical]="!!options.vertical">
-      <mat-button-toggle *ngFor="let radioItem of radiosList"
-        [id]="'control' + layoutNode?._id + '/' + radioItem?.name"
-        [value]="radioItem?.value"
-        (click)="updateValue(radioItem?.value)">
-        <span [innerHTML]="radioItem?.name"></span>
-      </mat-button-toggle>
-    </mat-button-toggle-group>`,
+    <div *ngIf="isConditionallyShown()">
+      <div *ngIf="options?.title">
+        <label
+          [attr.for]="'control' + layoutNode?._id"
+          [class]="options?.labelHtmlClass"
+          [style.display]="options?.notitle ? 'none' : ''"
+          [innerHTML]="options?.title"></label>
+      </div>
+      <mat-button-toggle-group
+        [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
+        [attr.readonly]="options?.readonly ? 'readonly' : null"
+        [attr.required]="options?.required"
+        [disabled]="controlDisabled"
+        [name]="controlName"
+        [value]="controlValue"
+        [vertical]="!!options.vertical">
+        <mat-button-toggle *ngFor="let radioItem of radiosList"
+          [id]="'control' + layoutNode?._id + '/' + radioItem?.name"
+          [value]="radioItem?.value"
+          (click)="updateValue(radioItem?.value)">
+          <span [innerHTML]="radioItem?.name"></span>
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>`,
 })
 export class MaterialButtonGroupComponent implements OnInit {
   formControl: AbstractControl;
@@ -43,6 +45,7 @@ export class MaterialButtonGroupComponent implements OnInit {
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
+  @Input() data: any;
 
   constructor(
     private jsf: JsonSchemaFormService
@@ -59,5 +62,17 @@ export class MaterialButtonGroupComponent implements OnInit {
 
   updateValue(value) {
     this.jsf.updateValue(this, value);
+  }
+
+  isConditionallyShown(): boolean {
+    this.data = this.jsf.data;
+    let result: boolean = true;
+    if (this.data && hasOwn(this.options, 'condition')) {
+      const model = this.data;
+      /* tslint:disable */
+      eval('result = ' + this.options.condition);
+      /* tslint:enable */
+    }
+    return result;
   }
 }

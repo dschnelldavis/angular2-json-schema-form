@@ -50,6 +50,7 @@ import { addClasses, inArray, JsonPointer, toTitleCase } from '../../shared';
 
         <select-widget-widget
           [formID]="formID"
+          [data]="data"
           [layoutNode]="widgetLayoutNode"
           [dataIndex]="dataIndex"
           [layoutIndex]="layoutIndex"></select-widget-widget>
@@ -102,6 +103,7 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
+  @Input() data: any;
 
   constructor(
     public changeDetector: ChangeDetectorRef,

@@ -2,11 +2,12 @@ import { Component, Input, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 
 import { JsonSchemaFormService } from '../../json-schema-form.service';
+import { hasOwn } from '../../shared';
 
 @Component({
   selector: 'material-input-widget',
   template: `
-    <mat-form-field
+    <mat-form-field *ngIf="isConditionallyShown()"
       [class]="options?.htmlClass || null"
       [floatPlaceholder]="options?.floatPlaceholder || (options?.notitle ? 'never' : 'auto')"
       [style.width]="'100%'">
@@ -64,6 +65,7 @@ export class MaterialInputComponent implements OnInit {
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
+  @Input() data: any;
 
   constructor(
     private jsf: JsonSchemaFormService
@@ -79,5 +81,17 @@ export class MaterialInputComponent implements OnInit {
 
   updateValue(event) {
     this.jsf.updateValue(this, event.target.value);
+  }
+
+  isConditionallyShown(): boolean {
+    this.data = this.jsf.data;
+    let result: boolean = true;
+    if (this.data && hasOwn(this.options, 'condition')) {
+      const model = this.data;
+      /* tslint:disable */
+      eval('result = ' + this.options.condition);
+      /* tslint:enable */
+    }
+    return result;
   }
 }

@@ -1,5 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
+import { hasOwn } from './../../shared/utility.functions';
+
 
 import { JsonSchemaFormService } from '../../json-schema-form.service';
 import { buildTitleMap, isArray } from '../../shared';
@@ -7,7 +9,7 @@ import { buildTitleMap, isArray } from '../../shared';
 @Component({
   selector: 'material-select-widget',
   template: `
-    <mat-form-field
+    <mat-form-field *ngIf="isConditionallyShown()"
       [class]="options?.htmlClass || null"
       [floatPlaceholder]="options?.floatPlaceholder || (options?.notitle ? 'never' : 'auto')"
       [style.width]="'100%'">
@@ -86,6 +88,7 @@ export class MaterialSelectComponent implements OnInit {
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
+  @Input() data: any;
 
   constructor(
     private jsf: JsonSchemaFormService
@@ -106,5 +109,17 @@ export class MaterialSelectComponent implements OnInit {
   updateValue(event) {
     this.jsf.updateValue(this, event.value);
     this.options.showErrors = true
+  }
+
+  isConditionallyShown(): boolean {
+    this.data = this.jsf.data;
+    let result: boolean = true;
+    if (this.data && hasOwn(this.options, 'condition')) {
+      const model = this.data;
+      /* tslint:disable */
+      eval('result = ' + this.options.condition);
+      /* tslint:enable */
+    }
+    return result;
   }
 }

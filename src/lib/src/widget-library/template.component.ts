@@ -15,6 +15,7 @@ export class TemplateComponent implements OnInit, OnChanges {
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
+  @Input() data: any;
   @ViewChild('widgetContainer', { read: ViewContainerRef })
     widgetContainer: ViewContainerRef;
 

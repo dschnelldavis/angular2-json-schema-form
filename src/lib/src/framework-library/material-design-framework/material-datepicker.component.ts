@@ -2,12 +2,13 @@ import { Component, Input, OnInit, OnChanges } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 
 import { JsonSchemaFormService } from '../../json-schema-form.service';
-import { dateToString, stringToDate } from '../../shared';
+import { dateToString, hasOwn, stringToDate } from '../../shared';
 
 @Component({
   selector: 'material-datepicker-widget',
   template: `
-    <mat-form-field [style.width]="'100%'">
+    <mat-form-field *ngIf="isConditionallyShown()"
+      [style.width]="'100%'">
       <span matPrefix *ngIf="options?.prefix || options?.fieldAddonLeft"
         [innerHTML]="options?.prefix || options?.fieldAddonLeft"></span>
       <input matInput #inputControl *ngIf="boundControl"
@@ -64,6 +65,7 @@ export class MaterialDatepickerComponent implements OnInit, OnChanges {
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
+  @Input() data: any;
 
   constructor(
     private jsf: JsonSchemaFormService
@@ -88,5 +90,17 @@ export class MaterialDatepickerComponent implements OnInit, OnChanges {
 
   updateValue(event) {
     this.jsf.updateValue(this, dateToString(event, this.options));
+  }
+
+  isConditionallyShown(): boolean {
+    this.data = this.jsf.data;
+    let result: boolean = true;
+    if (this.data && hasOwn(this.options, 'condition')) {
+      const model = this.data;
+      /* tslint:disable */
+      eval('result = ' + this.options.condition);
+      /* tslint:enable */
+    }
+    return result;
   }
 }

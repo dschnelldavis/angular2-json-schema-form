@@ -9,9 +9,10 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
       [class]="options?.htmlClass">
       <root-widget
         [formID]="formID"
-        [layout]="layoutNode.items"
+        [data]="data"
         [dataIndex]="dataIndex"
-        [layoutIndex]="layoutIndex"></root-widget>
+        [layoutIndex]="layoutIndex"
+        [layout]="layoutNode.items"></root-widget>
     </div>`,
 })
 export class TabComponent implements OnInit {
@@ -20,6 +21,7 @@ export class TabComponent implements OnInit {
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
+  @Input() data: any;
 
   constructor(
     private jsf: JsonSchemaFormService

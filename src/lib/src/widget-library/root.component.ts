@@ -1,31 +1,30 @@
 import { Component, Input, Host } from '@angular/core';
 
-import { hasOwn } from './../shared/utility.functions';
 import { JsonSchemaFormComponent } from '../json-schema-form.component';
+import { hasOwn } from '../shared';
 
 @Component({
   selector: 'root-widget',
   template: `
     <div *ngFor="let layoutItem of layout; let i = index"
       [class.form-flex-item]="isFlexItem"
+      [style.align-self]="(layoutItem.options || {})['align-self']"
+      [style.flex-basis]="getFlexAttribute(layoutItem, 'flex-basis')"
       [style.flex-grow]="getFlexAttribute(layoutItem, 'flex-grow')"
       [style.flex-shrink]="getFlexAttribute(layoutItem, 'flex-shrink')"
-      [style.flex-basis]="getFlexAttribute(layoutItem, 'flex-basis')"
-      [style.align-self]="(layoutItem.options || {})['align-self']"
       [style.order]="(layoutItem.options || {}).order">
       <div
-        [orderable]="isDraggable(layoutItem)"
         [formID]="formID"
         [dataIndex]="layoutItem?.arrayItem ? (dataIndex || []).concat(i) : (dataIndex || [])"
         [layoutIndex]="(layoutIndex || []).concat(i)"
-        [layoutNode]="layoutItem">
-        <select-framework-widget
-          *ngIf="isConditionallyShown(layoutItem)"
+        [layoutNode]="layoutItem"
+        [orderable]="isDraggable(layoutItem)">
+        <select-framework-widget *ngIf="isConditionallyShown(layoutItem)"
           [formID]="formID"
+          [data]="data"
           [dataIndex]="layoutItem?.arrayItem ? (dataIndex || []).concat(i) : (dataIndex || [])"
           [layoutIndex]="(layoutIndex || []).concat(i)"
-          [layoutNode]="layoutItem"
-          [data]="data"></select-framework-widget>
+          [layoutNode]="layoutItem"></select-framework-widget>
       </div>
     </div>`,
   styles: [`

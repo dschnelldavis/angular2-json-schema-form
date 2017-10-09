@@ -11,29 +11,26 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
       [class.expanded]="options?.expandable && expanded">
       <label *ngIf="options?.title"
         [class]="options?.labelHtmlClass"
-        [style.display]="options?.notitle ? 'none' : ''"
         [innerHTML]="options?.title"
+        [style.display]="options?.notitle ? 'none' : ''"
         (click)="expand()"></label>
-
         <root-widget *ngIf="expanded"
+          [data]="data"
+          [dataIndex]="dataIndex"
           [formID]="formID"
           [layout]="layoutNode.items"
-          [dataIndex]="dataIndex"
           [layoutIndex]="layoutIndex"
-          [isOrderable]="options?.orderable"
           [isFlexItem]="getFlexAttribute('is-flex')"
-          [data]="data"
+          [isOrderable]="options?.orderable"
           [class.form-flex-column]="getFlexAttribute('flex-direction') === 'column'"
           [class.form-flex-row]="getFlexAttribute('flex-direction') === 'row'"
+          [style.align-content]="getFlexAttribute('align-content')"
+          [style.align-items]="getFlexAttribute('align-items')"
           [style.display]="getFlexAttribute('display')"
           [style.flex-direction]="getFlexAttribute('flex-direction')"
           [style.flex-wrap]="getFlexAttribute('flex-wrap')"
-          [style.justify-content]="getFlexAttribute('justify-content')"
-          [style.align-items]="getFlexAttribute('align-items')"
-          [style.align-content]="getFlexAttribute('align-content')"></root-widget>
-
+          [style.justify-content]="getFlexAttribute('justify-content')"></root-widget>
     </div>
-
     <fieldset *ngIf="containerType === 'fieldset'"
       [class]="options?.htmlClass"
       [class.expandable]="options?.expandable && !expanded"
@@ -41,27 +38,25 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
       [disabled]="options?.readonly">
       <legend
         [class]="options?.labelHtmlClass"
-        [style.display]="legendDisplay()"
         [innerHTML]="options?.title"
+        [style.display]="legendDisplay()"
         (click)="expand()"></legend>
-
         <root-widget *ngIf="expanded"
+          [data]="data"
+          [dataIndex]="dataIndex"
           [formID]="formID"
           [layout]="layoutNode.items"
-          [dataIndex]="dataIndex"
           [layoutIndex]="layoutIndex"
-          [isOrderable]="options?.orderable"
           [isFlexItem]="getFlexAttribute('is-flex')"
-          [data]="data"
+          [isOrderable]="options?.orderable"
           [class.form-flex-column]="getFlexAttribute('flex-direction') === 'column'"
           [class.form-flex-row]="getFlexAttribute('flex-direction') === 'row'"
+          [style.align-content]="getFlexAttribute('align-content')"
+          [style.align-items]="getFlexAttribute('align-items')"
           [style.display]="getFlexAttribute('display')"
           [style.flex-direction]="getFlexAttribute('flex-direction')"
           [style.flex-wrap]="getFlexAttribute('flex-wrap')"
-          [style.justify-content]="getFlexAttribute('justify-content')"
-          [style.align-items]="getFlexAttribute('align-items')"
-          [style.align-content]="getFlexAttribute('align-content')"></root-widget>
-
+          [style.justify-content]="getFlexAttribute('justify-content')"></root-widget>
     </fieldset>`,
   styles: [`
     .expandable > legend:before { content: '▶'; padding-right: .3em; }

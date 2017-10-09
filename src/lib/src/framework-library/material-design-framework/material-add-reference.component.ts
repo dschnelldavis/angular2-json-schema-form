@@ -29,6 +29,7 @@ export class MaterialAddReferenceComponent implements OnInit, OnChanges {
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
+  @Input() data: any;
 
   constructor(
     private jsf: JsonSchemaFormService
