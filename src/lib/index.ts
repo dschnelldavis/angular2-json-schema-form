@@ -72,7 +72,7 @@ import { MaterialTextareaComponent } from './src/framework-library/material-desi
 import { MaterialDesignFrameworkComponent } from './src/framework-library/material-design-framework/material-design-framework.component';
 import { MaterialDesignFrameworkModule } from './src/framework-library/material-design-framework/material-design-framework.module';
 import { NoFrameworkComponent } from './src/framework-library/no-framework.component';
-import { Bootstrap3FrameworkComponent } from './src/framework-library/bootstrap-3-framework.component';
+import { Bootstrap3FrameworkComponent } from './src/framework-library/bootstrap-3-framework/bootstrap-3-framework.component';
 import { FrameworkLibraryService } from './src/framework-library/framework-library.service';
 import { FrameworkLibraryModule } from './src/framework-library/framework-library.module';
 

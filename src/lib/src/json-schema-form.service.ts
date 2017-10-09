@@ -4,7 +4,6 @@ import { Subject } from 'rxjs/Subject';
 
 import * as Ajv from 'ajv';
 import * as _ from 'lodash';
-import * as $RefParser from 'json-schema-ref-parser';
 
 import { convertSchemaToDraft6 } from './shared/convert-schema-to-draft6.function';
 import {
@@ -37,7 +36,6 @@ export class JsonSchemaFormService {
 
   ajvOptions: any = { allErrors: true, unknownFormats: 'ignore' };
   ajv: any = new Ajv(this.ajvOptions); // AJV: Another JSON Schema Validator
-  parser = new $RefParser(); // JSON Schema $ref Parser
 
   validateFormData: any = null; // Compiled AJV function to validate active form's schema
 

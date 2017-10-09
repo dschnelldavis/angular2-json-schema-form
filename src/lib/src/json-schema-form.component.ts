@@ -46,7 +46,6 @@ import { JsonPointer } from './shared/jsonpointer.functions';
  *  - Angular (obviously)                  https://angular.io
  *  - lodash, JavaScript utility library   https://github.com/lodash/lodash
  *  - ajv, Another JSON Schema validator   https://github.com/epoberezkin/ajv
- *  - JSON Schema $ref Parser              https://github.com/BigstickCarpet/json-schema-ref-parser
  *
  * In addition, the Example Playground also depends on:
  *  - brace, Browserified Ace editor       http://thlorenz.github.io/brace

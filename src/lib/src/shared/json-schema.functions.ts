@@ -1,5 +1,4 @@
 import * as _ from 'lodash';
-import * as $RefParser from 'json-schema-ref-parser';
 
 import {
   getType, hasValue, inArray, isArray, isEmpty, isFunction, isNumber, isObject,

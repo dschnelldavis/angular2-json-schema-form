@@ -67,7 +67,7 @@ return Promise.resolve()
         commonjs({ namedExports: {
           // list of lodash functions used by your library
           'node_modules/lodash/index.js': [
-            'cloneDeep', 'cloneDeepWith', 'filter', 'map', 'uniqueId'
+            'cloneDeep', 'cloneDeepWith', 'filter', 'isEqual', 'map', 'uniqueId'
           ]
         } })
       ],
