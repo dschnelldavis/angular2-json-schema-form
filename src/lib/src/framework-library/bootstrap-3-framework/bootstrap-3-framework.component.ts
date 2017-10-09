@@ -166,12 +166,11 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
 
       // Add asterisk to titles if required
       if (this.options.title && this.layoutNode.type !== 'tab' &&
-          !this.options.notitle && this.options.required  &&
-          this.options.title.indexOf('*') === -1) {
-
-          this.options.title += ' <strong class="text-danger">*</strong>';
-
-        }
+        !this.options.notitle && this.options.required  &&
+        this.options.title.indexOf('*') === -1
+      ) {
+        this.options.title += ' <strong class="text-danger">*</strong>';
+      }
       // Set miscelaneous styles and settings for each control type
       switch (this.layoutNode.type) {
         // Checkbox controls
@@ -230,8 +229,8 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
         break;
         // 'Add' buttons - references
         case '$ref':
-          this.widgetOptions.fieldHtmlClass =
-            addClasses(this.widgetOptions.fieldHtmlClass, 'btn pull-right');
+          this.widgetOptions.fieldHtmlClass = addClasses(
+            this.widgetOptions.fieldHtmlClass, 'btn pull-right');
           this.widgetOptions.fieldHtmlClass = addClasses(
             this.widgetOptions.fieldHtmlClass, this.options.style || 'btn-default');
           this.options.icon = 'glyphicon glyphicon-plus';
@@ -260,15 +259,16 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
 
   updateHelpBlock(value) {
     this.options.helpBlock = this.options.description || this.options.help || false;
-    if (this.options.enableErrorState && value === 'INVALID' && this.formControl.errors &&
+    if (this.options.enableErrorState &&
+      value === 'INVALID' && this.formControl.errors &&
       (this.formControl.dirty || this.options.feedbackOnRender)
     ) {
-      this.options.helpBlock = Object.keys(this.formControl.errors).map(
-        error => [error, Object.keys(this.formControl.errors[error]).map(
-          errorParameter => errorParameter + ': ' +
-          this.formControl.errors[error][errorParameter]
-        ).join(', ')].filter(e => e).join(' - ')
-      ).join('<br>');
+      this.options.helpBlock =
+        Object.keys(this.formControl.errors).map(error =>
+          [error, Object.keys(this.formControl.errors[error]).map(errorParameter =>
+            errorParameter + ': ' + this.formControl.errors[error][errorParameter]
+          ).join(', ')].filter(e => e).join(' - ')
+        ).join('<br>');
 
     }
   }
