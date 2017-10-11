@@ -85,7 +85,7 @@
     "@angular/router": "^4.4.4",
     "@types/ace": "^0.0.35",
     "@types/jasmine": "^2.6.0",
-    "@types/node": "^8.0.33",
+    "@types/node": "^8.0.34",
     "brace": "^0.10.0",
     "camelcase": "^4.0.0",
     "codelyzer": "^3.2.1",

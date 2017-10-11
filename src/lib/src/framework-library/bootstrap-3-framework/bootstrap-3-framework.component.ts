@@ -21,7 +21,7 @@ import { addClasses, inArray, JsonPointer, toTitleCase } from '../../shared';
       [class.has-success]="options?.enableSuccessState && !formControl?.errors &&
         (formControl?.dirty || options?.feedbackOnRender)">
 
-      <button *ngIf="layoutNode?.arrayItem && options?.removable"
+      <button *ngIf="showRemoveButton()"
         class="close pull-right"
         style="position: relative; z-index: 20;"
         type="button"
@@ -143,26 +143,19 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
 
       this.options.htmlClass =
         addClasses(this.options.htmlClass, 'schema-form-' + this.layoutNode.type);
-      if (this.layoutNode.type === 'array') {
-        this.options.htmlClass =
-          addClasses(this.options.htmlClass, 'list-group');
-      } else if (this.layoutNode.arrayItem && this.layoutNode.type !== '$ref') {
-        this.options.htmlClass =
-          addClasses(this.options.htmlClass, 'list-group-item');
-      } else {
-        this.options.htmlClass =
+      this.options.htmlClass =
+        this.layoutNode.type === 'array' ?
+          addClasses(this.options.htmlClass, 'list-group') :
+        this.layoutNode.arrayItem && this.layoutNode.type !== '$ref' ?
+          addClasses(this.options.htmlClass, 'list-group-item') :
           addClasses(this.options.htmlClass, 'form-group');
-      }
       this.widgetOptions.htmlClass = '';
       this.options.labelHtmlClass =
         addClasses(this.options.labelHtmlClass, 'control-label');
-
       this.widgetOptions.activeClass =
         addClasses(this.widgetOptions.activeClass, 'active');
-
       this.options.fieldAddonLeft =
         this.options.fieldAddonLeft || this.options.prepend;
-
       this.options.fieldAddonRight =
         this.options.fieldAddonRight || this.options.append;
 
@@ -325,6 +318,17 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
           this.dataIndex[this.dataIndex.length - 1]
         );
     }
+  }
+
+  showRemoveButton(): boolean {
+    if (!this.options.removable) { return false; }
+    if (!this.layoutNode.arrayItem) { return true; }
+    const arrayIndex = this.layoutIndex[this.layoutIndex.length - 1];
+    const parentArray = this.jsf.getParentNode(this);
+    return parentArray.items.length - 1 <= parentArray.options.minItems ? false :
+      this.layoutNode.arrayItemType === 'list' ? true :
+      // else this.layoutNode.arrayItemType === 'tuple'
+      arrayIndex === parentArray.items.length - 2;
   }
 
   removeItem() {

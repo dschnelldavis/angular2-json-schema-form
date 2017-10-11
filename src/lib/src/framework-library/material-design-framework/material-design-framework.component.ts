@@ -8,25 +8,77 @@ import { toTitleCase } from '../../shared';
 @Component({
   selector: 'material-design-framework',
   template: `
-    <select-widget-widget
+    <div
+      [class.array-item]="layoutNode.arrayItem && layoutNode.type !== '$ref'"
+      [orderable]="isOrderable"
       [formID]="formID"
-      [data]="data"
       [dataIndex]="dataIndex"
       [layoutIndex]="layoutIndex"
-      [layoutNode]="layoutNode"></select-widget-widget>
-  `,
+      [layoutNode]="layoutNode">
+      <svg *ngIf="showRemoveButton"
+        xmlns="http://www.w3.org/2000/svg"
+        height="18" width="18" viewBox="0 0 24 24"
+        class="close-button"
+        (click)="removeItem()">
+        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/>
+      </svg>
+      <select-widget-widget
+        [formID]="formID"
+        [data]="data"
+        [dataIndex]="dataIndex"
+        [layoutIndex]="layoutIndex"
+        [layoutNode]="layoutNode"></select-widget-widget>
+    </div>
+    <div class="spacer" *ngIf="layoutNode.arrayItem && layoutNode.type !== '$ref'"></div>`,
+  styles: [`
+    .array-item {
+      border-radius: 2px;
+      box-shadow: 0 3px 1px -2px rgba(0,0,0,.2),
+                  0 2px 2px 0 rgba(0,0,0,.14),
+                  0 1px 5px 0 rgba(0,0,0,.12);
+      padding: 6px;
+      position: relative;
+      transition: all 280ms cubic-bezier(.4, 0, .2, 1);
+    }
+    .close-button {
+      cursor: pointer;
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      fill: rgba(0,0,0,.4);
+      visibility: hidden;
+    }
+    .close-button:hover { fill: rgba(0,0,0,.8); }
+    .array-item:hover > .close-button { visibility: visible; }
+    .spacer { margin: 6px 0; }
+    [draggable=true]:hover {
+      box-shadow: 0 5px 5px -3px rgba(0,0,0,.2),
+                  0 8px 10px 1px rgba(0,0,0,.14),
+                  0 3px 14px 2px rgba(0,0,0,.12);
+      cursor: move;
+      z-index: 10;
+    }
+    [draggable=true].drag-target-top {
+      box-shadow: 0 -2px 0 #000;
+      position: relative; z-index: 20;
+    }
+    [draggable=true].drag-target-bottom {
+      box-shadow: 0 2px 0 #000;
+      position: relative; z-index: 20;
+    }
+  `],
 })
 export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
   controlInitialized: boolean = false;
   controlType: string;
-  showArrayItem: boolean = false;
-  showCloseButton: boolean = false;
   inputType: string;
   options: any; // Options used in this framework
   widgetLayoutNode: any; // layoutNode passed to child widget
   widgetOptions: any; // Options passed to child widget
   layoutPointer: string;
   formControl: any = null;
+  parentArray: any = null;
+  isOrderable: boolean = false;
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
@@ -38,16 +90,28 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
     private jsf: JsonSchemaFormService
   ) { }
 
+  get showRemoveButton(): boolean {
+    if (!this.options.removable || this.layoutNode.type === '$ref') { return false; }
+    if (!this.layoutNode.arrayItem) { return true; }
+    const arrayIndex = this.layoutIndex[this.layoutIndex.length - 1];
+    return this.parentArray.items.length - 1 <= this.parentArray.options.minItems ? false :
+      this.layoutNode.arrayItemType === 'list' ? true :
+      // else this.layoutNode.arrayItemType === 'tuple'
+      arrayIndex === this.parentArray.items.length - 2;
+  }
+
   ngOnInit() {
     this.initializeControl();
-    this.showArrayItem = this.layoutNode.arrayItem && this.layoutNode.type !== '$ref';
-    this.showCloseButton = !!this.options.removable;
+    if (this.layoutNode.arrayItem) {
+      this.parentArray = this.jsf.getParentNode(this);
+      this.isOrderable = this.layoutNode.type !== '$ref' &&
+      this.parentArray.options.orderable !== false &&
+      this.layoutNode.options.arrayItemType === 'list';
+    }
   }
 
   ngOnChanges() {
     if (!this.controlInitialized) { this.initializeControl(); }
-    this.showArrayItem = this.layoutNode.arrayItem && this.layoutNode.type !== '$ref';
-    this.showCloseButton = !!this.options.removable;
   }
 
   initializeControl() {
@@ -199,5 +263,9 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
           this.dataIndex[this.dataIndex.length - 1]
         );
     }
+  }
+
+  removeItem() {
+    this.jsf.removeItem(this);
   }
 }

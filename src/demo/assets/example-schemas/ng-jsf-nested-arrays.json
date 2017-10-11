@@ -7,15 +7,17 @@
         "properties": {
           "min_amount": { "type": "integer" },
           "max_amount": { "type": "integer" },
-          "Fees": {
+          "fees": {
+            "title": "Fees (optional—max 2)",
             "type": "array",
+            "maxItems": 2,
             "items": { "$ref": "#/definitions/fees_obj" }
           }
         }
       },
       "fees_obj": {
         "type": "object",
-        "title": "Fees",
+        "title": "Fee",
         "properties": {
           "ongoing_fee": { "type": "integer", "title": "Ongoing" },
           "application_fee": { "type": "integer", "title": "Application" }
@@ -25,9 +27,12 @@
     "type": "object",
     "properties": {
       "tiers": {
+        "title": "Tiers (required—max 3)",
         "type": "array",
+        "maxItems": 3,
         "items": { "$ref": "#/definitions/tiers_obj", "extendRefs": true }
       }
-    }
+    },
+    "required": [ "tiers" ]
   }
 }

@@ -38,8 +38,8 @@ export class MaterialAddReferenceComponent implements OnInit {
   }
 
   get showAddButton(): boolean {
-    return this.layoutNode.arrayItem &&
-      this.layoutIndex[this.layoutIndex.length - 1] < (this.options.maxItems || 1000);
+    return !this.layoutNode.arrayItem ||
+      this.layoutIndex[this.layoutIndex.length - 1] < this.options.maxItems;
   }
 
   addItem(event) {

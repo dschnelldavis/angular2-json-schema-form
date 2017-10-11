@@ -1,6 +1,4 @@
-import {
-  ChangeDetectionStrategy, Component, Input, OnInit
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
@@ -37,8 +35,8 @@ export class AddReferenceComponent implements OnInit {
   }
 
   get showAddButton(): boolean {
-    return this.layoutNode.arrayItem &&
-      this.layoutIndex[this.layoutIndex.length - 1] < (this.options.maxItems || 1000);
+    return !this.layoutNode.arrayItem ||
+      this.layoutIndex[this.layoutIndex.length - 1] < this.options.maxItems;
   }
 
   addItem(event) {
@@ -49,6 +47,7 @@ export class AddReferenceComponent implements OnInit {
   get buttonText(): string {
     const parent: any = {
       dataIndex: this.dataIndex.slice(0, -1),
+      layoutIndex: this.layoutIndex.slice(0, -1),
       layoutNode: this.jsf.getParentNode(this)
     };
     return parent.layoutNode.add ||

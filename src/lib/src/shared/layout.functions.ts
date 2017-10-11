@@ -139,18 +139,20 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
         // Present checkboxes as single control, rather than array
         if (newNode.type === 'checkboxes' && hasOwn(itemSchema, 'items')) {
           updateInputOptions(newNode, itemSchema.items, jsf);
-        } else if (itemSchema.type === 'array' && hasOwn(itemSchema, 'items')) {
-          if (isArray(itemSchema.items)) {
-            newNode.tupleItems = itemSchema.items.length;
-            if (hasOwn(itemSchema, 'additionalItems')) {
-              newNode.listItems = hasOwn(itemSchema, 'maxItems') ?
-                itemSchema.maxItems - itemSchema.items.length : true;
+        } else if (itemSchema.type === 'array') {
+          newNode.options.maxItems = Math.min(itemSchema.maxItems || 1000, newNode.options.maxItems || 1000);
+          newNode.options.minItems = Math.max(itemSchema.minItems || 0, newNode.options.minItems || 0);
+          if (hasOwn(itemSchema, 'items')) {
+            if (isArray(itemSchema.items)) {
+              newNode.tupleItems = itemSchema.items.length;
+              newNode.listItems =
+                !hasOwn(itemSchema, 'additionalItems') ? 0 :
+                hasOwn(itemSchema, 'maxItems') ? newNode.maxItems - itemSchema.items.length :
+                newNode.maxItems;
             } else {
-              newNode.listItems = false;
+              newNode.tupleItems = 0;
+              newNode.listItems = newNode.maxItems;
             }
-          } else {
-            newNode.tupleItems = false;
-            newNode.listItems = itemSchema.maxItems || true;
           }
         }
         if (!newNode.options.title && newNode.options.legend) {
@@ -195,10 +197,10 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
           jsf.dataMap.set(arrayPointer, new Map());
         }
         jsf.dataMap.get(arrayPointer).set('inputType', 'section');
-        if (newNode.options.required && !newNode.minItems) {
-          newNode.minItems = 1;
+        if (newNode.options.required && newNode.options.minItems === 0) {
+          newNode.options.minItems = 1;
         }
-        if (isDefined(newNode.options.maxItems) && newNode.options.maxItems < 2) {
+        if (newNode.options.maxItems < 2) {
           newNode.options.orderable = false;
         }
 
@@ -228,20 +230,17 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
               subItem.arrayItem = true;
               // TODO: Check schema to get arrayItemType and removable
               subItem.arrayItemType = 'list';
-              subItem.removable = newNode.options.removable || !newNode.options.minItems;
+              subItem.removable = newNode.options.removable !== false;
             }
           }
           if (arrayItemGroup.length) {
             newNode.items.push({
               arrayItem: true,
+              arrayItemType: newNode.tupleItems > newNode.items.length ?
+                'tuple' : 'list',
               items: arrayItemGroup,
               layoutPointer: newNode.layoutPointer + '/items/-',
-              options: {
-                arrayItemType: newNode.tupleItems > newNode.items.length ?
-                  'tuple' : 'list',
-                removable: newNode.options.removable !== false &&
-                  (newNode.options.minItems || 0) <= newNode.items.length,
-              },
+              options: { removable: newNode.options.removable !== false, },
               dataPointer: newNode.dataPointer + '/-',
               type: 'section',
               widget: widgetLibrary.getWidget('section'),
@@ -253,15 +252,13 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
             newNode.items[0].dataPointer =
               JsonPointer.toGenericPointer(arrayPointer, jsf.arrayMap);
           }
-          if ((newNode.options.minItems || 0) > 0) {
-            newNode.items[0].options.removable = false;
-          } else if (!JsonPointer.has(newNode, '/items/0/options/removable')) {
+          if (!JsonPointer.has(newNode, '/items/0/options/removable')) {
             newNode.items[0].options.removable = true;
           }
           if (newNode.options.orderable === false) {
             newNode.items[0].options.orderable = false;
           }
-          newNode.items[0].options.arrayItemType =
+          newNode.items[0].arrayItemType =
             newNode.tupleItems ? 'tuple' : 'list';
         }
 
@@ -327,12 +324,14 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
           }
           let newNodeRef: any = {
             arrayItem: true,
+            arrayItemType: 'list',
             dataPointer: newNode.dataPointer,
             layoutPointer: newNode.layoutPointer + '/items/-',
             listItems: newNode.listItems,
             options: {
-              arrayItemType: 'list',
-              removable: !!newNode.options.removable,
+              maxItems: newNode.maxItems,
+              minItems: newNode.minItems,
+              removable: false,
               title: buttonText,
             },
             recursiveReference: recursive,
@@ -341,12 +340,6 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
             widget: widgetLibrary.getWidget('$ref'),
             $ref: refPointer,
           };
-          if (hasOwn(newNode.options, 'maxItems')) {
-            newNodeRef.options.maxItems = newNode.options.maxItems;
-          }
-          if (hasOwn(newNode.options, 'minItems')) {
-            newNodeRef.options.minItems = newNode.options.minItems;
-          }
           if (isString(JsonPointer.get(newNode, '/style/add'))) {
             newNodeRef.options.fieldStyle = newNode.style.add;
             delete newNode.style.add;
@@ -422,8 +415,8 @@ export function buildLayoutFromSchema(
   const lastDataKey = JsonPointer.toKey(newNode.dataPointer);
   if (lastDataKey !== '-') { newNode.name = lastDataKey; }
   if (newNode.arrayItem) {
-    newNode.options.arrayItemType = arrayItemType;
-    newNode.options.removable = removable;
+    newNode.arrayItemType = arrayItemType;
+    newNode.options.removable = removable !== false;
   }
   if (dataPointer !== '' && !forRefLibrary) {
     const refPointer = removeRecursiveReferences(
@@ -487,16 +480,12 @@ export function buildLayoutFromSchema(
         templateArray = templateControl['controls'];
       }
     }
-    if (!newNode.minItems && isInputRequired(jsf.schema, schemaPointer)) {
-      newNode.minItems = 1;
+    newNode.options.maxItems = schema.maxItems || 1000;
+    newNode.options.minItems = schema.minItems || 0;
+    if (!newNode.options.minItems && isInputRequired(jsf.schema, schemaPointer)) {
+      newNode.options.minItems = 1;
     }
-    const minItems: number = newNode.minItems || 0;
-    const maxItems: number = newNode.maxItems || 1000;
-    if (isDefined(newNode.options.removable)) {
-      removable = newNode.options.removable;
-    } else if (!isDefined(removable)) {
-      removable = true;
-    }
+    removable = newNode.options.removable !== false;
     let additionalItems = false;
     const refPointer = removeRecursiveReferences(
       dataPointerPrefix + dataPointer + '/-', jsf.dataRecursiveRefMap, jsf.arrayMap
@@ -505,22 +494,20 @@ export function buildLayoutFromSchema(
     const recursive = refPointer !== genericPointer + '/-';
     if (isArray(schema.items)) { // 'items' is an array = tuple items
       newNode.tupleItems = schema.items.length;
-      if (hasOwn(schema, 'additionalItems')) {
-        newNode.listItems = hasOwn(schema, 'maxItems') ?
-          schema.maxItems - schema.items.length : true;
-      } else {
-        newNode.listItems = false;
-      }
+      newNode.listItems =
+        !hasOwn(schema, 'additionalItems') ? 0 :
+        hasOwn(schema, 'maxItems') ? schema.maxItems - schema.items.length :
+        true;
       newNode.items = _.filter(_.map(schema.items, (item, i) =>
         buildLayoutFromSchema(
           jsf, widgetLibrary,
           newNode.layoutPointer + '/items/-',
           schemaPointer + '/items/' + i,
           dataPointer + '/' + i,
-          true, 'tuple', removable && i >= minItems, forRefLibrary, dataPointerPrefix
+          true, 'tuple', removable, forRefLibrary, dataPointerPrefix
         )
       ));
-      if (newNode.items.length < maxItems &&
+      if (newNode.items.length < newNode.options.maxItems &&
         hasOwn(schema, 'additionalItems') && isObject(schema.additionalItems)
       ) { // 'additionalItems' is an object = additional list items (after tuple items)
         if (newNode.items.length < templateArray.length) {
@@ -530,7 +517,7 @@ export function buildLayoutFromSchema(
               newNode.layoutPointer + '/items/-',
               schemaPointer + '/additionalItems',
               dataPointer + '/' + i,
-              true, 'list', removable && i >= minItems, forRefLibrary, dataPointerPrefix
+              true, 'list', removable, forRefLibrary, dataPointerPrefix
             ));
           }
         } else if (newNode.items.length > templateArray.length) {
@@ -543,7 +530,7 @@ export function buildLayoutFromSchema(
             ));
           }
         }
-        if (newNode.items.length < maxItems && newNode.options.addable !== false &&
+        if (newNode.items.length < newNode.options.maxItems && newNode.options.addable !== false &&
           JsonPointer.get(newNode.items[newNode.items.length - 1], '/type') !== '$ref'
         ) {
           additionalItems = true;
@@ -565,18 +552,18 @@ export function buildLayoutFromSchema(
         }
       }
     } else { // 'items' is an object = list items only (no tuple items)
-      newNode.tupleItems = false;
+      newNode.tupleItems = 0;
       newNode.listItems = schema.maxItems || true;
-      for (let i = 0, l = Math.max(templateArray.length, minItems, 0); i < l; i++) {
+      for (let i = 0, l = Math.max(templateArray.length, newNode.options.minItems, 0); i < l; i++) {
         newNode.items.push(buildLayoutFromSchema(
           jsf, widgetLibrary,
           newNode.layoutPointer + '/items/-',
           schemaPointer + '/items',
           dataPointer + '/' + i,
-          true, 'list', removable && i >= minItems, forRefLibrary, dataPointerPrefix
+          true, 'list', removable, forRefLibrary, dataPointerPrefix
         ));
       }
-      if (newNode.items.length < maxItems && newNode.options.addable !== false &&
+      if (newNode.items.length < newNode.options.maxItems && newNode.options.addable !== false &&
         JsonPointer.get(newNode.items[newNode.items.length - 1], '/type') !== '$ref'
       ) {
         additionalItems = true;
@@ -598,7 +585,7 @@ export function buildLayoutFromSchema(
       }
     }
 
-    // If addable items add $ref item to layout
+    // If addable items, add $ref item to layout
     if (additionalItems) {
       let buttonText =
         ((jsf.layoutRefLibrary[refPointer] || {}).options || {}).title ||
@@ -606,11 +593,13 @@ export function buildLayoutFromSchema(
       if (!/^add\b/i.test(buttonText)) { buttonText = 'Add ' + buttonText; }
       let newNodeRef: any = {
         arrayItem: true,
+        arrayItemType: 'list',
         dataPointer: newNode.dataPointer + '/-',
         layoutPointer: newNode.layoutPointer + '/items/-',
         listItems: newNode.listItems,
         options: {
-          arrayItemType: 'list',
+          maxItems: newNode.options.maxItems,
+          minItems: newNode.options.minItems,
           removable: false,
           title: buttonText,
         },
@@ -620,25 +609,29 @@ export function buildLayoutFromSchema(
         widget: widgetLibrary.getWidget('$ref'),
         $ref: refPointer,
       };
-      if (hasOwn(newNode.options, 'maxItems')) {
-        newNodeRef.options.maxItems = newNode.options.maxItems;
-      }
-      if (hasOwn(newNode.options, 'minItems')) {
-        newNodeRef.options.minItems = newNode.options.minItems;
-      }
       newNode.items.push(newNodeRef);
     } else if (
       JsonPointer.get(newNode.items[newNode.items.length - 1], '/type') === '$ref'
     ) {
-      Object.assign(newNode.items[newNode.items.length - 1], {
-        listItems: newNode.listItems,
-        tupleItems: newNode.tupleItems,
+      if (!isObject(newNode.items[newNode.items.length - 1].options)) {
+        newNode.items[newNode.items.length - 1].options = {};
+      }
+      const arraySchema = JsonPointer.get(jsf.schema, schemaPointer, 0, -1);
+      Object.assign(newNode.items[newNode.items.length - 1].options, {
+        maxItems: arraySchema.maxItems || 1000,
+        minItems: arraySchema.minItems || 0,
       });
-      if (
-        isNumber(JsonPointer.get(jsf.schema, schemaPointer, 0, -1).maxItems)
-      ) {
-        newNode.items[newNode.items.length - 1].options.maxItems =
-          JsonPointer.get(jsf.schema, schemaPointer, 0, -1).maxItems;
+      if (isArray(arraySchema.items)) {
+        Object.assign(newNode.items[newNode.items.length - 1], {
+          listItems: hasOwn(arraySchema, 'additionalItems') ?
+            (arraySchema.maxItems || 1000) - arraySchema.items.length : 0,
+          tupleItems: arraySchema.items.length,
+        });
+      } else {
+        Object.assign(newNode.items[newNode.items.length - 1], {
+          listItems: arraySchema.maxItems || 1000,
+          tupleItems: 0,
+        });
       }
     }
   } else if (newNode.dataType === '$ref') {

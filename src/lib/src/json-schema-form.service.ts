@@ -402,7 +402,7 @@ export class JsonSchemaFormService {
     return JsonPointer.get(this.layout, this.getLayoutPointer(ctx), 0, -1);
   }
 
-  getParentNode(ctx: any): any[] {
+  getParentNode(ctx: any): any {
     return JsonPointer.get(this.layout, this.getLayoutPointer(ctx), 0, -2);
   }
 
@@ -485,16 +485,20 @@ export class JsonSchemaFormService {
       !ctx.layoutNode.layoutPointer || !ctx.layoutIndex ||
       !isDefined(oldIndex) || !isDefined(newIndex) || oldIndex === newIndex
     ) { return false; }
-
+console.log('moving', oldIndex, 'to', newIndex);
     // Move item in the formArray
     let formArray = <FormArray>this.getFormControlGroup(ctx);
-    formArray.insert(newIndex, formArray.at(oldIndex));
-    formArray.removeAt(oldIndex + (oldIndex < newIndex ? 0 : 1));
-    formArray.updateValueAndValidity();
-
+    const arrayItem = formArray.at(oldIndex);
+    formArray.removeAt(oldIndex);
+    formArray.insert(newIndex - (oldIndex < newIndex ? 1 : 0), arrayItem);
+    // formArray.insert(newIndex, formArray.at(oldIndex));
+    // formArray.removeAt(oldIndex + (oldIndex < newIndex ? 0 : 1));
+    formArray.updateValueAndValidity({ onlySelf: true });
+console.log('moved formArray item');
     // Move layout item
     let layoutArray = this.getLayoutArray(ctx);
     layoutArray.splice(newIndex, 0, layoutArray.splice(oldIndex, 1)[0]);
+console.log('moved layout item');
     return true;
   }
 

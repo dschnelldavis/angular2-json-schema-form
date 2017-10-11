@@ -1,96 +1,38 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
 
 import { JsonSchemaFormService } from '../../json-schema-form.service';
-import { hasOwn, isArray } from '../../shared';
+import { hasOwn } from '../../shared';
 
 @Component({
   selector: 'flex-layout-root-widget',
   template: `
-    <div *ngFor="let layoutItem of layout; let i = index"
+    <div *ngFor="let layoutNode of layout; let i = index"
       [class.form-flex-item]="isFlexItem"
-      [style.flex-grow]="getFlexAttribute(layoutItem, 'flex-grow')"
-      [style.flex-shrink]="getFlexAttribute(layoutItem, 'flex-shrink')"
-      [style.flex-basis]="getFlexAttribute(layoutItem, 'flex-basis')"
-      [style.align-self]="(layoutItem.options || {})['align-self']"
-      [style.order]="(layoutItem.options || {}).order"
-      [fxFlex]="(layoutItem.options || {}).fxFlex"
-      [fxFlexOrder]="(layoutItem.options || {}).fxFlexOrder"
-      [fxFlexOffset]="(layoutItem.options || {}).fxFlexOffset"
-      [fxFlexAlign]="(layoutItem.options || {}).fxFlexAlign">
-      <div
-        [class.array-item]="layoutItem.arrayItem && layoutItem.type !== '$ref'"
-        [orderable]="isDraggable(layoutItem)"
+      [style.flex-grow]="getFlexAttribute(layoutNode, 'flex-grow')"
+      [style.flex-shrink]="getFlexAttribute(layoutNode, 'flex-shrink')"
+      [style.flex-basis]="getFlexAttribute(layoutNode, 'flex-basis')"
+      [style.align-self]="(layoutNode.options || {})['align-self']"
+      [style.order]="(layoutNode.options || {}).order"
+      [fxFlex]="(layoutNode.options || {}).fxFlex"
+      [fxFlexOrder]="(layoutNode.options || {}).fxFlexOrder"
+      [fxFlexOffset]="(layoutNode.options || {}).fxFlexOffset"
+      [fxFlexAlign]="(layoutNode.options || {}).fxFlexAlign">
+      <select-framework-widget *ngIf="isConditionallyShown(layoutNode)"
         [formID]="formID"
-        [dataIndex]="layoutItem?.arrayItem ? (dataIndex || []).concat(i) : (dataIndex || [])"
+        [data]="data"
+        [dataIndex]="layoutNode?.arrayItem ? (dataIndex || []).concat(i) : (dataIndex || [])"
         [layoutIndex]="(layoutIndex || []).concat(i)"
-        [layoutNode]="layoutItem">
-        <svg *ngIf="showRemoveButton(layoutItem)"
-          xmlns="http://www.w3.org/2000/svg"
-          height="18" width="18" viewBox="0 0 24 24"
-          class="close-button"
-          (click)="removeItem({
-            dataIndex: layoutItem.arrayItem ? (dataIndex || []).concat(i) : (dataIndex || []),
-            layoutIndex: (layoutIndex || []).concat(i),
-            layoutNode: layoutItem
-          })">
-          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/>
-        </svg>
-        <select-framework-widget *ngIf="isConditionallyShown(layoutItem)"
-          [formID]="formID"
-          [data]="data"
-          [dataIndex]="layoutItem?.arrayItem ? (dataIndex || []).concat(i) : (dataIndex || [])"
-          [layoutIndex]="(layoutIndex || []).concat(i)"
-          [layoutNode]="layoutItem"></select-framework-widget>
-      </div>
-      <div class="spacer" *ngIf="layoutItem.arrayItem && layoutItem.type !== '$ref'"></div>
+        [layoutNode]="layoutNode"></select-framework-widget>
     <div>`,
-  styles: [`
-    .array-item {
-      border-radius: 2px;
-      box-shadow: 0 3px 1px -2px rgba(0,0,0,.2),
-                  0 2px 2px 0 rgba(0,0,0,.14),
-                  0 1px 5px 0 rgba(0,0,0,.12);
-      padding: 6px;
-      position: relative;
-      transition: all 280ms cubic-bezier(.4, 0, .2, 1);
-    }
-    .close-button {
-      cursor: pointer;
-      position: absolute;
-      top: 6px;
-      right: 6px;
-      fill: rgba(0,0,0,.4);
-      visibility: hidden;
-    }
-    .close-button:hover { fill: rgba(0,0,0,.8); }
-    .array-item:hover > .close-button { visibility: visible; }
-    .spacer { margin: 6px 0; }
-    [draggable=true]:hover {
-      box-shadow: 0 5px 5px -3px rgba(0,0,0,.2),
-                  0 8px 10px 1px rgba(0,0,0,.14),
-                  0 3px 14px 2px rgba(0,0,0,.12);
-      cursor: move;
-      z-index: 10;
-    }
-    [draggable=true].drag-target-top {
-      box-shadow: 0 -2px 0 #000;
-      position: relative; z-index: 20;
-    }
-    [draggable=true].drag-target-bottom {
-      box-shadow: 0 2px 0 #000;
-      position: relative; z-index: 20;
-    }
-  `],
   changeDetection: ChangeDetectionStrategy.Default,
 })
 export class FlexLayoutRootComponent implements OnInit {
   options: any;
-  minItems: number = 0;
+  parentNode: any;
   @Input() formID: number;
   @Input() dataIndex: number[];
   @Input() layoutIndex: number[];
   @Input() layout: any[];
-  @Input() isOrderable: boolean;
   @Input() isFlexItem: boolean = false;
   @Input() data: any;
 
@@ -99,22 +41,7 @@ export class FlexLayoutRootComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    if (isArray(this.layout) &&
-      this.layout[this.layout.length - 1].type === '$ref' &&
-      hasOwn(this.layout[this.layout.length - 1].options, 'minItems')
-    ) {
-      this.minItems = this.layout[this.layout.length - 1].options.minItems;
-    }
-  }
-
-  showRemoveButton(node: any): boolean {
-    return node.options.removable && (this.layout.length - 1 > this.minItems);
-  }
-
-  isDraggable(node: any): boolean {
-    return this.isOrderable !== false && node.type !== '$ref' &&
-      node.arrayItem && (node.options || {}).arrayItemType === 'list';
-      // && (this.layout[this.layout.length - 1].tupleItems || this.layout.length > 2);
+    // this.parentNode = this.jsf.getParentNode(this);
   }
 
   // Set attributes for flexbox child
@@ -125,21 +52,21 @@ export class FlexLayoutRootComponent implements OnInit {
       (node.options || {})[attribute] || ['1', '1', 'auto'][index];
   }
 
-  trackByItem(layoutItem: any) {
-    return (layoutItem || {})._id;
+  trackByItem(layoutNode: any) {
+    return (layoutNode || {})._id;
   }
 
   removeItem(item) {
     this.jsf.removeItem(item);
   }
 
-  isConditionallyShown(layoutItem: any): boolean {
+  isConditionallyShown(layoutNode: any): boolean {
     let result: boolean = true;
-    if (this.data && hasOwn(layoutItem, 'condition')) {
+    if (this.data && hasOwn(layoutNode, 'condition')) {
       const model = this.data;
       try {
         /* tslint:disable */
-        eval('result = ' + layoutItem.condition);
+        eval('result = ' + layoutNode.condition);
         /* tslint:enable */
       } catch (error) {
         console.error('Error evaluating condition:');
