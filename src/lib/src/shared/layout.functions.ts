@@ -140,19 +140,19 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
         if (newNode.type === 'checkboxes' && hasOwn(itemSchema, 'items')) {
           updateInputOptions(newNode, itemSchema.items, jsf);
         } else if (itemSchema.type === 'array') {
-          newNode.options.maxItems = Math.min(itemSchema.maxItems || 1000, newNode.options.maxItems || 1000);
-          newNode.options.minItems = Math.max(itemSchema.minItems || 0, newNode.options.minItems || 0);
-          if (hasOwn(itemSchema, 'items')) {
-            if (isArray(itemSchema.items)) {
-              newNode.tupleItems = itemSchema.items.length;
-              newNode.listItems =
-                !hasOwn(itemSchema, 'additionalItems') ? 0 :
-                hasOwn(itemSchema, 'maxItems') ? newNode.maxItems - itemSchema.items.length :
-                newNode.maxItems;
-            } else {
-              newNode.tupleItems = 0;
-              newNode.listItems = newNode.maxItems;
-            }
+          newNode.options.maxItems = Math.min(
+            itemSchema.maxItems || 1000, newNode.options.maxItems || 1000
+          );
+          newNode.options.minItems = Math.max(
+            itemSchema.minItems || 0, newNode.options.minItems || 0
+          );
+          if (isArray(itemSchema.items)) {
+            newNode.tupleItems = itemSchema.items.length;
+            newNode.listItems = hasOwn(itemSchema, 'additionalItems') ?
+              newNode.options.maxItems - itemSchema.items.length : 0;
+          } else {
+            newNode.tupleItems = 0;
+            newNode.listItems = newNode.options.maxItems;
           }
         }
         if (!newNode.options.title && newNode.options.legend) {
@@ -200,9 +200,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
         if (newNode.options.required && newNode.options.minItems === 0) {
           newNode.options.minItems = 1;
         }
-        if (newNode.options.maxItems < 2) {
-          newNode.options.orderable = false;
-        }
+        if (newNode.options.maxItems < 2) { newNode.options.orderable = false; }
 
         // Fix insufficiently nested array item groups
         if (newNode.items.length > 1) {
@@ -325,12 +323,12 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
           let newNodeRef: any = {
             arrayItem: true,
             arrayItemType: 'list',
-            dataPointer: newNode.dataPointer,
+            dataPointer: newNode.dataPointer + '/-',
             layoutPointer: newNode.layoutPointer + '/items/-',
             listItems: newNode.listItems,
             options: {
-              maxItems: newNode.maxItems,
-              minItems: newNode.minItems,
+              maxItems: newNode.options.maxItems,
+              minItems: newNode.options.minItems,
               removable: false,
               title: buttonText,
             },

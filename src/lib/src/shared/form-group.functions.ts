@@ -482,7 +482,9 @@ export function getControl(
 
   // If formGroup input is a real formGroup (not a formGroup template)
   // try using formGroup.get() to return the control
-  if (typeof formGroup.get === 'function') {
+  if (typeof formGroup.get === 'function' &&
+    dataPointerArray.every(key => key.indexOf('.') === -1)
+  ) {
     const formControl = formGroup.get(dataPointerArray.join('.'));
     if (formControl) { return formControl; }
   }

@@ -62,9 +62,8 @@ export class RootComponent {
   @Input() data: any;
 
   isDraggable(node: any): boolean {
-    return this.isOrderable !== false && node.type !== '$ref' &&
-      node.arrayItem && (node.options || {}).arrayItemType === 'list';
-      // && (this.layout[this.layout.length - 1].tupleItems || this.layout.length > 2);
+    return node.arrayItem && node.type !== '$ref' &&
+      node.arrayItemType === 'list' && this.isOrderable !== false;
   }
 
   // Set attributes for flexbox child

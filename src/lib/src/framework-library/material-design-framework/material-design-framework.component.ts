@@ -102,11 +102,11 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     this.initializeControl();
-    if (this.layoutNode.arrayItem) {
+    if (this.layoutNode.arrayItem && this.layoutNode.type !== '$ref' &&
+      this.layoutNode.arrayItemType === 'list'
+    ) {
       this.parentArray = this.jsf.getParentNode(this);
-      this.isOrderable = this.layoutNode.type !== '$ref' &&
-      this.parentArray.options.orderable !== false &&
-      this.layoutNode.options.arrayItemType === 'list';
+      this.isOrderable = this.parentArray.options.orderable !== false;
     }
   }
 

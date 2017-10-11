@@ -82,7 +82,6 @@ export class JsonSchemaFormService {
       addable: true, // Allow adding items to an array or $ref point?
       orderable: true, // Allow reordering items within an array?
       removable: true, // Allow removing items from an array or $ref point?
-      allowExponents: false, // Allow exponent entry in number fields?
       enableErrorState: true, // Apply 'has-error' class when field fails validation?
       // disableErrorState: false, // Don't apply 'has-error' class when field fails validation?
       enableSuccessState: true, // Apply 'has-success' class when field validates?
@@ -485,20 +484,17 @@ export class JsonSchemaFormService {
       !ctx.layoutNode.layoutPointer || !ctx.layoutIndex ||
       !isDefined(oldIndex) || !isDefined(newIndex) || oldIndex === newIndex
     ) { return false; }
-console.log('moving', oldIndex, 'to', newIndex);
+
     // Move item in the formArray
     let formArray = <FormArray>this.getFormControlGroup(ctx);
     const arrayItem = formArray.at(oldIndex);
     formArray.removeAt(oldIndex);
     formArray.insert(newIndex - (oldIndex < newIndex ? 1 : 0), arrayItem);
-    // formArray.insert(newIndex, formArray.at(oldIndex));
-    // formArray.removeAt(oldIndex + (oldIndex < newIndex ? 0 : 1));
     formArray.updateValueAndValidity({ onlySelf: true });
-console.log('moved formArray item');
+
     // Move layout item
     let layoutArray = this.getLayoutArray(ctx);
     layoutArray.splice(newIndex, 0, layoutArray.splice(oldIndex, 1)[0]);
-console.log('moved layout item');
     return true;
   }
 
