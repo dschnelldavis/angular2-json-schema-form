@@ -1,4 +1,4 @@
-import { Directive, ElementRef, HostListener, Input, OnInit } from '@angular/core';
+import { Directive, ElementRef, HostListener, Input, NgZone, OnInit } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { JsonPointer } from '../shared/jsonpointer.functions';
@@ -14,13 +14,21 @@ import { JsonPointer } from '../shared/jsonpointer.functions';
  * the child array element or the parent array element,
  * depending on the drop targert.
  *
+ * Listeners for movable element being dragged:
+ * - dragstart: add 'dragging' class to element, set effectAllowed = 'move'
+ * - dragover: set dropEffect = 'move'
+ * - dragend: remove 'dragging' class from element
+ *
+ * Listeners for stationary items being dragged over:
+ * - dragenter: add 'drag-target-...' classes to element
+ * - dragleave: remove 'drag-target-...' classes from element
+ * - drop: remove 'drag-target-...' classes from element, move dropped array item
  */
 @Directive({
   selector: '[orderable]',
 })
 export class OrderableDirective implements OnInit {
   arrayPointer: string;
-  listen: boolean = false;
   element: any;
   overParentElement: boolean = false;
   overChildElement: boolean = false;
@@ -33,103 +41,84 @@ export class OrderableDirective implements OnInit {
 
   constructor(
     private elementRef: ElementRef,
-    private jsf: JsonSchemaFormService
+    private jsf: JsonSchemaFormService,
+    private ngZone: NgZone
   ) { }
 
   ngOnInit() {
     if (this.orderable && this.layoutNode && this.layoutIndex && this.dataIndex) {
       this.element = this.elementRef.nativeElement;
       this.element.draggable = true;
-      this.arrayPointer = JsonPointer.compile(
-        JsonPointer.parse(this.jsf.getLayoutPointer(this)).slice(0, -1)
-      );
-      this.listen = true;
-    }
-  }
+      this.arrayPointer = this.jsf.getLayoutPointer(this).replace(/\/[^\/]+$/, '');
 
-  /**
-   * Listeners for movable element being dragged:
-   *
-   * dragstart: add 'dragging' class to element, set effectAllowed = 'move'
-   * dragover: set dropEffect = 'move'
-   * dragend: remove 'dragging' class from element
-   */
-  @HostListener('dragstart', ['$event']) onDragStart(event) {
-    if (this.listen) {
-      event.dataTransfer.effectAllowed = 'move';
-      // Hack to bypass stupid HTML drag-and-drop dataTransfer protection
-      // so drag source info will be available on dragenter
-      sessionStorage.setItem(this.arrayPointer,
-        this.dataIndex[this.dataIndex.length - 1] + ''
-      );
-      event.dataTransfer.setData('text/plain',
-        this.dataIndex[this.dataIndex.length - 1] + this.arrayPointer
-      );
-    }
-  }
+      this.ngZone.runOutsideAngular(() => {
 
-  @HostListener('dragover', ['$event']) onDragOver(event) {
-    if (event.preventDefault) { event.preventDefault(); }
-    event.dataTransfer.dropEffect = 'move';
-    return false;
-  }
+        this.element.addEventListener('dragstart', (event) => {
+          event.dataTransfer.effectAllowed = 'move';
+          // Hack to bypass stupid HTML drag-and-drop dataTransfer protection
+          // so drag source info will be available on dragenter
+          sessionStorage.setItem(this.arrayPointer,
+            this.dataIndex[this.dataIndex.length - 1] + ''
+          );
+          event.dataTransfer.setData('text/plain',
+            this.dataIndex[this.dataIndex.length - 1] + this.arrayPointer
+          );
+        });
 
-  /**
-   * Listeners for stationary items being dragged over:
-   *
-   * dragenter: add 'drag-target-...' classes to element
-   * dragleave: remove 'drag-target-...' classes from element
-   * drop: remove 'drag-target-...' classes from element, move dropped array item
-   */
-  @HostListener('dragenter', ['$event']) onDragEnter(event) {
-    // Part 1 of a hack, inspired by Dragster, to simulate mouseover and mouseout
-    // behavior while dragging items - http://bensmithett.github.io/dragster/
-    if (this.overParentElement) {
-      return this.overChildElement = true;
-    } else {
-      this.overParentElement = true;
-    }
+        this.element.addEventListener('dragover', (event) => {
+          if (event.preventDefault) { event.preventDefault(); }
+          event.dataTransfer.dropEffect = 'move';
+          return false;
+        });
 
-    if (this.listen) {
-      let sourceArrayIndex = sessionStorage.getItem(this.arrayPointer);
-      if (sourceArrayIndex !== null) {
-        if (this.dataIndex[this.dataIndex.length - 1] < +sourceArrayIndex) {
-          this.element.classList.add('drag-target-top');
-        } else if (this.dataIndex[this.dataIndex.length - 1] > +sourceArrayIndex) {
-          this.element.classList.add('drag-target-bottom');
-        }
-      }
-    }
-  }
+        this.element.addEventListener('dragenter', (event) => {
+          // Part 1 of a hack, inspired by Dragster, to simulate mouseover and mouseout
+          // behavior while dragging items - http://bensmithett.github.io/dragster/
+          if (this.overParentElement) {
+            return this.overChildElement = true;
+          } else {
+            this.overParentElement = true;
+          }
 
-  @HostListener('dragleave', ['$event']) onDragLeave(event) {
-    // Part 2 of the Dragster hack
-    if (this.overChildElement) {
-      this.overChildElement = false;
-    } else if (this.overParentElement) {
-      this.overParentElement = false;
-    }
+          let sourceArrayIndex = sessionStorage.getItem(this.arrayPointer);
+          if (sourceArrayIndex !== null) {
+            if (this.dataIndex[this.dataIndex.length - 1] < +sourceArrayIndex) {
+              this.element.classList.add('drag-target-top');
+            } else if (this.dataIndex[this.dataIndex.length - 1] > +sourceArrayIndex) {
+              this.element.classList.add('drag-target-bottom');
+            }
+          }
+        });
 
-    if (!this.overParentElement && !this.overChildElement && this.listen) {
-      this.element.classList.remove('drag-target-top');
-      this.element.classList.remove('drag-target-bottom');
-    }
-  }
+        this.element.addEventListener('dragleave', (event) => {
+          // Part 2 of the Dragster hack
+          if (this.overChildElement) {
+            this.overChildElement = false;
+          } else if (this.overParentElement) {
+            this.overParentElement = false;
+          }
 
-  @HostListener('drop', ['$event']) onDrop(event) {
-    if (this.listen) {
-      this.element.classList.remove('drag-target-top');
-      this.element.classList.remove('drag-target-bottom');
-      // Confirm that drop target is another item in the same array as source item
-      const sourceArrayIndex = +sessionStorage.getItem(this.arrayPointer);
-      if (sourceArrayIndex !== this.dataIndex[this.dataIndex.length - 1]) {
-        // Move array item
-        this.jsf.moveArrayItem(
-          this, sourceArrayIndex, this.dataIndex[this.dataIndex.length - 1]
-        );
-      }
-      sessionStorage.removeItem(this.arrayPointer);
+          if (!this.overParentElement && !this.overChildElement) {
+            this.element.classList.remove('drag-target-top');
+            this.element.classList.remove('drag-target-bottom');
+          }
+        });
+
+        this.element.addEventListener('drop', (event) => {
+          this.element.classList.remove('drag-target-top');
+          this.element.classList.remove('drag-target-bottom');
+          // Confirm that drop target is another item in the same array as source item
+          const sourceArrayIndex = +sessionStorage.getItem(this.arrayPointer);
+          if (sourceArrayIndex !== this.dataIndex[this.dataIndex.length - 1]) {
+            // Move array item
+            this.jsf.moveArrayItem(
+              this, sourceArrayIndex, this.dataIndex[this.dataIndex.length - 1]
+            );
+          }
+          sessionStorage.removeItem(this.arrayPointer);
+          return false;
+        });
+
+      });
     }
-    return false;
-  }
-}
+  }}
