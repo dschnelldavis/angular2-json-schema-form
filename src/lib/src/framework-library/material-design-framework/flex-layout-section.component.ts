@@ -12,7 +12,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
       <label
         [class]="options?.labelHtmlClass"
         [style.display]="legendDisplay()"
-        [innerHTML]="options?.notitle ? '&nbsp;' : options?.title || '&nbsp;'"
+        [innerHTML]="options?.title"
         (click)="expand()"></label>
       <flex-layout-root-widget *ngIf="expanded"
         [formID]="formID"
@@ -44,7 +44,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
       <legend
         [class]="options?.labelHtmlClass"
         [style.display]="legendDisplay()"
-        [innerHTML]="options?.notitle ? '&nbsp;' : options?.title || '&nbsp;'"
+        [innerHTML]="options?.title"
         (click)="expand()"></legend>
       <flex-layout-root-widget *ngIf="expanded"
         [formID]="formID"
@@ -76,7 +76,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
         <legend
           [class]="options?.labelHtmlClass"
           [style.display]="legendDisplay()"
-          [innerHTML]="options?.notitle ? '&nbsp;' : options?.title || '&nbsp;'"
+          [innerHTML]="options?.title"
           (click)="expand()">
         </legend>
       </mat-card-header>
@@ -143,8 +143,7 @@ export class FlexLayoutSectionComponent implements OnInit {
   }
 
   legendDisplay(): string {
-    if (this.options.removable) { return ''; }
-    return this.options.notitle || !this.options.title ? 'none' : '';
+    return (this.options.notitle || !this.options.title) ? 'none' : '';
   }
 
   expand() {

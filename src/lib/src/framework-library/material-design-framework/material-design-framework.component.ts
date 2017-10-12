@@ -47,6 +47,7 @@ import { toTitleCase } from '../../shared';
       right: 6px;
       fill: rgba(0,0,0,.4);
       visibility: hidden;
+      z-index: 500;
     }
     .close-button:hover { fill: rgba(0,0,0,.8); }
     .array-item:hover > .close-button { visibility: visible; }

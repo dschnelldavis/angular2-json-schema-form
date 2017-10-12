@@ -22,8 +22,7 @@ import { addClasses, inArray, JsonPointer, toTitleCase } from '../../shared';
         (formControl?.dirty || options?.feedbackOnRender)">
 
       <button *ngIf="showRemoveButton()"
-        class="close pull-right"
-        style="position: relative; z-index: 20;"
+        class="close-button close pull-right"
         type="button"
         (click)="removeItem()">
         <span aria-hidden="true">&times;</span>
@@ -77,6 +76,7 @@ import { addClasses, inArray, JsonPointer, toTitleCase } from '../../shared';
     <div *ngIf="debug && debugOutput">debug: <pre>{{debugOutput}}</pre></div>
   `,
   styles: [`
+    .close-button { position: relative; z-index: 500; }
     :host /deep/ .list-group-item .form-control-feedback { top: 40; }
     :host /deep/ .checkbox,
     :host /deep/ .radio { margin-top: 0; margin-bottom: 0; }
