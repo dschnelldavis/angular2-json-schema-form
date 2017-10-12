@@ -94,10 +94,10 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
     if (!this.options.removable || this.layoutNode.type === '$ref') { return false; }
     if (!this.layoutNode.arrayItem) { return true; }
     const arrayIndex = this.layoutIndex[this.layoutIndex.length - 1];
-    return this.parentArray.items.length - 1 <= this.parentArray.options.minItems ? false :
+    return ((this.parentArray || {}).items || {}).length - 1 <= ((this.parentArray || {}).options || {}).minItems ? false :
       this.layoutNode.arrayItemType === 'list' ? true :
-      // else this.layoutNode.arrayItemType === 'tuple'
-      arrayIndex === this.parentArray.items.length - 2;
+      // For removable tuple items, only allow removing last item in list
+      arrayIndex === ((this.parentArray || {}).items || {}).length - 2;
   }
 
   ngOnInit() {
@@ -106,7 +106,7 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
       this.layoutNode.arrayItemType === 'list'
     ) {
       this.parentArray = this.jsf.getParentNode(this);
-      this.isOrderable = this.parentArray.options.orderable !== false;
+      this.isOrderable = ((this.parentArray || {}).options || {}).orderable !== false;
     }
   }
 

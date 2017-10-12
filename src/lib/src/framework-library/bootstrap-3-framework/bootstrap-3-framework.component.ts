@@ -327,7 +327,7 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
     const parentArray = this.jsf.getParentNode(this);
     return parentArray.items.length - 1 <= parentArray.options.minItems ? false :
       this.layoutNode.arrayItemType === 'list' ? true :
-      // else this.layoutNode.arrayItemType === 'tuple'
+      // For removable tuple items, only allow removing last item in list
       arrayIndex === parentArray.items.length - 2;
   }
 

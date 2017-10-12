@@ -18,7 +18,7 @@ import {
 import {
   buildFormGroup, buildFormGroupTemplate, formatFormData, getControl
 } from './shared/form-group.functions';
-import { buildLayout } from './shared/layout.functions';
+import { buildLayout, getLayoutNode } from './shared/layout.functions';
 
 export interface TitleMapItem {
   name?: string, value?: any, checked?: boolean, group?: string, items?: TitleMapItem[]
@@ -69,7 +69,7 @@ export class JsonSchemaFormService {
       // for addSubmit: true = always, false = never,
       // 'auto' = only if layout is undefined (form is built from schema alone)
     debug: false, // Show debugging output?
-    fieldsRequired: false, // Are there any required fields in the form?
+    fieldsRequired: false, // (set automatically) Are there any required fields in the form?
     framework: 'material-design', // The framework to load
     widgets: {}, // Any custom widgets to load
     loadExternalAssets: false, // Load external css and JavaScript for framework?
@@ -79,6 +79,7 @@ export class JsonSchemaFormService {
     setSchemaDefaults: true,
     validateOnRender: false,
     formDefaults: { // Default options for form controls
+      initialItems: 1, // Number of items to display in array with no default value
       addable: true, // Allow adding items to an array or $ref point?
       orderable: true, // Allow reordering items within an array?
       removable: true, // Allow removing items from an array or $ref point?
@@ -443,33 +444,14 @@ export class JsonSchemaFormService {
 
     // Add the new form control to the parent formArray or formGroup
     if (ctx.layoutNode.arrayItem) { // Add new array item to formArray
-      (<FormArray>this.getFormControlGroup(ctx))
-        .push(newFormGroup);
+      (<FormArray>this.getFormControlGroup(ctx)).push(newFormGroup);
     } else { // Add new $ref item to formGroup
-      (<FormGroup>this.getFormControlGroup(ctx))
-        .addControl(this.getFormControlName(ctx), newFormGroup);
+      const name = this.getFormControlName(ctx);
+      (<FormGroup>this.getFormControlGroup(ctx)).addControl(name, newFormGroup);
     }
 
     // Copy a new layoutNode from layoutRefLibrary
-    const newLayoutNode = _.cloneDeep(JsonPointer.get(
-      this.layoutRefLibrary, [ctx.layoutNode.$ref]
-    ));
-    JsonPointer.forEachDeep(newLayoutNode, (subNode, pointer) => {
-
-      // Reset all _id's in newLayoutNode to unique values
-      if (hasOwn(subNode, '_id')) { subNode._id = _.uniqueId(); }
-      // If adding a recursive item, prefix current dataPointer
-      // and layoutPointer to all pointers in new layoutNode
-      if (ctx.layoutNode.recursiveReference) {
-        if (hasOwn(subNode, 'dataPointer')) {
-          subNode.dataPointer = ctx.layoutNode.dataPointer + subNode.dataPointer;
-        }
-        if (hasOwn(subNode, 'layoutPointer')) {
-          subNode.layoutPointer =
-            ctx.layoutNode.layoutPointer.slice(0, -2) + subNode.layoutPointer;
-        }
-      }
-    });
+    const newLayoutNode = getLayoutNode(ctx.layoutNode, this.layoutRefLibrary);
 
     // Add the new layoutNode to the form layout
     let layoutPointer = this.getLayoutPointer(ctx);

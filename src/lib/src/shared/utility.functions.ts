@@ -6,7 +6,7 @@ import {
 /**
  * Utility function library:
  *
- * addClasses,copy, forEach, forEachCopy, hasOwn, mergeFilteredObject,
+ * addClasses, copy, forEach, forEachCopy, hasOwn, mergeFilteredObject,
  * parseText, uniqueItems, commonItems, fixTitle, toTitleCase
 */
 
@@ -45,11 +45,12 @@ export function addClasses(
  */
 export function copy(object: any): any {
   if (typeof object !== 'object' || object === null) { return object; }
-  if (isObject(object)) { return Object.assign({}, object); }
-  if (isArray(object)) { return [...object]; }
-  if (isMap(object)) { return new Map(object); }
-  if (isSet(object)) { return new Set(object); }
+  if (isMap(object))    { return new Map(object); }
+  if (isSet(object))    { return new Set(object); }
+  if (isArray(object))  { return [ ...object ];   }
+  if (isObject(object)) { return { ...object };   }
   console.error('copy error: Object to copy must be a JavaScript object or value.');
+  return object;
 }
 
 /**
@@ -266,7 +267,7 @@ export function commonItems(...arrays): string[] {
  * @return {string} -
  */
 export function fixTitle(name: string): string {
-  return toTitleCase(name.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/_/g, ' '));
+  return name && toTitleCase(name.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/_/g, ' '));
 }
 
 /**

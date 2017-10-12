@@ -90,31 +90,19 @@ export function _executeAsyncValidators(
  * @param {PlainObject[]} object - one or more objects to merge
  * @return {PlainObject} - merged object
  */
-export function _mergeObjects(...object: PlainObject[]): PlainObject {
+export function _mergeObjects(...objects: PlainObject[]): PlainObject {
   let mergedObject: PlainObject = { };
-  for (let i = 0, l = arguments.length; i < l; i++) {
-    const currentObject = arguments[i];
+  for (let currentObject of objects) {
     if (isObject(currentObject)) {
       for (let key of Object.keys(currentObject)) {
         const currentValue = currentObject[key];
         const mergedValue = mergedObject[key];
-        if (isDefined(mergedValue)) {
-          if ( key === 'not' &&
-            isBoolean(mergedValue, 'strict') &&
-            isBoolean(currentValue, 'strict')
-          ) {
-            mergedObject[key] = xor(mergedValue, currentValue);
-          } else if (
-            getType(mergedValue) === 'object' &&
-            getType(currentValue) === 'object'
-          ) {
-            mergedObject[key] = _mergeObjects(mergedValue, currentValue);
-          } else {
-            mergedObject[key] = currentValue;
-          }
-        } else {
-          mergedObject[key] = currentValue;
-        }
+        mergedObject[key] = !isDefined(mergedValue) ? currentValue :
+          key === 'not' && isBoolean(mergedValue, 'strict') && isBoolean(currentValue, 'strict') ?
+            xor(mergedValue, currentValue) :
+          getType(mergedValue) === 'object' && getType(currentValue) === 'object' ?
+            _mergeObjects(mergedValue, currentValue) :
+            currentValue;
       }
     }
   }

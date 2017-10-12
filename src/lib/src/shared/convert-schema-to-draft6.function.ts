@@ -1,12 +1,14 @@
 /**
  * 'convertSchemaToDraft6' function
  *
- * Converts Earlier JSON Schema versions (v1-v4) to JSON Schema version 6
+ * Converts a JSON Schema in version 1 through 4 format to version 6 format
  *
- * Partly based on geraintluff's JSON Schema 3 to 4 compatibility function
- * https://github.com/geraintluff/json-schema-compatibility
+ * Originally based on geraintluff's JSON Schema 3 to 4 compatibility function
+ *   https://github.com/geraintluff/json-schema-compatibility
  * Also uses suggestions from AJV's JSON Schema 4 to 6 migration guide
- * https://github.com/epoberezkin/ajv/releases/tag/5.0.0
+ *   https://github.com/epoberezkin/ajv/releases/tag/5.0.0
+ * And additional details from the official JSON Schema documentation
+ *   http://json-schema.org
  *
  * @param {object} originalSchema - JSON schema (version 1, 2, 3, 4, or 6)
  * @return {object} - JSON schema (version 6)
@@ -19,40 +21,20 @@ export function convertSchemaToDraft6(schema: any, version: number = null): any 
   }
   const newSchema = { ...schema };
 
-  if (newSchema.$schema) {
-    switch (newSchema.$schema) {
-      case 'http://json-schema.org/draft-01/schema#': version = 1; break;
-      case 'http://json-schema.org/draft-02/schema#': version = 2; break;
-      case 'http://json-schema.org/draft-03/schema#': version = 3; break;
-      case 'http://json-schema.org/draft-04/schema#': version = 4; break;
-      case 'http://json-schema.org/draft-06/schema#': version = 6; break;
-    }
+  if (typeof newSchema.$schema === 'string' &&
+    /http\:\/\/json\-schema\.org\/draft\-0\d\/schema\#/.test(newSchema.$schema)
+  ) {
+    version = newSchema.$schema[30];
   }
 
-  if (newSchema.$ref && typeof newSchema.$ref === 'string') {
-
-    // return regular $ref object
-    if (Object.keys(newSchema).length === 1) { return newSchema; }
-
-    // convert overloaded $ref object to allOf
-    const refLink = newSchema.$ref;
-    delete newSchema.$ref;
-    return {
-      'allOf': [
-        { $ref: refLink },
-        convertSchemaToDraft6(newSchema, version)
-      ]
-    };
-  }
-
-  // convert v1-v2 contentEncoding to media.binaryEncoding
+  // Convert v1-v2 contentEncoding to media.binaryEncoding
   // Note: This is only used in JSON hyper-schema (not regular JSON schema)
   if (newSchema.contentEncoding) {
     newSchema.media = { binaryEncoding: newSchema.contentEncoding };
     delete newSchema.contentEncoding;
   }
 
-  // convert v1-v3 extends to allOf
+  // Convert v1-v3 extends to allOf
   if (newSchema.extends) {
     newSchema.allOf = Array.isArray(newSchema.extends) ?
       newSchema.extends.map(subSchema => convertSchemaToDraft6(subSchema, version)) :
@@ -60,7 +42,7 @@ export function convertSchemaToDraft6(schema: any, version: number = null): any 
     delete newSchema.extends;
   }
 
-  // convert v1-v3 disallow to not
+  // Convert v1-v3 disallow to not
   if (newSchema.disallow) {
     if (typeof newSchema.disallow === 'string') {
       newSchema.not = { type: newSchema.disallow };
@@ -73,18 +55,18 @@ export function convertSchemaToDraft6(schema: any, version: number = null): any 
     delete newSchema.disallow;
   }
 
-  // delete v3 boolean required key
+  // Delete v3 boolean required key
   if (typeof newSchema.required === 'boolean') {
     delete newSchema.required;
   }
 
-  // delete v1-v2 boolean optional key
+  // Delete v1-v2 boolean optional key
   if (typeof newSchema.optional === 'boolean') {
     delete newSchema.optional;
     if (!version) { version = 2; }
   }
 
-  // convert v3 string dependencies to arrays
+  // Convert v3 string dependencies to arrays
   if (newSchema.dependencies) {
     newSchema.dependencies = { ...newSchema.dependencies };
     Object.keys(newSchema.dependencies)
@@ -92,20 +74,20 @@ export function convertSchemaToDraft6(schema: any, version: number = null): any 
       .forEach(key => newSchema.dependencies[key] = [ newSchema.dependencies[key] ]);
   }
 
-  // convert v2-v3 divisibleBy to multipleOf
+  // Convert v2-v3 divisibleBy to multipleOf
   if (newSchema.divisibleBy) {
     newSchema.multipleOf = newSchema.divisibleBy;
     delete newSchema.divisibleBy;
   }
 
-  // convert v1 maxDecimal to multipleOf
+  // Convert v1 maxDecimal to multipleOf
   if (newSchema.maxDecimal) {
     newSchema.multipleOf = 1 / Math.pow(10, newSchema.maxDecimal);
     delete newSchema.divisibleBy;
     if (!version || version === 2) { version = 1; }
   }
 
-  // fix v3-v4 boolean exclusiveMinimum
+  // Fix v3-v4 boolean exclusiveMinimum
   if (newSchema.minimum && newSchema.exclusiveMinimum === true) {
     newSchema.exclusiveMinimum = newSchema.minimum;
     delete newSchema.minimum;
@@ -113,7 +95,7 @@ export function convertSchemaToDraft6(schema: any, version: number = null): any 
     delete newSchema.exclusiveMinimum;
   }
 
-  // convert v1-v2 boolean minimumCanEqual to exclusiveMinimum
+  // Convert v1-v2 boolean minimumCanEqual to exclusiveMinimum
   if (newSchema.minimum && newSchema.minimumCanEqual === false) {
     newSchema.exclusiveMinimum = newSchema.minimum;
     delete newSchema.minimum;
@@ -123,7 +105,7 @@ export function convertSchemaToDraft6(schema: any, version: number = null): any 
     if (!version) { version = 2; }
   }
 
-  // fix v3-v4 boolean exclusiveMaximum
+  // Fix v3-v4 boolean exclusiveMaximum
   if (newSchema.maximum && newSchema.exclusiveMaximum === true) {
     newSchema.exclusiveMaximum = newSchema.maximum;
     delete newSchema.maximum;
@@ -131,7 +113,7 @@ export function convertSchemaToDraft6(schema: any, version: number = null): any 
     delete newSchema.exclusiveMaximum;
   }
 
-  // convert v1-v2 boolean maximumCanEqual to exclusiveMaximum
+  // Convert v1-v2 boolean maximumCanEqual to exclusiveMaximum
   if (newSchema.maximum && newSchema.maximumCanEqual === false) {
     newSchema.exclusiveMaximum = newSchema.maximum;
     delete newSchema.maximum;
@@ -141,9 +123,9 @@ export function convertSchemaToDraft6(schema: any, version: number = null): any 
     if (!version) { version = 2; }
   }
 
-  // move v3 boolean required from individual items to required array
-  // move v1-v2 boolean optional from individual items to required array
-  // move v1-v2 requires from individual items to dependencies object
+  // Move v3 boolean required from individual items to required array
+  // Move v1-v2 boolean optional from individual items to required array
+  // Move v1-v2 requires from individual items to dependencies object
   if (newSchema.properties) {
     const requiredKeys = new Set(newSchema.required || []);
 
@@ -173,32 +155,11 @@ export function convertSchemaToDraft6(schema: any, version: number = null): any 
           newSchema.properties[key].requires
       );
     if (Object.keys(dependencies).length) { newSchema.dependencies = dependencies; }
-
-  // move incorrectly placed required list inside array object
-  } else if (Array.isArray(newSchema.required) &&
-    ((newSchema.items || {}).properties || (newSchema.additionalItems || {}).properties)
-  ) {
-    const getRequired = (object, key) => Array.isArray(object[key].required) ?
-      Array.from(new Set([ ...object[key].required, ...object.required ])) :
-      [ ...object.required ];
-    // TODO: verify required keys exist before moving?
-    if ((newSchema.items || {}).properties) {
-      newSchema.items = { ...newSchema.items };
-      newSchema.items.required = getRequired(newSchema, 'items');
-      delete newSchema.required;
-    } else { // (newSchema.additionalItems || {}).properties
-      newSchema.additionalItems = { ...newSchema.additionalItems };
-      newSchema.additionalItems.required = getRequired(newSchema, 'additionalItems');
-      delete newSchema.required;
-    }
   }
 
-  // update or delete $schema identifier
-  if (
-    newSchema.$schema === 'http://json-schema.org/draft-01/schema#' ||
-    newSchema.$schema === 'http://json-schema.org/draft-02/schema#' ||
-    newSchema.$schema === 'http://json-schema.org/draft-03/schema#' ||
-    newSchema.$schema === 'http://json-schema.org/draft-04/schema#'
+  // Update or remove $schema identifier
+  if (/http\:\/\/json\-schema\.org\/draft\-0[1-4]\/schema\#/
+    .test(newSchema.$schema || '')
   ) {
     newSchema.$schema = 'http://json-schema.org/draft-06/schema#';
   } else if (newSchema.$schema) {
@@ -211,13 +172,13 @@ export function convertSchemaToDraft6(schema: any, version: number = null): any 
     delete newSchema.$schema;
   }
 
-  // convert id to $id
+  // Convert id to $id
   if (newSchema.id && !newSchema.$id) {
     newSchema.$id = newSchema.id + '-CONVERTED-TO-DRAFT-06';
     delete newSchema.id;
   }
 
-  // convert sub schemas
+  // Convert sub schemas
   Object.keys(newSchema)
     .filter(key => typeof newSchema[key] === 'object')
     .forEach(key => {

@@ -404,14 +404,13 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
     // if alternate layout found, copy alternate layout options into schema
     if (alternateLayout) {
       JsonPointer.forEachDeep(alternateLayout, (value, pointer) => {
-        const schemaPointer = JsonPointer.toSchemaPointer(pointer, this.jsf.schema);
-        // const schemaPointer = pointer
-        //   .replace(/\//g, '/properties/')
-        //   .replace(/\/properties\/items\/properties\//g, '/items/properties/')
-        //   .replace(/\/properties\/titleMap\/properties\//g, '/titleMap/properties/');
+        const schemaPointer = pointer
+          .replace(/\//g, '/properties/')
+          .replace(/\/properties\/items\/properties\//g, '/items/properties/')
+          .replace(/\/properties\/titleMap\/properties\//g, '/titleMap/properties/');
         if (hasValue(value) && hasValue(pointer)) {
-          const groupPointer = JsonPointer.parse(schemaPointer).slice(0, -2);
-          let key = JsonPointer.toKey(schemaPointer);
+          let key = JsonPointer.toKey(pointer);
+          const groupPointer = (JsonPointer.parse(schemaPointer) || []).slice(0, -2);
           let itemPointer: string | string[];
 
           // If 'ui:order' object found, copy into object schema root

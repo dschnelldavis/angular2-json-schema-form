@@ -22,6 +22,8 @@ import {
  *
  * buildFormGroup:          Builds an Angular FormGroup from a FormGroupTemplate
  *
+ * mergeValues:
+ *
  * setRequiredFields:
  *
  * formatFormData:
@@ -101,12 +103,8 @@ export function buildFormGroupTemplate(
       if (jsf.globalOptions.setSchemaDefaults) {
         useValues = mergeValues(JsonPointer.get(schema, '/properties/default'), useValues);
       }
-      let propertyKeys = schema['ui:order'] ||
-        schema.properties['ui:order'] ||
-        Object.keys(schema.properties);
-      if (propertyKeys.includes('*') &&
-        !Object.keys(schema.properties).includes('*')
-      ) {
+      let propertyKeys = schema['ui:order'] || Object.keys(schema.properties);
+      if (propertyKeys.includes('*') && !hasOwn(schema.properties, '*')) {
         const unnamedKeys = Object.keys(schema.properties)
           .filter(key => !propertyKeys.includes(key));
         for (let i = propertyKeys.length - 1; i >= 0; i--) {
@@ -115,18 +113,14 @@ export function buildFormGroupTemplate(
           }
         }
       }
-      propertyKeys = propertyKeys.filter(key =>
-        Object.keys(schema.properties).includes(key) &&
-        key.slice(0, 3).toLowerCase() !== 'ui:'
-      );
-      for (let key of propertyKeys) {
-        controls[key] = buildFormGroupTemplate(
+      propertyKeys
+        .filter(key => hasOwn(schema.properties, key))
+        .forEach(key => controls[key] = buildFormGroupTemplate(
           jsf, JsonPointer.get(useValues, [<string>key]), mapArrays,
           schemaPointer + '/properties/' + key,
           dataPointer + '/' + key,
           templatePointer + '/controls/' + key
-        );
-      }
+        ));
       jsf.globalOptions.fieldsRequired = setRequiredFields(schema, controls);
       return { controlType, controls, validators };
     case 'FormArray':
@@ -137,7 +131,7 @@ export function buildFormGroupTemplate(
           jsf.arrayMap.set(dataPointer, schema.items.length);
         }
         controls = [];
-        for (let i = 0, l = schema.items.length; i < l; i++) {
+        for (let i = 0; i < schema.items.length; i++) {
           if (i >= minItems && !hasOwn(jsf.templateRefLibrary, `${schemaPointer}/${i}`)) {
             const itemRefPointer = removeRecursiveReferences(
               dataPointer + '/' + i, jsf.dataRecursiveRefMap, jsf.arrayMap
@@ -236,7 +230,7 @@ export function buildFormGroupTemplate(
       let initialItemCount =
         Math.max(minItems, JsonPointer.has(schema, '/items/$ref') ? 0 : 1);
       if (controls.length < initialItemCount) {
-        for (let i = controls.length, l = initialItemCount; i < l; i++) {
+        for (let i = controls.length; i < initialItemCount; i++) {
           controls.push(buildFormGroupTemplate(
             jsf, useValues, false,
             schemaPointer + '/items',
@@ -353,8 +347,7 @@ export function mergeValues(...valuesToMerge) {
         mergedValues = newValues;
       } else if (isArray(mergedValues) && isArray(currentValue)) {
         let newValues = [];
-        const l = Math.max(mergedValues.length, currentValue.length);
-        for (let i = 0; i < l; i++) {
+        for (let i = 0; i < Math.max(mergedValues.length, currentValue.length); i++) {
           if (i < mergedValues.length && i < currentValue.length) {
             newValues.push(mergeValues(mergedValues[i], currentValue[i]));
           } else if (i < mergedValues.length) {

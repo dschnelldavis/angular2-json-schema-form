@@ -20,6 +20,8 @@ import { JsonValidators } from './json.validators';
  *
  * getFromSchema:
  *
+ * combineSchemas:
+ *
  * removeRecursiveReferences:
  *
  * getInputType:
@@ -28,6 +30,10 @@ import { JsonValidators } from './json.validators';
  *
  * isInputRequired:
  *
+ * updateInputOptions:
+ *
+ * getTitleMapFromOneOf:
+ *
  * getControlValidators:
  *
  * resolveSchemaReferences:
@@ -35,6 +41,8 @@ import { JsonValidators } from './json.validators';
  * getSubSchema:
  *
  * combineAllOf:
+ *
+ * fixRequiredArrayProperties:
  */
 
 /**
@@ -135,10 +143,10 @@ export function getFromSchema(
     return null;
   }
   let subSchema = schema;
-  let schemaPointer = [];
-  let l = dataPointerArray.length;
+  const schemaPointer = [];
+  const length = dataPointerArray.length;
   if (returnType.slice(0, 6) === 'parent') { dataPointerArray.length--; }
-  for (let i = 0; i < l; ++i) {
+  for (let i = 0; i < length; ++i) {
     const parentSchema = subSchema;
     const key = dataPointerArray[i];
     let subSchemaFound = false;
@@ -490,7 +498,7 @@ export function isInputRequired(schema: any, schemaPointer: string): boolean {
  * @return {void}
  */
 export function updateInputOptions(layoutNode: any, schema: any, jsf: any) {
-  if (!isObject(layoutNode)) { return; }
+  if (!isObject(layoutNode) || !isObject(layoutNode.options)) { return; }
   const templatePointer = JsonPointer.get(
     jsf, ['dataMap', layoutNode.dataPointer, 'templatePointer']
   );
@@ -498,19 +506,18 @@ export function updateInputOptions(layoutNode: any, schema: any, jsf: any) {
   // If a validator is available for a layout option,
   // and not already set in the formGroup template, set it
   if (templatePointer) {
-    Object.keys(layoutNode).forEach(option => {
-      if (option !== 'type' && isFunction(JsonValidators[option]) && (
-        !hasOwn(schema, option) || ( schema[option] !== layoutNode[option] &&
-          !(option.slice(0, 3) === 'min' && schema[option] < layoutNode[option]) &&
-          !(option.slice(0, 3) === 'max' && schema[option] > layoutNode[option])
-        )
-      )) {
-        const validatorPointer = templatePointer + '/validators/' + option;
-        jsf.formGroupTemplate = JsonPointer.set(
-          jsf.formGroupTemplate, validatorPointer, [layoutNode[option]]
-        );
-      }
-    });
+    Object.keys(layoutNode.options)
+      .filter(option => isFunction(JsonValidators[option]))
+      .filter(option => !hasOwn(schema, option) || (
+        schema[option] !== layoutNode.options[option] &&
+        !(option.slice(0, 3) === 'min' && schema[option] <= layoutNode.options[option]) &&
+        !(option.slice(0, 3) === 'max' && schema[option] >= layoutNode.options[option])
+      ))
+      .forEach(option => jsf.formGroupTemplate = JsonPointer.set(
+        jsf.formGroupTemplate,
+        templatePointer + '/validators/' + option,
+        [ layoutNode.options[option] ]
+      ));
   }
 
   // Set all option values in layoutNode.options
@@ -825,6 +832,7 @@ export function getSubSchema(
           if (Object.keys(subSchema).length === 1) {
             return refSchema;
           } else {
+            subSchema = _.cloneDeep(subSchema);
             delete subSchema.$ref;
             return mergeSchemas(subSchema, refSchema);
           }
@@ -833,6 +841,11 @@ export function getSubSchema(
 
       // Combine allOf subSchemas
       if (isArray(subSchema.allOf)) { return combineAllOf(subSchema); }
+
+      // Fix incorrectly placed array object required lists
+      if (subSchema.type === 'array' && isArray(subSchema.required)) {
+        return fixRequiredArrayProperties(subSchema);
+      }
     }
     return subSchema;
   }, true, pointer);
@@ -856,4 +869,29 @@ export function combineAllOf(schema: any): any {
     mergedSchema = mergeSchemas(mergedSchema, extraKeys);
   }
   return mergedSchema;
+}
+
+/**
+ * 'fixRequiredArrayProperties' function
+ *
+ * Fixes an incorrectly placed required list inside an array schema, by moving
+ * it into items.properties or additionalItems.properties, where it belongs.
+ *
+ * @param {any} schema - allOf schema object
+ * @return {any} - converted schema object
+ */
+export function fixRequiredArrayProperties(schema: any): any {
+  if (schema.type === 'array' && isArray(schema.required)) {
+    let itemsObject = hasOwn(schema.items, 'properties') ? 'items' :
+      hasOwn(schema.additionalItems, 'properties') ? 'additionalItems' : null;
+    if (itemsObject && !hasOwn(schema[itemsObject], 'required') && (
+      hasOwn(schema[itemsObject], 'additionalProperties') ||
+      schema.required.every(key => hasOwn(schema[itemsObject].properties, key))
+    )) {
+      schema = _.cloneDeep(schema);
+      schema[itemsObject].required = schema.required;
+      delete schema.required;
+    }
+  }
+  return schema;
 }

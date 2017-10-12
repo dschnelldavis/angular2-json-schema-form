@@ -51,7 +51,7 @@ export class MaterialAddReferenceComponent implements OnInit {
     const parent: any = {
       dataIndex: this.dataIndex.slice(0, -1),
       layoutIndex: this.layoutIndex.slice(0, -1),
-      layoutNode: this.jsf.getParentNode(this)
+      layoutNode: this.jsf.getParentNode(this),
     };
     return parent.layoutNode.add ||
       this.jsf.setTitle(parent, this.layoutNode, this.itemCount);

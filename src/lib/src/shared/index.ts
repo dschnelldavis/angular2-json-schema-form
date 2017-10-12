@@ -20,10 +20,10 @@ export { Pointer, JsonPointer } from './jsonpointer.functions';
 export { JsonValidators } from './json.validators';
 
 export {
-  buildSchemaFromLayout, buildSchemaFromData, getFromSchema, getInputType,
-  removeRecursiveReferences, checkInlineType, isInputRequired,
-  updateInputOptions, getControlValidators, resolveSchemaReferences,
-  getSubSchema, combineAllOf
+  buildSchemaFromLayout, buildSchemaFromData, getFromSchema, combineSchemas,
+  removeRecursiveReferences, getInputType, checkInlineType, isInputRequired,
+  updateInputOptions, getTitleMapFromOneOf, getControlValidators,
+  resolveSchemaReferences, getSubSchema, combineAllOf, fixRequiredArrayProperties
 } from './json-schema.functions';
 
 export { convertSchemaToDraft6 } from './convert-schema-to-draft6.function';
@@ -36,7 +36,7 @@ export {
 } from './form-group.functions';
 
 export {
-  buildLayout, buildLayoutFromSchema, mapLayout, buildTitleMap
+  buildLayout, buildLayoutFromSchema, mapLayout, getLayoutNode, buildTitleMap
 } from './layout.functions';
 
 export { dateToString, stringToDate, findDate } from './date.functions';

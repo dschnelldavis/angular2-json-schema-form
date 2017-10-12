@@ -187,7 +187,7 @@ export class JsonPointer {
     const keyArray: string[] = this.parse(pointer);
     if (keyArray !== null) {
       let subObject: any = object;
-      for (let i = 0, l = keyArray.length - 1; i < l; ++i) {
+      for (let i = 0; i < keyArray.length - 1; ++i) {
         let key: string = keyArray[i];
         if (key === '-' && isArray(subObject)) {
           key = subObject.length;
@@ -239,7 +239,7 @@ export class JsonPointer {
     if (keyArray !== null) {
       let newObject: any = copy(object);
       let subObject: any = newObject;
-      for (let i = 0, l = keyArray.length - 1; i < l; ++i) {
+      for (let i = 0; i < keyArray.length - 1; ++i) {
         let key: string = keyArray[i];
         if (key === '-' && isArray(subObject)) {
           key = subObject.length;
@@ -648,7 +648,7 @@ export class JsonPointer {
   ) {
     if (this.isJsonPointer(indexedPointer) && isMap(arrayMap)) {
       let pointerArray = this.parse(indexedPointer);
-      for (let i = 1, l = pointerArray.length; i < l; i++) {
+      for (let i = 1; i < pointerArray.length; i++) {
         const subPointer = this.compile(pointerArray.slice(0, i));
         if (arrayMap.has(subPointer) && arrayMap.get(subPointer) <= +pointerArray[i]) {
           pointerArray[i] = '-';
