@@ -672,9 +672,12 @@ export class JsonPointer {
    *
    * @param {Pointer} dataPointer - JSON Pointer (string or array) to a data object
    * @param {FormGroup} formGroup - Angular FormGroup to get value from
+   * @param {boolean = false} controlMustExist - Only return if control exists?
    * @return {Pointer} - JSON Pointer (string) to the formGroup object
    */
-  static toControlPointer(dataPointer: Pointer, formGroup: any): string {
+  static toControlPointer(
+    dataPointer: Pointer, formGroup: any, controlMustExist: boolean = false
+  ): string {
     const dataPointerArray: string[] = this.parse(dataPointer);
     let controlPointerArray: string[] = [];
     let subGroup = formGroup;
@@ -690,11 +693,14 @@ export class JsonPointer {
         } else if (hasOwn(subGroup, key)) {
           controlPointerArray.push(key);
           subGroup = subGroup[key];
-        } else {
+        } else if (controlMustExist) {
           console.error(`toControlPointer error: Unable to find "${key}" item in FormGroup.`);
           console.error(dataPointer);
           console.error(formGroup);
           return;
+        } else {
+          controlPointerArray.push(key);
+          subGroup = { controls: {} };
         }
       }
       return this.compile(controlPointerArray);

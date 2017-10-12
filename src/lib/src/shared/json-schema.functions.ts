@@ -384,7 +384,7 @@ export function getInputType(schema: any, layoutNode: any = null): string {
         JsonPointer.has(schema, '/additionalProperties/$ref') ? '$ref' : null;
     }
     if (schemaType === 'array') {
-      let itemsObject: any = JsonPointer.getFirst([
+      let itemsObject = JsonPointer.getFirst([
         [schema, '/items'],
         [schema, '/additionalItems']
       ]) || {};
@@ -521,7 +521,7 @@ export function updateInputOptions(layoutNode: any, schema: any, jsf: any) {
   }
 
   // Set all option values in layoutNode.options
-  let newOptions: any = { };
+  let newOptions: any = {};
   const fixUiKeys = key => key.slice(0, 3).toLowerCase() === 'ui:' ? key.slice(3) : key;
   mergeFilteredObject(newOptions, jsf.globalOptions.formDefaults, [], fixUiKeys);
   [ [ JsonPointer.get(schema, '/ui:widget/options'), [] ],
@@ -573,12 +573,12 @@ export function updateInputOptions(layoutNode: any, schema: any, jsf: any) {
 
   // If field value is set in layoutNode, and no input data, update template value
   if (templatePointer && schema.type !== 'array' && schema.type !== 'object') {
-    let layoutNodeValue: any = JsonPointer.getFirst([
+    let layoutNodeValue = JsonPointer.getFirst([
       [ jsf.defaultValues, layoutNode.dataPointer ],
       [ layoutNode, '/value' ],
       [ layoutNode, '/default' ]
     ]);
-    let templateValue: any = JsonPointer.get(
+    let templateValue = JsonPointer.get(
       jsf.formGroupTemplate, templatePointer + '/value/value'
     );
     if (hasValue(layoutNodeValue) && layoutNodeValue !== templateValue) {

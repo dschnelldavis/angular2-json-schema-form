@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { MatMenuTrigger } from '@angular/material';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Http } from '@angular/http';
@@ -65,6 +66,7 @@ export class DemoComponent implements OnInit {
     printMargin: false,
     autoScrollEditorIntoView: true,
   };
+  @ViewChild(MatMenuTrigger) menuTrigger: MatMenuTrigger;
 
   constructor(
     private route: ActivatedRoute,
@@ -138,6 +140,7 @@ export class DemoComponent implements OnInit {
     selectedExample: string = this.selectedExample,
     selectedExampleName: string = this.selectedExampleName
   ) {
+    if (this.menuTrigger.menuOpen) { this.menuTrigger.closeMenu(); }
     if (selectedExample !== this.selectedExample) {
       this.selectedSet = selectedSet;
       this.selectedSetName = selectedSetName;

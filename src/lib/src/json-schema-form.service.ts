@@ -70,6 +70,7 @@ export class JsonSchemaFormService {
       // 'auto' = only if layout is undefined (form is built from schema alone)
     debug: false, // Show debugging output?
     fieldsRequired: false, // (set automatically) Are there any required fields in the form?
+    initialArrayItems: 0, // Number of blank items to initially add to arrays with no default value
     framework: 'material-design', // The framework to load
     widgets: {}, // Any custom widgets to load
     loadExternalAssets: false, // Load external css and JavaScript for framework?
@@ -79,7 +80,6 @@ export class JsonSchemaFormService {
     setSchemaDefaults: true,
     validateOnRender: false,
     formDefaults: { // Default options for form controls
-      initialItems: 1, // Number of items to display in array with no default value
       addable: true, // Allow adding items to an array or $ref point?
       orderable: true, // Allow reordering items within an array?
       removable: true, // Allow removing items from an array or $ref point?

@@ -55,21 +55,10 @@ export function buildFormGroupTemplate(
   jsf: any, setValues: any = null, mapArrays: boolean = true,
   schemaPointer: string = '', dataPointer: string = '', templatePointer: any = ''
 ) {
-  // if (dataPointer !== '') {
-  //   const shortDataPointer =
-  //     removeRecursiveReferences(dataPointer, jsf.dataRecursiveRefMap, jsf.arrayMap);
-  //   if (hasOwn(jsf.templateRefLibrary, shortDataPointer)) {
-  //     const template = _.cloneDeep(jsf.templateRefLibrary[dataPointer]);
-  //     if (setValues !== null) {
-  //       // TODO: add values to template before returning
-  //     }
-  //     return template;
-  //   }
-  // }
   const schema = getSubSchema(
     jsf.schema, schemaPointer, jsf.schemaRefLibrary, jsf.schemaRecursiveRefMap
   );
-  let useValues: any = jsf.globalOptions.setSchemaDefaults ?
+  let useValues = jsf.globalOptions.setSchemaDefaults ?
     mergeValues(JsonPointer.get(schema, '/default'), setValues) : setValues;
   const schemaType: string | string[] = JsonPointer.get(schema, '/type');
   let controlType: 'FormGroup' | 'FormArray' | 'FormControl' | '$ref';
@@ -96,7 +85,7 @@ export function buildFormGroupTemplate(
     }
   }
   let controls: any;
-  let validators: any = getControlValidators(schema);
+  let validators = getControlValidators(schema);
   switch (controlType) {
     case 'FormGroup':
       controls = {};
@@ -227,9 +216,10 @@ export function buildFormGroupTemplate(
           useValues = null;
         }
       }
-      let initialItemCount =
-        Math.max(minItems, (JsonPointer.has(schema, '/items/$ref') ||
-                            JsonPointer.has(schema, '/items/type')) ? 0 : 1);
+      let initialItemCount = Math.max(
+        minItems,
+        hasOwn(schema.items, '$ref') ? 0 : jsf.globalOptions.initialArrayItems
+      );
       if (controls.length < initialItemCount) {
         for (let i = controls.length; i < initialItemCount; i++) {
           controls.push(buildFormGroupTemplate(
@@ -242,7 +232,7 @@ export function buildFormGroupTemplate(
       }
       return { controlType, controls, validators };
     case 'FormControl':
-      let value: { value: any, disabled: boolean } = {
+      const value = {
         value: isPrimitive(useValues) ? useValues : null,
         disabled: schema['disabled'] ||
           JsonPointer.get(schema, '/x-schema-form/disabled') || false
@@ -257,7 +247,7 @@ export function buildFormGroupTemplate(
       if (refPointer && !hasOwn(jsf.templateRefLibrary, refPointer)) {
         // Set to null first to prevent recursive reference from causing endless loop
         jsf.templateRefLibrary[refPointer] = null;
-        const newTemplate: any = buildFormGroupTemplate(jsf, null, false, schemaRef);
+        const newTemplate = buildFormGroupTemplate(jsf, null, false, schemaRef);
         if (newTemplate) {
           jsf.templateRefLibrary[refPointer] = newTemplate;
         } else {
@@ -405,7 +395,7 @@ export function formatFormData(
   let formattedData = {};
   JsonPointer.forEachDeep(formData, (value, dataPointer) => {
     if (typeof value !== 'object' || (value === null && returnEmptyFields)) {
-      let genericPointer: string =
+      let genericPointer =
         JsonPointer.has(dataMap, [dataPointer, 'schemaType']) ?
           dataPointer :
           removeRecursiveReferences(dataPointer, recursiveRefMap, arrayMap);
@@ -469,7 +459,7 @@ export function getControl(
     }
     return null;
   }
-  let dataPointerArray: string[] = JsonPointer.parse(dataPointer);
+  let dataPointerArray = JsonPointer.parse(dataPointer);
   if (returnGroup) {
     dataPointerArray = dataPointerArray.slice(0, -1);
   }
