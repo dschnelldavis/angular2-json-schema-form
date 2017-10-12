@@ -234,7 +234,8 @@ export function buildFormGroupTemplate(
         }
       }
       let initialItemCount =
-        Math.max(minItems, JsonPointer.has(schema, '/items/$ref') ? 0 : 1);
+        Math.max(minItems, (JsonPointer.has(schema, '/items/$ref') ||
+                            JsonPointer.has(schema, '/items/type')) ? 0 : 1);
       if (controls.length < initialItemCount) {
         for (let i = controls.length, l = initialItemCount; i < l; i++) {
           controls.push(buildFormGroupTemplate(
