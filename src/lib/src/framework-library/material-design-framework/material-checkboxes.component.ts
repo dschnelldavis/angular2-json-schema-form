@@ -32,7 +32,7 @@ import { buildFormGroup, buildTitleMap, hasOwn, JsonPointer } from '../../shared
             [color]="options?.color || 'primary'"
             [disabled]="controlDisabled || options?.readonly"
             [name]="checkboxItem?.name"
-            (change)="updateValue($event)">
+            (change)="updateValue()">
             <span class="checkbox-name" [innerHTML]="checkboxItem?.name"></span>
           </mat-checkbox>
         </li>
@@ -89,7 +89,7 @@ export class MaterialCheckboxesComponent implements OnInit {
     return checkedItems > 0 && checkedItems < this.checkboxList.length;
   }
 
-  updateValue(event: any) {
+  updateValue() {
     if (this.boundControl) {
       this.jsf.updateArrayCheckboxList(this, this.checkboxList);
     }
@@ -97,6 +97,7 @@ export class MaterialCheckboxesComponent implements OnInit {
 
   updateAllValues(event: any) {
     this.checkboxList.forEach(t => t.checked = event.checked);
+    this.updateValue();
   }
 
   isConditionallyShown(): boolean {
