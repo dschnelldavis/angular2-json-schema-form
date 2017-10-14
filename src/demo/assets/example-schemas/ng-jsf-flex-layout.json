@@ -38,7 +38,8 @@
           "required": [ "number", "type" ]
         }
       }
-    }
+    },
+    "required": [ "last_name" ]
   },
   "layout": [
     { "type": "flex",
@@ -68,6 +69,7 @@
     { "key": "notes", "type": "textarea" },
     { "key": "phone_numbers",
       "type": "array",
+      "listItems": 3,
       "items": [ {
         "type": "div",
         "displayFlex": true,
@@ -75,10 +77,10 @@
         "fxLayoutGap": "12px",
         "items": [
           { "key": "phone_numbers[].type", "flex": "1 1 50px",
-            "notitle": true, "required": true
+            "notitle": true, "placeholder": "Type"
           },
           { "key": "phone_numbers[].number", "flex": "4 4 200px",
-            "notitle": true, "required": true
+            "notitle": true, "placeholder": "Phone Number"
           }
         ]
       } ]

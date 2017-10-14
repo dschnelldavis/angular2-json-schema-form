@@ -55,10 +55,10 @@ export class JsonSchemaFormService {
   isValidChanges: Subject<any> = new Subject(); // isValid observable
   validationErrorChanges: Subject<any> = new Subject(); // validationErrors observable
 
-  arrayMap: Map<string, number> = new Map<string, number>(); // Maps arrays in data object and number of tuple values
-  dataMap: Map<string, any> = new Map<string, any>(); // Maps paths in data model to schema and formGroup paths
-  dataRecursiveRefMap: Map<string, string> = new Map<string, string>(); // Maps recursive reference points in data model
-  schemaRecursiveRefMap: Map<string, string> = new Map<string, string>(); // Maps recursive reference points in schema
+  arrayMap: Map<string, number> = new Map(); // Maps arrays in data object and number of tuple values
+  dataMap: Map<string, any> = new Map(); // Maps paths in data model to schema and formGroup paths
+  dataRecursiveRefMap: Map<string, string> = new Map(); // Maps recursive reference points in data model
+  schemaRecursiveRefMap: Map<string, string> = new Map(); // Maps recursive reference points in schema
   layoutRefLibrary: any = {}; // Library of layout nodes for adding to form
   schemaRefLibrary: any = {}; // Library of schemas for resolving schema $refs
   templateRefLibrary: any = {}; // Library of formGroup templates for adding to form
@@ -70,7 +70,6 @@ export class JsonSchemaFormService {
       // 'auto' = only if layout is undefined (form is built from schema alone)
     debug: false, // Show debugging output?
     fieldsRequired: false, // (set automatically) Are there any required fields in the form?
-    initialArrayItems: 0, // Number of blank items to initially add to arrays with no default value
     framework: 'material-design', // The framework to load
     widgets: {}, // Any custom widgets to load
     loadExternalAssets: false, // Load external css and JavaScript for framework?
@@ -80,6 +79,7 @@ export class JsonSchemaFormService {
     setSchemaDefaults: true,
     validateOnRender: false,
     formDefaults: { // Default options for form controls
+      listItems: 1, // Number of blank list items to initially add to arrays with no default value
       addable: true, // Allow adding items to an array or $ref point?
       orderable: true, // Allow reordering items within an array?
       removable: true, // Allow removing items from an array or $ref point?
@@ -96,12 +96,10 @@ export class JsonSchemaFormService {
   };
   globalOptions: any;
 
-  constructor() {
-    this.globalOptions = _.cloneDeep(this.globalOptionDefaults);
-  }
-
   getData() { return this.data; }
+
   getSchema() { return this.schema; }
+
   getLayout() { return this.layout; }
 
   resetAllValues() {
@@ -120,10 +118,10 @@ export class JsonSchemaFormService {
     this.validData = null;
     this.isValid = null;
     this.validationErrors = null;
-    this.arrayMap = new Map<string, number>();
-    this.dataMap = new Map<string, any>();
-    this.dataRecursiveRefMap = new Map<string, string>();
-    this.schemaRecursiveRefMap = new Map<string, string>();
+    this.arrayMap = new Map();
+    this.dataMap = new Map();
+    this.dataRecursiveRefMap = new Map();
+    this.schemaRecursiveRefMap = new Map();
     this.layoutRefLibrary = {};
     this.schemaRefLibrary = {};
     this.templateRefLibrary = {};
@@ -134,9 +132,8 @@ export class JsonSchemaFormService {
     this.schema = convertSchemaToDraft6(this.schema);
   }
 
-  buildFormGroupTemplate(setValues: boolean = true) {
-    this.formGroupTemplate =
-      buildFormGroupTemplate(this, this.initialValues, setValues);
+  buildFormGroupTemplate(initialValues: any = null, setValues: boolean = true) {
+    this.formGroupTemplate = buildFormGroupTemplate(this, initialValues, setValues);
   }
 
   /**
@@ -144,16 +141,16 @@ export class JsonSchemaFormService {
    *
    * Example errors:
    * {
-   *   'last_name': [ {
-   *     'message': 'Last name must by start with capital letter.',
-   *     'code': 'capital_letter'
+   *   last_name: [ {
+   *     message: 'Last name must by start with capital letter.',
+   *     code: 'capital_letter'
    *   } ],
-   *   'email': [ {
-   *     'message': 'Email must be from example.com domain.',
-   *     'code': 'special_domain'
+   *   email: [ {
+   *     message: 'Email must be from example.com domain.',
+   *     code: 'special_domain'
    *   }, {
-   *     'message': 'Email must contain an @ symbol.',
-   *     'code': 'at_symbol'
+   *     message: 'Email must contain an @ symbol.',
+   *     code: 'at_symbol'
    *   } ]
    * }
    * @param {ErrorMessages} errors
@@ -208,19 +205,21 @@ export class JsonSchemaFormService {
   }
 
   setOptions(newOptions: any): void {
-    if (typeof newOptions === 'object') {
-      Object.assign(this.globalOptions, newOptions);
+    if (isObject(newOptions)) {
+      const addOptions = { ...newOptions }
+      if (isObject(addOptions.formDefaults)) {
+        Object.assign(this.globalOptions.formDefaults, addOptions.formDefaults);
+        delete addOptions.formDefaults;
+      }
+      Object.assign(this.globalOptions, addOptions);
     }
-    if (hasOwn(this.globalOptions.formDefaults, 'disableErrorState')) {
-      this.globalOptions.formDefaults.enableErrorState =
-        !this.globalOptions.formDefaults.disableErrorState;
-      delete this.globalOptions.formDefaults.disableErrorState;
-    }
-    if (hasOwn(this.globalOptions.formDefaults, 'disableSuccessState')) {
-      this.globalOptions.formDefaults.enableSuccessState =
-        !this.globalOptions.formDefaults.disableSuccessState;
-      delete this.globalOptions.formDefaults.disableSuccessState;
-    }
+    ['ErrorState', 'SuccessState'].forEach(suffix => {
+      if (hasOwn(this.globalOptions.formDefaults, 'disable' + suffix)) {
+        this.globalOptions.formDefaults['enable' + suffix] =
+          !this.globalOptions.formDefaults['disable' + suffix];
+        delete this.globalOptions.formDefaults['disable' + suffix];
+      }
+    });
   }
 
   compileAjvSchema() {

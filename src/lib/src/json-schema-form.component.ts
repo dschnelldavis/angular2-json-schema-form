@@ -313,10 +313,10 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
       // Initialize ajv and compile schema
       this.jsf.compileAjvSchema();
 
-      // Create schemaRefLibrary, schemaRecursiveRefMap, & dataRecursiveRefMap
+      // Create schemaRefLibrary, schemaRecursiveRefMap, dataRecursiveRefMap, & arrayMap
       this.jsf.schema = resolveSchemaReferences(
-        this.jsf.schema, this.jsf.schemaRefLibrary,
-        this.jsf.schemaRecursiveRefMap, this.jsf.dataRecursiveRefMap
+        this.jsf.schema, this.jsf.schemaRefLibrary, this.jsf.schemaRecursiveRefMap,
+        this.jsf.dataRecursiveRefMap, this.jsf.arrayMap
       );
 
       // TODO: (?) Resolve external $ref links
@@ -374,14 +374,12 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
       this.jsf.layout = _.cloneDeep(this.form);
     } else if (this.form && isArray(this.form.form)) {
       this.jsf.JsonFormCompatibility = true;
-      this.jsf.layout =
-        fixJsonFormOptions(_.cloneDeep(this.form.form));
+      this.jsf.layout = fixJsonFormOptions(_.cloneDeep(this.form.form));
     } else if (this.form && isArray(this.form.layout)) {
       this.jsf.layout = _.cloneDeep(this.form.layout);
     } else {
       this.jsf.layout = this.jsf.globalOptions.addSubmit === false ?
-        [ '*' ] :
-        [ '*', { type: 'submit', title: 'Submit' } ];
+        [ '*' ] : [ '*', { type: 'submit', title: 'Submit' } ];
     }
 
     // Check for alternate layout inputs
@@ -397,8 +395,7 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
       alternateLayout = _.cloneDeep(this.form.uiSchema);
     } else if (hasOwn(this.form, 'customFormItems')) {
       this.jsf.JsonFormCompatibility = true;
-      alternateLayout =
-        fixJsonFormOptions(_.cloneDeep(this.form.customFormItems));
+      alternateLayout = fixJsonFormOptions(_.cloneDeep(this.form.customFormItems));
     }
 
     // if alternate layout found, copy alternate layout options into schema
@@ -501,19 +498,24 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
       // If not already initialized, initialize ajv and compile schema
       this.jsf.compileAjvSchema();
 
-      // Build the Angular FormGroup template from the schema
-      this.jsf.buildFormGroupTemplate();
-
       // Update all layout elements, add values, widgets, and validators,
       // replace any '*' with a layout built from all schema elements,
       // and update the FormGroup template with any new validators
       this.jsf.buildLayout(this.widgetLibrary);
+
+      // Build the Angular FormGroup template from the schema
+      this.jsf.buildFormGroupTemplate(this.jsf.initialValues, false);
 
       // Build the real Angular FormGroup from the FormGroup template
       this.jsf.buildFormGroup();
     }
 
     if (this.jsf.formGroup) {
+
+      // Set initial form values
+      if (!isEmpty(this.jsf.initialValues)) {
+        this.setFormValues(this.jsf.initialValues);
+      }
 
       // TODO: Figure out how to display calculated values without changing object data
       // See http://ulion.github.io/jsonform/playground/?example=templating-values
@@ -531,7 +533,7 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
       // Subscribe to form changes to output live data, validation, and errors
       this.jsf.dataChanges.subscribe(data => this.onChanges.emit(data));
       this.jsf.isValidChanges.subscribe(isValid => this.isValid.emit(isValid));
-      this.jsf.validationErrorChanges.subscribe(errors => this.validationErrors.emit(errors));
+      this.jsf.validationErrorChanges.subscribe(err => this.validationErrors.emit(err));
 
       // Output final schema, final layout, and initial data
       this.formSchema.emit(this.jsf.schema);
@@ -544,5 +546,10 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
         this.validationErrors.emit(this.jsf.validationErrors);
       }
     }
+  }
+
+  private setFormValues(formValues: any) {
+    this.jsf.formGroup.reset();
+    this.jsf.formGroup.patchValue(formValues);
   }
 }

@@ -650,7 +650,9 @@ export class JsonPointer {
       let pointerArray = this.parse(indexedPointer);
       for (let i = 1; i < pointerArray.length; i++) {
         const subPointer = this.compile(pointerArray.slice(0, i));
-        if (arrayMap.has(subPointer) && arrayMap.get(subPointer) <= +pointerArray[i]) {
+        if (arrayMap.has(subPointer) &&
+          arrayMap.get(subPointer) <= +pointerArray[i]
+        ) {
           pointerArray[i] = '-';
         }
       }
@@ -726,11 +728,12 @@ export class JsonPointer {
       const firstKey = pointerArray.shift();
       if (firstKey === undefined) { return ''; }
       if (schema.type === 'object' || schema.properties || schema.additionalProperties) {
-        const subSchema =
-          (schema.properties || schema.additionalProperties || {})[firstKey];
-        if (subSchema) {
+        if ((schema.properties || {})[firstKey]) {
           return `/properties/${this.escape(firstKey)}` +
-            this.toSchemaPointer(pointerArray, subSchema);
+            this.toSchemaPointer(pointerArray, (schema.properties || {})[firstKey]);
+        } else  if (schema.additionalProperties) {
+          return '/additionalProperties' +
+            this.toSchemaPointer(pointerArray, schema.additionalProperties);
         }
       }
       if ((schema.type === 'array' || schema.items) &&
@@ -752,6 +755,8 @@ export class JsonPointer {
             this.toSchemaPointer(pointerArray, schema.additionalItems);
         }
       }
+      console.error(`toSchemaPointer error: Data pointer ${dataPointer} ` +
+        `not compatible with schema ${schema}`);
       return null;
     }
     if (!this.isJsonPointer(dataPointer)) {
