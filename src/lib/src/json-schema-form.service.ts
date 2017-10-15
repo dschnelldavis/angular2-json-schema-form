@@ -282,13 +282,9 @@ export class JsonSchemaFormService {
   }
 
   initializeControl(ctx: any, bind: boolean = true): boolean {
-    if (bind) {
-      ctx.formControl = this.getFormControl(ctx);
-      ctx.boundControl = !!ctx.formControl;
-    } else {
-      ctx.boundControl = false;
-    }
-    if (ctx.boundControl) {
+    ctx.formControl = this.getFormControl(ctx);
+    ctx.boundControl = bind && !!ctx.formControl;
+    if (ctx.formControl) {
       ctx.controlName = this.getFormControlName(ctx);
       ctx.controlValue = ctx.formControl.value;
       ctx.formControl.valueChanges.subscribe(v => ctx.controlValue = v);

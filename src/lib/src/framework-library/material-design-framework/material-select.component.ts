@@ -19,7 +19,6 @@ import { buildTitleMap, isArray } from '../../shared';
         [formControl]="formControl"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.name]="controlName"
-        [attr.readonly]="options?.readonly ? 'readonly' : null"
         [id]="'control' + layoutNode?._id"
         [multiple]="options?.multiple"
         [placeholder]="options?.notitle ? options?.placeholder : options?.title"
@@ -42,8 +41,7 @@ import { buildTitleMap, isArray } from '../../shared';
       <mat-select #inputControl *ngIf="!boundControl"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.name]="controlName"
-        [attr.readonly]="options?.readonly ? 'readonly' : null"
-        [disabled]="controlDisabled"
+        [disabled]="controlDisabled || options?.readonly"
         [id]="'control' + layoutNode?._id"
         [multiple]="options?.multiple"
         [placeholder]="options?.notitle ? options?.placeholder : options?.title"
@@ -100,7 +98,7 @@ export class MaterialSelectComponent implements OnInit {
       this.options.titleMap || this.options.enumNames,
       this.options.enum, !!this.options.required, !!this.options.flatList
     );
-    this.jsf.initializeControl(this);
+    this.jsf.initializeControl(this, !this.options.readonly);
     if (!this.options.notitle && !this.options.description && this.options.placeholder) {
       this.options.description = this.options.placeholder;
     }

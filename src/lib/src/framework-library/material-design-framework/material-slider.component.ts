@@ -17,7 +17,7 @@ import { getControl, hasOwn, inArray, isDefined } from '../../shared';
       [style.width]="'100%'"></mat-slider>
     <mat-slider thumbLabel #inputControl *ngIf="!boundControl && isConditionallyShown()"
       [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
-      [disabled]="controlDisabled"
+      [disabled]="controlDisabled || options?.readonly"
       [id]="'control' + layoutNode?._id"
       [max]="options?.maximum"
       [min]="options?.minimum"
@@ -49,7 +49,7 @@ export class MaterialSliderComponent implements OnInit {
 
   ngOnInit() {
     this.options = this.layoutNode.options || {};
-    this.jsf.initializeControl(this);
+    this.jsf.initializeControl(this, !this.options.readonly);
   }
 
   updateValue(event) {

@@ -19,7 +19,7 @@ import { buildTitleMap, hasOwn } from '../../shared';
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.required]="options?.required"
-        [disabled]="controlDisabled"
+        [disabled]="controlDisabled || options?.readonly"
         [name]="controlName"
         [value]="controlValue"
         [vertical]="!!options.vertical">

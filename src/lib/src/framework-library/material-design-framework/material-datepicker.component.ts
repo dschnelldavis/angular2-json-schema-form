@@ -29,7 +29,7 @@ import { dateToString, hasOwn, stringToDate } from '../../shared';
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.list]="'control' + layoutNode?._id + 'Autocomplete'"
         [attr.readonly]="options?.readonly ? 'readonly' : null"
-        [disabled]="controlDisabled"
+        [disabled]="controlDisabled || options?.readonly"
         [id]="'control' + layoutNode?._id"
         [max]="options?.maximum"
         [matDatepicker]="picker"
@@ -73,7 +73,7 @@ export class MaterialDatepickerComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     this.options = this.layoutNode.options || {};
-    this.jsf.initializeControl(this);
+    this.jsf.initializeControl(this, !this.options.readonly);
     this.setControlDate(this.controlValue);
     if (!this.options.notitle && !this.options.description && this.options.placeholder) {
       this.options.description = this.options.placeholder;

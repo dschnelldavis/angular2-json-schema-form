@@ -14,7 +14,7 @@ import { hasOwn } from '../../shared';
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [color]="options?.color || 'primary'"
-        [disabled]="controlDisabled"
+        [disabled]="controlDisabled || options?.readonly"
         [id]="'control' + layoutNode?._id"
         [name]="controlName"
         [type]="layoutNode?.type"

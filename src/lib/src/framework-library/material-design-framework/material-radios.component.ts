@@ -33,7 +33,7 @@ import { buildTitleMap, hasOwn } from '../../shared';
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.required]="options?.required"
         [style.flex-direction]="flexDirection"
-        [disabled]="controlDisabled"
+        [disabled]="controlDisabled || options?.readonly"
         [name]="controlName"
         [value]="controlValue">
         <mat-radio-button *ngFor="let radioItem of radiosList"
@@ -77,7 +77,7 @@ export class MaterialRadiosComponent implements OnInit {
       this.options.titleMap || this.options.enumNames,
       this.options.enum, true
     );
-    this.jsf.initializeControl(this);
+    this.jsf.initializeControl(this, !this.options.readonly);
   }
 
   updateValue(value) {

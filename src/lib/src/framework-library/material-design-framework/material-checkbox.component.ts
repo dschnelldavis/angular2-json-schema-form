@@ -84,7 +84,7 @@ export class MaterialCheckboxComponent implements OnInit {
 
   ngOnInit() {
     this.options = this.layoutNode.options || {};
-    this.jsf.initializeControl(this);
+    this.jsf.initializeControl(this, !this.options.readonly);
     if (this.controlValue === null || this.controlValue === undefined) {
       this.controlValue = false;
       this.jsf.updateValue(this, this.falseValue);
