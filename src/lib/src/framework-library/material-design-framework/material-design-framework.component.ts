@@ -92,22 +92,27 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
   ) { }
 
   get showRemoveButton(): boolean {
-    if (!this.options.removable || this.layoutNode.type === '$ref') { return false; }
-    if (!this.layoutNode.arrayItem) { return true; }
-    const arrayIndex = this.layoutIndex[this.layoutIndex.length - 1];
-    return ((this.parentArray || {}).items || {}).length - 1 <= ((this.parentArray || {}).options || {}).minItems ? false :
+    if (!this.options.removable || this.options.readonly ||
+      this.layoutNode.type === '$ref'
+    ) { return false; }
+    if (this.layoutNode.recursiveReference) { return true; }
+    if (!this.layoutNode.arrayItem || !this.parentArray) { return false; }
+    // If array length <= minItems, don't allow removing any items
+    return this.parentArray.items.length - 1 <= this.parentArray.options.minItems ? false :
+      // For removable list items, allow removing any item
       this.layoutNode.arrayItemType === 'list' ? true :
       // For removable tuple items, only allow removing last item in list
-      arrayIndex === ((this.parentArray || {}).items || {}).length - 2;
+      this.layoutIndex[this.layoutIndex.length - 1] === this.parentArray.items.length - 2;
   }
 
   ngOnInit() {
     this.initializeControl();
-    if (this.layoutNode.arrayItem && this.layoutNode.type !== '$ref' &&
-      this.layoutNode.arrayItemType === 'list'
-    ) {
+    if (this.layoutNode.arrayItem && this.layoutNode.type !== '$ref') {
       this.parentArray = this.jsf.getParentNode(this);
-      this.isOrderable = ((this.parentArray || {}).options || {}).orderable !== false;
+      if (this.parentArray) {
+        this.isOrderable = this.layoutNode.arrayItemType === 'list' &&
+          !this.options.readonly && this.parentArray.options.orderable;
+      }
     }
   }
 

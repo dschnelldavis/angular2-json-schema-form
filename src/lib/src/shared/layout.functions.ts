@@ -42,9 +42,35 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
   let hasSubmitButton = !JsonPointer.get(jsf, '/globalOptions/addSubmit');
   let formLayout = mapLayout(jsf.layout, (layoutItem, index, layoutPointer) => {
     let currentIndex: number = index;
-    let newNode: any = {};
+    let newNode: any = {
+      _id: _.uniqueId(),
+      layoutPointer: layoutPointer.replace(/\/\d+/g, '/-'),
+      options: {},
+    };
     if (isObject(layoutItem)) {
-      newNode = layoutItem;
+      Object.assign(newNode, layoutItem);
+      Object.keys(newNode)
+        .filter(option => !inArray(option, [
+          '_id', '$ref', 'arrayItem', 'arrayItemType', 'dataPointer',
+          'dataType', 'items', 'key', 'layoutPointer', 'name', 'options',
+          'recursiveReference', 'type', 'widget'
+        ]))
+        .forEach(option => {
+          newNode.options[option] = newNode[option];
+          delete newNode[option];
+        });
+      if (!hasOwn(newNode, 'type') && isString(newNode.widget)) {
+        newNode.type = newNode.widget;
+        delete newNode.widget;
+      }
+      if (!hasOwn(newNode.options, 'title')) {
+        if (hasOwn(newNode.options, 'legend')) {
+          newNode.options.title = newNode.options.legend;
+          delete newNode.options.legend;
+        } else if (hasOwn(newNode, 'name') && !/^\d+$/.test(newNode.name)) {
+          newNode.options.title = fixTitle(newNode.name);
+        }
+      }
     } else if (JsonPointer.isJsonPointer(layoutItem)) {
       newNode.dataPointer = layoutItem;
     } else if (isString(layoutItem)) {
@@ -54,14 +80,6 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
       console.error(layoutItem);
       return null;
     }
-    if (hasOwn(newNode, 'widget') && !hasOwn(newNode, 'type')) {
-      newNode.type = newNode.widget;
-    }
-    Object.assign(newNode, {
-      _id: _.uniqueId(),
-      layoutPointer: layoutPointer.replace(/\/\d+/g, '/-'),
-      options: {},
-    });
     let nodeSchema: any = null;
 
     // If newNode does not have a dataPointer, try to find an equivalent
@@ -111,18 +129,26 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
       const LastKey = JsonPointer.toKey(newNode.dataPointer);
       if (!newNode.name && isString(LastKey) && LastKey !== '-') {
         newNode.name = LastKey;
+        if (!newNode.options.title && !/^\d+$/.test(newNode.name)) {
+          newNode.options.title = fixTitle(newNode.name);
+        }
       }
       let refPointer = removeRecursiveReferences(
         newNode.dataPointer, jsf.dataRecursiveRefMap, jsf.arrayMap
       );
       let schemaPointer: string;
       if (!jsf.dataMap.has(refPointer)) { jsf.dataMap.set(refPointer, new Map()); }
-      if (jsf.dataMap.get(refPointer).has('schemaPointer')) {
-        schemaPointer = jsf.dataMap.get(refPointer).get('schemaPointer');
+      const itemDataMap  = jsf.dataMap.get(refPointer);
+      if (itemDataMap.has('schemaPointer')) {
+        schemaPointer = itemDataMap.get('schemaPointer');
       } else {
         schemaPointer = JsonPointer.toSchemaPointer(refPointer, jsf.schema);
-        jsf.dataMap.get(refPointer).set('schemaPointer', schemaPointer);
+        itemDataMap.set('schemaPointer', schemaPointer);
+        if (newNode.options.disabled) {
+          itemDataMap.set('disabled', newNode.options.disabled);
+        }
       }
+      itemDataMap.set('disabled', !!newNode.options.disabled);
       nodeSchema = JsonPointer.get(jsf.schema, schemaPointer);
       if (nodeSchema) {
         if (!hasOwn(newNode, 'type')) {
@@ -149,35 +175,31 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
           newNode.options.minItems = Math.max(
             nodeSchema.minItems || 0, newNode.options.minItems || 0
           );
-          if (!hasOwn(newNode.options, 'listItems')) {  }
-          newNode.options.listItems = newNode.listItems || 1;
-          newNode.options.tupleItems = isArray(nodeSchema.items) ? nodeSchema.items.length : 0;
+          if (!hasOwn(newNode.options, 'listItems')) {
+            newNode.options.listItems = 1;
+          }
+          newNode.options.tupleItems =
+            isArray(nodeSchema.items) ? nodeSchema.items.length : 0;
           if (newNode.options.maxItems < newNode.options.tupleItems) {
             newNode.options.tupleItems = newNode.options.maxItems;
             newNode.options.listItems = 0;
           } else if (newNode.options.maxItems <
             newNode.options.tupleItems + newNode.options.listItems
           ) {
-            newNode.options.listItems = newNode.options.maxItems - newNode.options.tupleItems;
+            newNode.options.listItems =
+              newNode.options.maxItems - newNode.options.tupleItems;
           } else if (newNode.options.minItems >
             newNode.options.tupleItems + newNode.options.listItems
           ) {
-            newNode.options.listItems = newNode.options.minItems - newNode.options.tupleItems;
+            newNode.options.listItems =
+              newNode.options.minItems - newNode.options.tupleItems;
           }
-          if (!jsf.dataMap.get(refPointer).has('maxItems')) {
-            const itemDataMap  = jsf.dataMap.get(refPointer);
+          if (!itemDataMap.has('maxItems')) {
             itemDataMap.set('maxItems', newNode.options.maxItems);
             itemDataMap.set('minItems', newNode.options.minItems);
             itemDataMap.set('tupleItems', newNode.options.tupleItems);
             itemDataMap.set('listItems', newNode.options.listItems);
           }
-        }
-        if (!newNode.options.title && newNode.options.legend) {
-          newNode.options.title = newNode.options.legend;
-        } else if (
-          !newNode.options.title && newNode.name && !/^\d+$/.test(newNode.name)
-        ) {
-          newNode.options.title = fixTitle(newNode.name);
         }
         if (isInputRequired(jsf.schema, schemaPointer)) {
           newNode.options.required = true;
@@ -200,10 +222,12 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
       }
 
       newNode.widget = widgetLibrary.getWidget(newNode.type);
-      jsf.dataMap.get(refPointer).set('inputType', newNode.type);
-      jsf.dataMap.get(refPointer).set('widget', newNode.widget);
+      itemDataMap.set('inputType', newNode.type);
+      itemDataMap.set('widget', newNode.widget);
 
-      if (newNode.dataType === 'array' && hasOwn(newNode, 'items')) {
+      if (newNode.dataType === 'array' &&
+        (hasOwn(newNode, 'items') || hasOwn(newNode, 'additionalItems'))
+      ) {
         let arrayRefPointer = removeRecursiveReferences(
           newNode.dataPointer + '/-', jsf.dataRecursiveRefMap, jsf.arrayMap
         );
@@ -245,7 +269,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
             newNode.items.push({
               _id: _.uniqueId(),
               arrayItem: true,
-              arrayItemType: newNode.tupleItems > newNode.items.length ?
+              arrayItemType: newNode.options.tupleItems > newNode.items.length ?
                 'tuple' : 'list',
               items: arrayItemGroup,
               layoutPointer: newNode.layoutPointer + '/items/-',
@@ -268,7 +292,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
             newNode.items[0].options.orderable = false;
           }
           newNode.items[0].arrayItemType =
-            newNode.tupleItems ? 'tuple' : 'list';
+            newNode.options.tupleItems ? 'tuple' : 'list';
         }
 
         // TODO: check maxItems to verify adding new items is OK, and check
@@ -282,19 +306,18 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
           if (!hasOwn(jsf.layoutRefLibrary, refPointer)) {
             jsf.layoutRefLibrary[refPointer] =
               _.cloneDeep(newNode.items[newNode.items.length - 1]);
-            jsf.layoutRefLibrary[refPointer]._id = null;
-            if (recursive) {
-              jsf.layoutRefLibrary[refPointer].recursiveReference = true;
-              forEach(jsf.layoutRefLibrary[refPointer], (item, key) => {
-                if (hasOwn(item, '_id')) { item._id = null; }
+            jsf.layoutRefLibrary[refPointer].recursiveReference = true;
+            forEach(jsf.layoutRefLibrary[refPointer], (item, key) => {
+              if (hasOwn(item, '_id')) { item._id = null; }
+              if (recursive) {
                 if (hasOwn(item, 'dataPointer')) {
                   item.dataPointer = item.dataPointer.slice(dataPointer.length);
                 }
                 if (hasOwn(item, 'layoutPointer')) {
                   item.layoutPointer = item.layoutPointer.slice(layoutPointer.length);
                 }
-              }, 'top-down');
-            }
+              }
+            }, 'top-down');
           }
           const arrayLength = Math.min(Math.max(
             newNode.options.tupleItems + newNode.options.listItems,
@@ -339,15 +362,15 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
             arrayItemType: 'list',
             dataPointer: newNode.dataPointer + '/-',
             layoutPointer: newNode.layoutPointer + '/items/-',
-            listItems: newNode.listItems,
             options: {
+              listItems: newNode.options.listItems,
               maxItems: newNode.options.maxItems,
               minItems: newNode.options.minItems,
               removable: false,
               title: buttonText,
+              tupleItems: newNode.options.tupleItems,
             },
             recursiveReference: recursive,
-            tupleItems: newNode.tupleItems,
             type: '$ref',
             widget: widgetLibrary.getWidget('$ref'),
             $ref: refPointer,
@@ -379,6 +402,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
   if (!hasSubmitButton) {
     formLayout.push({
       _id: _.uniqueId(),
+      layoutPointer: '/-',
       options: { title: 'Submit' },
       type: 'submit',
       widget: widgetLibrary.getWidget('submit'),
@@ -436,14 +460,14 @@ export function buildLayoutFromSchema(
       newNode.dataPointer, jsf.dataRecursiveRefMap, jsf.arrayMap
     );
     if (!jsf.dataMap.has(refPointer)) { jsf.dataMap.set(refPointer, new Map()); }
-    jsf.dataMap.get(refPointer).set('schemaPointer', schemaPointer);
-    jsf.dataMap.get(refPointer).set('inputType', newNode.type);
-    jsf.dataMap.get(refPointer).set('widget', newNode.widget);
+    const itemDataMap  = jsf.dataMap.get(refPointer);
+    itemDataMap.set('schemaPointer', schemaPointer);
+    itemDataMap.set('inputType', newNode.type);
+    itemDataMap.set('widget', newNode.widget);
+    itemDataMap.set('disabled', !!newNode.options.disabled);
   }
   updateInputOptions(newNode, schema, jsf);
-  if (!newNode.options.title && newNode.options.legend) {
-    newNode.options.title = newNode.options.legend;
-  } else if (!newNode.options.title && newNode.name && !/^\d+$/.test(newNode.name)) {
+  if (!newNode.options.title && newNode.name && !/^\d+$/.test(newNode.name)) {
     newNode.options.title = fixTitle(newNode.name);
   }
   if (newNode.dataType === 'object') {
@@ -536,11 +560,14 @@ export function buildLayoutFromSchema(
             jsf.layoutRefLibrary[itemRefPointer] = null;
             jsf.layoutRefLibrary[itemRefPointer] = buildLayoutFromSchema(
               jsf, widgetLibrary,
-              newNode.layoutPointer + '/items/-',
+              recursive ? '' : newNode.layoutPointer + '/items/-',
               schemaPointer + '/items/' + i,
-              dataPointer + '/' + i,
-              true, 'tuple', true, forRefLibrary, dataPointerPrefix
+              recursive ? '' : dataPointer + '/' + i,
+              true, 'tuple', true, true, recursive ? dataPointer + '/-' : ''
             );
+            if (recursive) {
+              jsf.layoutRefLibrary[refPointer].recursiveReference = true;
+            }
           }
           newItem = getLayoutNode({
             $ref: itemRefPointer,
@@ -589,13 +616,20 @@ export function buildLayoutFromSchema(
       if (!hasOwn(jsf.layoutRefLibrary, refPointer)) {
         // Set to null first to prevent recursive reference from causing endless loop
         jsf.layoutRefLibrary[refPointer] = null;
-        jsf.layoutRefLibrary[refPointer] = buildLayoutFromSchema(
-          jsf, widgetLibrary,
-          recursive ? '' : newNode.layoutPointer + '/items/-',
-          schemaRefPointer,
-          recursive ? '' : dataPointer + '/-',
-          true, 'list', removable, true, recursive ? dataPointer + '/-' : ''
-        );
+        if (recursive) {
+          jsf.layoutRefLibrary[refPointer].recursiveReference = true;
+        } else {
+          jsf.layoutRefLibrary[refPointer] = buildLayoutFromSchema(
+            jsf, widgetLibrary,
+            recursive ? '' : newNode.layoutPointer + '/items/-',
+            schemaRefPointer,
+            recursive ? '' : dataPointer + '/-',
+            true, 'list', removable, true, recursive ? dataPointer + '/-' : ''
+          );
+          if (recursive) {
+            jsf.layoutRefLibrary[refPointer].recursiveReference = true;
+          }
+        }
       }
       const arrayLength = Math.min(Math.max(
         newNode.options.tupleItems + newNode.options.listItems,
@@ -628,15 +662,15 @@ export function buildLayoutFromSchema(
         arrayItemType: 'list',
         dataPointer: newNode.dataPointer + '/-',
         layoutPointer: newNode.layoutPointer + '/items/-',
-        listItems: newNode.listItems,
         options: {
+          listItems: newNode.options.listItems,
           maxItems: newNode.options.maxItems,
           minItems: newNode.options.minItems,
           removable: false,
           title: buttonText,
+          tupleItems: newNode.options.tupleItems,
         },
         recursiveReference: recursive,
-        tupleItems: newNode.tupleItems,
         type: '$ref',
         widget: widgetLibrary.getWidget('$ref'),
         $ref: refPointer,

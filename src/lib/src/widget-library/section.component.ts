@@ -10,6 +10,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
       [class.expandable]="options?.expandable && !expanded"
       [class.expanded]="options?.expandable && expanded">
       <label *ngIf="options?.title"
+        class="legend"
         [class]="options?.labelHtmlClass"
         [innerHTML]="options?.title"
         [style.display]="options?.notitle ? 'none' : ''"
@@ -37,6 +38,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
       [class.expanded]="options?.expandable && expanded"
       [disabled]="options?.readonly">
       <legend
+        class="legend"
         [class]="options?.labelHtmlClass"
         [innerHTML]="options?.title"
         [style.display]="legendDisplay()"
@@ -59,8 +61,8 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
           [style.justify-content]="getFlexAttribute('justify-content')"></root-widget>
     </fieldset>`,
   styles: [`
-    .expandable > legend:before { content: '▶'; padding-right: .3em; }
-    .expanded > legend:before { content: '▼'; padding-right: .2em; }
+    .expandable > .legend:before { content: '▶'; padding-right: .3em; }
+    .expanded > .legend:before { content: '▼'; padding-right: .2em; }
   `],
 })
 export class SectionComponent implements OnInit {

@@ -259,37 +259,35 @@ export class JsonSchemaFormService {
     parentCtx: any = {}, childNode: any = null, index: number = null
   ): string {
     const parentNode: any = parentCtx.layoutNode;
-    let text: string;
     let childValue: any;
     let parentValues: any = this.getFormControlValue(parentCtx);
     const isArrayItem: boolean =
       (parentNode.type || '').slice(-5) === 'array' && isArray(parentValues);
-    if (isArrayItem && childNode.type !== '$ref') {
-      text = JsonPointer.getFirst([
+    const text = JsonPointer.getFirst(
+      isArrayItem && childNode.type !== '$ref' ? [
         [childNode, '/options/legend'],
         [childNode, '/options/title'],
-        [childNode, '/title'],
         [parentNode, '/options/title'],
         [parentNode, '/options/legend'],
-        [parentNode, '/title'],
-      ]);
-    } else {
-      text = JsonPointer.getFirst([
-        [childNode, '/title'],
+      ] : [
         [childNode, '/options/title'],
         [childNode, '/options/legend'],
-        [parentNode, '/title'],
         [parentNode, '/options/title'],
         [parentNode, '/options/legend']
-      ]);    }
+      ]
+    );
     if (!text) { return text; }
     childValue = isArrayItem ? parentValues[index] : parentValues;
     return this.parseText(text, childValue, parentValues, index);
   }
 
-  initializeControl(ctx: any): boolean {
-    ctx.formControl = this.getFormControl(ctx);
-    ctx.boundControl = !!ctx.formControl;
+  initializeControl(ctx: any, bind: boolean = true): boolean {
+    if (bind) {
+      ctx.formControl = this.getFormControl(ctx);
+      ctx.boundControl = !!ctx.formControl;
+    } else {
+      ctx.boundControl = false;
+    }
     if (ctx.boundControl) {
       ctx.controlName = this.getFormControlName(ctx);
       ctx.controlValue = ctx.formControl.value;
@@ -319,7 +317,7 @@ export class JsonSchemaFormService {
       ctx.controlName = ctx.layoutNode.name;
       ctx.controlValue = ctx.layoutNode.value;
       const dataPointer = this.getDataPointer(ctx);
-      if (dataPointer) {
+      if (bind && dataPointer) {
         console.error(`warning: control "${dataPointer}" is not bound to the Angular FormGroup.`);
       }
     }

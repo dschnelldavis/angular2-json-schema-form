@@ -21,8 +21,8 @@ import { addClasses, inArray, JsonPointer, toTitleCase } from '../../shared';
       [class.has-success]="options?.enableSuccessState && !formControl?.errors &&
         (formControl?.dirty || options?.feedbackOnRender)">
 
-      <button *ngIf="showRemoveButton()"
-        class="close-button close pull-right"
+      <button *ngIf="showRemoveButton"
+        class="close pull-right"
         type="button"
         (click)="removeItem()">
         <span aria-hidden="true">&times;</span>
@@ -76,7 +76,6 @@ import { addClasses, inArray, JsonPointer, toTitleCase } from '../../shared';
     <div *ngIf="debug && debugOutput">debug: <pre>{{debugOutput}}</pre></div>
   `,
   styles: [`
-    .close-button { position: relative; z-index: 500; }
     :host /deep/ .list-group-item .form-control-feedback { top: 40; }
     :host /deep/ .checkbox,
     :host /deep/ .radio { margin-top: 0; margin-bottom: 0; }
@@ -99,6 +98,8 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
   formControl: any = null;
   debugOutput: any = '';
   debug: any = '';
+  parentArray: any = null;
+  isOrderable: boolean = false;
   @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
@@ -110,12 +111,32 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
     public jsf: JsonSchemaFormService
   ) { }
 
+  get showRemoveButton(): boolean {
+    if (!this.options.removable || this.options.readonly ||
+      this.layoutNode.type === '$ref'
+    ) { return false; }
+    if (this.layoutNode.recursiveReference) { return true; }
+    if (!this.layoutNode.arrayItem || !this.parentArray) { return false; }
+    // If array length <= minItems, don't allow removing any items
+    return this.parentArray.items.length - 1 <= this.parentArray.options.minItems ? false :
+      // For removable list items, allow removing any item
+      this.layoutNode.arrayItemType === 'list' ? true :
+      // For removable tuple items, only allow removing last item in list
+      this.layoutIndex[this.layoutIndex.length - 1] === this.parentArray.items.length - 2;
+  }
+
   ngOnInit() {
     this.initializeControl();
+    if (this.layoutNode.arrayItem && this.layoutNode.type !== '$ref') {
+      this.parentArray = this.jsf.getParentNode(this);
+      if (this.parentArray) {
+        this.isOrderable = this.layoutNode.arrayItemType === 'list' &&
+          !this.options.readonly && this.parentArray.options.orderable;
+      }
+    }
   }
 
   ngOnChanges() {
-    this.updateArrayItems();
     if (!this.controlInitialized) { this.initializeControl(); }
   }
 
@@ -129,7 +150,6 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
       this.widgetOptions = this.widgetLayoutNode.options;
       this.layoutPointer = this.jsf.getLayoutPointer(this);
       this.formControl = this.jsf.getFormControl(this);
-      this.updateArrayItems();
 
       this.options.isInputWidget = inArray(this.layoutNode.type, [
         'button', 'checkbox', 'checkboxes-inline', 'checkboxes', 'color',
@@ -268,26 +288,6 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
     }
   }
 
-  updateArrayItems() {
-    if (this.layoutNode.arrayItem && this.options.removable &&
-      this.dataIndex && this.dataIndex.length
-    ) {
-      const arrayIndex = this.dataIndex[this.dataIndex.length - 1];
-      const parentArray =
-        JsonPointer.get(this.jsf.layout, this.layoutPointer, 0, -2);
-      if (parentArray && parentArray.items && parentArray.items.length >= 2) {
-        const minItems = parentArray.minItems || 0;
-        const lastArrayItem = parentArray.items.length - 2;
-        const tupleItems = parentArray.tupleItems;
-        if (arrayIndex >= minItems && this.options.type !== '$ref' &&
-          (arrayIndex >= tupleItems || arrayIndex === lastArrayItem)
-        ) {
-          this.options.removable = true;
-        }
-      }
-    }
-  }
-
   setTitle(): string {
     switch (this.layoutNode.type) {
       case 'button':  case 'checkbox': case 'help':     case 'msg':
@@ -318,17 +318,6 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
           this.dataIndex[this.dataIndex.length - 1]
         );
     }
-  }
-
-  showRemoveButton(): boolean {
-    if (!this.options.removable) { return false; }
-    if (!this.layoutNode.arrayItem) { return true; }
-    const arrayIndex = this.layoutIndex[this.layoutIndex.length - 1];
-    const parentArray = this.jsf.getParentNode(this);
-    return parentArray.items.length - 1 <= parentArray.options.minItems ? false :
-      this.layoutNode.arrayItemType === 'list' ? true :
-      // For removable tuple items, only allow removing last item in list
-      arrayIndex === parentArray.items.length - 2;
   }
 
   removeItem() {

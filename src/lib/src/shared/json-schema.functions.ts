@@ -505,33 +505,37 @@ export function updateInputOptions(layoutNode: any, schema: any, jsf: any) {
 
   // If a validator is available for a layout option,
   // and not already set in the formGroup template, set it
-  if (templatePointer) {
-    Object.keys(layoutNode.options)
-      .filter(option => isFunction(JsonValidators[option]))
-      .filter(option => !hasOwn(schema, option) || (
-        schema[option] !== layoutNode.options[option] &&
-        !(option.slice(0, 3) === 'min' && schema[option] <= layoutNode.options[option]) &&
-        !(option.slice(0, 3) === 'max' && schema[option] >= layoutNode.options[option])
-      ))
-      .forEach(option => jsf.formGroupTemplate = JsonPointer.set(
-        jsf.formGroupTemplate,
-        templatePointer + '/validators/' + option,
-        [ layoutNode.options[option] ]
-      ));
-  }
+  // if (templatePointer) {
+  //   Object.keys(layoutNode.options)
+  //     .filter(option => isFunction(JsonValidators[option]))
+  //     .filter(option => !hasOwn(schema, option) || (
+  //       schema[option] !== layoutNode.options[option] &&
+  //       !(option.slice(0, 3) === 'min' && schema[option] <= layoutNode.options[option]) &&
+  //       !(option.slice(0, 3) === 'max' && schema[option] >= layoutNode.options[option])
+  //     ))
+  //     .forEach(option => jsf.formGroupTemplate = JsonPointer.set(
+  //       jsf.formGroupTemplate,
+  //       templatePointer + '/validators/' + option,
+  //       [ layoutNode.options[option] ]
+  //     ));
+  // }
 
   // Set all option values in layoutNode.options
-  let newOptions: any = {};
+  let newOptions: any = { };
   const fixUiKeys = key => key.slice(0, 3).toLowerCase() === 'ui:' ? key.slice(3) : key;
   mergeFilteredObject(newOptions, jsf.globalOptions.formDefaults, [], fixUiKeys);
   [ [ JsonPointer.get(schema, '/ui:widget/options'), [] ],
     [ JsonPointer.get(schema, '/ui:widget'), [] ],
-    [ schema, ['properties', 'items', 'required', 'type', 'x-schema-form', '$ref'] ],
+    [ schema, [
+      'additionalProperties', 'additionalItems', 'properties', 'items',
+      'required', 'type', 'x-schema-form', '$ref'
+    ] ],
     [ JsonPointer.get(schema, '/x-schema-form/options'), [] ],
     [ JsonPointer.get(schema, '/x-schema-form'), ['items', 'options'] ],
     [ layoutNode, [
-      '_id', 'arrayItem', 'dataPointer', 'dataType', 'items', 'layoutPointer',
-      'listItems', 'name', 'options', 'tupleItems', 'type', 'widget', '$ref'
+      '_id', '$ref', 'arrayItem', 'arrayItemType', 'dataPointer',
+      'dataType', 'items', 'key', 'layoutPointer', 'name', 'options',
+      'recursiveReference', 'type', 'widget'
     ] ],
     [ layoutNode.options, [] ],
   ].forEach(([ object, excludeKeys ]) =>
@@ -555,11 +559,10 @@ export function updateInputOptions(layoutNode: any, schema: any, jsf: any) {
       }
     }
   }
-  layoutNode.options = newOptions;
 
   // If schema type is integer, enforce by setting multipleOf = 1
   if (schema.type === 'integer' && !hasValue(layoutNode.options.multipleOf)) {
-    layoutNode.options.multipleOf = 1;
+    newOptions.multipleOf = 1;
   }
 
   // Copy any typeahead word lists to options.typeahead.source
@@ -571,24 +574,30 @@ export function updateInputOptions(layoutNode: any, schema: any, jsf: any) {
     newOptions.typeahead = newOptions.tagsinput.typeahead;
   }
 
-  // If field value is set in layoutNode, and no input data, update template value
-  if (templatePointer && schema.type !== 'array' && schema.type !== 'object') {
-    let nodeValue = JsonPointer.getFirst([
-      [ jsf.defaultValues, layoutNode.dataPointer ],
-      [ layoutNode, '/value' ],
-      [ layoutNode, '/default' ]
-    ]);
-    let templateValue = JsonPointer.get(
-      jsf.formGroupTemplate, templatePointer + '/value/value'
-    );
-    if (hasValue(nodeValue) && nodeValue !== templateValue) {
-      jsf.formGroupTemplate = JsonPointer.set(
-        jsf.formGroupTemplate, templatePointer + '/value/value', nodeValue
-      );
-    }
-    delete layoutNode.value;
-    delete layoutNode.default;
-  }
+  layoutNode.options = newOptions;
+
+  // const nodeValue = JsonPointer.getFirst([
+  //   [ jsf.initialValues, layoutNode.dataPointer ],
+  //   [ layoutNode, '/options/value' ],
+  //   [ layoutNode, '/options/default' ]
+  // ]);
+  // if (hasValue(nodeValue)) {
+  //   layoutNode.value = nodeValue;
+  //   delete layoutNode.options.value;
+  //   delete layoutNode.options.default;
+  //
+  //   // If field value is set in layoutNode, and no input data, update template value
+  //   if (templatePointer && schema.type !== 'array' && schema.type !== 'object') {
+  //     let templateValue = JsonPointer.get(
+  //       jsf.formGroupTemplate, templatePointer + '/value/value'
+  //     );
+  //     if (hasValue(nodeValue) && nodeValue !== templateValue) {
+  //       jsf.formGroupTemplate = JsonPointer.set(
+  //         jsf.formGroupTemplate, templatePointer + '/value/value', nodeValue
+  //       );
+  //     }
+  //   }
+  // }
 }
 
 /**

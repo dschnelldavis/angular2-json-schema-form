@@ -10,6 +10,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
       [class.expandable]="options?.expandable && !expanded"
       [class.expanded]="options?.expandable && expanded">
       <label
+        class="legend"
         [class]="options?.labelHtmlClass"
         [style.display]="legendDisplay()"
         [innerHTML]="options?.title"
@@ -42,6 +43,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
       [class.expanded]="options?.expandable && expanded"
       [disabled]="options?.readonly">
       <legend
+        class="legend"
         [class]="options?.labelHtmlClass"
         [style.display]="legendDisplay()"
         [innerHTML]="options?.title"
@@ -74,6 +76,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
       [class.expanded]="options?.expandable && expanded">
       <mat-card-header>
         <legend
+          class="legend"
           [class]="options?.labelHtmlClass"
           [style.display]="legendDisplay()"
           [innerHTML]="options?.title"
@@ -108,8 +111,8 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
     </mat-card>`,
   styles: [`
     fieldset { border: 0; margin: 0; padding: 0; }
-    .expandable > legend:before { content: '▶'; padding-right: .3em; }
-    .expanded > legend:before { content: '▼'; padding-right: .2em; }
+    .expandable > .legend:before { content: '▶'; padding-right: .3em; }
+    .expanded > .legend:before { content: '▼'; padding-right: .2em; }
   `],
 })
 export class FlexLayoutSectionComponent implements OnInit {

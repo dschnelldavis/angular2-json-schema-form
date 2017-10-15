@@ -74,13 +74,14 @@ export function buildFormGroupTemplate(
     if (!jsf.dataMap.has(genericDataPointer)) {
       jsf.dataMap.set(genericDataPointer, new Map());
     }
-    if (!jsf.dataMap.get(genericDataPointer).has('schemaType')) {
-      jsf.dataMap.get(genericDataPointer).set('schemaPointer', schemaPointer);
-      jsf.dataMap.get(genericDataPointer).set('schemaType', schema.type);
-      if (controlType) {
-        jsf.dataMap.get(genericDataPointer).set('templatePointer', templatePointer);
-        jsf.dataMap.get(genericDataPointer).set('templateType', controlType);
-      }
+  }
+  const nodeOptions = jsf.dataMap.get(genericDataPointer) || new Map();
+  if (!nodeOptions.has('schemaType') && dataPointer !== '') {
+    nodeOptions.set('schemaPointer', schemaPointer);
+    nodeOptions.set('schemaType', schema.type);
+    if (controlType) {
+      nodeOptions.set('templatePointer', templatePointer);
+      nodeOptions.set('templateType', controlType);
     }
   }
   let controls: any;
@@ -115,8 +116,10 @@ export function buildFormGroupTemplate(
 
     case 'FormArray':
       controls = [];
-      const minItems = schema.minItems || 0;
-      const maxItems = schema.maxItems || 1000;
+      const minItems =
+        Math.max(schema.minItems || 0, nodeOptions.get('minItems') || 0);
+      const maxItems =
+        Math.min(schema.maxItems || 1000, nodeOptions.get('maxItems') || 1000);
       let schemaRefPointer: string = null;
       if (isArray(schema.items)) { // 'items' is an array = tuple items
         for (let i = 0; i < Math.min(schema.items.length, maxItems); i++) {
@@ -172,10 +175,9 @@ export function buildFormGroupTemplate(
           );
         }
         const arrayLength = Math.min(Math.max(
-          jsf.dataMap.get(genericDataPointer).get('tupleItems') +
-            jsf.dataMap.get(genericDataPointer).get('listItems'),
+          (nodeOptions.get('tupleItems') + nodeOptions.get('listItems')) || 0,
           isArray(nodeValue) ? nodeValue.length : 0
-        ), jsf.dataMap.get(genericDataPointer).get('maxItems'));
+        ), maxItems);
         for (let i = controls.length; i < arrayLength; i++) {
           controls.push(buildFormGroupTemplate(
             jsf, isArray(nodeValue) ? nodeValue[i] : nodeValue, setValues,
@@ -191,8 +193,7 @@ export function buildFormGroupTemplate(
     case 'FormControl':
       const value = {
         value: setValues && isPrimitive(nodeValue) ? nodeValue : null,
-        disabled: schema['disabled'] ||
-          JsonPointer.get(schema, '/x-schema-form/disabled') || false
+        disabled: nodeOptions.get('disabled') || false
       };
       return { controlType, value, validators };
 
