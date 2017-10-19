@@ -27,7 +27,7 @@ import { hasOwn } from '../../shared';
         [required]="options?.required"
         [style.width]="'100%'"
         [type]="layoutNode?.type"
-        (change)="options.showErrors = true">
+        (blur)="options.showErrors = true">
       <input matInput #inputControl *ngIf="!boundControl"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.list]="'control' + layoutNode?._id + 'Autocomplete'"
@@ -44,7 +44,7 @@ import { hasOwn } from '../../shared';
         [type]="layoutNode?.type"
         [value]="controlValue"
         (input)="updateValue($event)"
-        (change)="options.showErrors = true">
+        (blur)="options.showErrors = true">
       <span matSuffix *ngIf="options?.suffix || options?.fieldAddonRight"
         [innerHTML]="options?.suffix || options?.fieldAddonRight"></span>
       <mat-hint *ngIf="options?.description && (!options?.showErrors || !options?.errorMessage)"

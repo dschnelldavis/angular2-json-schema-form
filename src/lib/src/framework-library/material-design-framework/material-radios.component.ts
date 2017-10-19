@@ -22,7 +22,7 @@ import { buildTitleMap, hasOwn } from '../../shared';
         [attr.required]="options?.required"
         [style.flex-direction]="flexDirection"
         [name]="controlName"
-        (change)="options.showErrors = true">
+        (blur)="options.showErrors = true">
         <mat-radio-button *ngFor="let radioItem of radiosList"
           [id]="'control' + layoutNode?._id + '/' + radioItem?.name"
           [value]="radioItem?.value">

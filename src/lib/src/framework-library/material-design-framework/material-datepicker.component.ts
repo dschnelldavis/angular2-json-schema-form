@@ -24,7 +24,7 @@ import { dateToString, hasOwn, stringToDate } from '../../shared';
         [placeholder]="options?.title"
         [required]="options?.required"
         [style.width]="'100%'"
-        (change)="options.showErrors = true">
+        (blur)="options.showErrors = true">
       <input matInput #inputControl *ngIf="!boundControl"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.list]="'control' + layoutNode?._id + 'Autocomplete'"
@@ -39,8 +39,9 @@ import { dateToString, hasOwn, stringToDate } from '../../shared';
         [required]="options?.required"
         [style.width]="'100%'"
         [value]="dateValue"
-        (input)="updateValue($event)"
-        (change)="options.showErrors = true">
+        (blur)="options.showErrors = true"
+        (change)="updateValue($event)"
+        (input)="updateValue($event)">
       <span matSuffix *ngIf="options?.suffix || options?.fieldAddonRight"
         [innerHTML]="options?.suffix || options?.fieldAddonRight"></span>
       <mat-hint *ngIf="options?.description && (!options?.showErrors || !options?.errorMessage)"
@@ -92,6 +93,7 @@ export class MaterialDatepickerComponent implements OnInit, OnChanges {
   }
 
   updateValue(event) {
+    this.options.showErrors = true;
     this.jsf.updateValue(this, dateToString(event, this.options));
   }
 

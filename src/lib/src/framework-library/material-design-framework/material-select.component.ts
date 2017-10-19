@@ -24,7 +24,7 @@ import { buildTitleMap, isArray } from '../../shared';
         [placeholder]="options?.notitle ? options?.placeholder : options?.title"
         [required]="options?.required"
         [style.width]="'100%'"
-        (change)="options.showErrors = true">
+        (blur)="options.showErrors = true">
         <ng-template ngFor let-selectItem [ngForOf]="selectList">
           <mat-option *ngIf="!isArray(selectItem?.items)"
             [value]="selectItem?.value">
@@ -49,6 +49,7 @@ import { buildTitleMap, isArray } from '../../shared';
         [required]="options?.required"
         [style.width]="'100%'"
         [value]="controlValue"
+        (blur)="options.showErrors = true"
         (change)="updateValue($event)">
         <ng-template ngFor let-selectItem [ngForOf]="selectList">
           <mat-option *ngIf="!isArray(selectItem?.items)"
@@ -111,7 +112,6 @@ export class MaterialSelectComponent implements OnInit {
   updateValue(event) {
     this.options.showErrors = true;
     this.jsf.updateValue(this, event.value);
-    this.options.showErrors = true
   }
 
   isConditionallyShown(): boolean {

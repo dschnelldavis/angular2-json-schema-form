@@ -15,7 +15,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
       [id]="'control' + layoutNode?._id"
       labelPosition="after"
       [name]="controlName"
-      (change)="options.showErrors = true">
+      (blur)="options.showErrors = true">
       <span *ngIf="options?.title"
         class="checkbox-name"
         [style.display]="options?.notitle ? 'none' : ''"
@@ -29,6 +29,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
       labelPosition="after"
       [name]="controlName"
       [checked]="isChecked"
+      (blur)="options.showErrors = true"
       (change)="updateValue($event)">
       <span *ngIf="options?.title"
         class="checkbox-name"
@@ -42,7 +43,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
       [id]="'control' + layoutNode?._id"
       labelPosition="after"
       [name]="controlName"
-      (change)="options.showErrors = true">
+      (blur)="options.showErrors = true">
       <span *ngIf="options?.title"
         class="checkbox-name"
         [style.display]="options?.notitle ? 'none' : ''"
@@ -56,6 +57,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
       labelPosition="after"
       [name]="controlName"
       [checked]="isChecked"
+      (blur)="options.showErrors = true"
       (change)="updateValue($event)">
       <span *ngIf="options?.title"
         class="checkbox-name"

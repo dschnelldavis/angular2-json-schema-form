@@ -15,7 +15,7 @@ import { getControl, hasOwn, inArray, isDefined } from '../../shared';
       [min]="options?.minimum"
       [step]="options?.multipleOf || options?.step || 'any'"
       [style.width]="'100%'"
-      (change)="options.showErrors = true"></mat-slider>
+      (blur)="options.showErrors = true"></mat-slider>
     <mat-slider thumbLabel #inputControl *ngIf="!boundControl && isConditionallyShown()"
       [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
       [disabled]="controlDisabled || options?.readonly"
@@ -25,6 +25,7 @@ import { getControl, hasOwn, inArray, isDefined } from '../../shared';
       [step]="options?.multipleOf || options?.step || 'any'"
       [style.width]="'100%'"
       [value]="controlValue"
+      (blur)="options.showErrors = true"
       (change)="updateValue($event)"></mat-slider>
     <mat-error *ngIf="options?.showErrors && options?.errorMessage"
       [innerHTML]="options?.errorMessage"></mat-error>`,

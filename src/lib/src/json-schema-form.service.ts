@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AbstractControl, FormArray, FormGroup } from '@angular/forms';
+import { filter } from 'rxjs/operators/filter';
 import { Subject } from 'rxjs/Subject';
 
 import * as Ajv from 'ajv';
@@ -341,38 +342,29 @@ export class JsonSchemaFormService {
   }
 
   initializeControl(ctx: any, bind: boolean = true): boolean {
+    if (!isObject(ctx.options) || isEmpty(ctx.options)) {
+      ctx.options = _.cloneDeep(this.globalOptions);
+    }
     ctx.formControl = this.getFormControl(ctx);
     ctx.boundControl = bind && !!ctx.formControl;
     if (ctx.formControl) {
       ctx.controlName = this.getFormControlName(ctx);
       ctx.controlValue = ctx.formControl.value;
-      if (!isObject(ctx.options) || isEmpty(ctx.options)) {
-        ctx.options = _.cloneDeep(this.globalOptions);
-      }
-      ctx.formControl.valueChanges.subscribe(value => ctx.controlValue = value);
       ctx.controlDisabled = ctx.formControl.disabled;
+      ctx.options.errorMessage = ctx.formControl.status === 'VALID' ? null :
+        this.formatErrors(ctx.formControl.errors, ctx.options.errorMessages);
+      ctx.options.showErrors = this.globalOptions.validateOnRender === true ||
+        (this.globalOptions.validateOnRender === 'auto' && hasValue(ctx.controlValue));
       ctx.formControl.statusChanges.subscribe(status =>
         ctx.options.errorMessage = status === 'VALID' ? null :
           this.formatErrors(ctx.formControl.errors, ctx.options.errorMessages)
       );
-      if (this.globalOptions.validateOnRender === true || (
-        this.globalOptions.validateOnRender === 'auto' && hasValue(ctx.controlValue)
-      )) {
-        ctx.options.showErrors = true;
-        if (ctx.formControl.status === 'INVALID') {
-          ctx.options.errorMessage =
-            this.formatErrors(ctx.formControl.errors, ctx.options.errorMessages);
-        }
-      }
       ctx.formControl.valueChanges.subscribe(value => {
-        if (!_.isEqual(ctx.controlValue, value)) { ctx.controlValue = value; }
+        if (!_.isEqual(ctx.controlValue, value)) { ctx.controlValue = value }
       });
     } else {
       ctx.controlName = ctx.layoutNode.name;
       ctx.controlValue = ctx.layoutNode.value;
-      if (!isObject(ctx.options) || isEmpty(ctx.options)) {
-        ctx.options = _.cloneDeep(this.globalOptions);
-      }
       const dataPointer = this.getDataPointer(ctx);
       if (bind && dataPointer) {
         console.error(`warning: control "${dataPointer}" is not bound to the Angular FormGroup.`);

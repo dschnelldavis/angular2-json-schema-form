@@ -26,7 +26,7 @@ import { hasOwn } from '../../shared';
         [required]="options?.required"
         [style.width]="'100%'"
         [type]="'number'"
-        (change)="options.showErrors = true">
+        (blur)="options.showErrors = true">
       <input matInput #inputControl *ngIf="!boundControl"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.max]="options?.maximum"
@@ -42,7 +42,7 @@ import { hasOwn } from '../../shared';
         [type]="'number'"
         [value]="controlValue"
         (input)="updateValue($event)"
-        (change)="options.showErrors = true">
+        (blur)="options.showErrors = true">
       <span matSuffix *ngIf="options?.suffix || options?.fieldAddonRight"
         [innerHTML]="options?.suffix || options?.fieldAddonRight"></span>
       <mat-hint *ngIf="layoutNode?.type === 'range'" align="start"

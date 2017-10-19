@@ -17,6 +17,7 @@ import { buildFormGroup, buildTitleMap, hasOwn, JsonPointer } from '../../shared
         [name]="options?.name"
         [checked]="allChecked"
         [indeterminate]="someChecked"
+        (blur)="options.showErrors = true"
         (change)="updateAllValues($event)">
         <span class="checkbox-name" [innerHTML]="options?.name"></span>
       </mat-checkbox>
@@ -32,6 +33,7 @@ import { buildFormGroup, buildTitleMap, hasOwn, JsonPointer } from '../../shared
             [color]="options?.color || 'primary'"
             [disabled]="controlDisabled || options?.readonly"
             [name]="checkboxItem?.name"
+            (blur)="options.showErrors = true"
             (change)="updateValue()">
             <span class="checkbox-name" [innerHTML]="checkboxItem?.name"></span>
           </mat-checkbox>

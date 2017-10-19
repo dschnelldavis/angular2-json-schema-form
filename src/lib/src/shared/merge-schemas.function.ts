@@ -295,10 +295,13 @@ export function mergeSchemas(...schemas) {
               return { allOf: [ ...schemas ] };
             }
           break;
-          case 'title':
-            // Return the last title, overwriting any previous one
-            // Titles are not used for validation, so conflicts don't matter
-            combinedSchema.title = schemaValue;
+          case '$schema': case '$id': case 'id':
+            // Don't combine these keys
+          break;
+          case 'title': case 'description':
+            // Return the last value, overwriting any previous one
+            // These properties are not used for validation, so conflicts don't matter
+            combinedSchema[key] = schemaValue;
           break;
           case 'type':
             if (
