@@ -289,6 +289,7 @@ export class JsonSchemaFormService {
         this.schema['ui:order'] = this.schema.properties['ui:order'];
         delete this.schema.properties['ui:order'];
       }
+      this.ajv.removeSchema(this.schema);
       this.validateFormData = this.ajv.compile(this.schema);
     }
   }
