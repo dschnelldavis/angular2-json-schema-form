@@ -182,7 +182,7 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
       // Add asterisk to titles if required
       if (this.options.title && this.layoutNode.type !== 'tab' &&
         !this.options.notitle && this.options.required  &&
-        this.options.title.indexOf('*') === -1
+        !this.options.title.includes('*')
       ) {
         this.options.title += ' <strong class="text-danger">*</strong>';
       }
@@ -258,12 +258,10 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
 
       if (this.formControl) {
         this.updateHelpBlock(this.formControl.status);
-        this.formControl.statusChanges.subscribe(value => this.updateHelpBlock(value));
+        this.formControl.statusChanges.subscribe(status => this.updateHelpBlock(status));
 
         if (this.options.debug) {
           let vars: any[] = [];
-          // vars.push(this.jsf.formGroup.value[this.options.name]);
-          // vars.push(this.jsf.formGroup.controls[this.options.name]['errors']);
           this.debugOutput = _.map(vars, thisVar => JSON.stringify(thisVar, null, 2)).join('\n');
         }
       }
@@ -272,20 +270,12 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
 
   }
 
-  updateHelpBlock(value) {
-    this.options.helpBlock = this.options.description || this.options.help || false;
-    if (this.options.enableErrorState &&
-      value === 'INVALID' && this.formControl.errors &&
-      (this.formControl.dirty || this.options.feedbackOnRender)
-    ) {
-      this.options.helpBlock =
-        Object.keys(this.formControl.errors).map(error =>
-          [error, Object.keys(this.formControl.errors[error]).map(errorParameter =>
-            errorParameter + ': ' + this.formControl.errors[error][errorParameter]
-          ).join(', ')].filter(e => e).join(' - ')
-        ).join('<br>');
-
-    }
+  updateHelpBlock(status) {
+    this.options.helpBlock = status === 'INVALID' &&
+      this.options.enableErrorState && this.formControl.errors &&
+      (this.formControl.dirty || this.options.feedbackOnRender) ?
+        this.jsf.formatErrors(this.formControl.errors, this.options.errorMessages) :
+        this.options.description || this.options.help || null;
   }
 
   setTitle(): string {

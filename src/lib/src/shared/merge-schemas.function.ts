@@ -295,6 +295,11 @@ export function mergeSchemas(...schemas) {
               return { allOf: [ ...schemas ] };
             }
           break;
+          case 'title':
+            // Return the last title, overwriting any previous one
+            // Titles are not used for validation, so conflicts don't matter
+            combinedSchema.title = schemaValue;
+          break;
           case 'type':
             if (
               (isArray(schemaValue) || isString(schemaValue)) &&

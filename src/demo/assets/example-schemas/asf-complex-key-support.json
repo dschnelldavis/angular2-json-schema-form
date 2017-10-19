@@ -3,9 +3,7 @@
     "type": "object",
     "title": "Complex Key Support",
     "properties": {
-      "a[\"b\"].c": {
-        "type": "string"
-      },
+      "a[\"b\"].c": { "type": "string" },
       "simple": {
         "type": "object",
         "properties": {
@@ -24,14 +22,9 @@
               "title": "Control Characters",
               "type": "string"
             },
-            "˙∆∂∞˚¬": {
-              "type": "string"
-            }
+            "˙∆∂∞˚¬": { "type": "string" }
           },
-          "required": [
-            "a'rr[\"l",
-            "˙∆∂∞˚¬"
-          ]
+          "required": [ "a'rr[\"l", "˙∆∂∞˚¬" ]
         }
       }
     }
@@ -54,9 +47,7 @@
     },
     {
       "key": "simple",
-      "items": [
-        "simple.prøp"
-      ]
+      "items": [ "simple.prøp" ]
     }
   ]
 }

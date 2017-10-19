@@ -1,6 +1,6 @@
 import {
-  ChangeDetectionStrategy, Component, EventEmitter, Input, Output, OnChanges,
-  OnInit
+  ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter,
+  Input, Output, OnChanges, OnInit
 } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -75,6 +75,7 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
   debugOutput: any; // Debug information, if requested
   formValueSubscription: any = null;
   jsfObject: any;
+  objectWrap: boolean = false; // Is non-object input schema wrapped in an object?
 
   // Recommended inputs
   @Input() schema: any; // The JSON Schema
@@ -108,6 +109,7 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
   @Output() formLayout = new EventEmitter<any>(); // Final layout used to create form
 
   constructor(
+    private changeDetector: ChangeDetectorRef,
     private frameworkLibrary: FrameworkLibraryService,
     private widgetLibrary: WidgetLibraryService,
     private jsf: JsonSchemaFormService,
@@ -135,7 +137,9 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
   }
 
   submitForm() {
-    this.onSubmit.emit(this.jsf.validData);
+    this.onSubmit.emit(this.objectWrap ?
+      this.jsf.validData['1'] : this.jsf.validData
+    );
   }
 
   /**
@@ -291,11 +295,19 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
     if (!isEmpty(this.jsf.schema)) {
 
       // Add type = 'object' if missing
-      if (!hasOwn(this.jsf.schema, 'type') &&
-        hasOwn(this.jsf.schema, 'properties') &&
-        isObject(this.jsf.schema.properties)
-      ) {
+      if (!hasOwn(this.jsf.schema, 'type') && (
+        isObject(this.jsf.schema.properties) ||
+        isObject(this.jsf.schema.additionalProperties)
+      )) {
         this.jsf.schema.type = 'object';
+
+      // Wrap non-object schemas in object.
+      } else if (hasOwn(this.jsf.schema, 'type') &&
+        ['array', 'boolean', 'integer', 'null', 'number', 'string']
+          .includes(this.jsf.schema.type)
+      ) {
+        this.jsf.schema = { 'type': 'object', 'properties': { 1: this.jsf.schema } };
+        this.objectWrap = true;
 
       // Allow JSON schema shorthand (JSON Form style)
       } else if (!hasOwn(this.jsf.schema, 'type') ||
@@ -303,7 +315,10 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
         !hasOwn(this.jsf.schema, 'properties')
       ) {
         this.jsf.JsonFormCompatibility = true;
-        this.jsf.schema = { 'type': 'object', 'properties': this.jsf.schema };
+        this.jsf.schema = {
+          'type': 'object',
+          'properties': this.jsf.schema
+        };
       }
 
       // Update JSON Schema to version 6 format,
@@ -483,7 +498,7 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
     if (isEmpty(this.jsf.schema)) {
 
       // TODO: If full layout input (with no '*'), build schema from layout
-      // if (this.jsf.layout.indexOf('*') === -1) {
+      // if (!this.jsf.layout.includes('*')) {
       //   this.jsf.buildSchemaFromLayout();
       // } else
 
@@ -531,19 +546,31 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
       // TODO: (?) (re-)render the form
 
       // Subscribe to form changes to output live data, validation, and errors
-      this.jsf.dataChanges.subscribe(data => this.onChanges.emit(data));
+      this.jsf.dataChanges.subscribe(data =>
+        this.onChanges.emit(this.objectWrap ? data['1'] : data)
+      );
       this.jsf.isValidChanges.subscribe(isValid => this.isValid.emit(isValid));
       this.jsf.validationErrorChanges.subscribe(err => this.validationErrors.emit(err));
 
       // Output final schema, final layout, and initial data
       this.formSchema.emit(this.jsf.schema);
       this.formLayout.emit(this.jsf.layout);
-      this.onChanges.emit(this.jsf.data);
+      this.onChanges.emit(this.objectWrap ? this.jsf.data['1'] : this.jsf.data);
 
-      // If 'validateOnRender' = true, output initial validation and any errors
-      if (JsonPointer.get(this.jsf, '/globalOptions/validateOnRender')) {
+      // If validateOnRender, output initial validation and any errors
+      const validateOnRender =
+        JsonPointer.get(this.jsf, '/globalOptions/validateOnRender');
+      if (validateOnRender) {
+        const touch = (control) => {
+          if (hasValue(control.value) || validateOnRender === true) {
+            control.markAsTouched();
+          }
+          Object.keys(control.controls || {})
+            .forEach(key => touch(control.controls[key]));
+        };
+        touch(this.jsf.formGroup);
         this.isValid.emit(this.jsf.isValid);
-        this.validationErrors.emit(this.jsf.validationErrors);
+        this.validationErrors.emit(this.jsf.ajvErrors);
       }
     }
   }

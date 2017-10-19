@@ -158,8 +158,8 @@ export function convertSchemaToDraft6(schema: any, version: number = null): any 
   }
 
   // Update or remove $schema identifier
-  if (/http\:\/\/json\-schema\.org\/draft\-0[1-4]\/schema\#/
-    .test(newSchema.$schema || '')
+  if (typeof newSchema.$schema === 'string' &&
+    /http\:\/\/json\-schema\.org\/draft\-0[1-4]\/schema\#/.test(newSchema.$schema)
   ) {
     newSchema.$schema = 'http://json-schema.org/draft-06/schema#';
   } else if (newSchema.$schema) {

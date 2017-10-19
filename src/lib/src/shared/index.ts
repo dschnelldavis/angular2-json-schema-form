@@ -4,10 +4,10 @@
 export {
   _executeValidators, _executeAsyncValidators, _mergeObjects, _mergeErrors,
   isDefined, hasValue, isEmpty, isString, isNumber, isInteger, isBoolean,
-  isFunction, isObject, isArray, isMap, isSet, isPromise, getType, isType,
-  isPrimitive, toJavaScriptType, toSchemaType, _convertToPromise, inArray, xor,
-  SchemaPrimitiveType, SchemaType, JavaScriptPrimitiveType, JavaScriptType,
-  PrimitiveValue, PlainObject, IValidatorFn, AsyncIValidatorFn
+  isFunction, isObject, isArray, isMap, isSet, isPromise, isObservable, getType,
+  isType, isPrimitive, toJavaScriptType, toSchemaType, _toPromise, toObservable,
+  inArray, xor, SchemaPrimitiveType, SchemaType, JavaScriptPrimitiveType,
+  JavaScriptType, PrimitiveValue, PlainObject, IValidatorFn, AsyncIValidatorFn
 } from './validator.functions';
 
 export {
@@ -20,7 +20,7 @@ export { Pointer, JsonPointer } from './jsonpointer.functions';
 export { JsonValidators } from './json.validators';
 
 export {
-  buildSchemaFromLayout, buildSchemaFromData, getFromSchema, combineSchemas,
+  buildSchemaFromLayout, buildSchemaFromData, getFromSchema,
   removeRecursiveReferences, getInputType, checkInlineType, isInputRequired,
   updateInputOptions, getTitleMapFromOneOf, getControlValidators,
   resolveSchemaReferences, getSubSchema, combineAllOf, fixRequiredArrayProperties
@@ -31,8 +31,8 @@ export { convertSchemaToDraft6 } from './convert-schema-to-draft6.function';
 export { mergeSchemas } from './merge-schemas.function';
 
 export {
-  buildFormGroupTemplate, buildFormGroup,
-  formatFormData, getControl, setRequiredFields
+  buildFormGroupTemplate, buildFormGroup, formatFormData,
+  getControl, setRequiredFields
 } from './form-group.functions';
 
 export {

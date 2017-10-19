@@ -1,4 +1,6 @@
-import { AbstractControl } from '@angular/forms';
+import { AbstractControl, ValidationErrors } from '@angular/forms';
+import { Observable } from 'rxjs/Observable';
+import { fromPromise } from 'rxjs/observable/fromPromise';
 import { toPromise } from 'rxjs/operator/toPromise';
 
 /**
@@ -12,10 +14,11 @@ import { toPromise } from 'rxjs/operator/toPromise';
  *
  * Individual type checking:
  *   isString, isNumber, isInteger, isBoolean, isFunction, isObject, isArray,
- *   isMap, isSet, isPromise
+ *   isMap, isSet, isPromise, isObservable
  *
  * Multiple type checking and fixing:
- *   getType, isType, isPrimitive, toJavaScriptType, toSchemaType, _convertToPromise
+ *   getType, isType, isPrimitive, toJavaScriptType, toSchemaType,
+ *   _toPromise, toObservable
  *
  * Utility functions:
  *   inArray, xor
@@ -58,7 +61,7 @@ export type AsyncIValidatorFn = (c: AbstractControl, i?: boolean) => any;
  * @return {any[]} - array of nulls and error message
  */
 export function _executeValidators(
-  control: AbstractControl, validators: IValidatorFn[], invert: boolean = false
+  control: AbstractControl, validators: IValidatorFn[], invert = false
 ): PlainObject[] {
   return validators.map(validator => validator(control, invert));
 }
@@ -75,9 +78,9 @@ export function _executeValidators(
  * @return {any[]} - array of observable nulls and error message
  */
 export function _executeAsyncValidators(
-  control: AbstractControl, validators: AsyncIValidatorFn[], invert: boolean = false
+  control: AbstractControl, validators: AsyncIValidatorFn[], invert = false
 ): any[] {
-  return validators.map(v => v(control, invert));
+  return validators.map(validator => validator(control, invert));
 }
 
 /**
@@ -98,8 +101,8 @@ export function _mergeObjects(...objects: PlainObject[]): PlainObject {
         const currentValue = currentObject[key];
         const mergedValue = mergedObject[key];
         mergedObject[key] = !isDefined(mergedValue) ? currentValue :
-          key === 'not' && isBoolean(mergedValue, 'strict') && isBoolean(currentValue, 'strict') ?
-            xor(mergedValue, currentValue) :
+          key === 'not' && isBoolean(mergedValue, 'strict') &&
+            isBoolean(currentValue, 'strict') ? xor(mergedValue, currentValue) :
           getType(mergedValue) === 'object' && getType(currentValue) === 'object' ?
             _mergeObjects(mergedValue, currentValue) :
             currentValue;
@@ -119,7 +122,7 @@ export function _mergeObjects(...objects: PlainObject[]): PlainObject {
  * @return {PlainObject} - merged object, or null if no usable input objectcs
  */
 export function _mergeErrors(arrayOfErrors: PlainObject[]): PlainObject {
-  let mergedErrors: PlainObject = _mergeObjects.apply(null, arrayOfErrors);
+  const mergedErrors = _mergeObjects(...arrayOfErrors);
   return isEmpty(mergedErrors) ? null : mergedErrors;
 }
 
@@ -369,7 +372,7 @@ export function isPrimitive(value: any): boolean {
 export function toJavaScriptType(
   value: any,
   types: SchemaPrimitiveType | SchemaPrimitiveType[],
-  strictIntegers: boolean = true
+  strictIntegers = true
 ): PrimitiveValue {
   if (!isDefined(value)) { return null; }
   if (isString(types)) { types = [types]; }
@@ -441,56 +444,56 @@ export function toSchemaType(
   if (!isArray(<SchemaPrimitiveType>types)) {
     types = <SchemaPrimitiveType[]>[types];
   }
-  if ((<SchemaPrimitiveType[]>types).indexOf('null') !== -1 && !hasValue(value)) {
+  if ((<SchemaPrimitiveType[]>types).includes('null') && !hasValue(value)) {
     return null;
   }
-  if ((<SchemaPrimitiveType[]>types).indexOf('boolean') !== -1 && !isBoolean(value, 'strict')) {
+  if ((<SchemaPrimitiveType[]>types).includes('boolean') && !isBoolean(value, 'strict')) {
     return value;
   }
-  if ((<SchemaPrimitiveType[]>types).indexOf('integer') !== -1) {
+  if ((<SchemaPrimitiveType[]>types).includes('integer')) {
     let testValue = toJavaScriptType(value, 'integer');
     if (testValue !== null) { return +testValue; }
   }
-  if ((<SchemaPrimitiveType[]>types).indexOf('number') !== -1) {
+  if ((<SchemaPrimitiveType[]>types).includes('number')) {
     let testValue = toJavaScriptType(value, 'number');
     if (testValue !== null) { return +testValue; }
   }
   if (
     (isString(value) || isNumber(value, 'strict')) &&
-    (<SchemaPrimitiveType[]>types).indexOf('string') !== -1
+    (<SchemaPrimitiveType[]>types).includes('string')
   ) { // Convert number to string
     return toJavaScriptType(value, 'string');
   }
-  if ((<SchemaPrimitiveType[]>types).indexOf('boolean') !== -1 && isBoolean(value)) {
+  if ((<SchemaPrimitiveType[]>types).includes('boolean') && isBoolean(value)) {
     return toJavaScriptType(value, 'boolean');
   }
-  if ((<SchemaPrimitiveType[]>types).indexOf('string') !== -1) { // Convert null & boolean to string
+  if ((<SchemaPrimitiveType[]>types).includes('string')) { // Convert null & boolean to string
     if (value === null) { return ''; }
     let testValue = toJavaScriptType(value, 'string');
     if (testValue !== null) { return testValue; }
   }
   if ((
-    (<SchemaPrimitiveType[]>types).indexOf('number') !== -1 ||
-    (<SchemaPrimitiveType[]>types).indexOf('integer') !== -1)
+    (<SchemaPrimitiveType[]>types).includes('number') ||
+    (<SchemaPrimitiveType[]>types).includes('integer'))
   ) {
     if (value === true) { return 1; } // Convert boolean & null to number
     if (value === false || value === null || value === '') { return 0; }
   }
-  if ((<SchemaPrimitiveType[]>types).indexOf('number') !== -1) { // Convert mixed string to number
+  if ((<SchemaPrimitiveType[]>types).includes('number')) { // Convert mixed string to number
     let testValue = parseFloat(<string>value);
     if (!!testValue) { return testValue; }
   }
-  if ((<SchemaPrimitiveType[]>types).indexOf('integer') !== -1) { // Convert string or number to integer
+  if ((<SchemaPrimitiveType[]>types).includes('integer')) { // Convert string or number to integer
     let testValue = parseInt(<string>value, 10);
     if (!!testValue) { return testValue; }
   }
-  if ((<SchemaPrimitiveType[]>types).indexOf('boolean') !== -1) { // Convert anything to boolean
+  if ((<SchemaPrimitiveType[]>types).includes('boolean')) { // Convert anything to boolean
     return !!value;
   }
   if ((
-      (<SchemaPrimitiveType[]>types).indexOf('number') !== -1 ||
-      (<SchemaPrimitiveType[]>types).indexOf('integer') !== -1
-    ) && (<SchemaPrimitiveType[]>types).indexOf('null') === -1
+      (<SchemaPrimitiveType[]>types).includes('number') ||
+      (<SchemaPrimitiveType[]>types).includes('integer')
+    ) && !(<SchemaPrimitiveType[]>types).includes('null')
   ) {
     return 0; // If null not allowed, return 0 for non-convertable values
   }
@@ -500,20 +503,43 @@ export function toSchemaType(
  * 'isPromise' function
  *
  * @param {object} object
- * @return {object}
+ * @return {boolean}
  */
 export function isPromise(object: any): object is Promise<any> {
   return !!object && typeof object.then === 'function';
 }
 
 /**
- * '_convertToPromise' function
+ * 'isObservable' function
+ *
+ * @param {object} object
+ * @return {boolean}
+ */
+export function isObservable(object: any): object is Observable<any> {
+  return !!object && typeof object.subscribe === 'function';
+}
+
+/**
+ * '_toPromise' function
  *
  * @param {object} object
  * @return {Promise<any>}
  */
-export function _convertToPromise(object: any): Promise<any> {
+export function _toPromise(object: any): Promise<any> {
   return isPromise(object) ? object : toPromise.call(object);
+}
+
+/**
+ * 'toObservable' function
+ *
+ * @param {object} object
+ * @return {Observable<any>}
+ */
+export function toObservable(object: any): Observable<any> {
+  const observable = isPromise(object) ? fromPromise(object) : object;
+  if (isObservable(observable)) { return observable; }
+  console.error('toObservable error: Expected validator to return Promise or Observable.');
+  return new Observable();
 }
 
 /**
@@ -524,8 +550,8 @@ export function _convertToPromise(object: any): Promise<any> {
  *
  * If the optional third parameter allIn is set to TRUE, and the item to find
  * is an array, then the function returns true only if all elements from item
- * are found in the list, and false if any element is not found. If the item to
- * find is not an array, setting allIn to TRUE has no effect.
+ * are found in the array list, and false if any element is not found. If the
+ * item to find is not an array, setting allIn to TRUE has no effect.
  *
  * @param {any|any[]} item - the item to search for
  * @param {any[]} array - the array to search
@@ -533,17 +559,12 @@ export function _convertToPromise(object: any): Promise<any> {
  * @return {boolean} - true if item(s) in array, false otherwise
  */
 export function inArray(
-  item: any|any[], array: any[], allIn: boolean = false
+  item: any|any[], array: any[], allIn = false
 ): boolean {
   if (!isDefined(item) || !isArray(array)) { return false; }
-  if (isArray(item)) {
-    for (let subItem of item) {
-      if (xor(array.indexOf(subItem) !== -1, allIn)) { return !allIn; }
-    }
-    return allIn;
-  } else {
-    return array.indexOf(item) !== -1;
-  }
+  return isArray(item) ?
+    item[allIn ? 'every' : 'some'](subItem => array.includes(subItem)) :
+    array.includes(item);
 }
 
 /**

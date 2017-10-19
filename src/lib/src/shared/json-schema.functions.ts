@@ -20,8 +20,6 @@ import { JsonValidators } from './json.validators';
  *
  * getFromSchema:
  *
- * combineSchemas:
- *
  * removeRecursiveReferences:
  *
  * getInputType:
@@ -205,103 +203,6 @@ export function getFromSchema(
 }
 
 /**
- * 'combineSchemas' function
- *
- * Attempt to combine two schemas from an allOf array into a single schema
- * with the same rules.
- *
- * @param {any} schema1 -
- * @param {any} schema2 -
- * @return {any} -
- */
-export function combineSchemas(schema1, schema2) {
-  if (isEmpty(schema1)) { return _.cloneDeep(schema2); }
-  if (isEmpty(schema2)) { return _.cloneDeep(schema1); }
-  if (!isObject(schema1) || !isObject(schema2)) {
-    return { 'allOf': [schema1, schema2] };
-  }
-  const combinedSchema = _.cloneDeep(schema1);
-  for (let key of Object.keys(schema2)) {
-    let value1 = schema1[key];
-    let value2 = schema2[key];
-    if (!hasOwn(combinedSchema, key) || _.isEqual(value1, value2)) {
-      combinedSchema[key] = value2;
-    } else {
-      let combined = true;
-      switch (key) {
-        case 'enum': case 'type': case 'anyOf': case 'oneOf':
-        case 'additionalProperties':
-          // If arrays, keep items common to both arrays
-          if (isArray(value1) && isArray(value2)) {
-            combinedSchema[key] = value1.filter(item1 =>
-              value2.findIndex(item2 => _.isEqual(item1, item2)) > -1
-            );
-          // If objects, combine
-          } else if (isObject(value1) && isObject(value2)) {
-            combinedSchema[key] = combineSchemas(value1, value2);
-          // If object + array, combine object with each array item
-          } else if (isArray(value1) && isObject(value2)) {
-            combinedSchema[key] = value1.map(item => combineSchemas(item, value2));
-          } else if (isObject(value1) && isArray(value2)) {
-            combinedSchema[key] = value2.map(item => combineSchemas(item, value1));
-          } else {
-            combined = false;
-          }
-        break;
-        case 'allOf': case 'required':
-          // If arrays, include all unique items from both arrays
-          if (isArray(value1) && isArray(value2)) {
-            combinedSchema[key] = [...value1, ...value2.filter(item2 =>
-              value1.findIndex(item1 => _.isEqual(item2, item1)) === -1
-            )];
-          } else {
-            combined = false;
-          }
-        break;
-        case 'multipleOf':
-          // If numbers, set to least common multiple
-          if (isNumber(value1) && isNumber(value2)) {
-            const gcd = (x, y) => !y ? x : gcd(y, x % y);
-            const lcm = (x, y) => (x * y) / gcd(x, y);
-            combinedSchema[key] = lcm(value1, value2);
-          } else {
-            combined = false;
-          }
-        break;
-        case 'maximum': case 'exclusiveMaximum': case 'maxLength':
-        case 'maxItems': case 'maxProperties':
-          // If numbers, set to lowest value
-          if (isNumber(value1) && isNumber(value2)) {
-            combinedSchema[key] = Math.min(value1, value2);
-          } else {
-            combined = false;
-          }
-        break;
-        case 'minimum': case 'exclusiveMinimum': case 'minLength':
-        case 'minItems': case 'minProperties':
-          // If numbers, set to highest value
-          if (isNumber(value1) && isNumber(value2)) {
-            combinedSchema[key] = Math.max(value1, value2);
-          } else {
-            combined = false;
-          }
-        break;
-        case 'uniqueItems':
-          // Set true if either true
-          combinedSchema[key] = !!value1 || !!value2;
-        break;
-        default:
-          combined = false;
-      }
-      if (!combined) {
-        return { 'allOf': [schema1, schema2] };
-      }
-    }
-  }
-  return combinedSchema;
-};
-
-/**
  * 'removeRecursiveReferences' function
  *
  * Checks a JSON Pointer against a map of recursive references and returns
@@ -392,9 +293,8 @@ export function getInputType(schema: any, layoutNode: any = null): string {
         checkInlineType('checkboxes', schema, layoutNode) : 'array';
     }
     if (schemaType === 'null') { return 'hidden'; }
-    if (hasOwn(schema, 'enum') ||
-      hasOwn(layoutNode, 'titleMap') ||
-      getTitleMapFromOneOf(schema, null, true)
+    if (hasOwn(schema, 'enum') || getTitleMapFromOneOf(schema, null, true) ||
+      (hasOwn(layoutNode, 'options') && hasOwn(layoutNode.options, 'titleMap'))
     ) { return 'select'; }
     if (schemaType === 'number' || schemaType === 'integer') {
       return (schemaType === 'integer' || hasOwn(schema, 'multipleOf')) &&
@@ -612,13 +512,14 @@ export function getTitleMapFromOneOf(
   schema: any = {}, flatList: boolean = null, validateOnly: boolean = false
 ) {
   let titleMap = null;
-  if (isArray(schema.oneOf) && schema.oneOf.every(item => item.title)) {
-    if (schema.oneOf.every(item => isArray(item.enum) && item.enum.length === 1)) {
+  const oneOf = schema.oneOf || schema.anyOf || null;
+  if (isArray(oneOf) && oneOf.every(item => item.title)) {
+    if (oneOf.every(item => isArray(item.enum) && item.enum.length === 1)) {
       if (validateOnly) { return true; }
-      titleMap = schema.oneOf.map(item => ({ name: item.title, value: item.enum[0] }));
-    } else if (schema.oneOf.every(item => item.const)) {
+      titleMap = oneOf.map(item => ({ name: item.title, value: item.enum[0] }));
+    } else if (oneOf.every(item => item.const)) {
       if (validateOnly) { return true; }
-      titleMap = schema.oneOf.map(item => ({ name: item.title, value: item.const }));
+      titleMap = oneOf.map(item => ({ name: item.title, value: item.const }));
     }
 
     // if flatList !== false and some items have colons, make grouped map
@@ -846,9 +747,9 @@ export function getSubSchema(
           if (Object.keys(subSchema).length === 1) {
             return refSchema;
           } else {
-            subSchema = _.cloneDeep(subSchema);
-            delete subSchema.$ref;
-            return mergeSchemas(subSchema, refSchema);
+            const extraKeys = { ...subSchema };
+            delete extraKeys.$ref;
+            return mergeSchemas(refSchema, extraKeys);
           }
         }
       }

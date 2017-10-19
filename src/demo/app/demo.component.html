@@ -160,14 +160,16 @@
         </strong>
         <span *ngIf="!formIsValid && !prettyValidationErrors">n/a</span>
         <span *ngIf="prettyValidationErrors">— errors from validationErrors():</span>
-        <pre *ngIf="prettyValidationErrors" class="bg-danger">{{prettyValidationErrors}}</pre>
-      </div>
+        <div *ngIf="prettyValidationErrors"
+          class="data-bad"
+          [innerHTML]="prettyValidationErrors"></div>
+      </div><br>
       <div>
         Live data — from onChanges():
         <pre
           [class.data-good]="!prettyValidationErrors && prettyLiveFormData !== '{}'"
           [class.data-bad]="prettyValidationErrors">{{prettyLiveFormData}}</pre>
-      </div>
+      </div><br>
       <div>
         Submitted data — from onSubmit():
         <pre [class.data-good]="prettySubmittedFormData !== 'null'">{{prettySubmittedFormData}}</pre>

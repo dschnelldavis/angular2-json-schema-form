@@ -153,7 +153,7 @@ export class WidgetLibraryService {
       // Resolve aliases
       if (typeof widget === 'string') {
         let usedAliases: string[] = [];
-        while (typeof widget === 'string' && usedAliases.indexOf(widget) === -1) {
+        while (typeof widget === 'string' && !usedAliases.includes(widget)) {
           usedAliases.push(widget);
           widget = this.activeWidgets[widget];
         }

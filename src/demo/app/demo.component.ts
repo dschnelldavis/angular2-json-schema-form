@@ -7,6 +7,7 @@ import { Http } from '@angular/http';
 import 'rxjs/add/operator/map';
 
 import { Examples } from './example-schemas.model';
+import { JsonPointer } from '../../lib/src/shared';
 
 @Component({
   selector: 'demo',
@@ -44,9 +45,9 @@ export class DemoComponent implements OnInit {
     output: true
   };
 
-  formActive: boolean = false;
+  formActive = false;
   jsonFormSchema: string;
-  jsonFormValid: boolean = false;
+  jsonFormValid = false;
   jsonFormStatusMessage: string = 'Loading form...';
   jsonFormObject: any;
   jsonFormOptions: any = {
@@ -58,7 +59,7 @@ export class DemoComponent implements OnInit {
   };
   liveFormData: any = {};
   formValidationErrors: any;
-  formIsValid: boolean = null;
+  formIsValid = null;
   submittedFormData: any = null;
   aceEditorOptions: any = {
     highlightActiveLine: true,
@@ -126,12 +127,22 @@ export class DemoComponent implements OnInit {
 
   get prettyValidationErrors() {
     if (!this.formValidationErrors) { return null; }
-    let prettyValidationErrors = '';
+    let errorArray = [];
     for (let error of this.formValidationErrors) {
-      prettyValidationErrors += (error.dataPath.length ?
-        error.dataPath.slice(1) + ' ' + error.message : error.message) + '\n';
+      let message = error.message;
+      let dataPathArray = JsonPointer.parse(error.dataPath);
+      if (dataPathArray.length) {
+        let field = dataPathArray[0];
+        for (let i = 1; i < dataPathArray.length; i++) {
+          const key = dataPathArray[i];
+          field += /^\d+$/.test(key) ? `[${key}]` : `.${key}`;
+        }
+        errorArray.push(`${field}: ${message}`);
+      } else {
+        errorArray.push(message);
+      }
     }
-    return prettyValidationErrors;
+    return errorArray.join('<br>');
   }
 
   loadSelectedExample(

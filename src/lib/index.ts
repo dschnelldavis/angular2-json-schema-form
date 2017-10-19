@@ -1,10 +1,10 @@
 export {
   _executeValidators, _executeAsyncValidators, _mergeObjects, _mergeErrors,
   isDefined, hasValue, isEmpty, isString, isNumber, isInteger, isBoolean,
-  isFunction, isObject, isArray, isMap, isSet, isPromise, getType, isType,
-  isPrimitive, toJavaScriptType, toSchemaType, _convertToPromise, inArray, xor,
-  SchemaPrimitiveType, SchemaType, JavaScriptPrimitiveType, JavaScriptType,
-  PrimitiveValue, PlainObject, IValidatorFn, AsyncIValidatorFn
+  isFunction, isObject, isArray, isMap, isSet, isPromise, isObservable, getType,
+  isType, isPrimitive, toJavaScriptType, toSchemaType, _toPromise, toObservable,
+  inArray, xor, SchemaPrimitiveType, SchemaType, JavaScriptPrimitiveType,
+  JavaScriptType, PrimitiveValue, PlainObject, IValidatorFn, AsyncIValidatorFn
 } from './src/shared/validator.functions';
 export {
   addClasses, copy, forEach, forEachCopy, hasOwn, mergeFilteredObject,
@@ -13,20 +13,21 @@ export {
 export { Pointer, JsonPointer } from './src/shared/jsonpointer.functions';
 export { JsonValidators } from './src/shared/json.validators';
 export {
-  buildSchemaFromLayout, buildSchemaFromData, getFromSchema, getInputType,
-  removeRecursiveReferences, checkInlineType, isInputRequired,
-  updateInputOptions, getControlValidators, resolveSchemaReferences,
-  getSubSchema, combineAllOf
+  buildSchemaFromLayout, buildSchemaFromData, getFromSchema,
+  removeRecursiveReferences, getInputType, checkInlineType, isInputRequired,
+  updateInputOptions, getTitleMapFromOneOf, getControlValidators,
+  resolveSchemaReferences, getSubSchema, combineAllOf, fixRequiredArrayProperties
 } from './src/shared/json-schema.functions';
 export { convertSchemaToDraft6 } from './src/shared/convert-schema-to-draft6.function';
 export { mergeSchemas } from './src/shared/merge-schemas.function';
 export {
-  buildFormGroupTemplate, buildFormGroup, setRequiredFields,
-  formatFormData, getControl
+  buildFormGroupTemplate, buildFormGroup, formatFormData,
+  getControl, setRequiredFields
 } from './src/shared/form-group.functions';
 export {
-  buildLayout, buildLayoutFromSchema, mapLayout, buildTitleMap
+  buildLayout, buildLayoutFromSchema, mapLayout, getLayoutNode, buildTitleMap
 } from './src/shared/layout.functions';
+export { dateToString, stringToDate, findDate } from './src/shared/date.functions';
 
 export { AddReferenceComponent } from './src/widget-library/add-reference.component';
 export { ButtonComponent } from './src/widget-library/button.component';

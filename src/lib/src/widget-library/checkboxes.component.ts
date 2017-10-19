@@ -86,9 +86,9 @@ export class CheckboxesComponent implements OnInit {
     );
     if (this.boundControl) {
       const formArray = this.jsf.getFormControl(this);
-      for (let checkboxItem of this.checkboxList) {
-        checkboxItem.checked = formArray.value.indexOf(checkboxItem.value) !== -1;
-      }
+      this.checkboxList.forEach(checkboxItem =>
+        checkboxItem.checked = formArray.value.includes(checkboxItem.value)
+      );
     }
   }
 
