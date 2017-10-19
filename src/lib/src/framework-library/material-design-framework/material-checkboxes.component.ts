@@ -37,11 +37,14 @@ import { buildFormGroup, buildTitleMap, hasOwn, JsonPointer } from '../../shared
           </mat-checkbox>
         </li>
       </ul>
+      <mat-error *ngIf="options?.showErrors && options?.errorMessage"
+        [innerHTML]="options?.errorMessage"></mat-error>
     </div>`,
   styles: [`
     .checkbox-list { list-style-type: none; }
     .horizontal-list > li { display: inline-block; margin-right: 10px; zoom: 1; }
     .checkbox-name { white-space: nowrap; }
+    mat-error { font-size: 75%; }
   `],
 })
 export class MaterialCheckboxesComponent implements OnInit {
@@ -90,12 +93,14 @@ export class MaterialCheckboxesComponent implements OnInit {
   }
 
   updateValue() {
+    this.options.showErrors = true;
     if (this.boundControl) {
       this.jsf.updateArrayCheckboxList(this, this.checkboxList);
     }
   }
 
   updateAllValues(event: any) {
+    this.options.showErrors = true;
     this.checkboxList.forEach(t => t.checked = event.checked);
     this.updateValue();
   }

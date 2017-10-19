@@ -43,14 +43,17 @@ import { dateToString, hasOwn, stringToDate } from '../../shared';
         (change)="options.showErrors = true">
       <span matSuffix *ngIf="options?.suffix || options?.fieldAddonRight"
         [innerHTML]="options?.suffix || options?.fieldAddonRight"></span>
-      <mat-hint *ngIf="options?.description" align="end"
-        [innerHTML]="options?.description"></mat-hint>
-      <mat-error *ngIf="options?.showErrors && options?.errorMessage"
-        [innerHTML]="options?.errorMessage"></mat-error>
+      <mat-hint *ngIf="options?.description && (!options?.showErrors || !options?.errorMessage)"
+        align="end" [innerHTML]="options?.description"></mat-hint>
       <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
     </mat-form-field>
     <mat-datepicker #picker
-      (selectedChanged)="updateValue($event)"></mat-datepicker>`,
+      (selectedChanged)="updateValue($event)"></mat-datepicker>
+    <mat-error *ngIf="options?.showErrors && options?.errorMessage"
+      [innerHTML]="options?.errorMessage"></mat-error>`,
+  styles: [`
+    mat-error { font-size: 75%; margin-top: -1rem; margin-bottom: 0.5rem; }
+  `],
 })
 export class MaterialDatepickerComponent implements OnInit, OnChanges {
   formControl: AbstractControl;

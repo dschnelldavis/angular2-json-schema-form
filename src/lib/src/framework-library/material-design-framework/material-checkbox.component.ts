@@ -14,7 +14,8 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
       [color]="options?.color || 'primary'"
       [id]="'control' + layoutNode?._id"
       labelPosition="after"
-      [name]="controlName">
+      [name]="controlName"
+      (change)="options.showErrors = true">
       <span *ngIf="options?.title"
         class="checkbox-name"
         [style.display]="options?.notitle ? 'none' : ''"
@@ -40,7 +41,8 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
       [color]="options?.color || 'primary'"
       [id]="'control' + layoutNode?._id"
       labelPosition="after"
-      [name]="controlName">
+      [name]="controlName"
+      (change)="options.showErrors = true">
       <span *ngIf="options?.title"
         class="checkbox-name"
         [style.display]="options?.notitle ? 'none' : ''"
@@ -59,8 +61,13 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
         class="checkbox-name"
         [style.display]="options?.notitle ? 'none' : ''"
         [innerHTML]="options?.title"></span>
-    </mat-slide-toggle>`,
-  styles: [` .checkbox-name { white-space: nowrap; } `],
+    </mat-slide-toggle>
+    <mat-error *ngIf="options?.showErrors && options?.errorMessage"
+      [innerHTML]="options?.errorMessage"></mat-error>`,
+  styles: [`
+    .checkbox-name { white-space: nowrap; }
+    mat-error { font-size: 75%; }
+  `],
 })
 export class MaterialCheckboxComponent implements OnInit {
   formControl: AbstractControl;
@@ -89,8 +96,7 @@ export class MaterialCheckboxComponent implements OnInit {
       this.controlValue = false;
       this.jsf.updateValue(this, this.falseValue);
     }
-    if (
-      this.layoutNode.type === 'slide-toggle' ||
+    if (this.layoutNode.type === 'slide-toggle' ||
       this.layoutNode.format === 'slide-toggle'
     ) {
       this.showSlideToggle = true;
@@ -98,6 +104,7 @@ export class MaterialCheckboxComponent implements OnInit {
   }
 
   updateValue(event) {
+    this.options.showErrors = true;
     this.jsf.updateValue(this, event.checked ? this.trueValue : this.falseValue);
   }
 

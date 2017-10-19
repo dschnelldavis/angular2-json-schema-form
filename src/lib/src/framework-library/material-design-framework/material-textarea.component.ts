@@ -45,11 +45,14 @@ import { hasOwn } from '../../shared';
         (change)="options.showErrors = true"></textarea>
       <span matSuffix *ngIf="options?.suffix || options?.fieldAddonRight"
         [innerHTML]="options?.suffix || options?.fieldAddonRight"></span>
-      <mat-hint *ngIf="options?.description" align="end"
-        [innerHTML]="options?.description"></mat-hint>
-      <mat-error *ngIf="options?.showErrors && options?.errorMessage"
-        [innerHTML]="options?.errorMessage"></mat-error>
-    </mat-form-field>`,
+      <mat-hint *ngIf="options?.description && (!options?.showErrors || !options?.errorMessage)"
+        align="end" [innerHTML]="options?.description"></mat-hint>
+    </mat-form-field>
+    <mat-error *ngIf="options?.showErrors && options?.errorMessage"
+      [innerHTML]="options?.errorMessage"></mat-error>`,
+  styles: [`
+    mat-error { font-size: 75%; margin-top: -1rem; margin-bottom: 0.5rem; }
+  `],
 })
 export class MaterialTextareaComponent implements OnInit {
   formControl: AbstractControl;

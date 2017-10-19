@@ -14,7 +14,8 @@ import { getControl, hasOwn, inArray, isDefined } from '../../shared';
       [max]="options?.maximum"
       [min]="options?.minimum"
       [step]="options?.multipleOf || options?.step || 'any'"
-      [style.width]="'100%'"></mat-slider>
+      [style.width]="'100%'"
+      (change)="options.showErrors = true"></mat-slider>
     <mat-slider thumbLabel #inputControl *ngIf="!boundControl && isConditionallyShown()"
       [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
       [disabled]="controlDisabled || options?.readonly"
@@ -24,7 +25,10 @@ import { getControl, hasOwn, inArray, isDefined } from '../../shared';
       [step]="options?.multipleOf || options?.step || 'any'"
       [style.width]="'100%'"
       [value]="controlValue"
-      (change)="updateValue($event)"></mat-slider>`,
+      (change)="updateValue($event)"></mat-slider>
+    <mat-error *ngIf="options?.showErrors && options?.errorMessage"
+      [innerHTML]="options?.errorMessage"></mat-error>`,
+    styles: [` mat-error { font-size: 75%; } `],
 })
 export class MaterialSliderComponent implements OnInit {
   formControl: AbstractControl;
@@ -53,6 +57,7 @@ export class MaterialSliderComponent implements OnInit {
   }
 
   updateValue(event) {
+    this.options.showErrors = true;
     this.jsf.updateValue(this, event.value);
   }
 

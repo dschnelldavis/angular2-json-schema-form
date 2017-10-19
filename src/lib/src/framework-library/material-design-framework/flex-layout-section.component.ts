@@ -1,5 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { AbstractControl } from '@angular/forms';
+
 import { hasOwn } from './../../shared/utility.functions';
+import { isObject } from './../../shared/validator.functions';
 import { JsonSchemaFormService } from '../../json-schema-form.service';
 
 @Component({
@@ -30,11 +33,13 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
         [style.justify-content]="getFlexAttribute('justify-content')"
         [style.align-items]="getFlexAttribute('align-items')"
         [style.align-content]="getFlexAttribute('align-content')"
-        [fxLayout]="options.fxLayout"
-        [fxLayoutWrap]="options.fxLayoutWrap"
-        [fxLayoutGap]="options.fxLayoutGap"
-        [fxLayoutAlign]="options.fxLayoutAlign"
-        [attr.fxFlexFill]="options.fxLayoutAlign"></flex-layout-root-widget>
+        [fxLayout]="options?.fxLayout"
+        [fxLayoutWrap]="options?.fxLayoutWrap"
+        [fxLayoutGap]="options?.fxLayoutGap"
+        [fxLayoutAlign]="options?.fxLayoutAlign"
+        [attr.fxFlexFill]="options?.fxLayoutAlign"></flex-layout-root-widget>
+      <mat-error *ngIf="options?.showErrors && options?.errorMessage"
+        [innerHTML]="options?.errorMessage"></mat-error>
     </div>
 
     <fieldset *ngIf="containerType === 'fieldset' && isConditionallyShown()"
@@ -63,11 +68,13 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
         [style.justify-content]="getFlexAttribute('justify-content')"
         [style.align-items]="getFlexAttribute('align-items')"
         [style.align-content]="getFlexAttribute('align-content')"
-        [fxLayout]="options.fxLayout"
-        [fxLayoutWrap]="options.fxLayoutWrap"
-        [fxLayoutGap]="options.fxLayoutGap"
-        [fxLayoutAlign]="options.fxLayoutAlign"
-        [attr.fxFlexFill]="options.fxLayoutAlign"></flex-layout-root-widget>
+        [fxLayout]="options?.fxLayout"
+        [fxLayoutWrap]="options?.fxLayoutWrap"
+        [fxLayoutGap]="options?.fxLayoutGap"
+        [fxLayoutAlign]="options?.fxLayoutAlign"
+        [attr.fxFlexFill]="options?.fxLayoutAlign"></flex-layout-root-widget>
+      <mat-error *ngIf="options?.showErrors && options?.errorMessage"
+        [innerHTML]="options?.errorMessage"></mat-error>
     </fieldset>
 
     <mat-card *ngIf="containerType === 'card' && isConditionallyShown()"
@@ -101,13 +108,17 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
             [style.justify-content]="getFlexAttribute('justify-content')"
             [style.align-items]="getFlexAttribute('align-items')"
             [style.align-content]="getFlexAttribute('align-content')"
-            [fxLayout]="options.fxLayout"
-            [fxLayoutWrap]="options.fxLayoutWrap"
-            [fxLayoutGap]="options.fxLayoutGap"
-            [fxLayoutAlign]="options.fxLayoutAlign"
-            [attr.fxFlexFill]="options.fxLayoutAlign"></flex-layout-root-widget>
+            [fxLayout]="options?.fxLayout"
+            [fxLayoutWrap]="options?.fxLayoutWrap"
+            [fxLayoutGap]="options?.fxLayoutGap"
+            [fxLayoutAlign]="options?.fxLayoutAlign"
+            [attr.fxFlexFill]="options?.fxLayoutAlign"></flex-layout-root-widget>
           </fieldset>
       </mat-card-content>
+      <mat-card-footer>
+        <mat-error *ngIf="options?.showErrors && options?.errorMessage"
+          [innerHTML]="options?.errorMessage"></mat-error>
+      </mat-card-footer>
     </mat-card>`,
   styles: [`
     fieldset { border: 0; margin: 0; padding: 0; }
@@ -116,6 +127,11 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
   `],
 })
 export class FlexLayoutSectionComponent implements OnInit {
+  formControl: AbstractControl;
+  controlName: string;
+  controlValue: any;
+  controlDisabled: boolean = false;
+  boundControl: boolean = false;
   options: any;
   expanded: boolean = true;
   containerType: string = 'div';
@@ -130,6 +146,10 @@ export class FlexLayoutSectionComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    // TODO: fix initializeControl and display error messages
+    // this.jsf.initializeControl(this);
+    this.options = this.layoutNode.options;
+    this.expanded = !(this.options || {}).expandable;
     switch (this.layoutNode.type) {
       case 'fieldset': case 'advancedfieldset': case 'authfieldset':
       case 'optionfieldset': case 'selectfieldset':
@@ -141,16 +161,14 @@ export class FlexLayoutSectionComponent implements OnInit {
       default: // 'div', 'section', 'flex', 'array', 'tab', 'conditional', 'actions', 'tagsinput'
         this.containerType = 'div';
     }
-    this.options = this.layoutNode.options || {};
-    this.expanded = !this.options.expandable;
   }
 
   legendDisplay(): string {
-    return (this.options.notitle || !this.options.title) ? 'none' : '';
+    return ((this.options || {}).notitle || !(this.options || {}).title) ? 'none' : '';
   }
 
   expand() {
-    if (this.options.expandable) { this.expanded = !this.expanded; }
+    if ((this.options || {}).expandable) { this.expanded = !this.expanded; }
   }
 
   // Set attributes for flexbox container
@@ -158,8 +176,8 @@ export class FlexLayoutSectionComponent implements OnInit {
   getFlexAttribute(attribute: string) {
     const flexActive: boolean =
       this.layoutNode.type === 'flex' ||
-      !!this.options.displayFlex ||
-      this.options.display === 'flex';
+      !!(this.options || {}).displayFlex ||
+      (this.options || {}).display === 'flex';
     // if (attribute !== 'flex' && !flexActive) { return null; }
     switch (attribute) {
       case 'is-flex':
@@ -168,10 +186,10 @@ export class FlexLayoutSectionComponent implements OnInit {
         return flexActive ? 'flex' : 'initial';
       case 'flex-direction': case 'flex-wrap':
         const index = ['flex-direction', 'flex-wrap'].indexOf(attribute);
-        return (this.options['flex-flow'] || '').split(/\s+/)[index] ||
-          this.options[attribute] || ['column', 'nowrap'][index];
+        return ((this.options || {})['flex-flow'] || '').split(/\s+/)[index] ||
+          (this.options || {})[attribute] || ['column', 'nowrap'][index];
       case 'justify-content': case 'align-items': case 'align-content':
-        return this.options[attribute];
+        return (this.options || {})[attribute];
     }
   }
 
@@ -181,7 +199,7 @@ export class FlexLayoutSectionComponent implements OnInit {
     if (this.data && hasOwn(this.options, 'condition')) {
       const model = this.data;
       /* tslint:disable */
-      eval('result = ' + this.options.condition);
+      eval('result = ' + (this.options || {}).condition);
       /* tslint:enable */
     }
     return result;

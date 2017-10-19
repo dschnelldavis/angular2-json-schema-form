@@ -9,7 +9,7 @@ import { toTitleCase } from '../../shared';
   selector: 'material-design-framework',
   template: `
     <div
-      [class.array-item]="layoutNode.arrayItem && layoutNode.type !== '$ref'"
+      [class.array-item]="layoutNode?.arrayItem && layoutNode?.type !== '$ref'"
       [orderable]="isOrderable"
       [formID]="formID"
       [dataIndex]="dataIndex"
@@ -29,7 +29,7 @@ import { toTitleCase } from '../../shared';
         [layoutIndex]="layoutIndex"
         [layoutNode]="layoutNode"></select-widget-widget>
     </div>
-    <div class="spacer" *ngIf="layoutNode.arrayItem && layoutNode.type !== '$ref'"></div>`,
+    <div class="spacer" *ngIf="layoutNode?.arrayItem && layoutNode?.type !== '$ref'"></div>`,
   styles: [`
     .array-item {
       border-radius: 2px;
@@ -92,7 +92,7 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
   ) { }
 
   get showRemoveButton(): boolean {
-    if (!this.options.removable || this.options.readonly ||
+    if (!this.layoutNode || !this.options.removable || this.options.readonly ||
       this.layoutNode.type === '$ref'
     ) { return false; }
     if (this.layoutNode.recursiveReference) { return true; }
@@ -107,13 +107,6 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     this.initializeControl();
-    if (this.layoutNode.arrayItem && this.layoutNode.type !== '$ref') {
-      this.parentArray = this.jsf.getParentNode(this);
-      if (this.parentArray) {
-        this.isOrderable = this.layoutNode.arrayItemType === 'list' &&
-          !this.options.readonly && this.parentArray.options.orderable;
-      }
-    }
   }
 
   ngOnChanges() {
@@ -232,7 +225,18 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
         default:
           this.controlType = this.layoutNode.type;
       }
+
+      if (this.layoutNode.arrayItem && this.layoutNode.type !== '$ref') {
+        this.parentArray = this.jsf.getParentNode(this);
+        if (this.parentArray) {
+          this.isOrderable = this.layoutNode.arrayItemType === 'list' &&
+            !this.options.readonly && this.parentArray.options.orderable;
+        }
+      }
+
       this.controlInitialized = true;
+    } else {
+      this.options = {};
     }
   }
 

@@ -11,13 +11,13 @@ import { hasOwn } from '../../shared';
       [style.flex-grow]="getFlexAttribute(layoutNode, 'flex-grow')"
       [style.flex-shrink]="getFlexAttribute(layoutNode, 'flex-shrink')"
       [style.flex-basis]="getFlexAttribute(layoutNode, 'flex-basis')"
-      [style.align-self]="(layoutNode.options || {})['align-self']"
-      [style.order]="(layoutNode.options || {}).order"
-      [fxFlex]="(layoutNode.options || {}).fxFlex"
-      [fxFlexOrder]="(layoutNode.options || {}).fxFlexOrder"
-      [fxFlexOffset]="(layoutNode.options || {}).fxFlexOffset"
-      [fxFlexAlign]="(layoutNode.options || {}).fxFlexAlign">
-      <select-framework-widget *ngIf="isConditionallyShown(layoutNode)"
+      [style.align-self]="(layoutNode?.options || {})['align-self']"
+      [style.order]="layoutNode?.options?.order"
+      [fxFlex]="layoutNode?.options?.fxFlex"
+      [fxFlexOrder]="layoutNode?.options?.fxFlexOrder"
+      [fxFlexOffset]="layoutNode?.options?.fxFlexOffset"
+      [fxFlexAlign]="layoutNode?.options?.fxFlexAlign">
+      <select-framework-widget *ngIf="isConditionallyShown(layoutNode, i)"
         [formID]="formID"
         [data]="data"
         [dataIndex]="layoutNode?.arrayItem ? (dataIndex || []).concat(i) : (dataIndex || [])"
@@ -27,8 +27,7 @@ import { hasOwn } from '../../shared';
   changeDetection: ChangeDetectionStrategy.Default,
 })
 export class FlexLayoutRootComponent implements OnInit {
-  options: any;
-  parentNode: any;
+  arrayIndex: number;
   @Input() formID: number;
   @Input() dataIndex: number[];
   @Input() layoutIndex: number[];
@@ -40,16 +39,16 @@ export class FlexLayoutRootComponent implements OnInit {
     private jsf: JsonSchemaFormService
   ) { }
 
-  ngOnInit() {
-    // this.parentNode = this.jsf.getParentNode(this);
-  }
+  ngOnInit() { }
 
   // Set attributes for flexbox child
   // (container attributes are set in flex-layout-section.component)
   getFlexAttribute(node: any, attribute: string) {
+    if (!node || !attribute) { return null; }
     const index = ['flex-grow', 'flex-shrink', 'flex-basis'].indexOf(attribute);
-    return ((node.options || {}).flex || '').split(/\s+/)[index] ||
-      (node.options || {})[attribute] || ['1', '1', 'auto'][index];
+    const options = node.options || {};
+    return (options.flex || '').split(/\s+/)[index] || options[attribute] ||
+      ['1', '1', 'auto'][index];
   }
 
   trackByItem(layoutNode: any) {
@@ -60,13 +59,15 @@ export class FlexLayoutRootComponent implements OnInit {
     this.jsf.removeItem(item);
   }
 
-  isConditionallyShown(layoutNode: any): boolean {
-    let result: boolean = true;
-    if (this.data && hasOwn(layoutNode, 'condition')) {
+  isConditionallyShown(layoutNode: any, arrayIndex: number): boolean {
+    let result = true;
+    if (this.data && hasOwn(layoutNode, 'options') &&
+      hasOwn(layoutNode.options, 'condition')
+    ) {
       const model = this.data;
       try {
         /* tslint:disable */
-        eval('result = ' + layoutNode.condition);
+        eval('result = ' + layoutNode.options.condition);
         /* tslint:enable */
       } catch (error) {
         console.error('Error evaluating condition:');

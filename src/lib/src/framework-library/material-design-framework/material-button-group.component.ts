@@ -30,7 +30,10 @@ import { buildTitleMap, hasOwn } from '../../shared';
           <span [innerHTML]="radioItem?.name"></span>
         </mat-button-toggle>
       </mat-button-toggle-group>
+      <mat-error *ngIf="options?.showErrors && options?.errorMessage"
+        [innerHTML]="options?.errorMessage"></mat-error>
     </div>`,
+    styles: [` mat-error { font-size: 75%; } `],
 })
 export class MaterialButtonGroupComponent implements OnInit {
   formControl: AbstractControl;
@@ -61,6 +64,7 @@ export class MaterialButtonGroupComponent implements OnInit {
   }
 
   updateValue(value) {
+    this.options.showErrors = true;
     this.jsf.updateValue(this, value);
   }
 

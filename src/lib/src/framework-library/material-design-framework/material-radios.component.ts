@@ -21,7 +21,8 @@ import { buildTitleMap, hasOwn } from '../../shared';
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.required]="options?.required"
         [style.flex-direction]="flexDirection"
-        [name]="controlName">
+        [name]="controlName"
+        (change)="options.showErrors = true">
         <mat-radio-button *ngFor="let radioItem of radiosList"
           [id]="'control' + layoutNode?._id + '/' + radioItem?.name"
           [value]="radioItem?.value">
@@ -43,10 +44,13 @@ import { buildTitleMap, hasOwn } from '../../shared';
           <span [innerHTML]="radioItem?.name"></span>
         </mat-radio-button>
       </mat-radio-group>
+      <mat-error *ngIf="options?.showErrors && options?.errorMessage"
+        [innerHTML]="options?.errorMessage"></mat-error>
     </div>`,
   styles: [`
     mat-radio-group { display: inline-flex; }
     mat-radio-button { margin: 2px; }
+    mat-error { font-size: 75%; }
   `]
 })
 export class MaterialRadiosComponent implements OnInit {
@@ -81,6 +85,7 @@ export class MaterialRadiosComponent implements OnInit {
   }
 
   updateValue(value) {
+    this.options.showErrors = true;
     this.jsf.updateValue(this, value);
   }
 
