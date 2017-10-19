@@ -3,6 +3,8 @@ import { Observable } from 'rxjs/Observable';
 import { forkJoin } from 'rxjs/observable/forkJoin';
 import { map } from 'rxjs/operator/map';
 
+import * as _ from 'lodash';
+
 import {
   _executeValidators, _executeAsyncValidators, _mergeObjects, _mergeErrors,
   isEmpty, isDefined, hasValue, isString, isNumber, isBoolean, isArray,
@@ -35,27 +37,29 @@ import { forEachCopy } from './utility.functions';
  * JSON Schema pattern, which allows partial matches, rather than the behavior
  * of an HTML input control pattern, which does not.
  *
- * This library replaces Angular's 8 validators and 1 validator combination
- * function with the following 21 validators and 4 transformation functions:
+ * This library replaces Angular's validators and combination functions
+ * with the following validators and transformation functions:
  *
  * Validators:
  *   For all formControls:     required (*), type, enum, const
  *   For text formControls:    minLength (*), maxLength (*), pattern (*), format
- *   For numeric formControls: minimum, maximum, multipleOf
+ *   For numeric formControls: maximum, exclusiveMaximum,
+ *                             minimum, exclusiveMinimum, multipleOf
  *   For formGroup objects:    minProperties, maxProperties, dependencies
- *   For formArray arrays:     minItems, maxItems, uniqueItems
+ *   For formArray arrays:     minItems, maxItems, uniqueItems, contains
  *   Additional validators:    min (*), max (*), requiredTrue (*), email (*)
  * (Validators originally included with Angular are maked with (*).)
  *
- * The additional validators are included with Angular, but not used by JSON Schema.
- * Their JSON Schema equivalents are:
- *   min(number):   minimum(number)
- *   max(number):   maximum(number)
- *   requiredTrue:  const(true)
- *   email:         format('email')
+ * Additional validators included with Angular, but not used by JSON Schema,
+ * and their JSON Schema equivalents:
+ *   Angular function    JSON Schema equivalent
+ *     min(number):        minimum(number)
+ *     max(number):        maximum(number)
+ *     requiredTrue():     const(true)
+ *     email():            format('email')
  *
  * NOTE: The dependencies validator is not complete.
- * NOTE: The enum validator does not work with objects.
+ * NOTE: The contains validator is not complete.
  *
  * Validator transformation functions:
  *   composeAnyOf, composeOneOf, composeAllOf, composeNot
@@ -97,12 +101,12 @@ export class JsonValidators {
    *
    * For all formControls:     required, type, enum, const
    * For text formControls:    minLength, maxLength, pattern, format
-   * For numeric formControls: minimum, maximum, multipleOf
+   * For numeric formControls: maximum, exclusiveMaximum,
+   *                           minimum, exclusiveMinimum, multipleOf
    * For formGroup objects:    minProperties, maxProperties, dependencies
-   * For formArray arrays:     minItems, maxItems, uniqueItems
+   * For formArray arrays:     minItems, maxItems, uniqueItems, contains
    *
    * TODO: finish dependencies validator
-   * TODO: update enum to work with formGroup objects
    */
 
   /**
@@ -175,8 +179,6 @@ export class JsonValidators {
    * Converts types as needed to allow string inputs to still correctly
    * match number, boolean, and null enum values.
    *
-   * TODO: modify to work with objects
-   *
    * @param {any[]} allowedValues - array of acceptable values
    * @return {IValidatorFn}
    */
@@ -187,10 +189,11 @@ export class JsonValidators {
       const currentValue: any = control.value;
       const isEqual = (enumValue, inputValue) =>
         enumValue === inputValue ||
-        isNumber(enumValue) && +inputValue === +enumValue ||
-        isBoolean(enumValue, 'strict') &&
-          toJavaScriptType(inputValue, 'boolean') === enumValue ||
-        enumValue === null && !hasValue(inputValue);
+        (isNumber(enumValue) && +inputValue === +enumValue) ||
+        (isBoolean(enumValue, 'strict') &&
+          toJavaScriptType(inputValue, 'boolean') === enumValue) ||
+        (enumValue === null && !hasValue(inputValue)) ||
+        _.isEqual(enumValue, inputValue);
       const isValid = isArray(currentValue) ?
         currentValue.every(inputValue => allowedValues.some(enumValue =>
           isEqual(enumValue, inputValue)
@@ -368,11 +371,12 @@ export class JsonValidators {
   /**
    * 'minimum' validator
    *
-   * Requires a control to have a numeric value not greater than
-   * a specified minimum amount.
+   * Requires a control's numeric value to be greater than or equal to
+   * a minimum amount.
    *
-   * The optional second parameter indicates whether the valid range excludes
-   * the minimum value. It defaults to false, and includes the minimum.
+   * Any non-numeric value is also valid (because a non-numeric value doesn't
+   * have a minimum, according to the HTML forms spec).
+   * https://www.w3.org/TR/html5/forms.html#attr-input-max
    *
    * @param {number} minimum - minimum allowed value
    * @param {boolean = false} exclusiveMinimum - include minimum value itself?
@@ -382,34 +386,76 @@ export class JsonValidators {
     return (control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
       let currentValue: number = control.value;
-      let isValid = isNumber(currentValue) && exclusiveMinimum ?
-        currentValue > minimumValue : currentValue >= minimumValue;
+      let isValid = !isNumber(currentValue) || currentValue >= minimumValue;
       return xor(isValid, invert) ?
-        null : { 'minimum': { minimumValue, exclusiveMinimum, currentValue } };
+        null : { 'minimum': { minimumValue, currentValue } };
+    };
+  }
+
+  /**
+   * 'exclusiveMinimum' validator
+   *
+   * Requires a control's numeric value to be less than a maximum amount.
+   *
+   * Any non-numeric value is also valid (because a non-numeric value doesn't
+   * have a maximum, according to the HTML forms spec).
+   * https://www.w3.org/TR/html5/forms.html#attr-input-max
+   *
+   * @param {number} exclusiveMinimumValue - maximum allowed value
+   * @return {IValidatorFn}
+   */
+  static exclusiveMinimum(exclusiveMinimumValue: number): IValidatorFn {
+    return (control: AbstractControl, invert = false): ValidationErrors|null => {
+      if (isEmpty(control.value)) { return null; }
+      let currentValue: number = control.value;
+      let isValid = !isNumber(currentValue) || +currentValue < exclusiveMinimumValue;
+      return xor(isValid, invert) ?
+        null : { 'exclusiveMinimum': { exclusiveMinimumValue, currentValue } };
     };
   }
 
   /**
    * 'maximum' validator
    *
-   * Requires a control to have a numeric value not less than
-   * a specified maximum amount.
+   * Requires a control's numeric value to be less than or equal to
+   * a maximum amount.
    *
-   * The optional second parameter indicates whether the valid range excludes
-   * the maximum value. It defaults to false, and includes the maximum.
+   * Any non-numeric value is also valid (because a non-numeric value doesn't
+   * have a maximum, according to the HTML forms spec).
+   * https://www.w3.org/TR/html5/forms.html#attr-input-max
    *
    * @param {number} maximumValue - maximum allowed value
-   * @param {boolean = false} exclusiveMaximum - include maximum value itself?
    * @return {IValidatorFn}
    */
-  static maximum(maximumValue: number, exclusiveMaximum = false): IValidatorFn {
+  static maximum(maximumValue: number): IValidatorFn {
     return (control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
       let currentValue: number = control.value;
-      let isValid = isNumber(currentValue) && exclusiveMaximum ?
-        currentValue < maximumValue : currentValue <= maximumValue;
+      let isValid = !isNumber(currentValue) || +currentValue <= maximumValue;
       return xor(isValid, invert) ?
-        null : { 'maximum': { maximumValue, exclusiveMaximum, currentValue } };
+        null : { 'maximum': { maximumValue, currentValue } };
+    };
+  }
+
+  /**
+   * 'exclusiveMaximum' validator
+   *
+   * Requires a control's numeric value to be less than a maximum amount.
+   *
+   * Any non-numeric value is also valid (because a non-numeric value doesn't
+   * have a maximum, according to the HTML forms spec).
+   * https://www.w3.org/TR/html5/forms.html#attr-input-max
+   *
+   * @param {number} exclusiveMaximumValue - maximum allowed value
+   * @return {IValidatorFn}
+   */
+  static exclusiveMaximum(exclusiveMaximumValue: number): IValidatorFn {
+    return (control: AbstractControl, invert = false): ValidationErrors|null => {
+      if (isEmpty(control.value)) { return null; }
+      let currentValue: number = control.value;
+      let isValid = !isNumber(currentValue) || +currentValue < exclusiveMaximumValue;
+      return xor(isValid, invert) ?
+        null : { 'exclusiveMaximum': { exclusiveMaximumValue, currentValue } };
     };
   }
 
@@ -595,6 +641,30 @@ export class JsonValidators {
       let isValid = !duplicateItems.length;
       return xor(isValid, invert) ?
         null : { 'uniqueItems': { duplicateItems } };
+    };
+  }
+
+  /**
+   * 'contains' validator
+   *
+   * TODO: Complete this validator
+   *
+   * Requires values in a form array to be unique.
+   *
+   * @param {boolean = true} unique? - true to validate, false to disable
+   * @return {IValidatorFn}
+   */
+  static contains(requiredItem = true): IValidatorFn {
+    if (!requiredItem) { return JsonValidators.nullValidator; }
+    return (control: AbstractControl, invert = false): ValidationErrors|null => {
+      if (isEmpty(control.value) || !isArray(control.value)) { return null; }
+      const currentItems = control.value;
+      // const isValid = currentItems.some(item =>
+      //
+      // );
+      const isValid = true;
+      return xor(isValid, invert) ?
+        null : { 'contains': { requiredItem, currentItems } };
     };
   }
 

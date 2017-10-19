@@ -16,7 +16,7 @@
 export function convertSchemaToDraft6(schema: any, version: number = null): any {
 
   if (typeof schema !== 'object') { return schema; }
-  if (Array.isArray(schema)) {
+  if (typeof schema.map === 'function') {
     return [ ...schema.map(subSchema => convertSchemaToDraft6(subSchema, version)) ];
   }
   const newSchema = { ...schema };
@@ -36,7 +36,7 @@ export function convertSchemaToDraft6(schema: any, version: number = null): any 
 
   // Convert v1-v3 extends to allOf
   if (newSchema.extends) {
-    newSchema.allOf = Array.isArray(newSchema.extends) ?
+    newSchema.allOf = typeof newSchema.extends.map === 'function' ?
       newSchema.extends.map(subSchema => convertSchemaToDraft6(subSchema, version)) :
       [ convertSchemaToDraft6(newSchema.extends, version) ];
     delete newSchema.extends;
@@ -46,24 +46,24 @@ export function convertSchemaToDraft6(schema: any, version: number = null): any 
   if (newSchema.disallow) {
     if (typeof newSchema.disallow === 'string') {
       newSchema.not = { type: newSchema.disallow };
-    } else if (Array.isArray(newSchema.disallow)) {
+    } else if (typeof newSchema.disallow.map === 'function') {
       newSchema.not = {
         anyOf: newSchema.disallow
-          .map(type => typeof type === 'string' ? { type } : type)
+          .map(type => typeof type === 'object' ? type : { type })
       };
     }
     delete newSchema.disallow;
-  }
-
-  // Delete v3 boolean required key
-  if (typeof newSchema.required === 'boolean') {
-    delete newSchema.required;
   }
 
   // Delete v1-v2 boolean optional key
   if (typeof newSchema.optional === 'boolean') {
     delete newSchema.optional;
     if (!version) { version = 2; }
+  }
+
+  // Delete v3 boolean required key
+  if (typeof newSchema.required === 'boolean') {
+    delete newSchema.required;
   }
 
   // Convert v3 string dependencies to arrays
@@ -87,14 +87,6 @@ export function convertSchemaToDraft6(schema: any, version: number = null): any 
     if (!version || version === 2) { version = 1; }
   }
 
-  // Fix v3-v4 boolean exclusiveMinimum
-  if (newSchema.minimum && newSchema.exclusiveMinimum === true) {
-    newSchema.exclusiveMinimum = newSchema.minimum;
-    delete newSchema.minimum;
-  } else if (typeof newSchema.exclusiveMinimum !== 'number') {
-    delete newSchema.exclusiveMinimum;
-  }
-
   // Convert v1-v2 boolean minimumCanEqual to exclusiveMinimum
   if (newSchema.minimum && newSchema.minimumCanEqual === false) {
     newSchema.exclusiveMinimum = newSchema.minimum;
@@ -105,12 +97,12 @@ export function convertSchemaToDraft6(schema: any, version: number = null): any 
     if (!version) { version = 2; }
   }
 
-  // Fix v3-v4 boolean exclusiveMaximum
-  if (newSchema.maximum && newSchema.exclusiveMaximum === true) {
-    newSchema.exclusiveMaximum = newSchema.maximum;
-    delete newSchema.maximum;
-  } else if (typeof newSchema.exclusiveMaximum !== 'number') {
-    delete newSchema.exclusiveMaximum;
+  // Convert v3-v4 boolean exclusiveMinimum to numeric
+  if (newSchema.minimum && newSchema.exclusiveMinimum === true) {
+    newSchema.exclusiveMinimum = newSchema.minimum;
+    delete newSchema.minimum;
+  } else if (typeof newSchema.exclusiveMinimum !== 'number') {
+    delete newSchema.exclusiveMinimum;
   }
 
   // Convert v1-v2 boolean maximumCanEqual to exclusiveMaximum
@@ -123,9 +115,17 @@ export function convertSchemaToDraft6(schema: any, version: number = null): any 
     if (!version) { version = 2; }
   }
 
+  // Convert v3-v4 boolean exclusiveMaximum to numeric
+  if (newSchema.maximum && newSchema.exclusiveMaximum === true) {
+    newSchema.exclusiveMaximum = newSchema.maximum;
+    delete newSchema.maximum;
+  } else if (typeof newSchema.exclusiveMaximum !== 'number') {
+    delete newSchema.exclusiveMaximum;
+  }
+
   // Move v3 boolean required from individual items to required array
-  // Move v1-v2 boolean optional from individual items to required array
-  // Move v1-v2 requires from individual items to dependencies object
+  // Convert v1-v2 boolean optional from individual items to required array
+  // Convert v1-v2 requires from individual items to dependencies object
   if (newSchema.properties) {
     const requiredKeys = new Set(newSchema.required || []);
 
@@ -184,7 +184,7 @@ export function convertSchemaToDraft6(schema: any, version: number = null): any 
     .forEach(key => {
       if (
         [ 'definitions', 'dependencies', 'properties', 'patternProperties' ]
-          .includes(key) && !Array.isArray(newSchema[key])
+          .includes(key) && typeof newSchema[key].map !== 'function'
       ) {
         const newKey = {};
         for (const subKey of Object.keys(newSchema[key])) {
