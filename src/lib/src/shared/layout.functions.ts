@@ -347,7 +347,10 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
         }
 
         // If needed, add button to add items to array
-        if (newNode.options.addable !== false) {
+        if (newNode.options.addable !== false &&
+          newNode.options.minItems < newNode.options.maxItems &&
+          (newNode.items[newNode.items.length - 1] || {}).type !== '$ref'
+        ) {
           let buttonText: string = 'Add';
           if (newNode.options.title) {
             if (/^add\b/i.test(newNode.options.title)) {

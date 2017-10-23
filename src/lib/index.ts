@@ -64,6 +64,7 @@ export { MaterialButtonComponent } from './src/framework-library/material-design
 export { MaterialButtonGroupComponent } from './src/framework-library/material-design-framework/material-button-group.component';
 export { MaterialCheckboxComponent } from './src/framework-library/material-design-framework/material-checkbox.component';
 export { MaterialCheckboxesComponent } from './src/framework-library/material-design-framework/material-checkboxes.component';
+export { MaterialChipListComponent } from './src/framework-library/material-design-framework/material-chip-list.component';
 export { MaterialDatepickerComponent } from './src/framework-library/material-design-framework/material-datepicker.component';
 export { MaterialFileComponent } from './src/framework-library/material-design-framework/material-file.component';
 export { MaterialInputComponent } from './src/framework-library/material-design-framework/material-input.component';
@@ -71,6 +72,7 @@ export { MaterialNumberComponent } from './src/framework-library/material-design
 export { MaterialRadiosComponent } from './src/framework-library/material-design-framework/material-radios.component';
 export { MaterialSelectComponent } from './src/framework-library/material-design-framework/material-select.component';
 export { MaterialSliderComponent } from './src/framework-library/material-design-framework/material-slider.component';
+export { MaterialStepperComponent } from './src/framework-library/material-design-framework/material-stepper.component';
 export { MaterialTabsComponent } from './src/framework-library/material-design-framework/material-tabs.component';
 export { MaterialTextareaComponent } from './src/framework-library/material-design-framework/material-textarea.component';
 export { MaterialDesignFrameworkComponent } from './src/framework-library/material-design-framework/material-design-framework.component';

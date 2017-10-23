@@ -14,11 +14,12 @@ import { Bootstrap3FrameworkComponent } from './bootstrap-3-framework/bootstrap-
 import { FlexLayoutRootComponent } from './material-design-framework/flex-layout-root.component';
 import { FlexLayoutSectionComponent } from './material-design-framework/flex-layout-section.component';
 import { MaterialAddReferenceComponent } from './material-design-framework/material-add-reference.component';
-export { MaterialAnyOfComponent } from './material-design-framework/material-any-of.component';
+import { MaterialAnyOfComponent } from './material-design-framework/material-any-of.component';
 import { MaterialButtonComponent } from './material-design-framework/material-button.component';
 import { MaterialButtonGroupComponent } from './material-design-framework/material-button-group.component';
 import { MaterialCheckboxComponent } from './material-design-framework/material-checkbox.component';
 import { MaterialCheckboxesComponent } from './material-design-framework/material-checkboxes.component';
+import { MaterialChipListComponent } from './material-design-framework/material-chip-list.component';
 import { MaterialDatepickerComponent } from './material-design-framework/material-datepicker.component';
 import { MaterialFileComponent } from './material-design-framework/material-file.component';
 import { MaterialInputComponent } from './material-design-framework/material-input.component';
@@ -26,6 +27,7 @@ import { MaterialNumberComponent } from './material-design-framework/material-nu
 import { MaterialRadiosComponent } from './material-design-framework/material-radios.component';
 import { MaterialSelectComponent } from './material-design-framework/material-select.component';
 import { MaterialSliderComponent } from './material-design-framework/material-slider.component';
+import { MaterialStepperComponent } from './material-design-framework/material-stepper.component';
 import { MaterialTabsComponent } from './material-design-framework/material-tabs.component';
 import { MaterialTextareaComponent } from './material-design-framework/material-textarea.component';
 import { MaterialDesignFrameworkComponent } from './material-design-framework/material-design-framework.component';
@@ -69,6 +71,7 @@ export class FrameworkLibraryService {
         'root':         FlexLayoutRootComponent,
         'section':      FlexLayoutSectionComponent,
         '$ref':         MaterialAddReferenceComponent,
+        'any-of':       MaterialAnyOfComponent,
         'number':       MaterialNumberComponent,
         'slider':       MaterialSliderComponent,
         'text':         MaterialInputComponent,
@@ -80,7 +83,9 @@ export class FrameworkLibraryService {
         'select':       MaterialSelectComponent,
         'textarea':     MaterialTextareaComponent,
         'checkboxes':   MaterialCheckboxesComponent,
+        'chip-list':    MaterialChipListComponent,
         'radios':       MaterialRadiosComponent,
+        'stepper':      MaterialStepperComponent,
         'tabs':         MaterialTabsComponent,
         'card':         'section',
         'alt-date':     'date',
@@ -90,6 +95,8 @@ export class FrameworkLibraryService {
         'color':        'none',
         'hidden':       'none',
         'image':        'none',
+        'tagsinput':    'chip-list',
+        'wizard':       'stepper',
       },
       stylesheets: [
         '//fonts.googleapis.com/icon?family=Material+Icons',
