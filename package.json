@@ -1,6 +1,6 @@
 {
   "name": "angular2-json-schema-form",
-  "version": "0.5.0-alpha.12",
+  "version": "0.5.0-alpha.13",
   "author": {
     "name": "David Schnell-Davis",
     "email": "dschnelldavis@gmail.com"
@@ -48,7 +48,7 @@
     "build": "node build.js",
     "postbuild": "rimraf out-ngc",
     "prepublishOnly": "npm run build",
-    "publish": "cd dist && npm run publish",
+    "publish": "cd dist && npm publish",
     "preng-build": "rimraf dist/*",
     "ng-build": "ng build",
     "predeploy": "npm run ng-build",
