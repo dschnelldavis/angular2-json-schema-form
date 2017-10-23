@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
+import { hasOwn } from '../shared';
 
 @Component({
   selector: 'submit-widget',
@@ -41,9 +42,9 @@ export class SubmitComponent implements OnInit {
   ngOnInit() {
     this.options = this.layoutNode.options || {};
     this.jsf.initializeControl(this);
-    if (this.options.hasOwnProperty('disabled')) {
+    if (hasOwn(this.options, 'disabled')) {
       this.controlDisabled = this.options.disabled;
-    } else if (this.jsf.globalOptions.disableInvalidSubmit) {
+    } else if (this.jsf.globalSettings.disableInvalidSubmit) {
       this.controlDisabled = !this.jsf.isValid;
       this.jsf.isValidChanges.subscribe(isValid => this.controlDisabled = !isValid);
     }

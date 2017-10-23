@@ -41,15 +41,18 @@ export function addClasses(
  * it returns the value.
  *
  * @param {Object|Array|string|number|boolean|null} object - The object to copy
+ * @param {boolean = false} errors - Show errors?
  * @return {Object|Array|string|number|boolean|null} - The copied object
  */
-export function copy(object: any): any {
+export function copy(object: any, errors = false): any {
   if (typeof object !== 'object' || object === null) { return object; }
   if (isMap(object))    { return new Map(object); }
   if (isSet(object))    { return new Set(object); }
   if (isArray(object))  { return [ ...object ];   }
   if (isObject(object)) { return { ...object };   }
-  console.error('copy error: Object to copy must be a JavaScript object or value.');
+  if (errors) {
+    console.error('copy error: Object to copy must be a JavaScript object or value.');
+  }
   return object;
 }
 
@@ -71,11 +74,12 @@ export function copy(object: any): any {
  *
  * @param {Object|Array} object - The object or array to iterate over
  * @param {function} fn - the iterator funciton to call on each item
+ * @param {boolean = false} errors - Show errors?
  * @return {void}
  */
 export function forEach(
   object: any, fn: (v: any, k?: string | number, c?: any, rc?: any) => any,
-  recurse: boolean | string = false, rootObject: any = object
+  recurse: boolean | string = false, rootObject: any = object, errors = false
 ): void {
   if (isEmpty(object)) { return; }
   if ((isObject(object) || isArray(object)) && typeof fn === 'function') {
@@ -89,12 +93,16 @@ export function forEach(
         forEach(value, fn, recurse, rootObject);
       }
     }
-  } else if (typeof fn !== 'function') {
-    console.error('forEach error: Iterator must be a function.');
-    console.error(fn);
-  } else {
-    console.error('forEach error: Input object must be an object or array.');
-    console.error(object);
+  }
+  if (errors) {
+    if (typeof fn !== 'function') {
+      console.error('forEach error: Iterator must be a function.');
+      console.error('function', fn);
+    }
+    if (!isObject(object) && !isArray(object)) {
+      console.error('forEach error: Input object must be an object or array.');
+      console.error('object', object);
+    }
   }
 }
 
@@ -108,13 +116,14 @@ export function forEach(
  *
  * Does NOT recursively iterate over items in sub-objects or sub-arrays.
  *
- * @param {Object|Array} object - The object or array to iterate over
+ * @param {Object | Array} object - The object or array to iterate over
  * @param {function} fn - The iterator funciton to call on each item
- * @param {any = null} context - Context in which to call the iterator function
- * @return {Object|Array} - The resulting object or array
+ * @param {boolean = false} errors - Show errors?
+ * @return {Object | Array} - The resulting object or array
  */
 export function forEachCopy(
-  object: any, fn: (v: any, k?: string | number, o?: any, p?: string) => any
+  object: any, fn: (v: any, k?: string | number, o?: any, p?: string) => any,
+  errors = false
 ): any {
   if (!hasValue(object)) { return; }
   if ((isObject(object) || isArray(object)) && typeof fn !== 'function') {
@@ -124,12 +133,15 @@ export function forEachCopy(
     }
     return newObject;
   }
-  if (typeof fn !== 'function') {
-    console.error('forEachCopy error: Iterator must be a function.');
-    console.error(fn);
-  } else {
-    console.error('forEachCopy error: Input object must be an object or array.');
-    console.error(object);
+  if (errors) {
+    if (typeof fn !== 'function') {
+      console.error('forEachCopy error: Iterator must be a function.');
+      console.error('function', fn);
+    }
+    if (!isObject(object) && !isArray(object)) {
+      console.error('forEachCopy error: Input object must be an object or array.');
+      console.error('object', object);
+    }
   }
 }
 
@@ -143,13 +155,13 @@ export function forEachCopy(
  * @return {boolean} - true if object has property, false if not
  */
 export function hasOwn(object: any, property: string): boolean {
-  if (!object || !property || (!isObject(object) && !isArray(object))) {
-    return false;
-  }
+  if (!object || !['number', 'string', 'symbol'].includes(typeof property) ||
+    (!isObject(object) && !isArray(object) && !isMap(object) && !isSet(object))
+  ) { return false; }
+  if (isMap(object) || isSet(object)) { return object.has(property); }
   if (typeof property === 'number') {
+    if (isArray(object)) { return object[<number>property]; }
     property = property + '';
-  } else if (typeof property !== 'string' && typeof property !== 'symbol') {
-    return false;
   }
   return object.hasOwnProperty(property);
 }
@@ -252,9 +264,9 @@ export function commonItems(...arrays): string[] {
   let returnItems = null;
   for (let array of arrays) {
     if (isString(array)) { array = [array]; }
-    returnItems = returnItems ?
-      returnItems.filter(item => array.includes(item)) :
-      [ ...array ];
+    returnItems = returnItems === null ? [ ...array ] :
+      returnItems.filter(item => array.includes(item));
+    if (!returnItems.length) { return []; }
   }
   return returnItems;
 }

@@ -39,7 +39,7 @@ import { addClasses, inArray, JsonPointer, toTitleCase } from '../../shared';
         [class]="options?.labelHtmlClass"
         [class.sr-only]="options?.notitle"
         [innerHTML]="options?.title"></label>
-      <p *ngIf="layoutNode?.type === 'submit' && jsf?.globalOptions?.fieldsRequired">
+      <p *ngIf="layoutNode?.type === 'submit' && jsf?.globalSettings?.fieldsRequired">
         <strong class="text-danger">*</strong> = required fields
       </p>
       <div [class.input-group]="options?.fieldAddonLeft || options?.fieldAddonRight">

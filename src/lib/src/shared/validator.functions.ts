@@ -255,6 +255,10 @@ export function isSet(item: any): boolean {
     Object.prototype.toString.call(item) === '[object Set]';
 }
 
+export function isSymbol(item: any): boolean {
+  return typeof item === 'symbol';
+}
+
 /**
  * 'getType' function
  *
@@ -265,7 +269,7 @@ export function isSet(item: any): boolean {
  * in non-boolean formats, use isBoolean() instead).
  *
  * If passed a second optional parameter of 'strict', it will only detect
- * numbers and integers if they are JavaScript numbers.
+ * numbers and integers if they are formatted as JavaScript numbers.
  *
  * Examples:
  * getType('10.5') = 'number'

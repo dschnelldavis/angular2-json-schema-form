@@ -28,11 +28,11 @@ export const Examples: any = {
       // { name: 'Select Control Widgets',          file: 'ng-jsf-select-widget-examples', },
       { name: 'Data Only (no Schema or Layout)', file: 'ng-jsf-data-only', },
       // { name: 'Layout Only (no Schema or Data)', file: 'ng-jsf-layout-only', },
-      // { name: 'JSON Meta-Schema - Version 6',    file: 'json-schema-draft06', },
-      // { name: 'JSON Meta-Schema - Version 4',    file: 'json-schema-draft04', },
-      // { name: 'JSON Meta-Schema - Version 3',    file: 'json-schema-draft03', },
-      // { name: 'JSON Meta-Schema - Version 2',    file: 'json-schema-draft02', },
-      // { name: 'JSON Meta-Schema - Version 1',    file: 'json-schema-draft01', },
+      // { name: 'JSON Meta-Schema - Draft 6',    file: 'json-schema-draft06', },
+      // { name: 'JSON Meta-Schema - Draft 4',    file: 'json-schema-draft04', },
+      // { name: 'JSON Meta-Schema - Draft 3',    file: 'json-schema-draft03', },
+      // { name: 'JSON Meta-Schema - Draft 2',    file: 'json-schema-draft02', },
+      // { name: 'JSON Meta-Schema - Draft 1',    file: 'json-schema-draft01', },
     ]
   },
   'asf': {

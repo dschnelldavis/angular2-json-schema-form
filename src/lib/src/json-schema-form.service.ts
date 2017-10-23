@@ -6,7 +6,6 @@ import { Subject } from 'rxjs/Subject';
 import * as Ajv from 'ajv';
 import * as _ from 'lodash';
 
-import { convertSchemaToDraft6 } from './shared/convert-schema-to-draft6.function';
 import {
   hasValue, isArray, isDefined, isEmpty, isObject, isString
 } from './shared/validator.functions';
@@ -35,7 +34,7 @@ export class JsonSchemaFormService {
   AngularSchemaFormCompatibility: boolean = false;
   tpldata: any = {};
 
-  ajvOptions: any = { allErrors: true, jsonPointers: true, unknownFormats: 'ignore' };
+  ajvOptions: any = { allErrors: true,  unknownFormats: 'ignore' }; // jsonPointers: true,
   ajv: any = new Ajv(this.ajvOptions); // AJV: Another JSON Schema Validator
 
   validateFormData: any = null; // Compiled AJV function to validate active form's schema
@@ -62,12 +61,13 @@ export class JsonSchemaFormService {
   dataMap: Map<string, any> = new Map(); // Maps paths in data model to schema and formGroup paths
   dataRecursiveRefMap: Map<string, string> = new Map(); // Maps recursive reference points in data model
   schemaRecursiveRefMap: Map<string, string> = new Map(); // Maps recursive reference points in schema
-  layoutRefLibrary: any = {}; // Library of layout nodes for adding to form
   schemaRefLibrary: any = {}; // Library of schemas for resolving schema $refs
+  layoutRefLibrary: any = { '': null }; // Library of layout nodes for adding to form
   templateRefLibrary: any = {}; // Library of formGroup templates for adding to form
+  hasRootReference: boolean = false; // Does the form include a recursive reference to itself?
 
   // Default global form options
-  globalOptionDefaults: any = {
+  defaultGlobalSettings: any = {
     addSubmit: 'auto', // Add a submit button if layout does not have one?
       // for addSubmit: true = always, false = never,
       // 'auto' = only if layout is undefined (form is built from schema alone)
@@ -79,12 +79,17 @@ export class JsonSchemaFormService {
     pristine: { errors: true, success: true },
     supressPropertyTitles: false,
     disableInvalidSubmit: true, // Disable submit if form invalid?
-    setSchemaDefaults: true,
+    setSchemaDefaults: 'auto', // Set fefault values from schema?
+      // true = always set / false = never set
+      // 'auto' = set in addable components, and everywhere if initialValues not available
+    setLayoutDefaults: 'auto', // Set fefault values from layout?
+      // true = always set / false = never set
+      // 'auto' = set in addable components, and everywhere if initialValues not available
     validateOnRender: 'auto', // Validate fields immediately, before they are touched?
-      // for validateOnRender: true = validate all fields immediately
+      // true = validate all fields immediately
       // false = only validate fields after they are touched by user
       // 'auto' = validate fields with values immediately, empty fields after they are touched
-    formDefaults: { // Default options for form controls
+    defaultOptions: { // Default options for form controls
       listItems: 1, // Number of list items to initially add to arrays with no default value
       addable: true, // Allow adding items to an array or $ref point?
       orderable: true, // Allow reordering items within an array?
@@ -143,7 +148,7 @@ export class JsonSchemaFormService {
       },
     },
   };
-  globalOptions: any;
+  globalSettings: any;
 
   getData() { return this.data; }
 
@@ -174,15 +179,12 @@ export class JsonSchemaFormService {
     this.layoutRefLibrary = {};
     this.schemaRefLibrary = {};
     this.templateRefLibrary = {};
-    this.globalOptions = _.cloneDeep(this.globalOptionDefaults);
-  }
-
-  convertSchemaToDraft6() {
-    this.schema = convertSchemaToDraft6(this.schema);
+    this.globalSettings = _.cloneDeep(this.defaultGlobalSettings);
   }
 
   buildFormGroupTemplate(initialValues: any = null, setValues: boolean = true) {
     this.formGroupTemplate = buildFormGroupTemplate(this, initialValues, setValues);
+
   }
 
   /**
@@ -221,7 +223,7 @@ export class JsonSchemaFormService {
     // Format raw form data to correct data types
     this.data = formatFormData(
       newValue, this.dataMap, this.dataRecursiveRefMap,
-      this.arrayMap, this.globalOptions.returnEmptyFields
+      this.arrayMap, this.globalSettings.returnEmptyFields
     );
     this.isValid = this.validateFormData(this.data);
     this.validData = this.isValid ? this.data : null;
@@ -265,18 +267,18 @@ export class JsonSchemaFormService {
   setOptions(newOptions: any) {
     if (isObject(newOptions)) {
       const addOptions = { ...newOptions }
-      if (isObject(addOptions.formDefaults)) {
-        Object.assign(this.globalOptions.formDefaults, addOptions.formDefaults);
-        delete addOptions.formDefaults;
+      if (isObject(addOptions.defaultOptions)) {
+        Object.assign(this.globalSettings.defaultOptions, addOptions.defaultOptions);
+        delete addOptions.defaultOptions;
       }
-      Object.assign(this.globalOptions, addOptions);
+      Object.assign(this.globalSettings, addOptions);
 
       // convert disableErrorState / disableSuccessState to enable...State
       ['ErrorState', 'SuccessState'].forEach(suffix => {
-        if (hasOwn(this.globalOptions.formDefaults, 'disable' + suffix)) {
-          this.globalOptions.formDefaults['enable' + suffix] =
-            !this.globalOptions.formDefaults['disable' + suffix];
-          delete this.globalOptions.formDefaults['disable' + suffix];
+        if (hasOwn(this.globalSettings.defaultOptions, 'disable' + suffix)) {
+          this.globalSettings.defaultOptions['enable' + suffix] =
+            !this.globalSettings.defaultOptions['disable' + suffix];
+          delete this.globalSettings.defaultOptions['disable' + suffix];
         }
       });
     }
@@ -344,7 +346,7 @@ export class JsonSchemaFormService {
 
   initializeControl(ctx: any, bind: boolean = true): boolean {
     if (!isObject(ctx.options) || isEmpty(ctx.options)) {
-      ctx.options = _.cloneDeep(this.globalOptions);
+      ctx.options = _.cloneDeep(this.globalSettings);
     }
     ctx.formControl = this.getFormControl(ctx);
     ctx.boundControl = bind && !!ctx.formControl;
@@ -354,8 +356,8 @@ export class JsonSchemaFormService {
       ctx.controlDisabled = ctx.formControl.disabled;
       ctx.options.errorMessage = ctx.formControl.status === 'VALID' ? null :
         this.formatErrors(ctx.formControl.errors, ctx.options.errorMessages);
-      ctx.options.showErrors = this.globalOptions.validateOnRender === true ||
-        (this.globalOptions.validateOnRender === 'auto' && hasValue(ctx.controlValue));
+      ctx.options.showErrors = this.globalSettings.validateOnRender === true ||
+        (this.globalSettings.validateOnRender === 'auto' && hasValue(ctx.controlValue));
       ctx.formControl.statusChanges.subscribe(status =>
         ctx.options.errorMessage = status === 'VALID' ? null :
           this.formatErrors(ctx.formControl.errors, ctx.options.errorMessages)
@@ -454,7 +456,7 @@ export class JsonSchemaFormService {
 
   getFormControl(ctx: any): AbstractControl {
     if (
-      !ctx.layoutNode || !ctx.layoutNode.dataPointer ||
+      !ctx.layoutNode || !isDefined(ctx.layoutNode.dataPointer) ||
       ctx.layoutNode.type === '$ref'
     ) { return null; }
     return getControl(this.formGroup, this.getDataPointer(ctx));
@@ -462,7 +464,7 @@ export class JsonSchemaFormService {
 
   getFormControlValue(ctx: any): AbstractControl {
     if (
-      !ctx.layoutNode || !ctx.layoutNode.dataPointer ||
+      !ctx.layoutNode || !isDefined(ctx.layoutNode.dataPointer) ||
       ctx.layoutNode.type === '$ref'
     ) { return null; }
     const control = getControl(this.formGroup, this.getDataPointer(ctx));
@@ -470,13 +472,13 @@ export class JsonSchemaFormService {
   }
 
   getFormControlGroup(ctx: any): FormArray | FormGroup {
-    if (!ctx.layoutNode || !ctx.layoutNode.dataPointer) { return null; }
+    if (!ctx.layoutNode || !isDefined(ctx.layoutNode.dataPointer)) { return null; }
     return getControl(this.formGroup, this.getDataPointer(ctx), true);
   }
 
   getFormControlName(ctx: any): string {
     if (
-      !ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex
+      !ctx.layoutNode || !isDefined(ctx.layoutNode.dataPointer) || !hasValue(ctx.dataIndex)
     ) { return null; }
     return JsonPointer.toKey(this.getDataPointer(ctx));
   }
@@ -491,7 +493,7 @@ export class JsonSchemaFormService {
 
   getDataPointer(ctx: any): string {
     if (
-      !ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex
+      !ctx.layoutNode || !isDefined(ctx.layoutNode.dataPointer) || !hasValue(ctx.dataIndex)
     ) { return null; }
     return JsonPointer.toIndexedPointer(
       ctx.layoutNode.dataPointer, ctx.dataIndex, this.arrayMap
@@ -500,7 +502,7 @@ export class JsonSchemaFormService {
 
   getLayoutPointer(ctx: any): string {
     if (
-      !ctx.layoutNode || !ctx.layoutNode.layoutPointer || !ctx.layoutIndex
+      !ctx.layoutNode || !isDefined(ctx.layoutNode.layoutPointer) || !hasValue(ctx.layoutIndex)
     ) { return null; }
     return JsonPointer.toIndexedPointer(
       ctx.layoutNode.layoutPointer, ctx.layoutIndex
@@ -509,7 +511,7 @@ export class JsonSchemaFormService {
 
   isControlBound(ctx: any): boolean {
     if (
-      !ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex
+      !ctx.layoutNode || !isDefined(ctx.layoutNode.dataPointer) || !hasValue(ctx.dataIndex)
     ) { return false; }
     const controlGroup = this.getFormControlGroup(ctx);
     const name = this.getFormControlName(ctx);
@@ -518,8 +520,8 @@ export class JsonSchemaFormService {
 
   addItem(ctx: any): boolean {
     if (
-      !ctx.layoutNode || !ctx.layoutNode.$ref || !ctx.dataIndex ||
-      !ctx.layoutNode.layoutPointer || !ctx.layoutIndex
+      !ctx.layoutNode || !isDefined(ctx.layoutNode.$ref) || !hasValue(ctx.dataIndex) ||
+      !isDefined(ctx.layoutNode.layoutPointer) || !hasValue(ctx.layoutIndex)
     ) { return false; }
 
     // Create a new Angular form control from a template in templateRefLibrary
@@ -535,6 +537,12 @@ export class JsonSchemaFormService {
 
     // Copy a new layoutNode from layoutRefLibrary
     const newLayoutNode = getLayoutNode(ctx.layoutNode, this.layoutRefLibrary);
+    newLayoutNode.arrayItem = ctx.layoutNode.arrayItem;
+    if (ctx.layoutNode.arrayItemType) {
+      newLayoutNode.arrayItemType = ctx.layoutNode.arrayItemType;
+    } else {
+      delete newLayoutNode.arrayItemType;
+    }
 
     // Add the new layoutNode to the form layout
     let layoutPointer = this.getLayoutPointer(ctx);
@@ -545,8 +553,8 @@ export class JsonSchemaFormService {
 
   moveArrayItem(ctx: any, oldIndex: number, newIndex: number): boolean {
     if (
-      !ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex ||
-      !ctx.layoutNode.layoutPointer || !ctx.layoutIndex ||
+      !ctx.layoutNode || !isDefined(ctx.layoutNode.dataPointer) || !hasValue(ctx.dataIndex) ||
+      !isDefined(ctx.layoutNode.layoutPointer) || !hasValue(ctx.layoutIndex) ||
       !isDefined(oldIndex) || !isDefined(newIndex) || oldIndex === newIndex
     ) { return false; }
 
@@ -565,8 +573,8 @@ export class JsonSchemaFormService {
 
   removeItem(ctx: any): boolean {
     if (
-      !ctx.layoutNode || !ctx.layoutNode.dataPointer || !ctx.dataIndex ||
-      !ctx.layoutNode.layoutPointer || !ctx.layoutIndex
+      !ctx.layoutNode || !isDefined(ctx.layoutNode.dataPointer) || !hasValue(ctx.dataIndex) ||
+      !isDefined(ctx.layoutNode.layoutPointer) || !hasValue(ctx.layoutIndex)
     ) { return false; }
 
     // Remove the Angular form control from the parent formArray or formGroup

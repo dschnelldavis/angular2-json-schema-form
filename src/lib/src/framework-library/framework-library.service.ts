@@ -14,6 +14,7 @@ import { Bootstrap3FrameworkComponent } from './bootstrap-3-framework/bootstrap-
 import { FlexLayoutRootComponent } from './material-design-framework/flex-layout-root.component';
 import { FlexLayoutSectionComponent } from './material-design-framework/flex-layout-section.component';
 import { MaterialAddReferenceComponent } from './material-design-framework/material-add-reference.component';
+export { MaterialAnyOfComponent } from './material-design-framework/material-any-of.component';
 import { MaterialButtonComponent } from './material-design-framework/material-button.component';
 import { MaterialButtonGroupComponent } from './material-design-framework/material-button-group.component';
 import { MaterialCheckboxComponent } from './material-design-framework/material-checkbox.component';

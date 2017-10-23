@@ -46,9 +46,9 @@ export class MaterialButtonComponent implements OnInit {
   ngOnInit() {
     this.options = this.layoutNode.options || {};
     this.jsf.initializeControl(this);
-    if (this.options.hasOwnProperty('disabled')) {
+    if (hasOwn(this.options, 'disabled')) {
       this.controlDisabled = this.options.disabled;
-    } else if (this.jsf.globalOptions.disableInvalidSubmit) {
+    } else if (this.jsf.globalSettings.disableInvalidSubmit) {
       this.controlDisabled = !this.jsf.isValid;
       this.jsf.isValidChanges.subscribe(isValid => this.controlDisabled = !isValid);
     }

@@ -56,7 +56,7 @@ export function buildFormGroupTemplate(
   schemaPointer: string = '', dataPointer: string = '', templatePointer: any = ''
 ) {
   const schema = JsonPointer.get(jsf.schema, schemaPointer);
-  let nodeValue = jsf.globalOptions.setSchemaDefaults ?
+  let nodeValue = jsf.globalSettings.setSchemaDefaults ?
     mergeValues(JsonPointer.get(schema, '/default'), initialValues) : initialValues;
   const schemaType: string | string[] = JsonPointer.get(schema, '/type');
   let controlType: 'FormGroup' | 'FormArray' | 'FormControl' | '$ref';
@@ -86,28 +86,34 @@ export function buildFormGroupTemplate(
 
     case 'FormGroup':
       controls = {};
-      if (jsf.globalOptions.setSchemaDefaults) {
-        nodeValue = mergeValues(JsonPointer.get(schema, '/properties/default'), nodeValue);
-      }
-      let propertyKeys = schema['ui:order'] || Object.keys(schema.properties);
-      if (propertyKeys.includes('*') && !hasOwn(schema.properties, '*')) {
-        const unnamedKeys = Object.keys(schema.properties)
-          .filter(key => !propertyKeys.includes(key));
-        for (let i = propertyKeys.length - 1; i >= 0; i--) {
-          if (propertyKeys[i] === '*') {
-            propertyKeys.splice(i, 1, ...unnamedKeys);
+      if (hasOwn(schema, 'ui:order') || hasOwn(schema, 'properties')) {
+        if (jsf.globalSettings.setSchemaDefaults) {
+          nodeValue = mergeValues(JsonPointer.get(schema, '/properties/default'), nodeValue);
+        }
+        let propertyKeys = schema['ui:order'] || Object.keys(schema.properties);
+        if (propertyKeys.includes('*') && !hasOwn(schema.properties, '*')) {
+          const unnamedKeys = Object.keys(schema.properties)
+            .filter(key => !propertyKeys.includes(key));
+          for (let i = propertyKeys.length - 1; i >= 0; i--) {
+            if (propertyKeys[i] === '*') {
+              propertyKeys.splice(i, 1, ...unnamedKeys);
+            }
           }
         }
+        propertyKeys
+          .filter(key => hasOwn(schema.properties, key) ||
+            hasOwn(schema, 'additionalProperties')
+          )
+          .forEach(key => controls[key] = buildFormGroupTemplate(
+            jsf, JsonPointer.get(nodeValue, [<string>key]), setValues,
+            schemaPointer + (hasOwn(schema.properties, key) ?
+              '/properties/' + key : '/additionalProperties'
+            ),
+            dataPointer + '/' + key,
+            templatePointer + '/controls/' + key
+          ));
+        jsf.globalSettings.fieldsRequired = setRequiredFields(schema, controls);
       }
-      propertyKeys
-        .filter(key => hasOwn(schema.properties, key))
-        .forEach(key => controls[key] = buildFormGroupTemplate(
-          jsf, JsonPointer.get(nodeValue, [<string>key]), setValues,
-          schemaPointer + '/properties/' + key,
-          dataPointer + '/' + key,
-          templatePointer + '/controls/' + key
-        ));
-      jsf.globalOptions.fieldsRequired = setRequiredFields(schema, controls);
       return { controlType, controls, validators };
 
     case 'FormArray':
@@ -188,25 +194,27 @@ export function buildFormGroupTemplate(
         }
         // const itemOptions = jsf.dataMap.get(itemRefPointer) || new Map();
         const itemOptions = nodeOptions;
-        if (jsf.globalOptions.setSchemaDefaults) {
+        if (jsf.globalSettings.setSchemaDefaults) {
           nodeValue =
             mergeValues(JsonPointer.get(schema, '/items/default'), nodeValue);
         }
-        const arrayLength = Math.min(Math.max(
-          itemRecursive ? 0 :
-            (itemOptions.get('tupleItems') + itemOptions.get('listItems')) || 0,
-          isArray(nodeValue) ? nodeValue.length : 0
-        ), maxItems);
-        for (let i = controls.length; i < arrayLength; i++) {
-          if (nodeValue !== null) {
-            controls.push(buildFormGroupTemplate(
-              jsf, isArray(nodeValue) ? nodeValue[i] : nodeValue, setValues,
-              schemaRefPointer,
-              dataPointer + '/-',
-              templatePointer + '/controls/-'
-            ));
-          } else if (!itemRecursive) {
-            controls.push(_.cloneDeep(jsf.templateRefLibrary[itemRefPointer]));
+        if (!itemRecursive || hasOwn(validators, 'required')) {
+          const arrayLength = Math.min(Math.max(
+            itemRecursive ? 0 :
+              (itemOptions.get('tupleItems') + itemOptions.get('listItems')) || 0,
+            isArray(nodeValue) ? nodeValue.length : 0
+          ), maxItems);
+          for (let i = controls.length; i < arrayLength; i++) {
+            if (nodeValue !== null) {
+              controls.push(buildFormGroupTemplate(
+                jsf, isArray(nodeValue) ? nodeValue[i] : nodeValue, setValues,
+                schemaRefPointer,
+                dataPointer + '/-',
+                templatePointer + '/controls/-'
+              ));
+            } else if (!itemRecursive) {
+              controls.push(_.cloneDeep(jsf.templateRefLibrary[itemRefPointer]));
+            }
           }
         }
         nodeValue = null;
@@ -375,7 +383,8 @@ export function formatFormData(
   recursiveRefMap: Map<string, string>, arrayMap: Map<string, number>,
   returnEmptyFields: boolean = false, fixErrors: boolean = false
 ): any {
-  let formattedData = {};
+  if (formData === null || typeof formData !== 'object') { return formData }
+  let formattedData = isArray(formData) ? [] : {};
   JsonPointer.forEachDeep(formData, (value, dataPointer) => {
     if (typeof value !== 'object' || (value === null && returnEmptyFields)) {
       let genericPointer =

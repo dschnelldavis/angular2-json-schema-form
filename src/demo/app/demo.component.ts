@@ -53,7 +53,7 @@ export class DemoComponent implements OnInit {
   jsonFormOptions: any = {
     addSubmit: true, // Add a submit button if layout does not have one
     loadExternalAssets: true, // Load external css and JavaScript for frameworks
-    formDefaults: { feedback: true }, // Show inline feedback icons
+    defaultOptions: { feedback: true }, // Show inline feedback icons
     debug: false,
     returnEmptyFields: false,
   };
@@ -234,8 +234,8 @@ export class DemoComponent implements OnInit {
 
   toggleFormOption(option: string) {
     if (option === 'feedback') {
-      this.jsonFormOptions.formDefaults.feedback =
-        !this.jsonFormOptions.formDefaults.feedback;
+      this.jsonFormOptions.defaultOptions.feedback =
+        !this.jsonFormOptions.defaultOptions.feedback;
     } else {
       this.jsonFormOptions[option] = !this.jsonFormOptions[option];
     }

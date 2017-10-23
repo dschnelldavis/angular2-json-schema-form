@@ -273,16 +273,19 @@ export function getInputType(schema: any, layoutNode: any = null): string {
       schemaType =
         inArray('object', schemaType) && hasOwn(schema, 'properties') ? 'object' :
         inArray('array', schemaType) && hasOwn(schema, 'items') ? 'array' :
+        inArray('array', schemaType) && hasOwn(schema, 'additionalItems') ? 'array' :
         inArray('string', schemaType) ? 'string' :
         inArray('number', schemaType) ? 'number' :
         inArray('integer', schemaType) ? 'integer' :
-        inArray('boolean', schemaType) ? 'boolean' : 'null';
+        inArray('boolean', schemaType) ? 'boolean' : 'unknown';
     }
     if (schemaType === 'boolean') { return 'checkbox'; }
     if (schemaType === 'object') {
-      return hasOwn(schema, 'properties') ? 'section' :
-        hasOwn(schema, '$ref') ? '$ref' :
-        JsonPointer.has(schema, '/additionalProperties/$ref') ? '$ref' : null;
+      if (hasOwn(schema, 'properties') || hasOwn(schema, 'additionalProperties')) {
+        return 'section';
+      }
+      // TODO: Figure out how to handle additionalProperties
+      if (hasOwn(schema, '$ref')) { return '$ref'; }
     }
     if (schemaType === 'array') {
       let itemsObject = JsonPointer.getFirst([
@@ -292,9 +295,9 @@ export function getInputType(schema: any, layoutNode: any = null): string {
       return hasOwn(itemsObject, 'enum') && schema.maxItems !== 1 ?
         checkInlineType('checkboxes', schema, layoutNode) : 'array';
     }
-    if (schemaType === 'null') { return 'hidden'; }
-    if (hasOwn(schema, 'enum') || getTitleMapFromOneOf(schema, null, true) ||
-      (hasOwn(layoutNode, 'options') && hasOwn(layoutNode.options, 'titleMap'))
+    if (schemaType === 'null') { return 'none'; }
+    if (JsonPointer.has(layoutNode, '/options/titleMap') ||
+      hasOwn(schema, 'enum') || getTitleMapFromOneOf(schema, null, true)
     ) { return 'select'; }
     if (schemaType === 'number' || schemaType === 'integer') {
       return (schemaType === 'integer' || hasOwn(schema, 'multipleOf')) &&
@@ -310,7 +313,12 @@ export function getInputType(schema: any, layoutNode: any = null): string {
       }[schema.format] || 'text';
     }
   }
-  return hasOwn(schema, '$ref') ? '$ref' : 'text';
+  if (hasOwn(schema, '$ref')) { return '$ref'; }
+  if (isArray(schema.oneOf) || isArray(schema.anyOf)) { return 'one-of'; }
+  console.error(`getInputType error: Unable to determine input type for ${schemaType}`);
+  console.error('schema', schema);
+  if (layoutNode) { console.error('layoutNode', layoutNode); }
+  return 'none';
 }
 
 /**
@@ -423,7 +431,7 @@ export function updateInputOptions(layoutNode: any, schema: any, jsf: any) {
   // Set all option values in layoutNode.options
   let newOptions: any = { };
   const fixUiKeys = key => key.slice(0, 3).toLowerCase() === 'ui:' ? key.slice(3) : key;
-  mergeFilteredObject(newOptions, jsf.globalOptions.formDefaults, [], fixUiKeys);
+  mergeFilteredObject(newOptions, jsf.globalSettings.defaultOptions, [], fixUiKeys);
   [ [ JsonPointer.get(schema, '/ui:widget/options'), [] ],
     [ JsonPointer.get(schema, '/ui:widget'), [] ],
     [ schema, [
@@ -680,12 +688,16 @@ export function resolveSchemaReferences(
         refPointer = removeRecursiveReferences(subSchemaPointer, recursiveRefMap);
         JsonPointer.set(compiledSchema, subSchemaPointer, { $ref: `#${refPointer}` });
       }
-      schemaRefLibrary[refPointer] =
-        getSubSchema(compiledSchema, refPointer, schemaRefLibrary, recursiveRefMap);
-      schemaRecursiveRefMap.set(subSchemaPointer, refPointer);
+      if (!hasOwn(schemaRefLibrary, 'refPointer')) {
+        schemaRefLibrary[refPointer] = !refPointer.length ? compiledSchema :
+          getSubSchema(compiledSchema, refPointer, schemaRefLibrary, recursiveRefMap);
+      }
+      if (!schemaRecursiveRefMap.has(subSchemaPointer)) {
+        schemaRecursiveRefMap.set(subSchemaPointer, refPointer);
+      }
       const fromDataRef = JsonPointer.toDataPointer(subSchemaPointer, compiledSchema);
-      const toDataRef = JsonPointer.toDataPointer(refPointer, compiledSchema);
-      if (fromDataRef && toDataRef) {
+      if (!dataRecursiveRefMap.has(fromDataRef)) {
+        const toDataRef = JsonPointer.toDataPointer(refPointer, compiledSchema);
         dataRecursiveRefMap.set(fromDataRef, toDataRef);
       }
     }
@@ -693,8 +705,10 @@ export function resolveSchemaReferences(
       (hasOwn(subSchema, 'items') || hasOwn(subSchema, 'additionalItems'))
     ) {
       const dataPointer = JsonPointer.toDataPointer(subSchemaPointer, compiledSchema);
-      const tupleItems = isArray(subSchema.items) ? subSchema.items.length : 0;
-      arrayMap.set(dataPointer, tupleItems);
+      if (!arrayMap.has(dataPointer)) {
+        const tupleItems = isArray(subSchema.items) ? subSchema.items.length : 0;
+        arrayMap.set(dataPointer, tupleItems);
+      }
     }
   }, true);
   return compiledSchema;
@@ -735,7 +749,7 @@ export function getSubSchema(
   return JsonPointer.forEachDeepCopy(newSchema, (subSchema, subPointer) => {
     if (isObject(subSchema)) {
 
-      // Replace non-recursive subSchemas
+      // Replace non-recursive $ref links with referenced schemas
       if (isString(subSchema.$ref)) {
         const refPointer = JsonPointer.compile(subSchema.$ref);
         if (refPointer.length && usedPointers.every(ptr =>
@@ -753,6 +767,8 @@ export function getSubSchema(
           }
         }
       }
+
+      // TODO: Convert schemas with 'type' arrays to 'oneOf'
 
       // Combine allOf subSchemas
       if (isArray(subSchema.allOf)) { return combineAllOf(subSchema); }

@@ -48,14 +48,14 @@
     "build": "node build.js",
     "postbuild": "rimraf out-ngc",
     "prepublishOnly": "npm run build",
-    "publish": "cd dist && npm publish",
+    "publish": "cd dist && npm run publish",
     "preng-build": "rimraf dist/*",
     "ng-build": "ng build",
     "predeploy": "npm run ng-build",
     "deploy": "firebase deploy"
   },
   "dependencies": {
-    "ajv": "^5.2.3",
+    "ajv": "^5.2.4",
     "lodash": "4.x"
   },
   "peerDependencies": {
@@ -71,7 +71,7 @@
   "devDependencies": {
     "@angular/animations": "^4.4.6",
     "@angular/cdk": "^2.0.0-beta.12",
-    "@angular/cli": "^1.4.8",
+    "@angular/cli": "^1.4.9",
     "@angular/common": "^4.4.6",
     "@angular/compiler": "^4.4.6",
     "@angular/compiler-cli": "^4.4.6",
@@ -85,7 +85,7 @@
     "@angular/router": "^4.4.6",
     "@types/ace": "^0.0.35",
     "@types/jasmine": "^2.6.0",
-    "@types/node": "^8.0.45",
+    "@types/node": "^8.0.46",
     "brace": "^0.10.0",
     "camelcase": "^4.0.0",
     "codelyzer": "^3.2.1",
@@ -104,16 +104,16 @@
     "protractor": "^5.2.0",
     "rimraf": "^2.6.1",
     "rollup": "^0.50.0",
-    "rollup-plugin-commonjs": "^8.2.3",
+    "rollup-plugin-commonjs": "^8.2.4",
     "rollup-plugin-node-resolve": "^3.0.0",
     "rollup-plugin-node-resolve-angular": "^2.0.3",
     "rollup-plugin-sourcemaps": "^0.4.1",
     "rollup-plugin-uglify": "^2.0.1",
     "rxjs": "^5.5.0",
     "ts-node": "^3.0.0",
-    "tslint": "^5.2.0",
+    "tslint": "^5.8.0",
     "typedoc": "^0.9.0",
-    "typescript": "~2.4.2",
+    "typescript": "~2.3.0",
     "zone.js": "^0.8.18"
   }
 }

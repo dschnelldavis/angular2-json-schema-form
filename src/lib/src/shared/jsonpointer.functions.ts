@@ -34,7 +34,7 @@ export class JsonPointer {
    * @param {number = 0} startSlice - Zero-based index of first Pointer key to use
    * @param {number} endSlice - Zero-based index of last Pointer key to use
    * @param {boolean = false} getBoolean - Return only true or false?
-   * @param {boolean = true} errors - Show error if not found?
+   * @param {boolean = false} errors - Show error if not found?
    * @return {object} - Located value (or true or false if getBoolean = true)
    */
   static get(
@@ -53,12 +53,12 @@ export class JsonPointer {
         if (key === '-' && isArray(subObject) && subObject.length) {
           key = subObject.length - 1;
         }
-        if (typeof subObject === 'object' && subObject !== null &&
+        if (isMap(subObject) && subObject.has(key)) {
+          subObject = subObject.get(key);
+        } else if (typeof subObject === 'object' && subObject !== null &&
           hasOwn(subObject, key)
         ) {
           subObject = subObject[key];
-        } else if (isMap(subObject) && subObject.has(key)) {
-          subObject = subObject.get(key);
         } else {
           if (errors) {
             console.error(`get error: "${key}" key not found in object.`);
@@ -90,7 +90,7 @@ export class JsonPointer {
    * @param {number = 0} startSlice - Zero-based index of first Pointer key to use
    * @param {number} endSlice - Zero-based index of last Pointer key to use
    * @param {boolean = false} getBoolean - Return only true or false?
-   * @param {boolean = true} errors - Show error if not found?
+   * @param {boolean = false} errors - Show error if not found?
    * @return {object} - Located value (or true or false if getBoolean = true)
    */
   static getCopy(
@@ -467,7 +467,7 @@ export class JsonPointer {
    * (if input is already an an array of keys, it is returned unchanged)
    *
    * @param {Pointer} pointer - JSON Pointer (string or array)
-   * @param {boolean = true} errors - Show error if invalid pointer?
+   * @param {boolean = false} errors - Show error if invalid pointer?
    * @return {string[]} - JSON Pointer array of keys
    */
   static parse(pointer: Pointer, errors = false): string[] {
@@ -478,7 +478,7 @@ export class JsonPointer {
     if (isArray(pointer)) { return <string[]>pointer; }
     if (typeof pointer === 'string') {
       if ((<string>pointer)[0] === '#') { pointer = pointer.slice(1); }
-      if (<string>pointer === '') { return []; }
+      if (<string>pointer === '' || <string>pointer === '/') { return []; }
       return (<string>pointer).slice(1).split('/').map(this.unescape);
     }
   }
@@ -492,12 +492,13 @@ export class JsonPointer {
    * The optional second parameter is a default which will replace any empty keys.
    *
    * @param {Pointer} pointer - JSON Pointer (string or array)
-   * @param {boolean = true} errors - Show error if invalid pointer?
+   * @param {boolean = false} errors - Show error if invalid pointer?
    * @returns {string} - JSON Pointer string
    */
   static compile(
     pointer: Pointer, defaultValue: string | number = '', errors = false
   ): string {
+    if (pointer === '#') { return ''; }
     if (!this.isJsonPointer(pointer)) {
       if (errors) { console.error(`compile error: Invalid JSON Pointer: ${pointer}`); }
       return null;
@@ -520,7 +521,7 @@ export class JsonPointer {
    * Extracts name of the final key from a JSON Pointer.
    *
    * @param {Pointer} pointer - JSON Pointer (string or array)
-   * @param {boolean = true} errors - Show error if invalid pointer?
+   * @param {boolean = false} errors - Show error if invalid pointer?
    * @returns {string} - the extracted key
    */
   static toKey(pointer: Pointer, errors = false): string {
@@ -544,9 +545,10 @@ export class JsonPointer {
     if (isArray(value)) {
       return value.every(key => typeof key === 'string');
     } else if (isString(value)) {
-      if (value === '') { return true; }
-      if (value[0] === '#') { value = value.slice(1); }
-      if (value[0] === '/') { return true; }
+      if (value === '' || value === '#') { return true; }
+      if (value[0] === '/' || value.slice(0, 2) === '#/') {
+        return !/(~[^01]|~$)/g.test(value);
+      }
     }
     return false;
   }
@@ -725,12 +727,12 @@ export class JsonPointer {
   static toSchemaPointer(dataPointer: Pointer, schema: any): string {
     if (this.isJsonPointer(dataPointer) && typeof schema === 'object') {
       const pointerArray = this.parse(dataPointer);
+      if (!pointerArray.length) { return ''; }
       const firstKey = pointerArray.shift();
-      if (firstKey === undefined) { return ''; }
       if (schema.type === 'object' || schema.properties || schema.additionalProperties) {
         if ((schema.properties || {})[firstKey]) {
           return `/properties/${this.escape(firstKey)}` +
-            this.toSchemaPointer(pointerArray, (schema.properties || {})[firstKey]);
+            this.toSchemaPointer(pointerArray, schema.properties[firstKey]);
         } else  if (schema.additionalProperties) {
           return '/additionalProperties' +
             this.toSchemaPointer(pointerArray, schema.additionalProperties);
@@ -742,7 +744,7 @@ export class JsonPointer {
         const arrayItem = firstKey === '-' || firstKey === '' ? 0 : +firstKey;
         if (isArray(schema.items)) {
           if (arrayItem < schema.items.length) {
-            return `/items/${arrayItem}` +
+            return '/items/' + arrayItem +
               this.toSchemaPointer(pointerArray, schema.items[arrayItem]);
           } else if (schema.additionalItems) {
             return '/additionalItems' +
@@ -782,9 +784,10 @@ export class JsonPointer {
    *
    * @param {Pointer} schemaPointer - JSON Pointer (string or array) to a JSON schema
    * @param {any} schema - the JSON schema
+   * @param {boolean = false} errors - Show errors?
    * @return {Pointer} - JSON Pointer (string) to the value in the data object
    */
-  static toDataPointer(schemaPointer: Pointer, schema: any): string {
+  static toDataPointer(schemaPointer: Pointer, schema: any, errors = false): string {
     if (this.isJsonPointer(schemaPointer) && typeof schema === 'object' &&
       this.has(schema, schemaPointer)
     ) {
@@ -796,23 +799,35 @@ export class JsonPointer {
         (firstKey === 'items' && isArray(schema.items))
       ) {
         const secondKey = pointerArray.shift();
-        return '/' + secondKey +
-          this.toDataPointer(pointerArray, schema[firstKey][secondKey]);
+        const pointerSuffix = this.toDataPointer(pointerArray, schema[firstKey][secondKey]);
+        return pointerSuffix === null ? null : '/' + secondKey + pointerSuffix;
       } else if (firstKey === 'additionalItems' ||
         (firstKey === 'items' && isObject(schema.items))
       ) {
-        return '/-' + this.toDataPointer(pointerArray, schema[firstKey]);
+        const pointerSuffix = this.toDataPointer(pointerArray, schema[firstKey]);
+        return pointerSuffix === null ? null : '/-' + pointerSuffix;
+      } else if (['allOf', 'anyOf', 'oneOf'].includes(firstKey)) {
+        const secondKey = pointerArray.shift();
+        return this.toDataPointer(pointerArray, schema[firstKey][secondKey]);
+      } else if (firstKey === 'not') {
+        return this.toDataPointer(pointerArray, schema[firstKey]);
+      } else if (['contains', 'definitions', 'dependencies', 'additionalItems',
+        'additionalProperties', 'patternProperties', 'propertyNames'].includes(firstKey)
+      ) {
+        if (errors) { console.error(`toDataPointer error: Ambiguous location`); }
       }
-      return null;
+      return '';
     }
-    if (!this.isJsonPointer(schemaPointer)) {
-      console.error(`toDataPointer error: Invalid JSON Pointer: ${schemaPointer}`);
-    }
-    if (typeof schema !== 'object') {
-      console.error(`toDataPointer error: Invalid JSON Schema: ${schema}`);
-    }
-    if (typeof schema !== 'object') {
-      console.error(`toDataPointer error: Pointer ${schemaPointer} invalid for Schema: ${schema}`);
+    if (errors) {
+      if (!this.isJsonPointer(schemaPointer)) {
+        console.error(`toDataPointer error: Invalid JSON Pointer: ${schemaPointer}`);
+      }
+      if (typeof schema !== 'object') {
+        console.error(`toDataPointer error: Invalid JSON Schema: ${schema}`);
+      }
+      if (typeof schema !== 'object') {
+        console.error(`toDataPointer error: Pointer ${schemaPointer} invalid for Schema: ${schema}`);
+      }
     }
     return null;
   }
