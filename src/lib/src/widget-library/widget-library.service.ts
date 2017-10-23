@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { AddReferenceComponent } from './add-reference.component';
+import { AnyOfComponent } from './any-of.component';
 import { ButtonComponent } from './button.component';
 import { CheckboxComponent } from './checkbox.component';
 import { CheckboxesComponent } from './checkboxes.component';
@@ -60,7 +61,7 @@ export class WidgetLibraryService {
   // Non-text HTML 'input' form control widgets <input type="...">
     // 'button': <input type="button"> not used, use <button> instead
     'checkbox': CheckboxComponent, // TODO: Set ternary = true for 3-state ??
-    'file': FileComponent, // TODO: Figure out how to handle these
+    'file': FileComponent, // TODO: Add 'file' widget
     'hidden': 'text',
     'image': 'text', // TODO: Figure out how to handle these
     'radio': 'radios',
@@ -91,6 +92,8 @@ export class WidgetLibraryService {
     'flex': 'section', // A flexbox container <div style="display: flex">
 
   // Non-HTML layout widgets
+    'any-of': 'any-of', // A select box that changes another input
+                        // TODO: Add 'any-of' widget
     'array': 'section', // A list you can add, remove and reorder <fieldset>
     'tabarray': 'tabs', // A tabbed version of array
     'tab': 'section', // A tab group, similar to a fieldset or section <fieldset>
@@ -104,8 +107,8 @@ export class WidgetLibraryService {
   // Widgets included for compatibility with JSON Form API
     'advancedfieldset': 'section', // Adds 'Advanced settings' title <fieldset>
     'authfieldset': 'section', // Adds 'Authentication settings' title <fieldset>
-    'optionfieldset': 'section', // Option control, displays selected sub-item <fieldset>
-    'selectfieldset': 'section', // Select control, displays selected sub-item <fieldset>
+    'optionfieldset': 'any-of', // Option control, displays selected sub-item <fieldset>
+    'selectfieldset': 'any-of', // Select control, displays selected sub-item <fieldset>
     'conditional': 'section', // Identical to 'section' (depeciated) <div>
     'actions': 'section', // Horizontal button list, can only submit, uses buttons as items <div>
     'tagsinput': 'section', // For entering short text tags <div>

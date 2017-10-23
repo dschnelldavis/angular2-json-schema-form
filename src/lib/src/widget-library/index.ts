@@ -1,4 +1,5 @@
 import { AddReferenceComponent } from './add-reference.component';
+import { AnyOfComponent } from './any-of.component';
 import { ButtonComponent } from './button.component';
 import { CheckboxComponent } from './checkbox.component';
 import { CheckboxesComponent } from './checkboxes.component';
@@ -21,7 +22,7 @@ import { TemplateComponent } from './template.component';
 import { TextareaComponent } from './textarea.component';
 
 export const BASIC_WIDGETS = [
-  AddReferenceComponent, ButtonComponent, CheckboxComponent,
+  AddReferenceComponent, AnyOfComponent, ButtonComponent, CheckboxComponent,
   CheckboxesComponent, FileComponent, HiddenComponent, InputComponent,
   MessageComponent, NoneComponent, NumberComponent, RadiosComponent,
   RootComponent, SectionComponent, SelectComponent, SelectFrameworkComponent,
@@ -30,6 +31,7 @@ export const BASIC_WIDGETS = [
 ];
 
 export { AddReferenceComponent } from './add-reference.component';
+export { AnyOfComponent } from './any-of.component';
 export { ButtonComponent } from './button.component';
 export { CheckboxComponent } from './checkbox.component';
 export { CheckboxesComponent } from './checkboxes.component';

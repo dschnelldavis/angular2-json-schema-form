@@ -30,6 +30,7 @@ export {
 export { dateToString, stringToDate, findDate } from './src/shared/date.functions';
 
 export { AddReferenceComponent } from './src/widget-library/add-reference.component';
+export { AnyOfComponent } from './src/widget-library/any-of.component';
 export { ButtonComponent } from './src/widget-library/button.component';
 export { CheckboxComponent } from './src/widget-library/checkbox.component';
 export { CheckboxesComponent } from './src/widget-library/checkboxes.component';
@@ -58,6 +59,7 @@ export { WidgetLibraryModule } from './src/widget-library/widget-library.module'
 export { FlexLayoutRootComponent } from './src/framework-library/material-design-framework/flex-layout-root.component';
 export { FlexLayoutSectionComponent } from './src/framework-library/material-design-framework/flex-layout-section.component';
 export { MaterialAddReferenceComponent } from './src/framework-library/material-design-framework/material-add-reference.component';
+export { MaterialAnyOfComponent } from './src/framework-library/material-design-framework/material-any-of.component';
 export { MaterialButtonComponent } from './src/framework-library/material-design-framework/material-button.component';
 export { MaterialButtonGroupComponent } from './src/framework-library/material-design-framework/material-button-group.component';
 export { MaterialCheckboxComponent } from './src/framework-library/material-design-framework/material-checkbox.component';

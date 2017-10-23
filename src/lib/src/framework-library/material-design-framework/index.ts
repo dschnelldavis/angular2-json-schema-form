@@ -1,6 +1,7 @@
 import { FlexLayoutRootComponent } from './flex-layout-root.component';
 import { FlexLayoutSectionComponent } from './flex-layout-section.component';
 import { MaterialAddReferenceComponent } from './material-add-reference.component';
+import { MaterialAnyOfComponent } from './material-any-of.component';
 import { MaterialButtonComponent } from './material-button.component';
 import { MaterialButtonGroupComponent } from './material-button-group.component';
 import { MaterialCheckboxComponent } from './material-checkbox.component';
@@ -19,19 +20,20 @@ import { MaterialDesignFrameworkComponent } from './material-design-framework.co
 
 export const MATERIAL_DESIGN_COMPONENTS = [
   FlexLayoutRootComponent, FlexLayoutSectionComponent,
-  MaterialAddReferenceComponent, MaterialButtonComponent,
-  MaterialButtonGroupComponent, MaterialCheckboxComponent,
-  MaterialCheckboxesComponent, MaterialDatepickerComponent,
-  MaterialFileComponent, MaterialInputComponent,
-  MaterialNumberComponent, MaterialRadiosComponent,
-  MaterialSelectComponent, MaterialSliderComponent,
-  MaterialTabsComponent, MaterialTextareaComponent,
-  MaterialDesignFrameworkComponent
+  MaterialAddReferenceComponent, MaterialAnyOfComponent,
+  MaterialButtonComponent, MaterialButtonGroupComponent,
+  MaterialCheckboxComponent, MaterialCheckboxesComponent,
+  MaterialDatepickerComponent, MaterialFileComponent,
+  MaterialInputComponent, MaterialNumberComponent,
+  MaterialRadiosComponent, MaterialSelectComponent,
+  MaterialSliderComponent, MaterialTabsComponent,
+  MaterialTextareaComponent, MaterialDesignFrameworkComponent
 ];
 
 export { FlexLayoutRootComponent } from './flex-layout-root.component';
 export { FlexLayoutSectionComponent } from './flex-layout-section.component';
 export { MaterialAddReferenceComponent } from './material-add-reference.component';
+export { MaterialAnyOfComponent } from './material-any-of.component';
 export { MaterialButtonComponent } from './material-button.component';
 export { MaterialButtonGroupComponent } from './material-button-group.component';
 export { MaterialCheckboxComponent } from './material-checkbox.component';
