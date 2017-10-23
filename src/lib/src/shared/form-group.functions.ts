@@ -56,8 +56,14 @@ export function buildFormGroupTemplate(
   schemaPointer: string = '', dataPointer: string = '', templatePointer: any = ''
 ) {
   const schema = JsonPointer.get(jsf.schema, schemaPointer);
-  let nodeValue = jsf.globalSettings.setSchemaDefaults ?
-    mergeValues(JsonPointer.get(schema, '/default'), initialValues) : initialValues;
+  let nodeValue = initialValues;
+  if (!isDefined(initialValues) && (
+    (jsf.globalSettings.setSchemaDefaults === 'auto' && isEmpty(jsf.initialValues)) ||
+    (jsf.globalSettings.setSchemaDefaults === true && nodeValue === null)
+  )) {
+    nodeValue = JsonPointer.get(jsf.schema, schemaPointer + '/default');
+  }
+  // TODO: If nodeValue not set, check layout for default value
   const schemaType: string | string[] = JsonPointer.get(schema, '/type');
   let controlType: 'FormGroup' | 'FormArray' | 'FormControl' | '$ref';
   controlType =
@@ -87,9 +93,6 @@ export function buildFormGroupTemplate(
     case 'FormGroup':
       controls = {};
       if (hasOwn(schema, 'ui:order') || hasOwn(schema, 'properties')) {
-        if (jsf.globalSettings.setSchemaDefaults) {
-          nodeValue = mergeValues(JsonPointer.get(schema, '/properties/default'), nodeValue);
-        }
         let propertyKeys = schema['ui:order'] || Object.keys(schema.properties);
         if (propertyKeys.includes('*') && !hasOwn(schema.properties, '*')) {
           const unnamedKeys = Object.keys(schema.properties)

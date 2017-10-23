@@ -34,9 +34,8 @@ export class JsonSchemaFormService {
   AngularSchemaFormCompatibility: boolean = false;
   tpldata: any = {};
 
-  ajvOptions: any = { allErrors: true,  unknownFormats: 'ignore' }; // jsonPointers: true,
+  ajvOptions: any = { allErrors: true, jsonPointers: true, unknownFormats: 'ignore' };
   ajv: any = new Ajv(this.ajvOptions); // AJV: Another JSON Schema Validator
-
   validateFormData: any = null; // Compiled AJV function to validate active form's schema
 
   initialValues: any = {}; // The initial data model (e.g. previously submitted data)
@@ -80,11 +79,13 @@ export class JsonSchemaFormService {
     supressPropertyTitles: false,
     disableInvalidSubmit: true, // Disable submit if form invalid?
     setSchemaDefaults: 'auto', // Set fefault values from schema?
-      // true = always set / false = never set
-      // 'auto' = set in addable components, and everywhere if initialValues not available
+      // true = always set (unless overridden by layout default or initialValues)
+      // false = never set
+      // 'auto' = set in addable components, and everywhere if initialValues not set
     setLayoutDefaults: 'auto', // Set fefault values from layout?
-      // true = always set / false = never set
-      // 'auto' = set in addable components, and everywhere if initialValues not available
+      // true = always set (unless overridden by initialValues)
+      // false = never set
+      // 'auto' = set in addable components, and everywhere if initialValues not set
     validateOnRender: 'auto', // Validate fields immediately, before they are touched?
       // true = validate all fields immediately
       // false = only validate fields after they are touched by user

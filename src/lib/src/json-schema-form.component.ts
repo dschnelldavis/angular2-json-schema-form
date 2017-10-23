@@ -524,7 +524,7 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
       this.jsf.buildLayout(this.widgetLibrary);
 
       // Build the Angular FormGroup template from the schema
-      this.jsf.buildFormGroupTemplate(this.jsf.initialValues, false);
+      this.jsf.buildFormGroupTemplate(this.jsf.initialValues);
 
       // Build the real Angular FormGroup from the FormGroup template
       this.jsf.buildFormGroup();
