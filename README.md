@@ -41,7 +41,7 @@ All the source code is in the `/src` folder. Inside that folder, you will find t
 * `demo` - the demonstration playground example application
 * `demo/assets/example-schemas` - JSON Schema examples used in the playground
 
-If you want detailed documentation describing the individual functions used in this library, run `npm run docs` to generate TypeDoc documentation, and then look in the newly generated `/docs` folder. (Angular JSON Schema Form is still a work in progress, so right now this documentation varies from highly detailed to completely missing.)
+If you want detailed documentation describing the individual functions used in this library, run `npm run docs` to generate TypeDoc documentation, and then look in the generated `/docs/api` folder. (Angular JSON Schema Form is still a work in progress, so right now this documentation varies from highly detailed to completely missing.)
 
 ### To install from NPM and use in your own project
 
@@ -155,7 +155,7 @@ Here is an example:
   [schema]="yourJsonSchema"
   [layout]="yourJsonFormLayout"
   [data]="yourData"
-  [options]="yourGlobalSettingsettings"
+  [options]="yourGlobalSettings"
   [widgets]="yourCustomWidgets"
   framework="bootstrap-3"
   loadExternalAssets="true"

@@ -5,7 +5,7 @@ import {
 import * as _ from 'lodash';
 
 import {
-  hasValue, inArray, isArray, isEmpty, isObject, isDefined, isPrimitive,
+  hasValue, inArray, isArray, isEmpty, isDate, isObject, isDefined, isPrimitive,
   toJavaScriptType, toSchemaType, SchemaPrimitiveType
 } from './validator.functions';
 import { forEach, hasOwn } from './utility.functions';
@@ -389,17 +389,23 @@ export function formatFormData(
   if (formData === null || typeof formData !== 'object') { return formData }
   let formattedData = isArray(formData) ? [] : {};
   JsonPointer.forEachDeep(formData, (value, dataPointer) => {
-    if (typeof value !== 'object' || (value === null && returnEmptyFields)) {
+
+    // If returnEmptyFields === true,
+    // add empty arrays and objects to all allowed keys
+    if (returnEmptyFields && isArray(value)) {
+      JsonPointer.set(formattedData, dataPointer, []);
+    } else if (returnEmptyFields && isObject(value) && !isDate(value)) {
+      JsonPointer.set(formattedData, dataPointer, {});
+    } else {
       let genericPointer =
-        JsonPointer.has(dataMap, [dataPointer, 'schemaType']) ?
-          dataPointer :
+        JsonPointer.has(dataMap, [dataPointer, 'schemaType']) ? dataPointer :
           removeRecursiveReferences(dataPointer, recursiveRefMap, arrayMap);
       if (JsonPointer.has(dataMap, [genericPointer, 'schemaType'])) {
         const schemaType: SchemaPrimitiveType | SchemaPrimitiveType[] =
           dataMap.get(genericPointer).get('schemaType');
         if (schemaType === 'null') {
           JsonPointer.set(formattedData, dataPointer, null);
-        } else if ( (hasValue(value) || returnEmptyFields) &&
+        } else if ((hasValue(value) || returnEmptyFields) &&
           inArray(schemaType, ['string', 'integer', 'number', 'boolean'])
         ) {
           const newValue = (fixErrors || (value === null && returnEmptyFields)) ?
@@ -408,8 +414,23 @@ export function formatFormData(
           if (isDefined(newValue) || returnEmptyFields) {
             JsonPointer.set(formattedData, dataPointer, newValue);
           }
+
+        // If returnEmptyFields === false,
+        // only add empty arrays and objects to required keys
+        } else if (schemaType === 'object' && !returnEmptyFields) {
+          (dataMap.get(genericPointer).get('required') || []).forEach(key => {
+            const keySchemaType =
+              dataMap.get(`${genericPointer}/${key}`).get('schemaType');
+            if (keySchemaType === 'array') {
+              JsonPointer.set(formattedData, `${dataPointer}/${key}`, []);
+            } else if (keySchemaType === 'object') {
+              JsonPointer.set(formattedData, `${dataPointer}/${key}`, {});
+            }
+          });
         }
-      } else {
+      } else if (typeof value !== 'object' || isDate(value) ||
+        (value === null && returnEmptyFields)
+      ) {
         console.error('formatFormData error: ' +
           `Schema type not found for form value at ${genericPointer}`);
         console.error('dataMap', dataMap);

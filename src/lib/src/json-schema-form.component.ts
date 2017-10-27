@@ -12,7 +12,9 @@ import { WidgetLibraryService } from './widget-library/widget-library.service';
 import { JsonSchemaFormService } from './json-schema-form.service';
 import { convertSchemaToDraft6 } from './shared/convert-schema-to-draft6.function';
 import { resolveSchemaReferences } from './shared/json-schema.functions';
-import { hasValue, inArray, isArray, isEmpty, isObject } from './shared/validator.functions';
+import {
+  hasValue, inArray, isArray, isEmpty, isNumber, isObject
+} from './shared/validator.functions';
 import { forEach, hasOwn } from './shared/utility.functions';
 import { JsonPointer } from './shared/jsonpointer.functions';
 
@@ -309,6 +311,7 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
 
         // Add type = 'object' if missing
         if (isObject(this.jsf.schema.properties) ||
+          isObject(this.jsf.schema.patternProperties) ||
           isObject(this.jsf.schema.additionalProperties)
         ) {
           this.jsf.schema.type = 'object';

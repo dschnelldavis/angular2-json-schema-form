@@ -403,30 +403,11 @@ export function isInputRequired(schema: any, schemaPointer: string): boolean {
  *
  * @param {any} layoutNode
  * @param {any} schema
+ * @param {any} jsf
  * @return {void}
  */
 export function updateInputOptions(layoutNode: any, schema: any, jsf: any) {
   if (!isObject(layoutNode) || !isObject(layoutNode.options)) { return; }
-  const templatePointer = JsonPointer.get(
-    jsf, ['dataMap', layoutNode.dataPointer, 'templatePointer']
-  );
-
-  // If a validator is available for a layout option,
-  // and not already set in the formGroup template, set it
-  // if (templatePointer) {
-  //   Object.keys(layoutNode.options)
-  //     .filter(option => isFunction(JsonValidators[option]))
-  //     .filter(option => !hasOwn(schema, option) || (
-  //       schema[option] !== layoutNode.options[option] &&
-  //       !(option.slice(0, 3) === 'min' && schema[option] <= layoutNode.options[option]) &&
-  //       !(option.slice(0, 3) === 'max' && schema[option] >= layoutNode.options[option])
-  //     ))
-  //     .forEach(option => jsf.formGroupTemplate = JsonPointer.set(
-  //       jsf.formGroupTemplate,
-  //       templatePointer + '/validators/' + option,
-  //       [ layoutNode.options[option] ]
-  //     ));
-  // }
 
   // Set all option values in layoutNode.options
   let newOptions: any = { };
@@ -441,9 +422,8 @@ export function updateInputOptions(layoutNode: any, schema: any, jsf: any) {
     [ JsonPointer.get(schema, '/x-schema-form/options'), [] ],
     [ JsonPointer.get(schema, '/x-schema-form'), ['items', 'options'] ],
     [ layoutNode, [
-      '_id', '$ref', 'arrayItem', 'arrayItemType', 'dataPointer',
-      'dataType', 'items', 'key', 'layoutPointer', 'name', 'options',
-      'recursiveReference', 'type', 'widget'
+      '_id', '$ref', 'arrayItem', 'arrayItemType', 'dataPointer', 'dataType',
+      'items', 'key', 'name', 'options', 'recursiveReference', 'type', 'widget'
     ] ],
     [ layoutNode.options, [] ],
   ].forEach(([ object, excludeKeys ]) =>
@@ -483,37 +463,14 @@ export function updateInputOptions(layoutNode: any, schema: any, jsf: any) {
   }
 
   layoutNode.options = newOptions;
-
-  // const nodeValue = JsonPointer.getFirst([
-  //   [ jsf.initialValues, layoutNode.dataPointer ],
-  //   [ layoutNode, '/options/value' ],
-  //   [ layoutNode, '/options/default' ]
-  // ]);
-  // if (hasValue(nodeValue)) {
-  //   layoutNode.value = nodeValue;
-  //   delete layoutNode.options.value;
-  //   delete layoutNode.options.default;
-  //
-  //   // If field value is set in layoutNode, and no input data, update template value
-  //   if (templatePointer && schema.type !== 'array' && schema.type !== 'object') {
-  //     let templateValue = JsonPointer.get(
-  //       jsf.formGroupTemplate, templatePointer + '/value/value'
-  //     );
-  //     if (hasValue(nodeValue) && nodeValue !== templateValue) {
-  //       jsf.formGroupTemplate = JsonPointer.set(
-  //         jsf.formGroupTemplate, templatePointer + '/value/value', nodeValue
-  //       );
-  //     }
-  //   }
-  // }
 }
 
 /**
  * 'getTitleMapFromOneOf' function
  *
  * @param {schema} schema
- * @param {boolean} flatList
- * @param {boolean} validateOnly
+ * @param {boolean = null} flatList
+ * @param {boolean = false} validateOnly
  * @return {validators}
  */
 export function getTitleMapFromOneOf(
@@ -531,8 +488,8 @@ export function getTitleMapFromOneOf(
     }
 
     // if flatList !== false and some items have colons, make grouped map
-    if (flatList !== false &&
-      (titleMap || []).filter(title => ((title || {}).name || '').indexOf(': ')).length > 1
+    if (flatList !== false && (titleMap || [])
+      .filter(title => ((title || {}).name || '').indexOf(': ')).length > 1
     ) {
 
       // Split name on first colon to create grouped map (name -> group: name)
@@ -541,7 +498,7 @@ export function getTitleMapFromOneOf(
         return group && name ? { ...title, group, name } : title;
       });
 
-      // If flatList === true or some groups have multiple items, use grouped map
+      // If flatList === true or at least one group has multiple items, use grouped map
       if (flatList === true || newTitleMap.some((title, index) => index &&
         hasOwn(title, 'group') && title.group === newTitleMap[index - 1].group
       )) {

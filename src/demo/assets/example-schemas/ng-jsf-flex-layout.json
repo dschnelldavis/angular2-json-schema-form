@@ -29,30 +29,22 @@
         "items": {
           "type": "object",
           "properties": {
-            "number": { "type": "string" },
-            "type": {
-              "type": "string",
-              "enum": [ "cell", "home", "work" ]
-            }
+            "type": { "type": "string", "enum": [ "cell", "home", "work" ] },
+            "number": { "type": "string" }
           },
-          "required": [ "number", "type" ]
+          "required": [ "type", "number" ]
         }
       }
     },
     "required": [ "last_name" ]
   },
   "layout": [
-    { "type": "flex",
-      "flex-flow": "row wrap",
-      "fxLayoutGap": "12px",
-      "items": [ "first_name", "last_name" ]
-    },
+    { "type": "flex", "flex-flow": "row wrap", "items": [ "first_name", "last_name" ] },
     { "key": "address.street_1", "title": "Address", "placeholder": "Street" },
     { "key": "address.street_2", "notitle": true },
     { "type": "div",
       "display": "flex",
       "flex-direction": "row",
-      "fxLayoutGap": "12px",
       "items": [
         { "key": "address.city", "flex": "3 3 150px",
           "notitle": true, "placeholder": "City"
@@ -74,7 +66,6 @@
         "type": "div",
         "displayFlex": true,
         "flex-direction": "row",
-        "fxLayoutGap": "12px",
         "items": [
           { "key": "phone_numbers[].type", "flex": "1 1 50px",
             "notitle": true, "placeholder": "Type"
@@ -97,8 +88,8 @@
     },
     "birthday": "1999-09-09",
     "phone_numbers": [
-      { "number": "702-123-4567", "type": "cell" },
-      { "number": "702-987-6543", "type": "work" }
+      { "type": "cell", "number": "702-123-4567" },
+      { "type": "work", "number": "702-987-6543" }
     ]
   }
 }

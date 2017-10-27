@@ -92,7 +92,6 @@ import { addClasses, inArray, JsonPointer, toTitleCase } from '../../shared';
 export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
   controlInitialized: boolean = false;
   widgetOptions: any; // Options passed to child widget
-  layoutPointer: string;
   widgetLayoutNode: any; // layoutNode passed to child widget
   options: any; // Options used in this framework
   formControl: any = null;
@@ -148,7 +147,6 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
         options: _.cloneDeep(this.layoutNode.options)
       };
       this.widgetOptions = this.widgetLayoutNode.options;
-      this.layoutPointer = this.jsf.getLayoutPointer(this);
       this.formControl = this.jsf.getFormControl(this);
 
       this.options.isInputWidget = inArray(this.layoutNode.type, [

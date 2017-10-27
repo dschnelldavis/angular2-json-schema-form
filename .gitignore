@@ -3,7 +3,7 @@
 # compiled output
 /compiled
 /dist
-/docs
+/docs/api
 /out-ngc
 /tmp
 

@@ -42,7 +42,7 @@
     "start": "ng serve",
     "test": "ng test",
     "lint": "ng lint",
-    "docs": "typedoc --options typedoc.json lib/src/json-schema-form.module.ts",
+    "docs": "typedoc src/lib/src/",
     "clean": "rimraf out-ngc dist/*",
     "prebuild": "npm run clean",
     "build": "node build.js",
@@ -55,7 +55,7 @@
     "deploy": "firebase deploy"
   },
   "dependencies": {
-    "ajv": "^5.2.4",
+    "ajv": "^5.3.0",
     "lodash": "4.x"
   },
   "peerDependencies": {
@@ -84,11 +84,11 @@
     "@angular/platform-browser-dynamic": "^4.4.6",
     "@angular/router": "^4.4.6",
     "@types/ace": "^0.0.35",
-    "@types/jasmine": "^2.6.0",
-    "@types/node": "^8.0.46",
+    "@types/jasmine": "^2.6.2",
+    "@types/node": "^8.0.47",
     "brace": "^0.10.0",
     "camelcase": "^4.0.0",
-    "codelyzer": "^3.2.1",
+    "codelyzer": "^3.2.2",
     "concurrently": "^3.2.0",
     "core-js": "^2.4.1",
     "glob": "^7.1.1",
@@ -109,7 +109,7 @@
     "rollup-plugin-node-resolve-angular": "^2.0.3",
     "rollup-plugin-sourcemaps": "^0.4.1",
     "rollup-plugin-uglify": "^2.0.1",
-    "rxjs": "^5.5.0",
+    "rxjs": "^5.5.2",
     "ts-node": "^3.0.0",
     "tslint": "^5.8.0",
     "typedoc": "^0.9.0",
