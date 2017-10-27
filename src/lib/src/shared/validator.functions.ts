@@ -175,6 +175,7 @@ export function isEmpty(value: any): boolean {
  * Checks if a value is a string.
  *
  * @param {any} object - the value to check
+ * @param {any = false} strict - if truthy, also checks JavaScript tyoe
  * @return {boolean} - true if string, false if not
  */
 export function isString(value: any): value is string {
@@ -184,7 +185,7 @@ export function isString(value: any): value is string {
 /**
  * 'isNumber' utility function
  *
- * Checks if a value is a regular number or a numeric string.
+ * Checks if a value is a regular number, numeric string, or JavaScript Date.
  *
  * @param {any} object - the value to check
  * @param {any = false} strict - if truthy, also checks JavaScript tyoe
@@ -245,6 +246,11 @@ export function isArray(item: any): boolean {
     Object.prototype.toString.call(item) === '[object Array]';
 }
 
+export function isDate(item: any): boolean {
+  return typeof item === 'object' &&
+    Object.prototype.toString.call(item) === '[object Date]';
+}
+
 export function isMap(item: any): boolean {
   return typeof item === 'object' &&
     Object.prototype.toString.call(item) === '[object Map]';
@@ -300,7 +306,7 @@ export function getType(value: any, strict: any = false): SchemaType {
   if (isBoolean(value, 'strict')) { return 'boolean'; }
   if (isInteger(value, strict)) { return 'integer'; }
   if (isNumber(value, strict)) { return 'number'; }
-  if (isString(value)) { return 'string'; }
+  if (isString(value) || (!strict && isDate(value))) { return 'string'; }
   return null;
 }
 
@@ -317,7 +323,7 @@ export function getType(value: any, strict: any = false): SchemaType {
 export function isType(value: PrimitiveValue, type: SchemaPrimitiveType): boolean {
   switch (type) {
     case 'string':
-      return isString(value);
+      return isString(value) || isDate(value);
     case 'number':
       return isNumber(value);
     case 'integer':
@@ -361,12 +367,16 @@ export function isPrimitive(value: any): boolean {
  * If 'strictIntegers' is FALSE (or not set) the type 'integer' is treated
  * exactly the same as 'number', and allows decimals.
  *
- * Examples:
- * toJavaScriptType('10', 'number') = 10
- * toJavaScriptType('10', 'integer') = 10
- * toJavaScriptType('10.5', 'number') = 10.5
+ * Valid Examples:
+ * toJavaScriptType('10',   'number' ) = 10   // '10'   is a number
+ * toJavaScriptType('10',   'integer') = 10   // '10'   is also an integer
+ * toJavaScriptType( 10,    'integer') = 10   //  10    is still an integer
+ * toJavaScriptType( 10,    'string' ) = '10' //  10    can be made into a string
+ * toJavaScriptType('10.5', 'number' ) = 10.5 // '10.5' is a number
+ *
+ * Invalid Examples:
  * toJavaScriptType('10.5', 'integer') = null // '10.5' is not an integer
- * toJavaScriptType(10.5, 'integer') = null // 10.5 is still not an integer
+ * toJavaScriptType( 10.5,  'integer') = null //  10.5  is still not an integer
  *
  * @param {PrimitiveValue} value - value to convert
  * @param {SchemaPrimitiveType | SchemaPrimitiveType[]} types - types to convert to
@@ -390,6 +400,15 @@ export function toJavaScriptType(
   }
   if (inArray('string', types)) {
     if (isString(value)) { return value; }
+    // If value is a date, and types includes 'string',
+    // convert the date to a string
+    if (isDate(value)) { return value.toISOString().slice(0, 10); }
+    if (isNumber(value)) { return value.toString(); }
+  }
+  // If value is a date, and types includes 'integer' or 'number',
+  // but not 'string', convert the date to a number
+  if (isDate(value) && (inArray('integer', types) || inArray('number', types))) {
+    return value.getTime();
   }
   if (inArray('boolean', types)) {
     if (isBoolean(value, true)) { return true; }
