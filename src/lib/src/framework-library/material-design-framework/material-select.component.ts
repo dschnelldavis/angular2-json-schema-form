@@ -15,7 +15,7 @@ import { buildTitleMap, isArray } from '../../shared';
       [style.width]="'100%'">
       <span matPrefix *ngIf="options?.prefix || options?.fieldAddonLeft"
         [innerHTML]="options?.prefix || options?.fieldAddonLeft"></span>
-      <mat-select #inputControl *ngIf="boundControl"
+      <mat-select *ngIf="boundControl"
         [formControl]="formControl"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.name]="controlName"
@@ -39,7 +39,7 @@ import { buildTitleMap, isArray } from '../../shared';
           </mat-optgroup>
         </ng-template>
       </mat-select>
-      <mat-select #inputControl *ngIf="!boundControl"
+      <mat-select *ngIf="!boundControl"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.name]="controlName"
         [disabled]="controlDisabled || options?.readonly"

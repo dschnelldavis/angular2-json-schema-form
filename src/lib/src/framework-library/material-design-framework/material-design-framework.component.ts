@@ -76,7 +76,6 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
   options: any; // Options used in this framework
   widgetLayoutNode: any; // layoutNode passed to child widget
   widgetOptions: any; // Options passed to child widget
-  layoutPointer: string;
   formControl: any = null;
   parentArray: any = null;
   isOrderable: boolean = false;
@@ -121,7 +120,6 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
         options: _.cloneDeep(this.layoutNode.options || {})
       };
       this.widgetOptions = this.widgetLayoutNode.options;
-      this.layoutPointer = this.jsf.getLayoutPointer(this);
       this.formControl = this.jsf.getFormControl(this);
 
       if (this.options) {

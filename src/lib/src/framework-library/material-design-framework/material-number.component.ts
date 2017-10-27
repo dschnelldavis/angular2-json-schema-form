@@ -13,7 +13,7 @@ import { hasOwn } from '../../shared';
       [style.width]="'100%'">
       <span matPrefix *ngIf="options?.prefix || options?.fieldAddonLeft"
         [innerHTML]="options?.prefix || options?.fieldAddonLeft"></span>
-      <input matInput #inputControl *ngIf="boundControl"
+      <input matInput *ngIf="boundControl"
         [formControl]="formControl"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.max]="options?.maximum"
@@ -27,7 +27,7 @@ import { hasOwn } from '../../shared';
         [style.width]="'100%'"
         [type]="'number'"
         (blur)="options.showErrors = true">
-      <input matInput #inputControl *ngIf="!boundControl"
+      <input matInput *ngIf="!boundControl"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.max]="options?.maximum"
         [attr.min]="options?.minimum"

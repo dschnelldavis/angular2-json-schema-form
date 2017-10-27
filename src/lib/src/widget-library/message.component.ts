@@ -1,6 +1,4 @@
-import {
-  ChangeDetectorRef, Component, Input, OnChanges, OnInit
-} from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';

@@ -11,7 +11,7 @@ import { dateToString, hasOwn, stringToDate } from '../../shared';
       [style.width]="'100%'">
       <span matPrefix *ngIf="options?.prefix || options?.fieldAddonLeft"
         [innerHTML]="options?.prefix || options?.fieldAddonLeft"></span>
-      <input matInput #inputControl *ngIf="boundControl"
+      <input matInput *ngIf="boundControl"
         [formControl]="formControl"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.list]="'control' + layoutNode?._id + 'Autocomplete'"
@@ -25,7 +25,7 @@ import { dateToString, hasOwn, stringToDate } from '../../shared';
         [required]="options?.required"
         [style.width]="'100%'"
         (blur)="options.showErrors = true">
-      <input matInput #inputControl *ngIf="!boundControl"
+      <input matInput *ngIf="!boundControl"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.list]="'control' + layoutNode?._id + 'Autocomplete'"
         [attr.readonly]="options?.readonly ? 'readonly' : null"

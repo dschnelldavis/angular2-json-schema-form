@@ -13,7 +13,7 @@ import { hasOwn } from '../../shared';
       [style.width]="'100%'">
       <span matPrefix *ngIf="options?.prefix || options?.fieldAddonLeft"
         [innerHTML]="options?.prefix || options?.fieldAddonLeft"></span>
-      <textarea matInput #inputControl *ngIf="boundControl"
+      <textarea matInput *ngIf="boundControl"
         [formControl]="formControl"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.list]="'control' + layoutNode?._id + 'Autocomplete'"
@@ -27,7 +27,7 @@ import { hasOwn } from '../../shared';
         [readonly]="options?.readonly ? 'readonly' : null"
         [style.width]="'100%'"
         (blur)="options.showErrors = true"></textarea>
-      <textarea matInput #inputControl *ngIf="!boundControl"
+      <textarea matInput *ngIf="!boundControl"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.list]="'control' + layoutNode?._id + 'Autocomplete'"
         [attr.maxlength]="options?.maxLength"
