@@ -66,8 +66,10 @@ If you want to use the Material Design framework, also add:
 
 ```javascript
 import { FlexLayoutModule }                   from '@angular/flex-layout';
-import { MaterialModule, MdDatepickerModule } from '@angular/material';
+import { MatInputModule, MatSelectModule }    from '@angular/material';
 ```
+
+(For information about all the available modules, check the [Angular Material site](https://material.angular.io/guide/getting-started).)
 
 If you don't want to use the Material Design framework, you don't need to import these modules. (To get the project to build correctly, you may need to install the Angular Material libraries through NPM, as described above, but you don't need to actually import them.)
 
@@ -79,7 +81,7 @@ Your final app.module.ts should look something like this:
 import { BrowserModule }                      from '@angular/platform-browser';
 import { NgModule }                           from '@angular/core';
 import { FlexLayoutModule }                   from '@angular/flex-layout';
-import { MaterialModule, MdDatepickerModule } from '@angular/material';
+import { MatInputModule, MatSelectModule }    from '@angular/material';
 
 import { JsonSchemaFormModule }               from 'angular2-json-schema-form';
 
@@ -88,8 +90,7 @@ import { AppComponent }                       from './app.component';
 @NgModule({
   declarations: [ AppComponent ],
   imports:      [
-    BrowserModule, FlexLayoutModule, MaterialModule,
-    MdDatepickerModule, JsonSchemaFormModule
+    BrowserModule, FlexLayoutModule, MatInputModule, MatSelectModule, JsonSchemaFormModule
   ],
   providers:    [],
   bootstrap:    [ AppComponent ]
