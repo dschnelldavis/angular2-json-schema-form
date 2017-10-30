@@ -29,9 +29,9 @@ export class DemoComponent implements OnInit {
   examples: any = Examples;
   frameworkList: any = ['material-design', 'bootstrap-3', 'no-framework'];
   frameworks: any = {
-    'material-design': 'Material Design framework',
-    'bootstrap-3': 'Bootstrap 3 framework',
-    'no-framework': 'No Framework (plain HTML controls)',
+    'material-design': 'Material Design',
+    'bootstrap-3': 'Bootstrap 3',
+    'no-framework': 'None (plain HTML)',
   };
   selectedSet: string = 'ng-jsf';
   selectedSetName: string = '';
@@ -52,10 +52,11 @@ export class DemoComponent implements OnInit {
   jsonFormObject: any;
   jsonFormOptions: any = {
     addSubmit: true, // Add a submit button if layout does not have one
+    debug: false, // Don't show inline debugging information
     loadExternalAssets: true, // Load external css and JavaScript for frameworks
-    defaultOptions: { feedback: true }, // Show inline feedback icons
-    debug: false,
-    returnEmptyFields: false,
+    returnEmptyFields: false, // Don't return values for empty input fields
+    setSchemaDefaults: true, // Always use schema defaults for empty fields
+    defautWidgetOptions: { feedback: true }, // Show inline feedback icons
   };
   liveFormData: any = {};
   formValidationErrors: any;
@@ -153,6 +154,7 @@ export class DemoComponent implements OnInit {
   ) {
     if (this.menuTrigger.menuOpen) { this.menuTrigger.closeMenu(); }
     if (selectedExample !== this.selectedExample) {
+      this.formActive = false;
       this.selectedSet = selectedSet;
       this.selectedSetName = selectedSetName;
       this.selectedExample = selectedExample;
@@ -234,8 +236,8 @@ export class DemoComponent implements OnInit {
 
   toggleFormOption(option: string) {
     if (option === 'feedback') {
-      this.jsonFormOptions.defaultOptions.feedback =
-        !this.jsonFormOptions.defaultOptions.feedback;
+      this.jsonFormOptions.defautWidgetOptions.feedback =
+        !this.jsonFormOptions.defautWidgetOptions.feedback;
     } else {
       this.jsonFormOptions[option] = !this.jsonFormOptions[option];
     }

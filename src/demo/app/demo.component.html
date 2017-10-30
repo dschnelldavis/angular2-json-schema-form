@@ -74,16 +74,18 @@
       {{visible.options ? '▼' : '▶'}} Selected Framework and Options
     </h4>
     <div *ngIf="visible.options" fxLayout="column" [@expandSection]="true">
-      <mat-select
-        [(ngModel)]="selectedFramework"
-        name="framework"
-        placeholder="Framework">
-        <mat-option
-          *ngFor="let framework of frameworkList"
-          [value]="framework">
-          {{frameworks[framework]}}
-        </mat-option>
-      </mat-select>
+      <mat-form-field>
+        <mat-select
+          [(ngModel)]="selectedFramework"
+          name="framework"
+          placeholder="Framework">
+          <mat-option
+            *ngFor="let framework of frameworkList"
+            [value]="framework">
+            {{frameworks[framework]}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
       <div class="check-row">
         <mat-checkbox color="primary" [(ngModel)]="jsonFormOptions.returnEmptyFields">
           Return empty fields?
@@ -97,7 +99,7 @@
         (default = only add if no layout is defined)
       </div>
       <div class="check-row">
-        <mat-checkbox color="primary" [(ngModel)]="jsonFormOptions.defaultOptions.feedback">
+        <mat-checkbox color="primary" [(ngModel)]="jsonFormOptions.defautWidgetOptions.feedback">
           Show inline fedback?
         </mat-checkbox>
         (default = false)
