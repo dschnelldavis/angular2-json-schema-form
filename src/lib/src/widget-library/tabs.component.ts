@@ -1,7 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
-import { JsonPointer } from '../shared';
 
 @Component({
   selector: 'tabs-widget',
@@ -37,11 +36,9 @@ export class TabsComponent implements OnInit {
   itemCount: number;
   selectedItem: number = 0;
   showAddTab: boolean = true;
-  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
-  @Input() data: any;
 
   constructor(
     private jsf: JsonSchemaFormService
@@ -57,7 +54,6 @@ export class TabsComponent implements OnInit {
     if (this.layoutNode.items[index].type === '$ref') {
       this.itemCount = this.layoutNode.items.length;
       this.jsf.addItem({
-        formID: this.formID,
         layoutNode: this.layoutNode.items[index],
         layoutIndex: this.layoutIndex.concat(index),
         dataIndex: this.dataIndex.concat(index)
@@ -76,7 +72,7 @@ export class TabsComponent implements OnInit {
     }
   }
 
-  setTitle(item: any = null, index: number = null): string {
+  setTitle(item: any, index: number): string {
     return this.jsf.setTitle(this, item, index);
   }
 }

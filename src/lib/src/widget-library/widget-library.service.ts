@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 
+import { hasOwn } from '../shared/utility.functions';
+
 import { AddReferenceComponent } from './add-reference.component';
 import { AnyOfComponent } from './any-of.component';
 import { ButtonComponent } from './button.component';
@@ -22,8 +24,6 @@ import { TabComponent } from './tab.component';
 import { TabsComponent } from './tabs.component';
 import { TemplateComponent } from './template.component';
 import { TextareaComponent } from './textarea.component';
-
-import { hasOwn } from '../shared/utility.functions';
 
 @Injectable()
 export class WidgetLibraryService {

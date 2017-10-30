@@ -33,11 +33,9 @@ export class OrderableDirective implements OnInit {
   overParentElement: boolean = false;
   overChildElement: boolean = false;
   @Input() orderable: boolean;
-  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
-  @Input() data: any;
 
   constructor(
     private elementRef: ElementRef,
@@ -98,7 +96,8 @@ export class OrderableDirective implements OnInit {
             this.overParentElement = false;
           }
 
-          if (!this.overParentElement && !this.overChildElement) {
+          const sourceArrayIndex = sessionStorage.getItem(this.arrayLayoutIndex);
+          if (!this.overParentElement && !this.overChildElement && sourceArrayIndex !== null) {
             this.element.classList.remove('drag-target-top');
             this.element.classList.remove('drag-target-bottom');
           }

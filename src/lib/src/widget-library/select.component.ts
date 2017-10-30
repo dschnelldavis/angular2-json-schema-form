@@ -72,11 +72,9 @@ export class SelectComponent implements OnInit {
   options: any;
   selectList: any[] = [];
   isArray = isArray;
-  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
-  @Input() data: any;
 
   constructor(
     private jsf: JsonSchemaFormService

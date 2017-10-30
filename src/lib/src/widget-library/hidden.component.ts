@@ -24,11 +24,9 @@ export class HiddenComponent implements OnInit {
   controlValue: any;
   controlDisabled: boolean = false;
   boundControl: boolean = false;
-  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
-  @Input() data: any;
 
   constructor(
     private jsf: JsonSchemaFormService

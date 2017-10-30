@@ -28,6 +28,7 @@ export {
   buildLayout, buildLayoutFromSchema, mapLayout, getLayoutNode, buildTitleMap
 } from './src/shared/layout.functions';
 export { dateToString, stringToDate, findDate } from './src/shared/date.functions';
+export { OrderableDirective } from './src/shared/orderable.directive';
 
 export { AddReferenceComponent } from './src/widget-library/add-reference.component';
 export { AnyOfComponent } from './src/widget-library/any-of.component';
@@ -51,7 +52,6 @@ export { TabComponent } from './src/widget-library/tab.component';
 export { TabsComponent } from './src/widget-library/tabs.component';
 export { TemplateComponent } from './src/widget-library/template.component';
 export { TextareaComponent } from './src/widget-library/textarea.component';
-export { OrderableDirective } from './src/widget-library/orderable.directive';
 
 export { WidgetLibraryService } from './src/widget-library/widget-library.service';
 export { WidgetLibraryModule } from './src/widget-library/widget-library.module';

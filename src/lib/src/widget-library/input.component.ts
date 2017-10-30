@@ -56,11 +56,9 @@ export class InputComponent implements OnInit {
   boundControl: boolean = false;
   options: any;
   autoCompleteList: string[] = [];
-  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
-  @Input() data: any;
 
   constructor(
     private jsf: JsonSchemaFormService

@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@angular/core';
 
 import { WidgetLibraryService } from '../widget-library/widget-library.service';
+import { hasOwn } from '../shared/utility.functions';
 
 // No framework - unmodified HTML controls, with styles from layout only
 import { NoFrameworkComponent } from './no-framework.component';
@@ -40,8 +41,6 @@ import { MaterialDesignFrameworkComponent } from './material-design-framework/ma
 //   https://github.com/zurb/foundation-sites
 // - Semantic UI:
 //   https://github.com/vladotesanovic/ngSemantic
-
-import { hasOwn } from '../shared/utility.functions';
 
 export interface Framework {
   framework: any,

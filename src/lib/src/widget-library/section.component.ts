@@ -16,9 +16,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
         [style.display]="options?.notitle ? 'none' : ''"
         (click)="expand()"></label>
         <root-widget *ngIf="expanded"
-          [data]="data"
           [dataIndex]="dataIndex"
-          [formID]="formID"
           [layout]="layoutNode.items"
           [layoutIndex]="layoutIndex"
           [isFlexItem]="getFlexAttribute('is-flex')"
@@ -44,9 +42,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
         [style.display]="legendDisplay()"
         (click)="expand()"></legend>
         <root-widget *ngIf="expanded"
-          [data]="data"
           [dataIndex]="dataIndex"
-          [formID]="formID"
           [layout]="layoutNode.items"
           [layoutIndex]="layoutIndex"
           [isFlexItem]="getFlexAttribute('is-flex')"
@@ -69,11 +65,9 @@ export class SectionComponent implements OnInit {
   options: any;
   expanded: boolean = true;
   containerType: string;
-  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
-  @Input() data: any;
 
   constructor(
     private jsf: JsonSchemaFormService

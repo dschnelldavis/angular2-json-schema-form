@@ -30,11 +30,9 @@ export class ButtonComponent implements OnInit {
   controlDisabled: boolean = false;
   boundControl: boolean = false;
   options: any;
-  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
-  @Input() data: any;
 
   constructor(
     private jsf: JsonSchemaFormService

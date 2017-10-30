@@ -46,11 +46,9 @@ export class CheckboxComponent implements OnInit {
   options: any;
   trueValue: any = true;
   falseValue: any = false;
-  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
-  @Input() data: any;
 
   constructor(
     private jsf: JsonSchemaFormService

@@ -11,7 +11,6 @@ import { toTitleCase } from '../../shared';
     <div
       [class.array-item]="layoutNode?.arrayItem && layoutNode?.type !== '$ref'"
       [orderable]="isOrderable"
-      [formID]="formID"
       [dataIndex]="dataIndex"
       [layoutIndex]="layoutIndex"
       [layoutNode]="layoutNode">
@@ -23,8 +22,6 @@ import { toTitleCase } from '../../shared';
         <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/>
       </svg>
       <select-widget-widget
-        [formID]="formID"
-        [data]="data"
         [dataIndex]="dataIndex"
         [layoutIndex]="layoutIndex"
         [layoutNode]="layoutNode"></select-widget-widget>
@@ -34,8 +31,8 @@ import { toTitleCase } from '../../shared';
     .array-item {
       border-radius: 2px;
       box-shadow: 0 3px 1px -2px rgba(0,0,0,.2),
-                  0 2px 2px 0 rgba(0,0,0,.14),
-                  0 1px 5px 0 rgba(0,0,0,.12);
+                  0 2px 2px  0   rgba(0,0,0,.14),
+                  0 1px 5px  0   rgba(0,0,0,.12);
       padding: 6px;
       position: relative;
       transition: all 280ms cubic-bezier(.4, 0, .2, 1);
@@ -70,7 +67,7 @@ import { toTitleCase } from '../../shared';
   `],
 })
 export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
-  controlInitialized: boolean = false;
+  frameworkInitialized: boolean = false;
   controlType: string;
   inputType: string;
   options: any; // Options used in this framework
@@ -79,11 +76,9 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
   formControl: any = null;
   parentArray: any = null;
   isOrderable: boolean = false;
-  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
-  @Input() data: any;
 
   constructor(
     private changeDetector: ChangeDetectorRef,
@@ -105,14 +100,14 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
-    this.initializeControl();
+    this.initializeFramework();
   }
 
   ngOnChanges() {
-    if (!this.controlInitialized) { this.initializeControl(); }
+    if (!this.frameworkInitialized) { this.initializeFramework(); }
   }
 
-  initializeControl() {
+  initializeFramework() {
     if (this.layoutNode) {
       this.options = _.cloneDeep(this.layoutNode.options || {});
       this.widgetLayoutNode = {
@@ -232,7 +227,7 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
         }
       }
 
-      this.controlInitialized = true;
+      this.frameworkInitialized = true;
     } else {
       this.options = {};
     }

@@ -13,11 +13,9 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
 export class MessageComponent implements OnInit {
   options: any;
   message: string = null;
-  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
-  @Input() data: any;
 
   constructor(
     private jsf: JsonSchemaFormService

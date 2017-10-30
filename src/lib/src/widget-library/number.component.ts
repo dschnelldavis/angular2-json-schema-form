@@ -2,7 +2,6 @@ import { Component, Input, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
-import { getControl, inArray, isDefined } from '../shared';
 
 @Component({
   selector: 'number-widget',
@@ -59,11 +58,9 @@ export class NumberComponent implements OnInit {
   allowDecimal: boolean = true;
   allowExponents: boolean = false;
   lastValidNumber: string = '';
-  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
-  @Input() data: any;
 
   constructor(
     private jsf: JsonSchemaFormService

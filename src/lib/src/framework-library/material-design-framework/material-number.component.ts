@@ -2,12 +2,11 @@ import { Component, Input, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 
 import { JsonSchemaFormService } from '../../json-schema-form.service';
-import { hasOwn } from '../../shared';
 
 @Component({
   selector: 'material-number-widget',
   template: `
-    <mat-form-field *ngIf="isConditionallyShown()"
+    <mat-form-field
       [class]="options?.htmlClass || null"
       [floatPlaceholder]="options?.floatPlaceholder || (options?.notitle ? 'never' : 'auto')"
       [style.width]="'100%'">
@@ -67,11 +66,9 @@ export class MaterialNumberComponent implements OnInit {
   allowDecimal: boolean = true;
   allowExponents: boolean = false;
   lastValidNumber: string = '';
-  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
-  @Input() data: any;
 
   constructor(
     private jsf: JsonSchemaFormService
@@ -88,17 +85,5 @@ export class MaterialNumberComponent implements OnInit {
 
   updateValue(event) {
     this.jsf.updateValue(this, event.target.value);
-  }
-
-  isConditionallyShown(): boolean {
-    this.data = this.jsf.data;
-    let result: boolean = true;
-    if (this.data && hasOwn(this.options, 'condition')) {
-      const model = this.data;
-      /* tslint:disable */
-      eval('result = ' + this.options.condition);
-      /* tslint:enable */
-    }
-    return result;
   }
 }

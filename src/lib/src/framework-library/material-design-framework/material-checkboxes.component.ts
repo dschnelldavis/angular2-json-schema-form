@@ -10,18 +10,19 @@ import { buildFormGroup, buildTitleMap, hasOwn, JsonPointer } from '../../shared
 @Component({
   selector: 'material-checkboxes-widget',
   template: `
-    <div  *ngIf="isConditionallyShown()">
+    <div>
       <mat-checkbox type="checkbox"
+        [checked]="allChecked"
         [color]="options?.color || 'primary'"
         [disabled]="controlDisabled || options?.readonly"
-        [name]="options?.name"
-        [checked]="allChecked"
         [indeterminate]="someChecked"
+        [name]="options?.name"
         (blur)="options.showErrors = true"
         (change)="updateAllValues($event)">
         <span class="checkbox-name" [innerHTML]="options?.name"></span>
       </mat-checkbox>
       <label *ngIf="options?.title"
+        class="title"
         [class]="options?.labelHtmlClass"
         [style.display]="options?.notitle ? 'none' : ''"
         [innerHTML]="options?.title"></label>
@@ -43,6 +44,7 @@ import { buildFormGroup, buildTitleMap, hasOwn, JsonPointer } from '../../shared
         [innerHTML]="options?.errorMessage"></mat-error>
     </div>`,
   styles: [`
+    .title { font-weight: bold; }
     .checkbox-list { list-style-type: none; }
     .horizontal-list > li { display: inline-block; margin-right: 10px; zoom: 1; }
     .checkbox-name { white-space: nowrap; }
@@ -59,11 +61,9 @@ export class MaterialCheckboxesComponent implements OnInit {
   horizontalList: boolean = false;
   formArray: AbstractControl;
   checkboxList: TitleMapItem[] = [];
-  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
-  @Input() data: any;
 
   constructor(
     private jsf: JsonSchemaFormService
@@ -105,17 +105,5 @@ export class MaterialCheckboxesComponent implements OnInit {
     this.options.showErrors = true;
     this.checkboxList.forEach(t => t.checked = event.checked);
     this.updateValue();
-  }
-
-  isConditionallyShown(): boolean {
-    this.data = this.jsf.data;
-    let result: boolean = true;
-    if (this.data && hasOwn(this.options, 'condition')) {
-      const model = this.data;
-      /* tslint:disable */
-      eval('result = ' + this.options.condition);
-      /* tslint:enable */
-    }
-    return result;
   }
 }

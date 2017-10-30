@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-import { OrderableDirective } from './orderable.directive';
+import { OrderableDirective } from '../shared/orderable.directive';
 
 import { WidgetLibraryService } from './widget-library.service';
 import { JsonSchemaFormService } from '../json-schema-form.service';

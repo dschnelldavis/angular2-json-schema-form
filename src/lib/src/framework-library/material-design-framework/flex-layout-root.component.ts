@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
 
 import { JsonSchemaFormService } from '../../json-schema-form.service';
-import { hasOwn } from '../../shared';
+import { isDefined, JsonPointer } from '../../shared';
 
 @Component({
   selector: 'flex-layout-root-widget',
@@ -17,9 +17,7 @@ import { hasOwn } from '../../shared';
       [fxFlexOrder]="layoutNode?.options?.fxFlexOrder"
       [fxFlexOffset]="layoutNode?.options?.fxFlexOffset"
       [fxFlexAlign]="layoutNode?.options?.fxFlexAlign">
-      <select-framework-widget *ngIf="isConditionallyShown(layoutNode, i)"
-        [formID]="formID"
-        [data]="data"
+      <select-framework-widget *ngIf="isConditionallyShown(layoutNode)"
         [dataIndex]="layoutNode?.arrayItem ? (dataIndex || []).concat(i) : (dataIndex || [])"
         [layoutIndex]="(layoutIndex || []).concat(i)"
         [layoutNode]="layoutNode"></select-framework-widget>
@@ -27,13 +25,10 @@ import { hasOwn } from '../../shared';
   changeDetection: ChangeDetectionStrategy.Default,
 })
 export class FlexLayoutRootComponent implements OnInit {
-  arrayIndex: number;
-  @Input() formID: number;
   @Input() dataIndex: number[];
   @Input() layoutIndex: number[];
   @Input() layout: any[];
   @Input() isFlexItem: boolean = false;
-  @Input() data: any;
 
   constructor(
     private jsf: JsonSchemaFormService
@@ -59,19 +54,22 @@ export class FlexLayoutRootComponent implements OnInit {
     this.jsf.removeItem(item);
   }
 
-  isConditionallyShown(layoutNode: any, arrayIndex: number): boolean {
+  isConditionallyShown(layoutNode: any): boolean {
+    const arrayIndex = this.dataIndex[this.dataIndex.length - 1];
     let result = true;
-    if (this.data && hasOwn(layoutNode, 'options') &&
-      hasOwn(layoutNode.options, 'condition')
-    ) {
-      const model = this.data;
-      try {
-        /* tslint:disable */
-        eval('result = ' + layoutNode.options.condition);
-        /* tslint:enable */
-      } catch (error) {
-        console.error('Error evaluating condition:');
-        console.error(error);
+    if (isDefined((layoutNode.options || {}).condition)) {
+      if (typeof layoutNode.options.condition === 'string') {
+        let pointer = layoutNode.options.condition
+        if (isDefined(arrayIndex)) {
+          pointer = pointer.replace('[arrayIndex]', `[${arrayIndex}]`);
+        }
+        pointer = JsonPointer.parseObjectPath(pointer);
+        result = !!JsonPointer.get(this.jsf.data, pointer);
+        if (!result && pointer[0] === 'model') {
+          result = !!JsonPointer.get({ model: this.jsf.data }, pointer);
+        }
+      } else if (typeof layoutNode.options.condition === 'function') {
+        result = layoutNode.options.condition(this.jsf.data);
       }
     }
     return result;

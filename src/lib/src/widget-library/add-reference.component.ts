@@ -20,11 +20,9 @@ export class AddReferenceComponent implements OnInit {
   itemCount: number;
   previousLayoutIndex: number[];
   previousDataIndex: number[];
-  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
-  @Input() data: any;
 
   constructor(
     private jsf: JsonSchemaFormService

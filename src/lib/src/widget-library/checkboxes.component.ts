@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { FormArray, AbstractControl } from '@angular/forms';
 
 import { JsonSchemaFormService, TitleMapItem } from '../json-schema-form.service';
-import { buildFormGroup, buildTitleMap, JsonPointer } from '../shared';
+import { buildTitleMap } from '../shared';
 
 @Component({
   selector: 'checkboxes-widget',
@@ -66,11 +66,9 @@ export class CheckboxesComponent implements OnInit {
   layoutOrientation: string;
   formArray: AbstractControl;
   checkboxList: TitleMapItem[] = [];
-  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
-  @Input() data: any;
 
   constructor(
     private jsf: JsonSchemaFormService

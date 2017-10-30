@@ -2,12 +2,12 @@ import { Component, Input, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 
 import { JsonSchemaFormService } from '../../json-schema-form.service';
-import { buildTitleMap, hasOwn } from '../../shared';
+import { buildTitleMap } from '../../shared';
 
 @Component({
   selector: 'material-button-group-widget',
   template: `
-    <div *ngIf="isConditionallyShown()">
+    <div>
       <div *ngIf="options?.title">
         <label
           [attr.for]="'control' + layoutNode?._id"
@@ -44,11 +44,9 @@ export class MaterialButtonGroupComponent implements OnInit {
   options: any;
   radiosList: any[] = [];
   vertical: boolean = false;
-  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
-  @Input() data: any;
 
   constructor(
     private jsf: JsonSchemaFormService
@@ -66,17 +64,5 @@ export class MaterialButtonGroupComponent implements OnInit {
   updateValue(value) {
     this.options.showErrors = true;
     this.jsf.updateValue(this, value);
-  }
-
-  isConditionallyShown(): boolean {
-    this.data = this.jsf.data;
-    let result: boolean = true;
-    if (this.data && hasOwn(this.options, 'condition')) {
-      const model = this.data;
-      /* tslint:disable */
-      eval('result = ' + this.options.condition);
-      /* tslint:enable */
-    }
-    return result;
   }
 }

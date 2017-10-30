@@ -1,7 +1,7 @@
 import { Component, Input, Host } from '@angular/core';
 
-import { JsonSchemaFormComponent } from '../json-schema-form.component';
-import { hasOwn } from '../shared';
+import { JsonSchemaFormService } from '../json-schema-form.service';
+import { isDefined, JsonPointer } from '../shared';
 
 @Component({
   selector: 'root-widget',
@@ -14,14 +14,11 @@ import { hasOwn } from '../shared';
       [style.flex-shrink]="getFlexAttribute(layoutItem, 'flex-shrink')"
       [style.order]="(layoutItem.options || {}).order">
       <div
-        [formID]="formID"
         [dataIndex]="layoutItem?.arrayItem ? (dataIndex || []).concat(i) : (dataIndex || [])"
         [layoutIndex]="(layoutIndex || []).concat(i)"
         [layoutNode]="layoutItem"
         [orderable]="isDraggable(layoutItem)">
         <select-framework-widget *ngIf="isConditionallyShown(layoutItem)"
-          [formID]="formID"
-          [data]="data"
           [dataIndex]="layoutItem?.arrayItem ? (dataIndex || []).concat(i) : (dataIndex || [])"
           [layoutIndex]="(layoutIndex || []).concat(i)"
           [layoutNode]="layoutItem"></select-framework-widget>
@@ -52,14 +49,15 @@ import { hasOwn } from '../shared';
 })
 export class RootComponent {
   options: any;
-  parentComponent: JsonSchemaFormComponent;
-  @Input() formID: number;
   @Input() dataIndex: number[];
   @Input() layoutIndex: number[];
   @Input() layout: any[];
   @Input() isOrderable: boolean;
   @Input() isFlexItem: boolean = false;
-  @Input() data: any;
+
+  constructor(
+    private jsf: JsonSchemaFormService
+  ) { }
 
   isDraggable(node: any): boolean {
     return node.arrayItem && node.type !== '$ref' &&
@@ -78,17 +76,22 @@ export class RootComponent {
     return layoutItem && layoutItem._id;
   }
 
-  isConditionallyShown(layoutItem: any): boolean {
-    let result: boolean = true;
-    if (this.data && hasOwn(layoutItem, 'condition')) {
-      const model = this.data;
-      try {
-        /* tslint:disable */
-        eval('result = ' + layoutItem.condition);
-        /* tslint:enable */
-      } catch (error) {
-        console.error('Error evaluating condition:');
-        console.error(error);
+  isConditionallyShown(layoutNode: any): boolean {
+    const arrayIndex = this.dataIndex && this.dataIndex[this.dataIndex.length - 1];
+    let result = true;
+    if (isDefined((layoutNode.options || {}).condition)) {
+      if (typeof layoutNode.options.condition === 'string') {
+        let pointer = layoutNode.options.condition
+        if (isDefined(arrayIndex)) {
+          pointer = pointer.replace('[arrayIndex]', `[${arrayIndex}]`);
+        }
+        pointer = JsonPointer.parseObjectPath(pointer);
+        result = !!JsonPointer.get(this.jsf.data, pointer);
+        if (!result && pointer[0] === 'model') {
+          result = !!JsonPointer.get({ model: this.jsf.data }, pointer);
+        }
+      } else if (typeof layoutNode.options.condition === 'function') {
+        result = layoutNode.options.condition(this.jsf.data);
       }
     }
     return result;

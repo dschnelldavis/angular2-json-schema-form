@@ -1,14 +1,13 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
-import { hasOwn } from './../../shared/utility.functions';
-
 
 import { JsonSchemaFormService } from '../../json-schema-form.service';
+import { hasOwn } from './../../shared/utility.functions';
 
 @Component({
   selector: 'material-checkbox-widget',
   template: `
-    <mat-checkbox *ngIf="boundControl && !showSlideToggle && isConditionallyShown()"
+    <mat-checkbox *ngIf="boundControl && !showSlideToggle"
       [formControl]="formControl"
       align="left"
       [color]="options?.color || 'primary'"
@@ -21,7 +20,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
         [style.display]="options?.notitle ? 'none' : ''"
         [innerHTML]="options?.title"></span>
     </mat-checkbox>
-    <mat-checkbox *ngIf="!boundControl && !showSlideToggle && isConditionallyShown()"
+    <mat-checkbox *ngIf="!boundControl && !showSlideToggle"
       align="left"
       [color]="options?.color || 'primary'"
       [disabled]="controlDisabled || options?.readonly"
@@ -36,7 +35,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
         [style.display]="options?.notitle ? 'none' : ''"
         [innerHTML]="options?.title"></span>
     </mat-checkbox>
-    <mat-slide-toggle *ngIf="boundControl && showSlideToggle && isConditionallyShown()"
+    <mat-slide-toggle *ngIf="boundControl && showSlideToggle"
       [formControl]="formControl"
       align="left"
       [color]="options?.color || 'primary'"
@@ -49,7 +48,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
         [style.display]="options?.notitle ? 'none' : ''"
         [innerHTML]="options?.title"></span>
     </mat-slide-toggle>
-    <mat-slide-toggle *ngIf="!boundControl && showSlideToggle && isConditionallyShown()"
+    <mat-slide-toggle *ngIf="!boundControl && showSlideToggle"
       align="left"
       [color]="options?.color || 'primary'"
       [disabled]="controlDisabled || options?.readonly"
@@ -81,11 +80,9 @@ export class MaterialCheckboxComponent implements OnInit {
   trueValue: any = true;
   falseValue: any = false;
   showSlideToggle: boolean = false;
-  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
-  @Input() data: any;
 
   constructor(
     private jsf: JsonSchemaFormService
@@ -112,17 +109,5 @@ export class MaterialCheckboxComponent implements OnInit {
 
   get isChecked() {
     return this.jsf.getFormControlValue(this) === this.trueValue;
-  }
-
-  isConditionallyShown(): boolean {
-    this.data = this.jsf.data;
-    let result: boolean = true;
-    if (this.data && hasOwn(this.options, 'condition')) {
-      const model = this.data;
-      /* tslint:disable */
-      eval('result = ' + this.options.condition);
-      /* tslint:enable */
-    }
-    return result;
   }
 }

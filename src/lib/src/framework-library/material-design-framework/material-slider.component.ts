@@ -2,12 +2,11 @@ import { Component, Input, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 
 import { JsonSchemaFormService } from '../../json-schema-form.service';
-import { getControl, hasOwn, inArray, isDefined } from '../../shared';
 
 @Component({
   selector: 'material-slider-widget',
   template: `
-    <mat-slider thumbLabel *ngIf="boundControl && isConditionallyShown()"
+    <mat-slider thumbLabel *ngIf="boundControl"
       [formControl]="formControl"
       [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
       [id]="'control' + layoutNode?._id"
@@ -16,7 +15,7 @@ import { getControl, hasOwn, inArray, isDefined } from '../../shared';
       [step]="options?.multipleOf || options?.step || 'any'"
       [style.width]="'100%'"
       (blur)="options.showErrors = true"></mat-slider>
-    <mat-slider thumbLabel *ngIf="!boundControl && isConditionallyShown()"
+    <mat-slider thumbLabel *ngIf="!boundControl"
       [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
       [disabled]="controlDisabled || options?.readonly"
       [id]="'control' + layoutNode?._id"
@@ -42,11 +41,9 @@ export class MaterialSliderComponent implements OnInit {
   allowDecimal: boolean = true;
   allowExponents: boolean = false;
   lastValidNumber: string = '';
-  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
-  @Input() data: any;
 
   constructor(
     private jsf: JsonSchemaFormService
@@ -60,17 +57,5 @@ export class MaterialSliderComponent implements OnInit {
   updateValue(event) {
     this.options.showErrors = true;
     this.jsf.updateValue(this, event.value);
-  }
-
-  isConditionallyShown(): boolean {
-    this.data = this.jsf.data;
-    let result: boolean = true;
-    if (this.data && hasOwn(this.options, 'condition')) {
-      const model = this.data;
-      /* tslint:disable */
-      eval('result = ' + this.options.condition);
-      /* tslint:enable */
-    }
-    return result;
   }
 }

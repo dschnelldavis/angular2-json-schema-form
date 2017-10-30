@@ -39,7 +39,7 @@ import { addClasses, inArray, JsonPointer, toTitleCase } from '../../shared';
         [class]="options?.labelHtmlClass"
         [class.sr-only]="options?.notitle"
         [innerHTML]="options?.title"></label>
-      <p *ngIf="layoutNode?.type === 'submit' && jsf?.globalSettings?.fieldsRequired">
+      <p *ngIf="layoutNode?.type === 'submit' && jsf?.formOptions?.fieldsRequired">
         <strong class="text-danger">*</strong> = required fields
       </p>
       <div [class.input-group]="options?.fieldAddonLeft || options?.fieldAddonRight">
@@ -48,8 +48,6 @@ import { addClasses, inArray, JsonPointer, toTitleCase } from '../../shared';
           [innerHTML]="options?.fieldAddonLeft"></span>
 
         <select-widget-widget
-          [formID]="formID"
-          [data]="data"
           [layoutNode]="widgetLayoutNode"
           [dataIndex]="dataIndex"
           [layoutIndex]="layoutIndex"></select-widget-widget>
@@ -90,7 +88,7 @@ import { addClasses, inArray, JsonPointer, toTitleCase } from '../../shared';
   `],
 })
 export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
-  controlInitialized: boolean = false;
+  frameworkInitialized: boolean = false;
   widgetOptions: any; // Options passed to child widget
   widgetLayoutNode: any; // layoutNode passed to child widget
   options: any; // Options used in this framework
@@ -99,11 +97,9 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
   debug: any = '';
   parentArray: any = null;
   isOrderable: boolean = false;
-  @Input() formID: number;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
-  @Input() data: any;
 
   constructor(
     public changeDetector: ChangeDetectorRef,
@@ -125,7 +121,7 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
-    this.initializeControl();
+    this.initializeFramework();
     if (this.layoutNode.arrayItem && this.layoutNode.type !== '$ref') {
       this.parentArray = this.jsf.getParentNode(this);
       if (this.parentArray) {
@@ -136,10 +132,10 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges() {
-    if (!this.controlInitialized) { this.initializeControl(); }
+    if (!this.frameworkInitialized) { this.initializeFramework(); }
   }
 
-  initializeControl() {
+  initializeFramework() {
     if (this.layoutNode) {
       this.options = _.cloneDeep(this.layoutNode.options);
       this.widgetLayoutNode = {
@@ -263,7 +259,7 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
           this.debugOutput = _.map(vars, thisVar => JSON.stringify(thisVar, null, 2)).join('\n');
         }
       }
-      this.controlInitialized = true;
+      this.frameworkInitialized = true;
     }
 
   }
