@@ -36,7 +36,7 @@ import { buildFormGroupTemplate, getControl } from './form-group.functions';
  * @return {any[]}
  */
 export function buildLayout(jsf: any, widgetLibrary: any): any[] {
-  let hasSubmitButton = !JsonPointer.get(jsf, '/globalSettings/addSubmit');
+  let hasSubmitButton = !JsonPointer.get(jsf, '/formOptions/addSubmit');
   let formLayout = mapLayout(jsf.layout, (layoutItem, index, layoutPointer) => {
     let currentIndex: number = index;
     let newNode: any = {
@@ -113,13 +113,13 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
 
     if (hasOwn(newNode, 'dataPointer')) {
       if (newNode.dataPointer === '*') {
-        return buildLayoutFromSchema(jsf, widgetLibrary);
+        return buildLayoutFromSchema(jsf, widgetLibrary, jsf.formValues);
       }
       const nodeValue =
-        JsonPointer.get(jsf.initialValues, newNode.dataPointer.replace(/\/-/g, '/1'));
+        JsonPointer.get(jsf.formValues, newNode.dataPointer.replace(/\/-/g, '/1'));
 
-      // TODO: Create function getInitialValues(jsf, dataPointer, forRefLibrary)
-      // check globalSettings.setSchemaDefaults and globalSettings.setLayoutDefaults
+      // TODO: Create function getFormValues(jsf, dataPointer, forRefLibrary)
+      // check formOptions.setSchemaDefaults and formOptions.setLayoutDefaults
       // then set apropriate values from initialVaues, schema, or layout
 
       newNode.dataPointer =
@@ -330,7 +330,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
               $ref: itemRefPointer,
               dataPointer: newNode.dataPointer,
               recursiveReference: newNode.recursiveReference,
-            }, jsf.layoutRefLibrary, widgetLibrary));
+            }, jsf, widgetLibrary));
           }
         }
 
@@ -415,7 +415,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
       dataType: 'object',
       items: fullLayout,
       name: '',
-      options: _.cloneDeep(jsf.globalSettings.defaultOptions),
+      options: _.cloneDeep(jsf.formOptions.defautWidgetOptions),
       recursiveReference: true,
       required: false,
       type: 'section',
@@ -437,28 +437,32 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
  * 'buildLayoutFromSchema' function
  *
  * @param {any} jsf -
- * @param {number = 0} layoutIndex -
+ * @param {any} widgetLibrary -
  * @param {string = ''} schemaPointer -
  * @param {string = ''} dataPointer -
  * @param {boolean = false} arrayItem -
  * @param {string = null} arrayItemType -
  * @param {boolean = null} removable -
  * @param {boolean = false} forRefLibrary -
+ * @param {string = ''} dataPointerPrefix -
  * @return {any}
  */
 export function buildLayoutFromSchema(
-  jsf: any, widgetLibrary: any, schemaPointer: string = '',
-  dataPointer: string = '', arrayItem: boolean = false,
-  arrayItemType: string = null, removable: boolean = null,
-  forRefLibrary: boolean = false, dataPointerPrefix: string = ''
+  jsf: any, widgetLibrary: any, nodeValue: any = null, schemaPointer = '',
+  dataPointer = '', arrayItem = false, arrayItemType: string = null,
+  removable: boolean = null, forRefLibrary = false, dataPointerPrefix = ''
 ): any {
   const schema = JsonPointer.get(jsf.schema, schemaPointer);
   if (!hasOwn(schema, 'type') && !hasOwn(schema, '$ref') &&
     !hasOwn(schema, 'x-schema-form')
   ) { return null; }
   const newNodeType: string = getInputType(schema);
-  const nodeValue =
-    JsonPointer.get(jsf.initialValues, dataPointer.replace(/\/-/g, '/1'));
+  if (!isDefined(nodeValue) && (
+    jsf.formOptions.setSchemaDefaults === true ||
+    (jsf.formOptions.setSchemaDefaults === 'auto' && isEmpty(jsf.formValues))
+  )) {
+    nodeValue = JsonPointer.get(jsf.schema, schemaPointer + '/default');
+  }
   let newNode: any = {
     _id: forRefLibrary ? null : _.uniqueId(),
     arrayItem: arrayItem,
@@ -519,7 +523,7 @@ export function buildLayoutFromSchema(
           const keySchemaPointer = hasOwn(schema.properties, key) ?
             '/properties/' + key : '/additionalProperties';
           const innerItem = buildLayoutFromSchema(
-            jsf, widgetLibrary,
+            jsf, widgetLibrary, isObject(nodeValue) ? nodeValue[key] : null,
             schemaPointer + keySchemaPointer,
             dataPointer + '/' + key,
             false, null, null, forRefLibrary, dataPointerPrefix
@@ -598,7 +602,7 @@ export function buildLayoutFromSchema(
             // Set to null first to prevent recursive reference from causing endless loop
             jsf.layoutRefLibrary[itemRefPointer] = null;
             jsf.layoutRefLibrary[itemRefPointer] = buildLayoutFromSchema(
-              jsf, widgetLibrary,
+              jsf, widgetLibrary, isArray(nodeValue) ? nodeValue[i] : null,
               schemaPointer + '/items/' + i,
               itemRecursive ? '' : dataPointer + '/' + i,
               true, 'tuple', true, true, itemRecursive ? dataPointer + '/' + i : ''
@@ -611,10 +615,10 @@ export function buildLayoutFromSchema(
             $ref: itemRefPointer,
             dataPointer: dataPointer + '/' + i,
             recursiveReference: itemRecursive,
-          }, jsf.layoutRefLibrary, widgetLibrary);
+          }, jsf, widgetLibrary, isArray(nodeValue) ? nodeValue[i] : null);
         } else {
           newItem = buildLayoutFromSchema(
-            jsf, widgetLibrary,
+            jsf, widgetLibrary, isArray(nodeValue) ? nodeValue[i] : null,
             schemaPointer + '/items/' + i,
             dataPointer + '/' + i,
             true, 'tuple', false, forRefLibrary, dataPointerPrefix
@@ -647,7 +651,7 @@ export function buildLayoutFromSchema(
         // Set to null first to prevent recursive reference from causing endless loop
         jsf.layoutRefLibrary[itemRefPointer] = null;
         jsf.layoutRefLibrary[itemRefPointer] = buildLayoutFromSchema(
-          jsf, widgetLibrary,
+          jsf, widgetLibrary, null,
           itemSchemaPointer,
           itemRecursive ? '' : dataPointer + '/-',
           true, 'list', removable, true, itemRecursive ? dataPointer + '/-' : ''
@@ -660,7 +664,8 @@ export function buildLayoutFromSchema(
       // Add any additional default items
       if (!itemRecursive || newNode.options.required) {
         const arrayLength = Math.min(Math.max(
-          itemRecursive ? 0 : newNode.options.tupleItems + newNode.options.listItems,
+          itemRecursive ? 0 :
+            newNode.options.tupleItems + newNode.options.listItems,
           isArray(nodeValue) ? nodeValue.length : 0
         ), newNode.options.maxItems);
         if (newNode.items.length < arrayLength) {
@@ -669,7 +674,7 @@ export function buildLayoutFromSchema(
               $ref: itemRefPointer,
               dataPointer: dataPointer + '/-',
               recursiveReference: itemRecursive,
-            }, jsf.layoutRefLibrary, widgetLibrary));
+            }, jsf, widgetLibrary, isArray(nodeValue) ? nodeValue[i] : null));
           }
         }
       }
@@ -680,9 +685,12 @@ export function buildLayoutFromSchema(
         (newNode.items[newNode.items.length - 1] || {}).type !== '$ref'
       ) {
         let buttonText =
-          ((jsf.layoutRefLibrary[itemRefPointer] || {}).options || {}).title ||
-          schema.title || fixTitle(JsonPointer.toKey(dataPointer));
-        if (!/^add\b/i.test(buttonText)) { buttonText = 'Add ' + buttonText; }
+          ((jsf.layoutRefLibrary[itemRefPointer] || {}).options || {}).title;
+        const prefix = buttonText ? 'Add ' : 'Add to ';
+        if (!buttonText) {
+          buttonText = schema.title || fixTitle(JsonPointer.toKey(dataPointer));
+        }
+        if (!/^add\b/i.test(buttonText)) { buttonText = prefix + buttonText; }
         newNode.items.push({
           _id: _.uniqueId(),
           arrayItem: true,
@@ -747,9 +755,7 @@ export function buildLayoutFromSchema(
         // Set to null first to prevent recursive reference from causing endless loop
         jsf.layoutRefLibrary[dataRef] = null;
         const newLayout: any = buildLayoutFromSchema(
-          jsf, widgetLibrary,
-          schemaRef,
-          '',
+          jsf, widgetLibrary, null, schemaRef, '',
           newNode.arrayItem, newNode.arrayItemType, true, true, dataPointer
         );
         if (newLayout) {
@@ -833,7 +839,7 @@ export function mapLayout(
  * @return {any} copied layoutNode
  */
 export function getLayoutNode(
-  refNode: any, layoutRefLibrary: any, widgetLibrary: any = null
+  refNode: any, jsf: any, widgetLibrary: any = null, nodeValue: any = null
 ) {
 
   // If recursive reference and building initial layout, return Add button
@@ -850,20 +856,32 @@ export function getLayoutNode(
     });
     return newLayoutNode;
 
-  // Otherwise, return referenced layout from library
-  } else {
-    const newLayoutNode = _.cloneDeep(layoutRefLibrary[refNode.$ref]);
-    JsonPointer.forEachDeep(newLayoutNode, (subNode, pointer) => {
+  // Otherwise, return referenced layout
+} else {
+    let newLayoutNode = jsf.layoutRefLibrary[refNode.$ref];
+    // If value defined, build new node from schema (to set array lengths)
+    if (isDefined(nodeValue)) {
+      newLayoutNode = buildLayoutFromSchema(
+        jsf, widgetLibrary, nodeValue,
+        JsonPointer.toSchemaPointer(refNode.$ref, jsf.schema),
+        refNode.$ref, newLayoutNode.arrayItem,
+        newLayoutNode.arrayItemType, newLayoutNode.options.removable, false
+      );
+    } else {
+      // If value not defined, copy node from layoutRefLibrary
+      newLayoutNode = _.cloneDeep(newLayoutNode);
+      JsonPointer.forEachDeep(newLayoutNode, (subNode, pointer) => {
 
-      // Reset all _id's in newLayoutNode to unique values
-      if (hasOwn(subNode, '_id')) { subNode._id = _.uniqueId(); }
+        // Reset all _id's in newLayoutNode to unique values
+        if (hasOwn(subNode, '_id')) { subNode._id = _.uniqueId(); }
 
-      // If adding a recursive item, prefix current dataPointer
-      // to all dataPointers in new layoutNode
-      if (refNode.recursiveReference && hasOwn(subNode, 'dataPointer')) {
-        subNode.dataPointer = refNode.dataPointer + subNode.dataPointer;
-      }
-    });
+        // If adding a recursive item, prefix current dataPointer
+        // to all dataPointers in new layoutNode
+        if (refNode.recursiveReference && hasOwn(subNode, 'dataPointer')) {
+          subNode.dataPointer = refNode.dataPointer + subNode.dataPointer;
+        }
+      });
+    }
     return newLayoutNode;
   }
 }

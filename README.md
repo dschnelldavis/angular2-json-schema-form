@@ -156,7 +156,7 @@ Here is an example:
   [schema]="yourJsonSchema"
   [layout]="yourJsonFormLayout"
   [data]="yourData"
-  [options]="yourGlobalSettings"
+  [options]="yourFormOptions"
   [widgets]="yourCustomWidgets"
   framework="bootstrap-3"
   loadExternalAssets="true"

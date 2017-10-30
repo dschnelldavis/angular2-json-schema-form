@@ -44,7 +44,7 @@ import {
  * https://spacetelescope.github.io/understanding-json-schema/reference/object.html
  *
  * @param  {any} jsf -
- * @param  {any = null} initialValues -
+ * @param  {any = null} nodeValue -
  * @param  {boolean = true} mapArrays -
  * @param  {string = ''} schemaPointer -
  * @param  {string = ''} dataPointer -
@@ -52,21 +52,23 @@ import {
  * @return {any} -
  */
 export function buildFormGroupTemplate(
-  jsf: any, initialValues: any = null, setValues: boolean = true,
-  schemaPointer: string = '', dataPointer: string = '', templatePointer: any = ''
+  jsf: any, nodeValue: any = null, setValues = true,
+  schemaPointer = '', dataPointer = '', templatePointer = ''
 ) {
   const schema = JsonPointer.get(jsf.schema, schemaPointer);
-  let nodeValue = initialValues;
-  if (!isDefined(initialValues) && (
-    (jsf.globalSettings.setSchemaDefaults === 'auto' && isEmpty(jsf.initialValues)) ||
-    (jsf.globalSettings.setSchemaDefaults === true && nodeValue === null)
-  )) {
-    nodeValue = JsonPointer.get(jsf.schema, schemaPointer + '/default');
+  if (setValues) {
+    if (!isDefined(nodeValue) && (
+      jsf.formOptions.setSchemaDefaults === true ||
+      (jsf.formOptions.setSchemaDefaults === 'auto' && isEmpty(jsf.formValues))
+    )) {
+      nodeValue = JsonPointer.get(jsf.schema, schemaPointer + '/default');
+    }
+  } else {
+    nodeValue = null;
   }
-  // TODO: If nodeValue not set, check layout for default value
+  // TODO: If nodeValue still not set, check layout for default value
   const schemaType: string | string[] = JsonPointer.get(schema, '/type');
-  let controlType: 'FormGroup' | 'FormArray' | 'FormControl' | '$ref';
-  controlType =
+  let controlType =
     (hasOwn(schema, 'properties') || hasOwn(schema, 'additionalProperties')) &&
       schemaType === 'object' ? 'FormGroup' :
     (hasOwn(schema, 'items') || hasOwn(schema, 'additionalItems')) &&
@@ -115,7 +117,7 @@ export function buildFormGroupTemplate(
             dataPointer + '/' + key,
             templatePointer + '/controls/' + key
           ));
-        jsf.globalSettings.fieldsRequired = setRequiredFields(schema, controls);
+        jsf.formOptions.fieldsRequired = setRequiredFields(schema, controls);
       }
       return { controlType, controls, validators };
 
@@ -155,9 +157,9 @@ export function buildFormGroupTemplate(
               );
             }
             controls.push(
-              nodeValue !== null ?
+              isArray(nodeValue) ?
                 buildFormGroupTemplate(
-                  jsf, isArray(nodeValue) ? nodeValue[i] : nodeValue, setValues,
+                  jsf, nodeValue[i], setValues,
                   schemaPointer + '/items/' + i,
                   dataPointer + '/' + i,
                   templatePointer + '/controls/' + i
@@ -197,10 +199,6 @@ export function buildFormGroupTemplate(
         }
         // const itemOptions = jsf.dataMap.get(itemRefPointer) || new Map();
         const itemOptions = nodeOptions;
-        if (jsf.globalSettings.setSchemaDefaults) {
-          nodeValue =
-            mergeValues(JsonPointer.get(schema, '/items/default'), nodeValue);
-        }
         if (!itemRecursive || hasOwn(validators, 'required')) {
           const arrayLength = Math.min(Math.max(
             itemRecursive ? 0 :
@@ -208,19 +206,19 @@ export function buildFormGroupTemplate(
             isArray(nodeValue) ? nodeValue.length : 0
           ), maxItems);
           for (let i = controls.length; i < arrayLength; i++) {
-            if (nodeValue !== null) {
-              controls.push(buildFormGroupTemplate(
-                jsf, isArray(nodeValue) ? nodeValue[i] : nodeValue, setValues,
-                schemaRefPointer,
-                dataPointer + '/-',
-                templatePointer + '/controls/-'
-              ));
-            } else if (!itemRecursive) {
-              controls.push(_.cloneDeep(jsf.templateRefLibrary[itemRefPointer]));
-            }
+            controls.push(
+              isArray(nodeValue) ?
+                buildFormGroupTemplate(
+                  jsf, nodeValue[i], setValues,
+                  schemaRefPointer,
+                  dataPointer + '/-',
+                  templatePointer + '/controls/-'
+                ) :
+                itemRecursive ?
+                  null : _.cloneDeep(jsf.templateRefLibrary[itemRefPointer])
+            );
           }
         }
-        nodeValue = null;
       }
       return { controlType, controls, validators };
 
@@ -233,7 +231,7 @@ export function buildFormGroupTemplate(
       if (refPointer && !hasOwn(jsf.templateRefLibrary, refPointer)) {
         // Set to null first to prevent recursive reference from causing endless loop
         jsf.templateRefLibrary[refPointer] = null;
-        const newTemplate = buildFormGroupTemplate(jsf, null, setValues, schemaRef);
+        const newTemplate = buildFormGroupTemplate(jsf, setValues, setValues, schemaRef);
         if (newTemplate) {
           jsf.templateRefLibrary[refPointer] = newTemplate;
         } else {
@@ -367,8 +365,7 @@ export function setRequiredFields(schema: any, formControlTemplate: any): boolea
   return fieldsRequired;
 
   // TODO: Add support for patternProperties
-  // https://spacetelescope.github.io/understanding-json-schema/reference/object.html
-  //   #pattern-properties
+  // https://spacetelescope.github.io/understanding-json-schema/reference/object.html#pattern-properties
 }
 
 /**
@@ -458,7 +455,7 @@ export function formatFormData(
  * @return {group} - Located value (or null, if no control found)
  */
 export function getControl(
-  formGroup: any, dataPointer: Pointer | string, returnGroup = false
+  formGroup: any, dataPointer: Pointer, returnGroup = false
 ): any {
   if (!isObject(formGroup) || !JsonPointer.isJsonPointer(dataPointer)) {
     if (!JsonPointer.isJsonPointer(dataPointer)) {
@@ -492,9 +489,7 @@ export function getControl(
   // search the formGroup object for dataPointer's control
   let subGroup = formGroup;
   for (let key of dataPointerArray) {
-    if (hasOwn(subGroup, 'controls')) {
-      subGroup = subGroup.controls;
-    }
+    if (hasOwn(subGroup, 'controls')) { subGroup = subGroup.controls; }
     if (isArray(subGroup) && (key === '-')) {
       subGroup = subGroup[subGroup.length - 1];
     } else if (hasOwn(subGroup, key)) {

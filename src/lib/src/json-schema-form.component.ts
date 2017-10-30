@@ -1,6 +1,6 @@
 import {
-  ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter,
-  Input, Output, OnChanges, OnInit
+  ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input,
+  Output, OnChanges, OnInit
 } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -62,41 +62,53 @@ import { JsonPointer } from './shared/jsonpointer.functions';
       <script type="text/javascript" [src]="script"></script>
     </div>
     <form class="json-schema-form" (ngSubmit)="submitForm()">
-      <root-widget
-        [formID]="formID"
-        [layout]="jsfObject.layout"
-        [data]="jsfObject.data"></root-widget>
+      <root-widget [layout]="jsf?.layout"></root-widget>
     </form>
-    <div *ngIf="debug || jsfObject.globalSettings.debug">
+    <div *ngIf="debug || jsf?.formOptions?.debug">
       Debug output: <pre>{{debugOutput}}</pre>
     </div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  // Add 'providers' here creates a separate instance of JsonSchemaFormService
+  providers:  [ JsonSchemaFormService ],
 })
 export class JsonSchemaFormComponent implements OnChanges, OnInit {
-  formID: number; // Unique ID for displayed form
   debugOutput: any; // Debug information, if requested
   formValueSubscription: any = null;
-  jsfObject: any;
+  formInitialized = false;
   objectWrap: boolean = false; // Is non-object input schema wrapped in an object?
+
+  formValuesInput: string; // Name of the input providing the form data
+  inputHistory: { // Previous input values, to detect which input triggers onChanges
+    schema: any, layout: any[], data: any, options: any, framework: any|string,
+    widgets: any, form: any, model: any, JSONSchema: any, UISchema: any,
+    formData: any, ngModel: any, loadExternalAssets: boolean, debug: boolean,
+  } = {
+    schema: null, layout: null, data: null, options: null, framework: null,
+    widgets: null, form: null, model: null, JSONSchema: null, UISchema: null,
+    formData: null, ngModel: null, loadExternalAssets: null, debug: null,
+  };
 
   // Recommended inputs
   @Input() schema: any; // The JSON Schema
   @Input() layout: any[]; // The form layout
-  @Input() data: any; // The data model
+  @Input() data: any; // The form data
   @Input() options: any; // The global form options
-  @Input() framework: string; // The framework to load
-  @Input() widgets: string; // Any custom widgets to load
+  @Input() framework: any|string; // The framework to load
+  @Input() widgets: any; // Any custom widgets to load
 
   // Alternate combined single input
   @Input() form: any; // For testing, and JSON Schema Form API compatibility
 
-  // Angular Schema Form API compatibility inputs
-  @Input() model: any; // Alternate input for data model
+  // Angular Schema Form API compatibility input
+  @Input() model: any; // Alternate input for form data
 
   // React JSON Schema Form API compatibility inputs
   @Input() JSONSchema: any; // Alternate input for JSON Schema
   @Input() UISchema: any; // UI schema - alternate form layout format
-  @Input() formData: any; // Alternate input for data model
+  @Input() formData: any; // Alternate input for form data
+
+  // Angular form control style compatibility input
+  @Input() ngModel: any; // Alternate input for form data
 
   // Development inputs, for testing and debugging
   @Input() loadExternalAssets: boolean; // Load external framework assets?
@@ -109,22 +121,22 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
   @Output() validationErrors = new EventEmitter<any>(); // Validation errors (if any)
   @Output() formSchema = new EventEmitter<any>(); // Final schema used to create form
   @Output() formLayout = new EventEmitter<any>(); // Final layout used to create form
+  // Outputs for possible 2-way data binding
+  // Only the one input providing the initial form data will be bound.
+  // If there is no inital data, input '{}' to activate 2-way data binding.
+  // There is no 2-way binding if inital data is combined inside the 'form' input.
+  @Output() dataChange = new EventEmitter<any>();
+  @Output() modelChange = new EventEmitter<any>();
+  @Output() formDataChange = new EventEmitter<any>();
+  @Output() ngModelChange = new EventEmitter<any>();
 
   constructor(
     private changeDetector: ChangeDetectorRef,
     private frameworkLibrary: FrameworkLibraryService,
     private widgetLibrary: WidgetLibraryService,
-    private jsf: JsonSchemaFormService,
+    public jsf: JsonSchemaFormService,
     private sanitizer: DomSanitizer
-  ) {
-    this.jsfObject = jsf;
-  }
-
-  ngOnInit() { }
-
-  ngOnChanges() {
-    this.initializeForm();
-  }
+  ) { }
 
   get stylesheets(): SafeResourceUrl[] {
     const stylesheets = this.frameworkLibrary.getFrameworkStylesheets();
@@ -138,6 +150,50 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
     return scripts.map(script => load(script));
   }
 
+  ngOnInit() { }
+
+  ngOnChanges() {
+    if (!this.formInitialized) {
+      this.initializeForm();
+    } else if (this.formValuesInput) {
+
+      // Get names of changed inputs
+      let changedInput = Object.keys(this.inputHistory)
+        .filter(input => this.inputHistory[input] !== this[input]);
+      let resetFirst = true;
+      if (changedInput.length === 1 && changedInput[0] === 'form' &&
+        this.formValuesInput.startsWith('form.')
+      ) {
+        // If only 'form' input changed, get names of changed keys
+        changedInput = Object.keys(this.inputHistory.form || {})
+          .filter(key => !_.isEqual(this.inputHistory.form[key], this.form[key]))
+          .map(key => `form.${key}`);
+        resetFirst = false;
+      }
+
+      // If only form values changed, update values
+      if (changedInput.length === 1 && changedInput[0] === this.formValuesInput) {
+        if (this.formValuesInput.indexOf('.') === -1) {
+          this.setFormValues(this[this.formValuesInput], resetFirst);
+        } else {
+          const [input, key] = this.formValuesInput.split('.');
+          this.setFormValues(this[input][key], resetFirst);
+        }
+
+      // Otherwise, re-render entire form
+      } else {
+        this.initializeForm();
+      }
+
+      // Save changed inputs
+      Object.keys(this.inputHistory)
+        .filter(input => this.inputHistory[input] !== this[input])
+        .forEach(input => this.inputHistory[input] = this[input]);
+    } else {
+      this.initializeForm();
+    }
+  }
+
   submitForm() {
     const validData = this.jsf.validData;
     this.onSubmit.emit(this.objectWrap ? validData['1'] : validData);
@@ -146,7 +202,7 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
   /**
    * 'initializeForm' function
    *
-   * - Update 'schema', 'layout', and 'initialValues', from inputs.
+   * - Update 'schema', 'layout', and 'formValues', from inputs.
    *
    * - Create 'schemaRefLibrary' and 'schemaRecursiveRefMap'
    *   to resolve schema $ref links, including recursive $ref links.
@@ -173,7 +229,7 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
       this.initializeSchema();    // Update schema, schemaRefLibrary,
                                   // schemaRecursiveRefMap, & dataRecursiveRefMap
       this.initializeLayout();    // Update layout, layoutRefLibrary,
-      this.initializeData();      // Update initialValues
+      this.initializeData();      // Update formValues
       this.activateForm();        // Update dataMap, templateRefLibrary,
                                   // formGroupTemplate, formGroup
 
@@ -183,7 +239,7 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
       // console.log('schema', this.jsf.schema);
       // console.log('layout', this.jsf.layout);
       // console.log('options', this.options);
-      // console.log('initialValues', this.jsf.initialValues);
+      // console.log('formValues', this.jsf.formValues);
       // console.log('formGroupTemplate', this.jsf.formGroupTemplate);
       // console.log('formGroup', this.jsf.formGroup);
       // console.log('formGroup.value', this.jsf.formGroup.value);
@@ -197,12 +253,12 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
 
       // Uncomment individual lines to output debugging information to browser:
       // (These only work if the 'debug' option has also been set to 'true'.)
-      if (this.debug || this.jsf.globalSettings.debug) {
+      if (this.debug || this.jsf.formOptions.debug) {
         const vars: any[] = [];
         // vars.push(this.jsf.schema);
         // vars.push(this.jsf.layout);
         // vars.push(this.options);
-        // vars.push(this.jsf.initialValues);
+        // vars.push(this.jsf.formValues);
         // vars.push(this.jsf.formGroup.value);
         // vars.push(this.jsf.formGroupTemplate);
         // vars.push(this.jsf.formGroup);
@@ -216,6 +272,7 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
         this.debugOutput = vars.map(v => JSON.stringify(v, null, 2)).join('\n');
       }
     }
+    this.formInitialized = true;
   }
 
   /**
@@ -246,9 +303,9 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
     this.frameworkLibrary.setLoadExternalAssets(loadExternalAssets);
     this.frameworkLibrary.setFramework(framework);
     this.jsf.framework = this.frameworkLibrary.getFramework();
-    if (isObject(this.jsf.globalSettings.widgets)) {
-      for (let widget of Object.keys(this.jsf.globalSettings.widgets)) {
-        this.widgetLibrary.registerWidget(widget, this.jsf.globalSettings.widgets[widget]);
+    if (isObject(this.jsf.formOptions.widgets)) {
+      for (let widget of Object.keys(this.jsf.formOptions.widgets)) {
+        this.widgetLibrary.registerWidget(widget, this.jsf.formOptions.widgets[widget]);
       }
     }
     if (isObject(this.form) && isObject(this.form.tpldata)) {
@@ -355,34 +412,46 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
   /**
    * 'initializeData' function
    *
-   * Initialize 'initialValues'
+   * Initialize 'formValues'
    * defulat or previously submitted values used to populate form
    * Use first available input:
    * 1. data - recommended
-   * 2. model - Angular Schema Form style
-   * 3. form.value - JSON Form style
-   * 4. form.data - Single input style
-   * 5. formData - React JSON Schema Form style
-   * 6. form.formData - For easier testing of React JSON Schema Forms
-   * 7. (none) no data - initialize data from schema and layout defaults only
+   * 2. ngModel - Angular Form input style
+   * 3. model - Angular Schema Form style
+   * 4. form.value - JSON Form style
+   * 5. form.data - Single input style
+   * 6. formData - React JSON Schema Form style
+   * 7. form.formData - For easier testing of React JSON Schema Forms
+   * 8. (none) no data - initialize data from schema and layout defaults only
    */
   private initializeData() {
-    if (isObject(this.data)) {
-      this.jsf.initialValues = _.cloneDeep(this.data);
-    } else if (isObject(this.model)) {
+    if (hasValue(this.data)) {
+      this.jsf.formValues = _.cloneDeep(this.data);
+      this.formValuesInput = 'data';
+    } else if (hasValue(this.ngModel)) {
       this.jsf.AngularSchemaFormCompatibility = true;
-      this.jsf.initialValues = _.cloneDeep(this.model);
-    } else if (isObject(this.form) && isObject(this.form.value)) {
+      this.jsf.formValues = _.cloneDeep(this.ngModel);
+      this.formValuesInput = 'ngModel';
+    } else if (hasValue(this.model)) {
+      this.jsf.AngularSchemaFormCompatibility = true;
+      this.jsf.formValues = _.cloneDeep(this.model);
+      this.formValuesInput = 'model';
+    } else if (isObject(this.form) && hasValue(this.form.value)) {
       this.jsf.JsonFormCompatibility = true;
-      this.jsf.initialValues = _.cloneDeep(this.form.value);
-    } else if (isObject(this.form) && isObject(this.form.data)) {
-      this.jsf.initialValues = _.cloneDeep(this.form.data);
-    } else if (isObject(this.formData)) {
+      this.jsf.formValues = _.cloneDeep(this.form.value);
+      this.formValuesInput = 'form.value';
+    } else if (isObject(this.form) && hasValue(this.form.data)) {
+      this.jsf.formValues = _.cloneDeep(this.form.data);
+      this.formValuesInput = 'form.data';
+    } else if (hasValue(this.formData)) {
       this.jsf.ReactJsonSchemaFormCompatibility = true;
-      this.jsf.initialValues = _.cloneDeep(this.formData);
-    } else if (hasOwn(this.form, 'formData') && isObject(this.form.formData)) {
+      this.formValuesInput = 'formData';
+    } else if (hasOwn(this.form, 'formData') && hasValue(this.form.formData)) {
       this.jsf.ReactJsonSchemaFormCompatibility = true;
-      this.jsf.initialValues = _.cloneDeep(this.form.formData);
+      this.jsf.formValues = _.cloneDeep(this.form.formData);
+      this.formValuesInput = 'form.formData';
+    } else {
+      this.formValuesInput = null;
     }
   }
 
@@ -435,7 +504,7 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
     } else if (this.form && isArray(this.form.layout)) {
       this.jsf.layout = _.cloneDeep(this.form.layout);
     } else {
-      this.jsf.layout = this.jsf.globalSettings.addSubmit === false ?
+      this.jsf.layout = this.jsf.formOptions.addSubmit === false ?
         [ '*' ] : [ '*', { type: 'submit', title: 'Submit' } ];
     }
 
@@ -511,7 +580,7 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
       // } else
 
       // If data input, build schema from data
-      if (!isEmpty(this.jsf.initialValues)) {
+      if (!isEmpty(this.jsf.formValues)) {
         this.jsf.buildSchemaFromData();
       }
     }
@@ -527,7 +596,7 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
       this.jsf.buildLayout(this.widgetLibrary);
 
       // Build the Angular FormGroup template from the schema
-      this.jsf.buildFormGroupTemplate(this.jsf.initialValues);
+      this.jsf.buildFormGroupTemplate(this.jsf.formValues);
 
       // Build the real Angular FormGroup from the FormGroup template
       this.jsf.buildFormGroup();
@@ -535,9 +604,12 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
 
     if (this.jsf.formGroup) {
 
-      // Set initial form values
-      if (!isEmpty(this.jsf.initialValues)) {
-        this.setFormValues(this.jsf.initialValues);
+      // Reset initial form values
+      if (!isEmpty(this.jsf.formValues) &&
+        this.jsf.formOptions.setSchemaDefaults !== true &&
+        this.jsf.formOptions.setLayoutDefaults !== true
+      ) {
+        this.setFormValues(this.jsf.formValues);
       }
 
       // TODO: Figure out how to display calculated values without changing object data
@@ -551,12 +623,16 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
       //   }, 'top-down');
       // }
 
-      // TODO: (?) (re-)render the form
-
       // Subscribe to form changes to output live data, validation, and errors
       this.jsf.dataChanges.subscribe(data =>
         this.onChanges.emit(this.objectWrap ? data['1'] : data)
       );
+      if (this.formValuesInput && this.formValuesInput.indexOf('.') === -1) {
+        this.jsf.dataChanges.subscribe(data =>
+          this[`${this.formValuesInput}Change`].emit(this.objectWrap ? data['1'] : data)
+        );
+      }
+
       this.jsf.isValidChanges.subscribe(isValid => this.isValid.emit(isValid));
       this.jsf.validationErrorChanges.subscribe(err => this.validationErrors.emit(err));
 
@@ -567,24 +643,28 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
 
       // If validateOnRender, output initial validation and any errors
       const validateOnRender =
-        JsonPointer.get(this.jsf, '/globalSettings/validateOnRender');
-      if (validateOnRender) {
-        const touch = (control) => {
-          if (hasValue(control.value) || validateOnRender === true) {
+        JsonPointer.get(this.jsf, '/formOptions/validateOnRender');
+      if (validateOnRender) { // validateOnRender === 'auto' || true
+        const touchAll = (control) => {
+          if (validateOnRender === true || hasValue(control.value)) {
             control.markAsTouched();
           }
           Object.keys(control.controls || {})
-            .forEach(key => touch(control.controls[key]));
+            .forEach(key => touchAll(control.controls[key]));
         };
-        touch(this.jsf.formGroup);
+        touchAll(this.jsf.formGroup);
         this.isValid.emit(this.jsf.isValid);
         this.validationErrors.emit(this.jsf.ajvErrors);
       }
     }
   }
 
-  private setFormValues(formValues: any) {
-    this.jsf.formGroup.reset();
-    this.jsf.formGroup.patchValue(formValues);
+  private setFormValues(formValues: any, resetFirst = true) {
+    let newFormValues = formValues;
+    if (this.objectWrap && !isObject(formValues)) {
+      newFormValues = { '1': formValues };
+    }
+    if (resetFirst) { this.jsf.formGroup.reset(); }
+    this.jsf.formGroup.patchValue(newFormValues);
   }
 }

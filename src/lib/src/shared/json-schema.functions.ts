@@ -412,7 +412,7 @@ export function updateInputOptions(layoutNode: any, schema: any, jsf: any) {
   // Set all option values in layoutNode.options
   let newOptions: any = { };
   const fixUiKeys = key => key.slice(0, 3).toLowerCase() === 'ui:' ? key.slice(3) : key;
-  mergeFilteredObject(newOptions, jsf.globalSettings.defaultOptions, [], fixUiKeys);
+  mergeFilteredObject(newOptions, jsf.formOptions.defautWidgetOptions, [], fixUiKeys);
   [ [ JsonPointer.get(schema, '/ui:widget/options'), [] ],
     [ JsonPointer.get(schema, '/ui:widget'), [] ],
     [ schema, [
@@ -449,7 +449,7 @@ export function updateInputOptions(layoutNode: any, schema: any, jsf: any) {
   }
 
   // If schema type is integer, enforce by setting multipleOf = 1
-  if (schema.type === 'integer' && !hasValue(layoutNode.options.multipleOf)) {
+  if (schema.type === 'integer' && !hasValue(newOptions.multipleOf)) {
     newOptions.multipleOf = 1;
   }
 

@@ -40,12 +40,13 @@ export class JsonSchemaFormService {
   ajv: any = new Ajv(this.ajvOptions); // AJV: Another JSON Schema Validator
   validateFormData: any = null; // Compiled AJV function to validate active form's schema
 
-  initialValues: any = {}; // The initial data model (e.g. previously submitted data)
+  formValues: any = {}; // The form data (default or previously submitted values)
   schema: any = {}; // The internal JSON Schema
-  layout: any[] = []; // The internal Form layout
+  layout: any[] = []; // The internal form layout
   formGroupTemplate: any = {}; // The template used to create formGroup
   formGroup: any = null; // The Angular formGroup, which powers the reactive form
   framework: any = null; // The active framework component
+  formOptions: any; // The active options, used to configure the form
 
   data: any = {}; // Form data, formatted with correct data types
   validData: any = null; // Valid form data (or null)
@@ -59,8 +60,8 @@ export class JsonSchemaFormService {
   validationErrorChanges: Subject<any> = new Subject(); // validationErrors observable
 
   arrayMap: Map<string, number> = new Map(); // Maps arrays in data object and number of tuple values
-  dataMap: Map<string, any> = new Map(); // Maps paths in data model to schema and formGroup paths
-  dataRecursiveRefMap: Map<string, string> = new Map(); // Maps recursive reference points in data model
+  dataMap: Map<string, any> = new Map(); // Maps paths in form data to schema and formGroup paths
+  dataRecursiveRefMap: Map<string, string> = new Map(); // Maps recursive reference points in form data
   schemaRecursiveRefMap: Map<string, string> = new Map(); // Maps recursive reference points in schema
   schemaRefLibrary: any = {}; // Library of schemas for resolving schema $refs
   layoutRefLibrary: any = { '': null }; // Library of layout nodes for adding to form
@@ -68,31 +69,31 @@ export class JsonSchemaFormService {
   hasRootReference: boolean = false; // Does the form include a recursive reference to itself?
 
   // Default global form options
-  defaultGlobalSettings: any = {
+  defaultFormOptions: any = {
     addSubmit: 'auto', // Add a submit button if layout does not have one?
       // for addSubmit: true = always, false = never,
       // 'auto' = only if layout is undefined (form is built from schema alone)
     debug: false, // Show debugging output?
+    disableInvalidSubmit: true, // Disable submit if form invalid?
     fieldsRequired: false, // (set automatically) Are there any required fields in the form?
     framework: 'material-design', // The framework to load
-    widgets: {}, // Any custom widgets to load
     loadExternalAssets: false, // Load external css and JavaScript for framework?
     pristine: { errors: true, success: true },
     supressPropertyTitles: false,
-    disableInvalidSubmit: true, // Disable submit if form invalid?
     setSchemaDefaults: 'auto', // Set fefault values from schema?
-      // true = always set (unless overridden by layout default or initialValues)
+      // true = always set (unless overridden by layout default or formValues)
       // false = never set
-      // 'auto' = set in addable components, and everywhere if initialValues not set
+      // 'auto' = set in addable components, and everywhere if formValues not set
     setLayoutDefaults: 'auto', // Set fefault values from layout?
-      // true = always set (unless overridden by initialValues)
+      // true = always set (unless overridden by formValues)
       // false = never set
-      // 'auto' = set in addable components, and everywhere if initialValues not set
+      // 'auto' = set in addable components, and everywhere if formValues not set
     validateOnRender: 'auto', // Validate fields immediately, before they are touched?
       // true = validate all fields immediately
       // false = only validate fields after they are touched by user
       // 'auto' = validate fields with values immediately, empty fields after they are touched
-    defaultOptions: { // Default options for form controls
+    widgets: {}, // Any custom widgets to load
+    defautWidgetOptions: { // Default options for form control widgets
       listItems: 1, // Number of list items to initially add to arrays with no default value
       addable: true, // Allow adding items to an array or $ref point?
       orderable: true, // Allow reordering items within an array?
@@ -151,7 +152,6 @@ export class JsonSchemaFormService {
       },
     },
   };
-  globalSettings: any;
 
   getData() { return this.data; }
 
@@ -165,7 +165,7 @@ export class JsonSchemaFormService {
     this.AngularSchemaFormCompatibility = false;
     this.tpldata = {};
     this.validateFormData = null;
-    this.initialValues = {};
+    this.formValues = {};
     this.schema = {};
     this.layout = [];
     this.formGroupTemplate = {};
@@ -182,11 +182,11 @@ export class JsonSchemaFormService {
     this.layoutRefLibrary = {};
     this.schemaRefLibrary = {};
     this.templateRefLibrary = {};
-    this.globalSettings = _.cloneDeep(this.defaultGlobalSettings);
+    this.formOptions = _.cloneDeep(this.defaultFormOptions);
   }
 
-  buildFormGroupTemplate(initialValues: any = null, setValues: boolean = true) {
-    this.formGroupTemplate = buildFormGroupTemplate(this, initialValues, setValues);
+  buildFormGroupTemplate(formValues: any = null, setValues: boolean = true) {
+    this.formGroupTemplate = buildFormGroupTemplate(this, formValues, setValues);
 
   }
 
@@ -226,7 +226,7 @@ export class JsonSchemaFormService {
     // Format raw form data to correct data types
     this.data = formatFormData(
       newValue, this.dataMap, this.dataRecursiveRefMap,
-      this.arrayMap, this.globalSettings.returnEmptyFields
+      this.arrayMap, this.formOptions.returnEmptyFields
     );
     this.isValid = this.validateFormData(this.data);
     this.validData = this.isValid ? this.data : null;
@@ -267,14 +267,19 @@ export class JsonSchemaFormService {
   setOptions(newOptions: any) {
     if (isObject(newOptions)) {
       const addOptions = { ...newOptions }
+      // Provide backward compatibility for 'defaultOptions' (old name for 'defautWidgetOptions')
       if (isObject(addOptions.defaultOptions)) {
-        Object.assign(this.globalSettings.defaultOptions, addOptions.defaultOptions);
+        Object.assign(this.formOptions.defautWidgetOptions, addOptions.defaultOptions);
         delete addOptions.defaultOptions;
       }
-      Object.assign(this.globalSettings, addOptions);
+      if (isObject(addOptions.defautWidgetOptions)) {
+        Object.assign(this.formOptions.defautWidgetOptions, addOptions.defautWidgetOptions);
+        delete addOptions.defautWidgetOptions;
+      }
+      Object.assign(this.formOptions, addOptions);
 
       // convert disableErrorState / disableSuccessState to enable...State
-      const globalDefaults = this.globalSettings.defaultOptions;
+      const globalDefaults = this.formOptions.defautWidgetOptions;
       ['ErrorState', 'SuccessState']
         .filter(suffix => hasOwn(globalDefaults, 'disable' + suffix))
         .forEach(suffix => {
@@ -299,7 +304,7 @@ export class JsonSchemaFormService {
 
   buildSchemaFromData(data?: any, requireAllFields: boolean = false): any {
     if (data) { return buildSchemaFromData(data, requireAllFields); }
-    this.schema = buildSchemaFromData(this.initialValues, requireAllFields);
+    this.schema = buildSchemaFromData(this.formValues, requireAllFields);
   }
 
   buildSchemaFromLayout(layout?: any): any {
@@ -344,8 +349,10 @@ export class JsonSchemaFormService {
   }
 
   initializeControl(ctx: any, bind: boolean = true): boolean {
-    if (!isObject(ctx.options) || isEmpty(ctx.options)) {
-      ctx.options = _.cloneDeep(this.globalSettings);
+    if (!isObject(ctx)) { return false; }
+    if (isEmpty(ctx.options)) {
+      ctx.options = !isEmpty((ctx.layoutNode || {}).options) ?
+        ctx.layoutNode.options : _.cloneDeep(this.formOptions);
     }
     ctx.formControl = this.getFormControl(ctx);
     ctx.boundControl = bind && !!ctx.formControl;
@@ -355,8 +362,8 @@ export class JsonSchemaFormService {
       ctx.controlDisabled = ctx.formControl.disabled;
       ctx.options.errorMessage = ctx.formControl.status === 'VALID' ? null :
         this.formatErrors(ctx.formControl.errors, ctx.options.errorMessages);
-      ctx.options.showErrors = this.globalSettings.validateOnRender === true ||
-        (this.globalSettings.validateOnRender === 'auto' && hasValue(ctx.controlValue));
+      ctx.options.showErrors = this.formOptions.validateOnRender === true ||
+        (this.formOptions.validateOnRender === 'auto' && hasValue(ctx.controlValue));
       ctx.formControl.statusChanges.subscribe(status =>
         ctx.options.errorMessage = status === 'VALID' ? null :
           this.formatErrors(ctx.formControl.errors, ctx.options.errorMessages)
@@ -531,7 +538,7 @@ export class JsonSchemaFormService {
     }
 
     // Copy a new layoutNode from layoutRefLibrary
-    const newLayoutNode = getLayoutNode(ctx.layoutNode, this.layoutRefLibrary);
+    const newLayoutNode = getLayoutNode(ctx.layoutNode, this);
     newLayoutNode.arrayItem = ctx.layoutNode.arrayItem;
     if (ctx.layoutNode.arrayItemType) {
       newLayoutNode.arrayItemType = ctx.layoutNode.arrayItemType;
