@@ -3,7 +3,9 @@ import { ChangeDetectorRef, Component, Input, OnChanges, OnInit } from '@angular
 import * as _ from 'lodash';
 
 import { JsonSchemaFormService } from '../../json-schema-form.service';
-import { addClasses, inArray, JsonPointer, toTitleCase } from '../../shared';
+import {
+  addClasses, hasOwn, inArray, isArray, JsonPointer, toTitleCase
+} from '../../shared';
 
 /**
  * Bootstrap 3 framework for Angular JSON Schema Form.
@@ -273,6 +275,14 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
   }
 
   setTitle(): string {
+    if (hasOwn((this.layoutNode || {}).options, 'title')) {
+      return this.jsf.parseText(
+        this.layoutNode.options.title,
+        this.jsf.getFormControlValue(this),
+        (this.jsf.getFormControlGroup(this) || <any>{}).value,
+        isArray(this.dataIndex) ? this.dataIndex[this.dataIndex.length - 1] : null
+      );
+    }
     switch (this.layoutNode.type) {
       case 'button':  case 'checkbox': case 'help':     case 'msg':
       case 'message': case 'submit':   case 'tabarray': case '$ref':
@@ -285,8 +295,10 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
         this.widgetOptions.expandable = true;
         this.widgetOptions.title = 'Authentication settings';
         return null;
+      case 'tabs': case 'section':
+        return null;
       default:
-        let thisTitle = this.options.title || (
+        let thisTitle = this.widgetLayoutNode.options.title || (
           isNaN(this.layoutNode.name) && this.layoutNode.name !== '-' ?
           toTitleCase(this.layoutNode.name) : null
         );

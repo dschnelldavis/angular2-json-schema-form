@@ -7,7 +7,7 @@ import {
  * Utility function library:
  *
  * addClasses, copy, forEach, forEachCopy, hasOwn, mergeFilteredObject,
- * parseText, uniqueItems, commonItems, fixTitle, toTitleCase
+ * uniqueItems, commonItems, fixTitle, toTitleCase
 */
 
 /**
@@ -197,41 +197,6 @@ export function mergeFilteredObject(
     }
   }
   return targetObject;
-}
-
-/**
- * 'parseText' function
- *
- * @param  {string = ''} text -
- * @param  {any = {}} value -
- * @param  {number = null} index -
- * @return {string} -
- */
-export function parseText(
-  text: string = '', value: any = {}, values: any = {},
-  key: number|string = null, tpldata: any = null
-): string {
-  if (!text) { return text; }
-  let idx: number = null; // For JSON Form API compatibility
-  let $index: number = null; // For Angular Schema Form API compatibility
-  if (typeof key === 'number') { idx = $index = key + 1; }
-  try {
-    /* tslint:disable */
-    return text.replace(/{{.+?}}/g, exp => eval(exp.slice(2, -2)));
-    /* tslint:enable */
-  } catch (error) {
-    try {
-      /* tslint:disable */
-      return tpldata ?
-        text.replace(/{{.+?}}/g, exp => eval('tpldata.' + exp.slice(2, -2))) :
-        text.replace(/{{.+?}}/g, exp => eval('this.' + exp.slice(2, -2)));
-      /* tslint:enable */
-    } catch (error) {
-      console.error('parseText error: ');
-      console.error(error);
-    }
-    return text;
-  }
 }
 
 /**

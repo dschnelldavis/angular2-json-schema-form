@@ -12,7 +12,7 @@ export {
 
 export {
   addClasses, copy, forEach, forEachCopy, hasOwn, mergeFilteredObject,
-  parseText, uniqueItems, commonItems, fixTitle, toTitleCase
+  uniqueItems, commonItems, fixTitle, toTitleCase
 } from './utility.functions';
 
 export { Pointer, JsonPointer } from './jsonpointer.functions';

@@ -3,17 +3,17 @@ import { ChangeDetectorRef, Component, Input, OnChanges, OnInit } from '@angular
 import * as _ from 'lodash';
 
 import { JsonSchemaFormService } from '../../json-schema-form.service';
-import { toTitleCase } from '../../shared';
+import { hasOwn, isArray, toTitleCase } from '../../shared';
 
 @Component({
   selector: 'material-design-framework',
   template: `
     <div
-      [class.array-item]="layoutNode?.arrayItem && layoutNode?.type !== '$ref'"
+      [class.array-item]="widgetLayoutNode?.arrayItem && widgetLayoutNode?.type !== '$ref'"
       [orderable]="isOrderable"
       [dataIndex]="dataIndex"
       [layoutIndex]="layoutIndex"
-      [layoutNode]="layoutNode">
+      [layoutNode]="widgetLayoutNode">
       <svg *ngIf="showRemoveButton"
         xmlns="http://www.w3.org/2000/svg"
         height="18" width="18" viewBox="0 0 24 24"
@@ -24,9 +24,9 @@ import { toTitleCase } from '../../shared';
       <select-widget-widget
         [dataIndex]="dataIndex"
         [layoutIndex]="layoutIndex"
-        [layoutNode]="layoutNode"></select-widget-widget>
+        [layoutNode]="widgetLayoutNode"></select-widget-widget>
     </div>
-    <div class="spacer" *ngIf="layoutNode?.arrayItem && layoutNode?.type !== '$ref'"></div>`,
+    <div class="spacer" *ngIf="widgetLayoutNode?.arrayItem && widgetLayoutNode?.type !== '$ref'"></div>`,
   styles: [`
     .array-item {
       border-radius: 2px;
@@ -86,8 +86,8 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
   ) { }
 
   get showRemoveButton(): boolean {
-    if (!this.layoutNode || !this.options.removable || this.options.readonly ||
-      this.layoutNode.type === '$ref'
+    if (!this.layoutNode || !this.widgetOptions.removable ||
+      this.widgetOptions.readonly || this.layoutNode.type === '$ref'
     ) { return false; }
     if (this.layoutNode.recursiveReference) { return true; }
     if (!this.layoutNode.arrayItem || !this.parentArray) { return false; }
@@ -109,7 +109,7 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
 
   initializeFramework() {
     if (this.layoutNode) {
-      this.options = _.cloneDeep(this.layoutNode.options || {});
+      this.options = _.cloneDeep(this.layoutNode.options);
       this.widgetLayoutNode = {
         ...this.layoutNode,
         options: _.cloneDeep(this.layoutNode.options || {})
@@ -117,9 +117,9 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
       this.widgetOptions = this.widgetLayoutNode.options;
       this.formControl = this.jsf.getFormControl(this);
 
-      if (this.options) {
-        this.options.title = this.setTitle();
-        if (this.options.minimum && this.options.maximum) {
+      if (this.widgetOptions) {
+        this.widgetOptions.title = this.setTitle();
+        if (this.widgetOptions.minimum && this.widgetOptions.maximum) {
           this.layoutNode.type = 'range';
         }
       }
@@ -223,7 +223,7 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
         this.parentArray = this.jsf.getParentNode(this);
         if (this.parentArray) {
           this.isOrderable = this.layoutNode.arrayItemType === 'list' &&
-            !this.options.readonly && this.parentArray.options.orderable;
+            !this.widgetOptions.readonly && this.parentArray.options.orderable;
         }
       }
 
@@ -234,6 +234,14 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
   }
 
   setTitle(): string {
+    if (hasOwn((this.layoutNode || {}).options, 'title')) {
+      return this.jsf.parseText(
+        this.layoutNode.options.title,
+        this.jsf.getFormControlValue(this),
+        (this.jsf.getFormControlGroup(this) || <any>{}).value,
+        isArray(this.dataIndex) ? this.dataIndex[this.dataIndex.length - 1] : null
+      );
+    }
     switch (this.layoutNode.type) {
       case 'button':  case 'checkbox': case 'help':     case 'msg':
       case 'message': case 'submit':   case 'tabarray': case '$ref':
@@ -246,11 +254,10 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
         this.widgetOptions.expandable = true;
         this.widgetOptions.title = 'Authentication settings';
         return null;
-      case 'tabs':
-      case 'section':
+      case 'tabs': case 'section':
         return null;
       default:
-        let thisTitle = this.options.title || (
+        let thisTitle = this.widgetOptions.title || (
           isNaN(this.layoutNode.name) && this.layoutNode.name !== '-' ?
           toTitleCase(this.layoutNode.name) : null
         );

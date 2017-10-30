@@ -10,7 +10,7 @@ import {
   hasValue, isArray, isDefined, isEmpty, isObject, isString
 } from './shared/validator.functions';
 import {
-  fixTitle, forEach, hasOwn, parseText, toTitleCase
+  fixTitle, forEach, hasOwn, toTitleCase
 } from './shared/utility.functions';
 import { JsonPointer } from './shared/jsonpointer.functions';
 import {
@@ -320,7 +320,62 @@ export class JsonSchemaFormService {
   parseText(
     text: string = '', value: any = {}, values: any = {}, key: number|string = null
   ): string {
-    return parseText(text, value, values, key, this.tpldata);
+    if (!text || !/{{.+?}}/.test(text)) { return text; }
+    return text.replace(/{{(.+?)}}/g, (...a) =>
+      this.parseExpression(a[1], value, values, key, this.tpldata)
+    );
+  }
+
+  parseExpression(
+    expression: string = '', value: any = {}, values: any = {},
+    key: number|string = null, tpldata: any = null
+  ) {
+    if (typeof expression !== 'string') { return ''; }
+    const index = (key === 'number' ? key + 1 : key) + '';
+    expression = expression.trim();
+    if (
+      ((expression[0] === '"' && expression[expression.length - 1] === '"') ||
+      (expression[0] === "'" && expression[expression.length - 1] === "'")) &&
+      expression.slice(1, expression.length - 1).indexOf(expression[0]) === -1
+    ) {
+      return expression.slice(1, expression.length - 1);
+    }
+    if (expression === 'idx' || expression === '$index') { return index; }
+    if (expression === 'value' && !hasOwn(values, 'value')) { return value; }
+    if (['"', "'", ' ', '||', '&&', '+'].every(delim => expression.indexOf(delim) === -1)) {
+      const pointer = JsonPointer.parseObjectPath(expression);
+      return pointer[0] === 'value' && JsonPointer.has(value, pointer.slice(1)) ?
+          JsonPointer.get(value, pointer.slice(1)) :
+        pointer[0] === 'values' && JsonPointer.has(values, pointer.slice(1)) ?
+          JsonPointer.get(values, pointer.slice(1)) :
+        pointer[0] === 'tpldata' && JsonPointer.has(tpldata, pointer.slice(1)) ?
+          JsonPointer.get(tpldata, pointer.slice(1)) :
+        JsonPointer.has(values, pointer) ? JsonPointer.get(values, pointer) : '';
+    }
+    if (expression.indexOf('[idx]') > -1) {
+      expression = expression.replace(/\[idx\]/g, index);
+    }
+    if (expression.indexOf('[$index]') > -1) {
+      expression = expression.replace(/\[$index\]/g, index);
+    }
+    // TODO: Improve expression evaluation by parsing quoted strings first
+    // let expressionArray = expression.match(/([^"']+|"[^"]+"|'[^']+')/g);
+    if (expression.indexOf('||') > -1) {
+      return expression.split('||').reduce((all, term) =>
+        all || this.parseExpression(term, value, values, key, tpldata), null
+      ) || '';
+    }
+    if (expression.indexOf('&&') > -1) {
+      return expression.split('&&').reduce((all, term) =>
+        all && this.parseExpression(term, value, values, key, tpldata), ' '
+      ).trim();
+    }
+    if (expression.indexOf('+') > -1) {
+      return expression.split('+')
+        .map(term => this.parseExpression(term, value, values, key, tpldata))
+        .join('');
+    }
+    return '';
   }
 
   setTitle(

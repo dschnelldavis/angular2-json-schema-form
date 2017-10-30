@@ -8,7 +8,7 @@ export {
 } from './src/shared/validator.functions';
 export {
   addClasses, copy, forEach, forEachCopy, hasOwn, mergeFilteredObject,
-  parseText, uniqueItems, commonItems, fixTitle, toTitleCase
+  uniqueItems, commonItems, fixTitle, toTitleCase
 } from './src/shared/utility.functions';
 export { Pointer, JsonPointer } from './src/shared/jsonpointer.functions';
 export { JsonValidators } from './src/shared/json.validators';
