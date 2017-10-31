@@ -331,11 +331,10 @@ export class JsonSchemaFormService {
     key: number|string = null, tpldata: any = null
   ) {
     if (typeof expression !== 'string') { return ''; }
-    const index = (key === 'number' ? key + 1 : key) + '';
+    const index = typeof key === 'number' ? (key + 1) + '' : (key || '');
     expression = expression.trim();
-    if (
-      ((expression[0] === '"' && expression[expression.length - 1] === '"') ||
-      (expression[0] === "'" && expression[expression.length - 1] === "'")) &&
+    if ((expression[0] === "'" || expression[0] === '"') &&
+      expression[0] === expression[expression.length - 1] &&
       expression.slice(1, expression.length - 1).indexOf(expression[0]) === -1
     ) {
       return expression.slice(1, expression.length - 1);
@@ -353,17 +352,17 @@ export class JsonSchemaFormService {
         JsonPointer.has(values, pointer) ? JsonPointer.get(values, pointer) : '';
     }
     if (expression.indexOf('[idx]') > -1) {
-      expression = expression.replace(/\[idx\]/g, index);
+      expression = expression.replace(/\[idx\]/g, <string>index);
     }
     if (expression.indexOf('[$index]') > -1) {
-      expression = expression.replace(/\[$index\]/g, index);
+      expression = expression.replace(/\[$index\]/g, <string>index);
     }
     // TODO: Improve expression evaluation by parsing quoted strings first
     // let expressionArray = expression.match(/([^"']+|"[^"]+"|'[^']+')/g);
     if (expression.indexOf('||') > -1) {
       return expression.split('||').reduce((all, term) =>
-        all || this.parseExpression(term, value, values, key, tpldata), null
-      ) || '';
+        all || this.parseExpression(term, value, values, key, tpldata), ''
+      );
     }
     if (expression.indexOf('&&') > -1) {
       return expression.split('&&').reduce((all, term) =>
@@ -381,9 +380,9 @@ export class JsonSchemaFormService {
   setTitle(
     parentCtx: any = {}, childNode: any = null, index: number = null
   ): string {
-    const parentNode: any = parentCtx.layoutNode;
+    const parentNode = parentCtx.layoutNode;
     const parentValues: any = this.getFormControlValue(parentCtx);
-    const isArrayItem: boolean =
+    const isArrayItem =
       (parentNode.type || '').slice(-5) === 'array' && isArray(parentValues);
     const text = JsonPointer.getFirst(
       isArrayItem && childNode.type !== '$ref' ? [
@@ -399,7 +398,8 @@ export class JsonSchemaFormService {
       ]
     );
     if (!text) { return text; }
-    const childValue = isArrayItem ? parentValues[index] : parentValues;
+    const childValue = isArray(parentValues) && index < parentValues.length ?
+      parentValues[index] : parentValues;
     return this.parseText(text, childValue, parentValues, index);
   }
 

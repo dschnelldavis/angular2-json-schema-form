@@ -71,9 +71,9 @@ export class DemoComponent implements OnInit {
   @ViewChild(MatMenuTrigger) menuTrigger: MatMenuTrigger;
 
   constructor(
-    private route: ActivatedRoute,
-    private router: Router,
     private http: Http,
+    private route: ActivatedRoute,
+    private router: Router
   ) { }
 
   ngOnInit() {

@@ -275,14 +275,6 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
   }
 
   setTitle(): string {
-    if (hasOwn((this.layoutNode || {}).options, 'title')) {
-      return this.jsf.parseText(
-        this.layoutNode.options.title,
-        this.jsf.getFormControlValue(this),
-        (this.jsf.getFormControlGroup(this) || <any>{}).value,
-        isArray(this.dataIndex) ? this.dataIndex[this.dataIndex.length - 1] : null
-      );
-    }
     switch (this.layoutNode.type) {
       case 'button':  case 'checkbox': case 'help':     case 'msg':
       case 'message': case 'submit':   case 'tabarray': case '$ref':
@@ -298,21 +290,19 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
       case 'tabs': case 'section':
         return null;
       default:
-        let thisTitle = this.widgetLayoutNode.options.title || (
-          isNaN(this.layoutNode.name) && this.layoutNode.name !== '-' ?
-          toTitleCase(this.layoutNode.name) : null
-        );
+        let thisTitle = this.options.title ||
+          (isNaN(this.layoutNode.name) && this.layoutNode.name !== '-' ?
+            toTitleCase(this.layoutNode.name) : null);
         this.widgetOptions.title = null;
-        if (!thisTitle) { return null; }
-        if (thisTitle.indexOf('{') === -1 || !this.formControl || !this.dataIndex) {
-          return thisTitle;
-        }
-        return this.jsf.parseText(
-          thisTitle,
-          this.jsf.getFormControlValue(this),
-          this.jsf.getFormControlGroup(this).value,
-          this.dataIndex[this.dataIndex.length - 1]
-        );
+        return !thisTitle ? null :
+          thisTitle.indexOf('{{') === -1 || !this.formControl || !this.dataIndex ?
+            thisTitle :
+            this.jsf.parseText(
+              thisTitle,
+              this.jsf.getFormControlValue(this),
+              this.jsf.getFormControlGroup(this).value,
+              this.dataIndex[this.dataIndex.length - 1]
+            );
     }
   }
 

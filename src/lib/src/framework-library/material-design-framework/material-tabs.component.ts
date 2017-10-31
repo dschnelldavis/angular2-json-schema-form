@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 
 import { JsonSchemaFormService } from '../../json-schema-form.service';
 
@@ -8,8 +8,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
     <nav mat-tab-nav-bar
       [attr.aria-label]="options?.label || options?.title"
       [style.width]="'100%'">
-        <a *ngFor="let item of layoutNode?.items; let i = index"
-          mat-tab-link
+        <a mat-tab-link *ngFor="let item of layoutNode?.items; let i = index"
           [active]="selectedItem === i"
           (click)="select(i)">
           <span *ngIf="showAddTab || item.type !== '$ref'"
@@ -47,7 +46,6 @@ export class MaterialTabsComponent implements OnInit {
 
   select(index) {
     if (this.layoutNode.items[index].type === '$ref') {
-      this.itemCount = this.layoutNode.items.length;
       this.jsf.addItem({
         layoutNode: this.layoutNode.items[index],
         layoutIndex: this.layoutIndex.concat(index),
@@ -59,12 +57,10 @@ export class MaterialTabsComponent implements OnInit {
   }
 
   updateControl() {
+    this.itemCount = this.layoutNode.items.length - 1;
     const lastItem = this.layoutNode.items[this.layoutNode.items.length - 1];
-    if (lastItem.type === '$ref' &&
-      this.itemCount >= (lastItem.options.maxItems || 1000)
-    ) {
-      this.showAddTab = false;
-    }
+    this.showAddTab = lastItem.type === '$ref' &&
+      this.itemCount < (lastItem.options.maxItems || 1000);
   }
 
   setTitle(item: any, index: number): string {

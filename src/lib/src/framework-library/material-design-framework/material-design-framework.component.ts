@@ -76,6 +76,7 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
   formControl: any = null;
   parentArray: any = null;
   isOrderable: boolean = false;
+  dynamicTitle: string = null;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];
@@ -105,6 +106,7 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
 
   ngOnChanges() {
     if (!this.frameworkInitialized) { this.initializeFramework(); }
+    if (this.dynamicTitle) { this.updateTitle(); }
   }
 
   initializeFramework() {
@@ -118,7 +120,6 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
       this.formControl = this.jsf.getFormControl(this);
 
       if (this.widgetOptions) {
-        this.widgetOptions.title = this.setTitle();
         if (this.widgetOptions.minimum && this.widgetOptions.maximum) {
           this.layoutNode.type = 'range';
         }
@@ -219,6 +220,13 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
           this.controlType = this.layoutNode.type;
       }
 
+      if (this.controlType !== 'tabs' &&
+        ((this.widgetOptions || {}).title || '').indexOf('{{') > -1
+      ) {
+        this.dynamicTitle = this.widgetOptions.title;
+        this.updateTitle();
+      }
+
       if (this.layoutNode.arrayItem && this.layoutNode.type !== '$ref') {
         this.parentArray = this.jsf.getParentNode(this);
         if (this.parentArray) {
@@ -233,46 +241,13 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
     }
   }
 
-  setTitle(): string {
-    if (hasOwn((this.layoutNode || {}).options, 'title')) {
-      return this.jsf.parseText(
-        this.layoutNode.options.title,
-        this.jsf.getFormControlValue(this),
-        (this.jsf.getFormControlGroup(this) || <any>{}).value,
-        isArray(this.dataIndex) ? this.dataIndex[this.dataIndex.length - 1] : null
-      );
-    }
-    switch (this.layoutNode.type) {
-      case 'button':  case 'checkbox': case 'help':     case 'msg':
-      case 'message': case 'submit':   case 'tabarray': case '$ref':
-        return null;
-      case 'advancedfieldset':
-        this.widgetOptions.expandable = true;
-        this.widgetOptions.title = 'Advanced options';
-        return null;
-      case 'authfieldset':
-        this.widgetOptions.expandable = true;
-        this.widgetOptions.title = 'Authentication settings';
-        return null;
-      case 'tabs': case 'section':
-        return null;
-      default:
-        let thisTitle = this.widgetOptions.title || (
-          isNaN(this.layoutNode.name) && this.layoutNode.name !== '-' ?
-          toTitleCase(this.layoutNode.name) : null
-        );
-        this.widgetOptions.title = null;
-        if (!thisTitle) { return null; }
-        if (thisTitle.indexOf('{') === -1 || !this.formControl || !this.dataIndex) {
-          return thisTitle;
-        }
-        return this.jsf.parseText(
-          thisTitle,
-          this.jsf.getFormControlValue(this),
-          this.jsf.getFormControlGroup(this).value,
-          this.dataIndex[this.dataIndex.length - 1]
-        );
-    }
+  updateTitle() {
+    this.widgetLayoutNode.options.title = this.jsf.parseText(
+      this.dynamicTitle,
+      this.jsf.getFormControlValue(this),
+      this.jsf.getFormControlGroup(this).value,
+      this.dataIndex[this.dataIndex.length - 1]
+    );
   }
 
   removeItem() {

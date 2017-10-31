@@ -22,7 +22,7 @@
     },
     "tabicons": {
       "title": "Tabs icons",
-      "maxLength":8,
+      "maxLength": 8,
       "type": "array",
       "items": {
         "title": "Tab icon",
