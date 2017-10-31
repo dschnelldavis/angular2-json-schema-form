@@ -230,7 +230,8 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
       if (this.layoutNode.arrayItem && this.layoutNode.type !== '$ref') {
         this.parentArray = this.jsf.getParentNode(this);
         if (this.parentArray) {
-          this.isOrderable = this.layoutNode.arrayItemType === 'list' &&
+          this.isOrderable = this.parentArray.type.slice(0, 3) !== 'tab' &&
+            this.layoutNode.arrayItemType === 'list' &&
             !this.widgetOptions.readonly && this.parentArray.options.orderable;
         }
       }
