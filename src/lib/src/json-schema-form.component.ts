@@ -1,8 +1,8 @@
 import {
-  ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input,
-  Output, OnChanges, OnInit
+  ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter,
+  forwardRef, Input, Output, OnChanges, OnInit, Renderer2
 } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormGroup } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 import * as _ from 'lodash';
@@ -17,6 +17,12 @@ import {
 } from './shared/validator.functions';
 import { forEach, hasOwn } from './shared/utility.functions';
 import { JsonPointer } from './shared/jsonpointer.functions';
+
+export const JSON_SCHEMA_FORM_VALUE_ACCESSOR: any = {
+  provide: NG_VALUE_ACCESSOR,
+  useExisting: forwardRef(() => JsonSchemaFormComponent),
+  multi: true,
+};
 
 /**
  * @module 'JsonSchemaFormComponent' - Angular JSON Schema Form
@@ -68,14 +74,15 @@ import { JsonPointer } from './shared/jsonpointer.functions';
       Debug output: <pre>{{debugOutput}}</pre>
     </div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  // Add 'providers' here creates a separate instance of JsonSchemaFormService
-  providers:  [ JsonSchemaFormService ],
+  // Adding 'JsonSchemaFormService' here, instead of in the module,
+  // creates a separate instance of the service for each component
+  providers:  [ JsonSchemaFormService, JSON_SCHEMA_FORM_VALUE_ACCESSOR ],
 })
-export class JsonSchemaFormComponent implements OnChanges, OnInit {
+export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges, OnInit {
   debugOutput: any; // Debug information, if requested
   formValueSubscription: any = null;
   formInitialized = false;
-  objectWrap: boolean = false; // Is non-object input schema wrapped in an object?
+  objectWrap = false; // Is non-object input schema wrapped in an object?
 
   formValuesInput: string; // Name of the input providing the form data
   inputHistory: { // Previous input values, to detect which input triggers onChanges
@@ -130,11 +137,15 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
   @Output() formDataChange = new EventEmitter<any>();
   @Output() ngModelChange = new EventEmitter<any>();
 
+  onChange: Function;
+  onTouched: Function;
+
   constructor(
     private changeDetector: ChangeDetectorRef,
     private frameworkLibrary: FrameworkLibraryService,
     private widgetLibrary: WidgetLibraryService,
     public jsf: JsonSchemaFormService,
+    public renderer: Renderer2,
     private sanitizer: DomSanitizer
   ) { }
 
@@ -171,7 +182,7 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
         resetFirst = false;
       }
 
-      // If only form values changed, update values
+      // If only input values have changed, update the form values
       if (changedInput.length === 1 && changedInput[0] === this.formValuesInput) {
         if (this.formValuesInput.indexOf('.') === -1) {
           this.setFormValues(this[this.formValuesInput], resetFirst);
@@ -180,9 +191,11 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
           this.setFormValues(this[input][key], resetFirst);
         }
 
-      // Otherwise, re-render entire form
+      // Otherwise, re-render the entire form
       } else {
         this.initializeForm();
+        if (this.onChange) { this.onChange(this.jsf.formValues); }
+        if (this.onTouched) { this.onTouched(this.jsf.formValues); }
       }
 
       // Save changed inputs
@@ -192,6 +205,36 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
     } else {
       this.initializeForm();
     }
+  }
+
+  writeValue(value: any) {
+    this.setFormValues(value, false);
+  }
+
+  registerOnChange(fn: Function) {
+    this.onChange = fn;
+  }
+
+  registerOnTouched(fn: Function) {
+    this.onTouched = fn;
+  }
+
+  setDisabledState(isDisabled: boolean) {
+    if (this.jsf.formOptions.formDisabled !== isDisabled) {
+      this.jsf.formOptions.formDisabled = isDisabled;
+      this.initializeForm();
+    }
+  }
+
+  setFormValues(formValues: any, resetFirst = true) {
+    let newFormValues = formValues;
+    if (this.objectWrap && !isObject(formValues)) {
+      newFormValues = { '1': formValues };
+    }
+    if (resetFirst) { this.jsf.formGroup.reset(); }
+    this.jsf.formGroup.patchValue(newFormValues);
+    if (this.onChange) { this.onChange(newFormValues); }
+    if (this.onTouched) { this.onTouched(newFormValues); }
   }
 
   submitForm() {
@@ -657,14 +700,5 @@ export class JsonSchemaFormComponent implements OnChanges, OnInit {
         this.validationErrors.emit(this.jsf.ajvErrors);
       }
     }
-  }
-
-  private setFormValues(formValues: any, resetFirst = true) {
-    let newFormValues = formValues;
-    if (this.objectWrap && !isObject(formValues)) {
-      newFormValues = { '1': formValues };
-    }
-    if (resetFirst) { this.jsf.formGroup.reset(); }
-    this.jsf.formGroup.patchValue(newFormValues);
   }
 }
