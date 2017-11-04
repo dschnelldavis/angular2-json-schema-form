@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/angular2-json-schema-form.svg?style=plastic)](https://www.npmjs.com/package/angular2-json-schema-form) [![npm downloads](https://img.shields.io/npm/dm/angular2-json-schema-form.svg?style=plastic)](https://www.npmjs.com/package/angular2-json-schema-form) [![GitHub MIT License](https://img.shields.io/github/license/dschnelldavis/angular2-json-schema-form.svg?style=social)](https://github.com/dschnelldavis/angular2-json-schema-form)
 [![Dependencies](https://david-dm.org/dschnelldavis/angular2-json-schema-form.svg)](https://david-dm.org/dschnelldavis/angular2-json-schema-form) [![devDependencies](https://david-dm.org/dschnelldavis/angular2-json-schema-form/dev-status.svg)](https://david-dm.org/dschnelldavis/angular2-json-schema-form?type=dev)
 
-A [JSON Schema](http://json-schema.org) Form builder for Angular 4, similar to, and mostly API compatible with,
+A [JSON Schema](http://json-schema.org) Form builder for Angular 4 or 5, similar to, and mostly API compatible with,
 
   * [JSON Schema Form](https://github.com/json-schema-form)'s [Angular Schema Form](http://schemaform.io) for [AngularJS](https://angularjs.org) ([examples](http://schemaform.io/examples/bootstrap-example.html))
   * [Mozilla](https://blog.mozilla.org/services/)'s [React JSON Schema Form](https://github.com/mozilla-services/react-jsonschema-form) for [React](https://facebook.github.io/react/) ([examples](https://mozilla-services.github.io/react-jsonschema-form/)), and
@@ -54,7 +54,7 @@ npm install @angular/flex-layout --save
 npm install @angular/material --save
 ```
 
-IMPORTANT NOTE ABOUT PEER DEPENDANCIES: For now, Angular Material is a required peer dependency for the current version. This will be fixed in a future version, which will offer separate installers for the Bootstrap and Material Design frameworks. But until that happens, even if you don't intend to use Material Design framework, you may need to install Angular Material and its related modules through NPM for your project to build correctly. If you want to try building your project without these modules, go ahead, and depending on your build process it might work. But if your build fails, chances are you need to install these additional modules to make angular2-json-schema-form work.
+IMPORTANT NOTE ABOUT PEER DEPENDANCIES: For now, Angular Material is a required peer dependency for the current version. This will be fixed in a future version, which will offer separate installers for the Bootstrap and Material Design frameworks. But until that happens, even if you don't intend to use Material Design framework, you will need to install Angular Material and its related modules through NPM for your project to build correctly.
 
 Then import JsonSchemaFormModule in your main application module:
 
@@ -62,18 +62,18 @@ Then import JsonSchemaFormModule in your main application module:
 import { JsonSchemaFormModule } from 'angular2-json-schema-form';
 ```
 
-If you want to use the Material Design framework, also add:
+If you want to use the Angular Material Design framework, also add:
 
 ```javascript
 import { FlexLayoutModule }                   from '@angular/flex-layout';
 import { MatInputModule, MatSelectModule }    from '@angular/material';
 ```
 
-(For information about all the available modules, check the [Angular Material site](https://material.angular.io/guide/getting-started).)
+(For information about which Angular Material modules to import, check the [Angular Material site](https://material.angular.io/guide/getting-started).)
 
-If you don't want to use the Material Design framework, you don't need to import these modules. (To get the project to build correctly, you may need to install the Angular Material libraries through NPM, as described above, but you don't need to actually import them.)
+If you don't want to use the Material Design framework, you don't need to import these modules. (To get the project to build correctly, you need to install the Angular Material libraries through NPM, as described above, but you don't need to actually import them.)
 
-Finally, edit the `imports` array in your @NgModule declaration to add `JsonSchemaFormModule`, and the Angular Material modules if you want to use that framework.
+Finally, edit the `imports` array in your @NgModule declaration to add `JsonSchemaFormModule`, and, optionally, the Angular Material modules.
 
 Your final app.module.ts should look something like this:
 
@@ -133,6 +133,36 @@ For basic use, after loading the JsonSchemaFormModule as described above, to add
 
 Where the `schema` input is a valid JSON schema object (v3 or v4), and the `onSubmit` output calls a function to process the submitted form data, which will be passed as a JSON object. If you don't already have your own schemas, you can find a whole bunch of samples to test with in the `src/demo/assets/example-schemas` folder, as described above.
 
+### Data-only mode
+
+Angular JSON Schema Form can also create a form entirely from a JSON object—with no schema—like so:
+
+```html
+<json-schema-form
+  [(ngModel)]="exampleJsonObject">
+</json-schema-form>
+```
+
+```javascript
+exampleJsonObject = {
+  "first_name": "Jane", "last_name": "Doe", "age": 25, "is_company": false,
+  "address": {
+    "street_1": "123 Main St.", "street_2": null,
+    "city": "Las Vegas", "state": "NV", "zip_code": "89123"
+  },
+  "phone_numbers": [
+    { "number": "702-123-4567", "type": "cell" },
+    { "number": "702-987-6543", "type": "work" }
+  ], "notes": ""
+};
+```
+
+In this mode, Angular JSON Schema Form automatically generates a schema from your data. The generated schema is relatively simple, compared to what you could create on your own. However, as the above example shows, it does detect and enforce string, number, and boolean values (nulls are also assumed to be strings), and automatically allows array elements to be added, removed, and reordered.
+
+After displaying a form in this mode, you can also use the `formSchema` and `formLayout` outputs (described in 'Debugging inputs and outputs', below), to return the generated schema and layout, which will give you a head start on writing your own schemas and layouts by showing you examples created from your own data.
+
+Also, notice that the 'ngModel' input supports Angular's 2-way data binding, just like other form controls, which is why an onSubmit function was not necessary (though onSubmit is still available for you to add if you want).
+
 ### Advanced use
 
 #### Additional inputs an outputs
@@ -155,7 +185,7 @@ Here is an example:
 <json-schema-form
   [schema]="yourJsonSchema"
   [layout]="yourJsonFormLayout"
-  [data]="yourData"
+  [(data)]="yourData"
   [options]="yourFormOptions"
   [widgets]="yourCustomWidgets"
   framework="bootstrap-3"
@@ -195,35 +225,6 @@ You can also mix these two styles depending on your needs. In the example playgr
 
 Combining inputs is useful if you have many unique forms and store each form's data and schema together. If you have one form (or many identical forms), it will likely be more useful to use separate inputs for your data and schema—though even in that case, if you use a custom layout, you could store your schema and layout together and use one input for both.
 
-#### Data-only mode
-
-Angular JSON Schema Form can also create a form entirely from a JSON object—with no schema—like so:
-
-```javascript
-exampleJsonObject = {
-  "first_name": "Jane", "last_name": "Doe", "age": 25, "is_company": false,
-  "address": {
-    "street_1": "123 Main St.", "street_2": null,
-    "city": "Las Vegas", "state": "NV", "zip_code": "89123"
-  },
-  "phone_numbers": [
-    { "number": "702-123-4567", "type": "cell" },
-    { "number": "702-987-6543", "type": "work" }
-  ], "notes": ""
-};
-```
-
-```html
-<json-schema-form
-  [data]="exampleJsonObject"
-  (onSubmit)="yourOnSubmitFn($event)">
-</json-schema-form>
-```
-
-In this mode, Angular JSON Schema Form generates a schema from your data on the fly. The generated schema is relatively simple, compared to what you could create on your own. However, as the above example shows, it does detect and enforce string, number, and boolean values (nulls are also assumed to be strings), and automatically allows array elements to be added, removed, and reordered.
-
-After displaying a form in this mode, you can also use the `formSchema` and `formLayout` outputs (described in 'Debugging inputs and outputs', below), to return the generated schema and layout, which will give you a head start on writing your own schemas and layouts by showing you examples created from your own data.
-
 #### Compatibility modes
 
 If you have previously used another JSON form creation library—Angular Schema Form (for AngularJS), React JSON Schema Form, or JSON Form (for jQuery)—in order to make the transition easier, Angular JSON Schema Form will recognize the input names and custom input objects used by those libraries. It should automatically work with JSON Schemas in [version 6](http://json-schema.org/draft-06/schema), [version 4](http://json-schema.org/draft-04/schema), [version 3](http://json-schema.org/draft-03/schema), or the [truncated version 3 format supported by JSON Form](https://github.com/joshfire/jsonform/wiki#schema-shortcut). So the following will all work:
@@ -233,7 +234,7 @@ Angular Schema Form (AngularJS) compatibility:
 <json-schema-form
   [schema]="yourJsonSchema"
   [form]="yourAngularSchemaFormLayout"
-  [model]="yourData">
+  [(model)]="yourData">
 </json-schema-form>
 ```
 
@@ -242,7 +243,7 @@ React JSON Schema Form compatibility:
 <json-schema-form
   [schema]="yourJsonSchema"
   [UISchema]="yourReactJsonSchemaFormUISchema"
-  [formData]="yourData">
+  [(formData)]="yourData">
 </json-schema-form>
 ```
 
@@ -258,13 +259,17 @@ JSON Form (jQuery) compatibility:
 </json-schema-form>
 ```
 
+Note: 2-way data binding will work with any dedicated data input,
+      including 'data', 'model', 'ngModel', or 'formData'.
+      But 2-way binding will not work with the combined 'form' input.
+
 #### Debugging inputs and outputs
 
 Finally, Angular JSON Schema Form includes some additional inputs and outputs for debugging:
 
-* `debug` input—activates debugging mode
-* `loadExternalAssets` input—automatically loads external JavaScript and CSS needed by the selected framework (this is not 100% reliable, so while this may be helpful during development and testing, it is not recommended for production)—Note: If you are using this mode and get a console error saying an external asset has not loaded (such as jQuery, required for Bootstrap 3) simply reloading your web browser will usually fix it
-* `formSchema` and `formLayout` outputs—returns the final schema and layout used to create the form (which will either show how your original input schema and layout were modified, if you provided inputs, or show you the automatically generated ones, if you didn't)
+* `debug` input — Activates debugging mode.
+* `loadExternalAssets` input — Causes external JavaScript and CSS needed by the selected framework to be automatically loaded from a CDN (this is not 100% reliable, so while this can be helpful during development and testing, it is not recommended for production)—Note: If you are using this mode and get a console error saying an external asset has not loaded (such as jQuery, required for Bootstrap 3) simply reloading your web browser will usually fix it.
+* `formSchema` and `formLayout` outputs — Returns the final schema and layout used to create the form (which will either show how your original input schema and layout were modified, if you provided inputs, or show you the automatically generated ones, if you didn't).
 
 ```html
 <json-schema-form
@@ -278,7 +283,106 @@ Finally, Angular JSON Schema Form includes some additional inputs and outputs fo
 
 ## Customizing
 
-Angular JSON Schema Form has two built-in features designed to make it easy to customize at run-time: a widget library and a framework library. All forms are constructed from these basic components. The default widget library includes all standard HTML 5 form controls, as well as several common layout patterns, such as multiple checkboxes and tab sets. And the default framework library includes templates to style forms using either Bootstrap 3 or Material Design (or with no formatting, which is not useful in production, but can be helpful for debugging).
+In addition to a large number of user-settable options, Angular JSON Schema Form also has the ability to load custom form control widgets and layout frameworks. All forms are constructed from these basic components. The default widget library includes all standard HTML 5 form controls, as well as several common layout patterns, such as multiple checkboxes and tab sets. The default framework library includes templates to style forms using either Bootstrap 3 or Material Design (or plain HTML with no formatting, which is not useful in production, but can be helpful for development and debugging).
+
+### User settings
+
+(TODO: List all available user settings, and configuration options for each.)
+
+### Creating custom input validation error messages
+
+You can easily add your own custom input validation error messages, either for individual control widgets, or for your entire form.
+
+#### Setting error messages for individual controls or the entire form
+
+To set messages for individual form controls, add them to that control's node in the form layout, like this:
+
+```javascript
+let yourFormLayout = [
+  { key: 'name',
+    title: 'Enter your name',
+    errorMessages: {
+      // Put your error messages for the 'name' field here
+    }
+  },
+  { type: 'submit', title: 'Submit' }
+]
+```
+
+To set messages for the entire form, add them to the form options, inside the defautWidgetOptions errorMessages object, like this:
+
+```javascript
+let yourFormOptions = {
+  defautWidgetOptions: {
+    errorMessages: {
+      // Put your error messages for the entire form here
+    }
+  }
+}
+```
+
+#### How to format error messages
+
+The errorMessages object—in either a layout node or the form options—contains the names of each error message you want to set as keys, and the corresponding messages as values. Messages may be in any of the following formats:
+
+ * String: A plain text message, which is always the same.
+ * String template: A text message that includes Angular template-style {{variables}}, which will be be replaced with values from the returned error object.
+ * Function: A JavaScript function which accepts the error object as input, and returns a string error message.
+
+Here are examples of all three error message types:
+```javascript
+errorMessages: {
+
+  // String error message
+  required: 'This field is required.',
+
+  // String template error message
+  // - minimumLength variable will be replaced
+  minLength: 'Must be at least {{minimumLength}} characters long.',
+
+  // Function error message
+  // - example error object:   { multipleOfValue: 0.01, currentValue: 3.456 }
+  // - resulting error message: 'Must have 2 or fewer decimal places.'
+  multipleOf: function(error) {
+    if ((1 / error.multipleOfValue) % 10 === 0) {
+      const decimals = Math.log10(1 / error.multipleOfValue);
+      return `Must have ${decimals} or fewer decimal places.`;
+    } else {
+      return `Must be a multiple of ${error.multipleOfValue}.`;
+    }
+  }
+}
+```
+(Note: These examples are from the default set of built-in error messages, which includes messages for all JSON Schema errors except type, const, enum, and dependencies.)
+
+#### Available input validation errors and object values
+
+Here is a list of all the built-in JSON Schema errors, which data type each error is available for, and the values in their returned error objects:
+
+Error name       | Data type | Returned error object values
+-----------------|-----------|-----------------------------------------
+required         |  any      | (none)
+type             |  any      | requiredType,          currentValue
+const            |  any      | requiredValue,         currentValue
+enum             |  any      | allowedValues,         currentValue
+minLength        |  string   | minimumLength,         currentLength
+maxLength        |  string   | maximumLength,         currentLength
+pattern          |  string   | requiredPattern,       currentValue
+format           |  string   | requiredFormat,        currentValue
+minimum          |  number   | minimumValue,          currentValue
+exclusiveMinimum |  number   | exclusiveMinimumValue, currentValue
+maximum          |  number   | maximumValue,          currentValue
+exclusiveMaximum |  number   | exclusiveMaximumValue, currentValue
+multipleOf       |  number   | multipleOfValue,       currentValue
+minProperties    |  object   | minimumProperties,     currentProperties
+maxProperties    |  object   | maximumProperties,     currentProperties
+ dependencies  * |  object   | (varies, based on dependencies schema)
+minItems         |  array    | minimumItems,          currentItems
+maxItems         |  array    | maximumItems,          currentItems
+uniqueItems      |  array    | duplicateItems
+ contains      * |  array    | requiredItem,          currentItems
+
+* Note: The contains and dependencies validators are still in development, and do not yet work correctly.
 
 ### Changing or adding widgets
 
@@ -371,19 +475,25 @@ The two built-in frameworks (in the `/src/lib/src/framework-library` folder) dem
 
 If you find this library useful, I'd love to hear from you. If you have any trouble with it or would like to request a feature, please [post an issue on GitHub](https://github.com/dschnelldavis/angular2-json-schema-form/issues).
 
-If you're a programmer and would like a fun intermediate-level Angular project to hack on, then clone the library and take a look at the source code. I wrote this library both because I needed an Angular JSON Schema Form builder, and also as a way to sharpen my Angular skills. This project is just complex enough to be challenging and fun, but not so difficult as to be overwhelming. One thing I particularly like is that each example in the demo playground is like a little puzzle which provides immediate feedback—as soon as it works perfectly, you know you've solved it.
+If you're a programmer and would like a fun intermediate-level Angular project to hack on, clone the library and take a look at the source code. I wrote this library both because I needed an Angular JSON Schema Form builder, and also as a way to sharpen my Angular skills. This project is just complex enough to be challenging and fun, but not so difficult as to be overwhelming. One thing I particularly like is that each example in the demo playground is like a little puzzle which provides immediate feedback—as soon as it works perfectly, you know you've solved it.
 
 I've also tried to split things into small modules as much as possible, so even though some code is still a bit messy, most individual parts should be straightforward to work with. (A lot of the code is well commented, though some isn't—but I'm working to fix that. If you run into anything you don't understand, please ask.) If you make improvements, please [submit a pull request](https://github.com/dschnelldavis/angular2-json-schema-form/pulls) to share what you've done.
 
 This library is mostly functional (I'm already using it in another large site, where it works well), but it still has many small bugs to fix and enhancements that could be made. Here's a random list of some stuff I know needs to be added or improved:
 
-  * It needs a testing framework—The single biggest flaw in this library is that each change or improvement has the potential to break something else (which has already happened several times). Integrating automated tests into the build process would fix that.
-
-  * The 'JSON Schema - Required Field' example doesn't work—Currently, required fields inside objects are always required. But when the object itself is not required, those fields should instead be dynamically required, or not, only if at least one field in the object is non-empty.
+  * TDD tests—The single biggest flaw in this library is that each change or improvement has the potential to break something else (which has already happened several times). Integrating automated tests into the build process would fix that.
 
   * More frameworks—Not everyone uses Material Design or Bootstrap 3, so it would be great to create framework plug-ins for [Bootstrap 4](https://github.com/ng-bootstrap/ng-bootstrap), [Foundation 6](https://github.com/zurb/foundation-sites), [Semantic UI](https://github.com/vladotesanovic/ngSemantic), or other web design frameworks.
 
-  * More widgets—There are lots of great form controls available, such as the [Pikaday calendar](https://github.com/dbushell/Pikaday), [Spectrum color picker](http://bgrins.github.io/spectrum), and [ACE code editor](https://ace.c9.io), which just need small custom wrappers to convert them into Angular JSON Schema Form plug-ins.
+  * More widgets—There are lots of great form controls available, such as the [Pikaday calendar](https://github.com/dbushell/Pikaday), [Spectrum color picker](http://bgrins.github.io/spectrum), and [ACE code editor](https://ace.c9.io), which just need small custom wrappers to convert them into Angular JSON Schema Form plug-ins. In addition, there are a few additional features of HTML, JSON Schema, and Material Design which could be fixed by adding new widgets:
+
+    * [A file widget](https://github.com/dschnelldavis/angular2-json-schema-form/issues/38)—To support uploading files, this widget would display an HTML file input, and then include the uploaded file in the form's output data, as an [ArrayBuffer](https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsArrayBuffer) or [DataURL](https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsDataURL).
+
+    * [A oneOf widget](https://github.com/dschnelldavis/angular2-json-schema-form/issues/112)—To support schemas using oneOf or anyOf, this widget would enable a user to choose an option from a select list, which would then replace another control on the form.
+
+    * [An addAdditionalProperties widget](https://github.com/dschnelldavis/angular2-json-schema-form/issues/104)—To support schemas using additionalProperties or patternProperties, this widget would enable users to enter a name to add a new property to an object, and would then add a new control to the form for setting that property's value (similar to the existing [add-reference widget](https://github.com/dschnelldavis/angular2-json-schema-form/blob/master/src/lib/src/widget-library/add-reference.component.ts)).
+
+    * [A matStepper widget](https://github.com/dschnelldavis/angular2-json-schema-form/issues/123)—To support the [Angular Material Stepper control](https://material.angular.io/components/stepper/overview) (similar to the existing [tabs](https://github.com/dschnelldavis/angular2-json-schema-form/blob/master/src/lib/src/widget-library/tabs.component.ts) widget).
 
 If you like this library, need help, or want to contribute, let me know. I'm busy, so it sometimes takes me a long time to respond, but I will eventually get back to you. :-)
 
