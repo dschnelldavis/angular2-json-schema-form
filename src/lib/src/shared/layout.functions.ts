@@ -38,7 +38,7 @@ import { buildFormGroupTemplate, getControl } from './form-group.functions';
 export function buildLayout(jsf: any, widgetLibrary: any): any[] {
   let hasSubmitButton = !JsonPointer.get(jsf, '/formOptions/addSubmit');
   let formLayout = mapLayout(jsf.layout, (layoutItem, index, layoutPointer) => {
-    let currentIndex: number = index;
+    let currentIndex = index;
     let newNode: any = {
       _id: _.uniqueId(),
       options: {},
@@ -339,7 +339,7 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
           newNode.options.minItems < newNode.options.maxItems &&
           (newNode.items[newNode.items.length - 1] || {}).type !== '$ref'
         ) {
-          let buttonText: string = 'Add';
+          let buttonText = 'Add';
           if (newNode.options.title) {
             if (/^add\b/i.test(newNode.options.title)) {
               buttonText = newNode.options.title;
@@ -797,10 +797,10 @@ export function buildLayoutFromSchema(
 export function mapLayout(
   layout: any[],
   fn: (v: any, i?: number, p?: string, l?: any) => any,
-  layoutPointer: string = '',
+  layoutPointer = '',
   rootLayout: any[] = layout
 ): any[] {
-  let indexPad: number = 0;
+  let indexPad = 0;
   let newLayout: any[] = [];
   forEach(layout, (item, index) => {
     let realIndex = +index + indexPad;
@@ -897,7 +897,7 @@ export function getLayoutNode(
  *   || { { group: string, items: { name: string, value: any }[] }[] }
  */
 export function buildTitleMap(
-  titleMap: any, enumList: any, fieldRequired: boolean = true, flatList: boolean = true
+  titleMap: any, enumList: any, fieldRequired = true, flatList = true
 ): TitleMapItem[] {
   let newTitleMap: TitleMapItem[] = [];
   let hasEmptyValue = false;

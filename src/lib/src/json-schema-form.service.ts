@@ -31,9 +31,9 @@ export interface ErrorMessages {
 
 @Injectable()
 export class JsonSchemaFormService {
-  JsonFormCompatibility: boolean = false;
-  ReactJsonSchemaFormCompatibility: boolean = false;
-  AngularSchemaFormCompatibility: boolean = false;
+  JsonFormCompatibility = false;
+  ReactJsonSchemaFormCompatibility = false;
+  AngularSchemaFormCompatibility = false;
   tpldata: any = {};
 
   ajvOptions: any = { allErrors: true, jsonPointers: true, unknownFormats: 'ignore' };
@@ -66,7 +66,7 @@ export class JsonSchemaFormService {
   schemaRefLibrary: any = {}; // Library of schemas for resolving schema $refs
   layoutRefLibrary: any = { '': null }; // Library of layout nodes for adding to form
   templateRefLibrary: any = {}; // Library of formGroup templates for adding to form
-  hasRootReference: boolean = false; // Does the form include a recursive reference to itself?
+  hasRootReference = false; // Does the form include a recursive reference to itself?
 
   // Default global form options
   defaultFormOptions: any = {
@@ -75,6 +75,8 @@ export class JsonSchemaFormService {
       // 'auto' = only if layout is undefined (form is built from schema alone)
     debug: false, // Show debugging output?
     disableInvalidSubmit: true, // Disable submit if form invalid?
+    formDisabled: false, // Set entire form as disabled? (not editable, and disables outputs)
+    formReadonly: false, // Set entire form as read only? (not editable, but outputs still enabled)
     fieldsRequired: false, // (set automatically) Are there any required fields in the form?
     framework: 'material-design', // The framework to load
     loadExternalAssets: false, // Load external css and JavaScript for framework?
@@ -105,50 +107,52 @@ export class JsonSchemaFormService {
       feedback: false, // Show inline feedback icons?
       feedbackOnRender: false, // Show errorMessage on Render?
       notitle: false, // Hide title?
-      readonly: false, // Set control as read only?
+      disabled: false, // Set control as disabled? (not editable, and excluded from output)
+      readonly: false, // Set control as read only? (not editable, but included in output)
       returnEmptyFields: true, // return values for fields that contain no data?
       errorMessages: { // Default error messages
-        required: 'Required',
-        minLength: 'Must be {{requiredLength}} characters or longer (current length: {{currentLength}})',
-        maxLength: 'Must be {{requiredLength}} characters or shorter (current length: {{currentLength}})',
+        required: 'This field is required.',
+        minLength: 'Must be {{minimumLength}} characters or longer (current length: {{currentLength}})',
+        maxLength: 'Must be {{maximumLength}} characters or shorter (current length: {{currentLength}})',
         pattern: 'Must match pattern: {{requiredPattern}}',
         format: function (error) {
           switch (error.requiredFormat) {
             case 'date-time':
-              return 'Must be a date-time formatted like "2000-12-31" or "2000-03-14T01:59.265"'
+              return 'Must be a date-time, formatted like "2000-12-31" or "2000-03-14T01:59.265"'
             case 'email':
-              return 'Must be an email address formatted like "name@example.com"'
+              return 'Must be an email address, formatted like "name@example.com"'
             case 'hostname':
-              return 'Must be a hostname formatted like "example.com"'
+              return 'Must be a hostname, formatted like "example.com"'
             case 'ipv4':
-              return 'Must be an IPv4 address formatted like "127.0.0.1"'
+              return 'Must be an IPv4 address, formatted like "127.0.0.1"'
             case 'ipv6':
-              return 'Must be an IPv6 address formatted like "1234:5678:9ABC:DEF0:1234:5678:9ABC:DEF0"'
+              return 'Must be an IPv6 address, formatted like "1234:5678:9ABC:DEF0:1234:5678:9ABC:DEF0"'
             case 'uri': case 'url':
-              return 'Must be a url formatted like "http://www.example.com/page.html"'
+              return 'Must be a url, formatted like "http://www.example.com/page.html"'
             case 'color':
-              return 'Must be a color formatted like "#FFFFFF"'
+              return 'Must be a color, formatted like "#FFFFFF"'
             default:
               return 'Must be a correctly formatted ' + error.requiredFormat
           }
         },
-        minimum: function(error) {
-          return error.exclusiveMinimum ?
-            `Must be more than ${error.minimumValue}` :
-            `Must be ${error.minimumValue} or more`;
+        minimum: 'Must be {{minimumValue}} or more',
+        exclusiveMinimum: 'Must be more than {{exclusiveMinimumValue}}',
+        maximum: 'Must be {{maximumValue}} or less',
+        exclusiveMaximum: 'Must be less than {{exclusiveMaximumValue}}',
+        multipleOf: function (error) {
+          if ((1 / error.multipleOfValue) % 10 === 0) {
+            const decimals = Math.log10(1 / error.multipleOfValue);
+            return `Must have ${decimals} or fewer decimal places.`;
+          } else {
+            return `Must be a multiple of ${error.multipleOfValue}.`;
+          }
         },
-        maximum: function(error) {
-          return error.exclusiveMaximum ?
-            `Must be less than ${error.maximumValue}` :
-            `Must be ${error.maximumValue} or less`;
-        },
-        multipleOf: 'Must be a multiple of {{multipleOf}}',
-        minProperties: 'Must have {{requiredProperties}} or more items (current items: {{currentProperties}})',
-        maxProperties: 'Must have {{requiredProperties}} or fewer items (current items: {{currentProperties}})',
-        minItems: 'Must have {{requiredItems}} or more items (current items: {{currentItems}})',
-        maxItems: 'Must have {{requiredItems}} or fewer items (current items: {{currentItems}})',
+        minProperties: 'Must have {{minimumProperties}} or more items (current items: {{currentProperties}})',
+        maxProperties: 'Must have {{maximumProperties}} or fewer items (current items: {{currentProperties}})',
+        minItems: 'Must have {{minimumItems}} or more items (current items: {{currentItems}})',
+        maxItems: 'Must have {{maximumItems}} or fewer items (current items: {{currentItems}})',
         uniqueItems: 'All items must be unique',
-        // Note: Default error messages not set for 'type', 'enum', or 'dependencies'
+        // Note: No default error messages for 'type', 'const', 'enum', or 'dependencies'
       },
     },
   };
@@ -185,11 +189,6 @@ export class JsonSchemaFormService {
     this.formOptions = _.cloneDeep(this.defaultFormOptions);
   }
 
-  buildFormGroupTemplate(formValues: any = null, setValues: boolean = true) {
-    this.formGroupTemplate = buildFormGroupTemplate(this, formValues, setValues);
-
-  }
-
   /**
    * 'buildRemoteError' function
    *
@@ -221,7 +220,7 @@ export class JsonSchemaFormService {
     });
   }
 
-  validateData(newValue: any, updateSubscriptions: boolean = true): void {
+  validateData(newValue: any, updateSubscriptions = true): void {
 
     // Format raw form data to correct data types
     this.data = formatFormData(
@@ -245,6 +244,10 @@ export class JsonSchemaFormService {
       this.isValidChanges.next(this.isValid);
       this.validationErrorChanges.next(this.ajvErrors);
     }
+  }
+
+  buildFormGroupTemplate(formValues: any = null, setValues = true) {
+    this.formGroupTemplate = buildFormGroupTemplate(this, formValues, setValues);
   }
 
   buildFormGroup() {
@@ -302,7 +305,7 @@ export class JsonSchemaFormService {
     }
   }
 
-  buildSchemaFromData(data?: any, requireAllFields: boolean = false): any {
+  buildSchemaFromData(data?: any, requireAllFields = false): any {
     if (data) { return buildSchemaFromData(data, requireAllFields); }
     this.schema = buildSchemaFromData(this.formValues, requireAllFields);
   }
@@ -318,7 +321,7 @@ export class JsonSchemaFormService {
   }
 
   parseText(
-    text: string = '', value: any = {}, values: any = {}, key: number|string = null
+    text = '', value: any = {}, values: any = {}, key: number|string = null
   ): string {
     if (!text || !/{{.+?}}/.test(text)) { return text; }
     return text.replace(/{{(.+?)}}/g, (...a) =>
@@ -327,7 +330,7 @@ export class JsonSchemaFormService {
   }
 
   parseExpression(
-    expression: string = '', value: any = {}, values: any = {},
+    expression = '', value: any = {}, values: any = {},
     key: number|string = null, tpldata: any = null
   ) {
     if (typeof expression !== 'string') { return ''; }
@@ -403,7 +406,7 @@ export class JsonSchemaFormService {
     return this.parseText(text, childValue, parentValues, index);
   }
 
-  initializeControl(ctx: any, bind: boolean = true): boolean {
+  initializeControl(ctx: any, bind = true): boolean {
     if (!isObject(ctx)) { return false; }
     if (isEmpty(ctx.options)) {
       ctx.options = !isEmpty((ctx.layoutNode || {}).options) ?

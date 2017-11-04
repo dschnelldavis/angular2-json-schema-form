@@ -381,7 +381,7 @@ export function setRequiredFields(schema: any, formControlTemplate: any): boolea
 export function formatFormData(
   formData: any, dataMap: Map<string, any>,
   recursiveRefMap: Map<string, string>, arrayMap: Map<string, number>,
-  returnEmptyFields: boolean = false, fixErrors: boolean = false
+  returnEmptyFields = false, fixErrors = false
 ): any {
   if (formData === null || typeof formData !== 'object') { return formData }
   let formattedData = isArray(formData) ? [] : {};

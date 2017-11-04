@@ -273,7 +273,7 @@ export function toTitleCase(input: string, forceWords?: string|string[]): string
   const forceArrayLower: string[] = forceArray.map(w => w.toLowerCase());
   const noInitialCase: boolean =
     input === input.toUpperCase() || input === input.toLowerCase();
-  let prevLastChar: string = '';
+  let prevLastChar = '';
   input = input.trim();
   return input.replace(/[A-Za-z0-9\u00C0-\u00FF]+[^\s-]*/g, (word, idx) => {
     if (!noInitialCase && word.slice(1).search(/[A-Z]|\../) !== -1) {

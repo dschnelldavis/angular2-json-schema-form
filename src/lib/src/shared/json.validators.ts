@@ -239,17 +239,17 @@ export class JsonValidators {
    *
    * Requires a control's text value to be greater than a specified length.
    *
-   * @param {number} requiredLength - minimum allowed string length
+   * @param {number} minimumLength - minimum allowed string length
    * @param {boolean = false} invert - instead return error object only if valid
    * @return {IValidatorFn}
    */
-  static minLength(requiredLength: number): IValidatorFn {
+  static minLength(minimumLength: number): IValidatorFn {
     return (control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
       let currentLength = isString(control.value) ? control.value.length : 0;
-      let isValid = currentLength >= requiredLength;
+      let isValid = currentLength >= minimumLength;
       return xor(isValid, invert) ?
-        null : { 'minLength': { requiredLength, currentLength } };
+        null : { 'minLength': { minimumLength, currentLength } };
     };
   };
 
@@ -258,16 +258,16 @@ export class JsonValidators {
    *
    * Requires a control's text value to be less than a specified length.
    *
-   * @param {number} requiredLength - maximum allowed string length
+   * @param {number} maximumLength - maximum allowed string length
    * @param {boolean = false} invert - instead return error object only if valid
    * @return {IValidatorFn}
    */
-  static maxLength(requiredLength: number): IValidatorFn {
+  static maxLength(maximumLength: number): IValidatorFn {
     return (control: AbstractControl, invert = false): ValidationErrors|null => {
       let currentLength = isString(control.value) ? control.value.length : 0;
-      let isValid = currentLength <= requiredLength;
+      let isValid = currentLength <= maximumLength;
       return xor(isValid, invert) ?
-        null : { 'maxLength': { requiredLength, currentLength } };
+        null : { 'maxLength': { maximumLength, currentLength } };
     };
   };
 
@@ -385,7 +385,7 @@ export class JsonValidators {
   static minimum(minimumValue: number, exclusiveMinimum = false): IValidatorFn {
     return (control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
-      let currentValue: number = control.value;
+      let currentValue = control.value;
       let isValid = !isNumber(currentValue) || currentValue >= minimumValue;
       return xor(isValid, invert) ?
         null : { 'minimum': { minimumValue, currentValue } };
@@ -407,7 +407,7 @@ export class JsonValidators {
   static exclusiveMinimum(exclusiveMinimumValue: number): IValidatorFn {
     return (control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
-      let currentValue: number = control.value;
+      let currentValue = control.value;
       let isValid = !isNumber(currentValue) || +currentValue < exclusiveMinimumValue;
       return xor(isValid, invert) ?
         null : { 'exclusiveMinimum': { exclusiveMinimumValue, currentValue } };
@@ -430,7 +430,7 @@ export class JsonValidators {
   static maximum(maximumValue: number): IValidatorFn {
     return (control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
-      let currentValue: number = control.value;
+      let currentValue = control.value;
       let isValid = !isNumber(currentValue) || +currentValue <= maximumValue;
       return xor(isValid, invert) ?
         null : { 'maximum': { maximumValue, currentValue } };
@@ -452,7 +452,7 @@ export class JsonValidators {
   static exclusiveMaximum(exclusiveMaximumValue: number): IValidatorFn {
     return (control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
-      let currentValue: number = control.value;
+      let currentValue = control.value;
       let isValid = !isNumber(currentValue) || +currentValue < exclusiveMaximumValue;
       return xor(isValid, invert) ?
         null : { 'exclusiveMaximum': { exclusiveMaximumValue, currentValue } };
@@ -471,7 +471,7 @@ export class JsonValidators {
   static multipleOf(multipleOfValue: number): IValidatorFn {
     return (control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
-      let currentValue: number = control.value;
+      let currentValue = control.value;
       let isValid = isNumber(currentValue) &&
         currentValue % multipleOfValue === 0;
       return xor(isValid, invert) ?
@@ -485,16 +485,16 @@ export class JsonValidators {
    * Requires a form group to have a minimum number of properties (i.e. have
    * values entered in a minimum number of controls within the group).
    *
-   * @param {number} requiredProperties - minimum number of properties allowed
+   * @param {number} minimumProperties - minimum number of properties allowed
    * @return {IValidatorFn}
    */
-  static minProperties(requiredProperties: number): IValidatorFn {
+  static minProperties(minimumProperties: number): IValidatorFn {
     return (control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
       let currentProperties = Object.keys(control.value).length || 0;
-      let isValid = currentProperties >= requiredProperties;
+      let isValid = currentProperties >= minimumProperties;
       return xor(isValid, invert) ?
-        null : { 'minProperties': { requiredProperties, currentProperties } };
+        null : { 'minProperties': { minimumProperties, currentProperties } };
     };
   }
 
@@ -507,15 +507,15 @@ export class JsonValidators {
    * Note: Has no effect if the form group does not contain more than the
    * maximum number of controls.
    *
-   * @param {number} requiredProperties - maximum number of properties allowed
+   * @param {number} maximumProperties - maximum number of properties allowed
    * @return {IValidatorFn}
    */
-  static maxProperties(requiredProperties: number): IValidatorFn {
+  static maxProperties(maximumProperties: number): IValidatorFn {
     return (control: AbstractControl, invert = false): ValidationErrors|null => {
       let currentProperties = Object.keys(control.value).length || 0;
-      let isValid = currentProperties <= requiredProperties;
+      let isValid = currentProperties <= maximumProperties;
       return xor(isValid, invert) ?
-        null : { 'maxProperties': { requiredProperties, currentProperties } };
+        null : { 'maxProperties': { maximumProperties, currentProperties } };
     };
   }
 
@@ -589,16 +589,16 @@ export class JsonValidators {
    *
    * Requires a form array to have a minimum number of values.
    *
-   * @param {number} minItems - minimum number of items allowed
+   * @param {number} minimumItems - minimum number of items allowed
    * @return {IValidatorFn}
    */
-  static minItems(requiredItems: number): IValidatorFn {
+  static minItems(minimumItems: number): IValidatorFn {
     return (control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
       let currentItems = isArray(control.value) ? control.value.length : 0;
-      let isValid = currentItems >= requiredItems;
+      let isValid = currentItems >= minimumItems;
       return xor(isValid, invert) ?
-        null : { 'minItems': { requiredItems, currentItems } };
+        null : { 'minItems': { minimumItems, currentItems } };
     };
   }
 
@@ -607,15 +607,15 @@ export class JsonValidators {
    *
    * Requires a form array to have a maximum number of values.
    *
-   * @param {number} requiredItems - maximum number of items allowed
+   * @param {number} maximumItems - maximum number of items allowed
    * @return {IValidatorFn}
    */
-  static maxItems(requiredItems: number): IValidatorFn {
+  static maxItems(maximumItems: number): IValidatorFn {
     return (control: AbstractControl, invert = false): ValidationErrors|null => {
       let currentItems = isArray(control.value) ? control.value.length : 0;
-      let isValid = currentItems <= requiredItems;
+      let isValid = currentItems <= maximumItems;
       return xor(isValid, invert) ?
-        null : { 'maxItems': { requiredItems, currentItems } };
+        null : { 'maxItems': { maximumItems, currentItems } };
     };
   }
 
@@ -825,7 +825,7 @@ export class JsonValidators {
       // don't validate empty values to allow optional controls
       if (isEmpty(control.value) || isEmpty(min)) { return null; }
       const value = parseFloat(control.value);
-      const actual: number = control.value;
+      const actual = control.value;
       // Controls with NaN values after parsing should be treated as not having a
       // minimum, per the HTML forms spec: https://www.w3.org/TR/html5/forms.html#attr-input-min
       return isNaN(value) || value >= min ? null : { 'min': { min, actual } };
@@ -840,7 +840,7 @@ export class JsonValidators {
       // don't validate empty values to allow optional controls
       if (isEmpty(control.value) || isEmpty(max)) { return null; }
       const value = parseFloat(control.value);
-      const actual: number = control.value;
+      const actual = control.value;
       // Controls with NaN values after parsing should be treated as not having a
       // maximum, per the HTML forms spec: https://www.w3.org/TR/html5/forms.html#attr-input-max
       return isNaN(value) || value <= max ? null : { 'max': { max, actual } };

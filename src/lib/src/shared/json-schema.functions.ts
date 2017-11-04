@@ -133,7 +133,7 @@ export function buildSchemaFromData(
  * @return {schema} - The located sub-schema
  */
 export function getFromSchema(
-  schema: any, dataPointer: Pointer, returnType: string = 'schema'
+  schema: any, dataPointer: Pointer, returnType = 'schema'
 ): any {
   const dataPointerArray: any[] = JsonPointer.parse(dataPointer);
   if (dataPointerArray === null) {
@@ -474,7 +474,7 @@ export function updateInputOptions(layoutNode: any, schema: any, jsf: any) {
  * @return {validators}
  */
 export function getTitleMapFromOneOf(
-  schema: any = {}, flatList: boolean = null, validateOnly: boolean = false
+  schema: any = {}, flatList: boolean = null, validateOnly = false
 ) {
   let titleMap = null;
   const oneOf = schema.oneOf || schema.anyOf || null;
