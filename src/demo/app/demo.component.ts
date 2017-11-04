@@ -2,7 +2,7 @@ import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Http } from '@angular/http';
+import { HttpClient } from '@angular/common/http';
 
 import 'rxjs/add/operator/map';
 
@@ -33,11 +33,11 @@ export class DemoComponent implements OnInit {
     'bootstrap-3': 'Bootstrap 3',
     'no-framework': 'None (plain HTML)',
   };
-  selectedSet: string = 'ng-jsf';
-  selectedSetName: string = '';
-  selectedExample: string = 'ng-jsf-flex-layout';
-  selectedExampleName: string = 'Flexbox layout';
-  selectedFramework: string = 'material-design';
+  selectedSet = 'ng-jsf';
+  selectedSetName = '';
+  selectedExample = 'ng-jsf-flex-layout';
+  selectedExampleName = 'Flexbox layout';
+  selectedFramework = 'material-design';
   visible: { [item: string]: boolean } = {
     options: true,
     schema: true,
@@ -48,7 +48,7 @@ export class DemoComponent implements OnInit {
   formActive = false;
   jsonFormSchema: string;
   jsonFormValid = false;
-  jsonFormStatusMessage: string = 'Loading form...';
+  jsonFormStatusMessage = 'Loading form...';
   jsonFormObject: any;
   jsonFormOptions: any = {
     addSubmit: true, // Add a submit button if layout does not have one
@@ -71,7 +71,7 @@ export class DemoComponent implements OnInit {
   @ViewChild(MatMenuTrigger) menuTrigger: MatMenuTrigger;
 
   constructor(
-    private http: Http,
+    private http: HttpClient,
     private route: ActivatedRoute,
     private router: Router
   ) { }
@@ -169,14 +169,13 @@ export class DemoComponent implements OnInit {
       this.formIsValid = null;
       this.formValidationErrors = null;
     }
+    const exampleURL = `assets/example-schemas/${this.selectedExample}.json`;
     this.http
-      .get('assets/example-schemas/' + this.selectedExample + '.json')
-      .map(schema => schema.text())
+      .get(exampleURL, { responseType: 'text' })
       .subscribe(schema => {
         this.jsonFormSchema = schema;
         this.generateForm(this.jsonFormSchema);
       });
-    // this.resizeAceEditor();
   }
 
   loadSelectedFramework(selectedFramework: string) {
