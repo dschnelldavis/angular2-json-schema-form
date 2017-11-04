@@ -20,7 +20,6 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
 export class MaterialAddReferenceComponent implements OnInit {
   options: any;
   itemCount: number;
-  // showAddButton: boolean = true;
   previousLayoutIndex: number[];
   previousDataIndex: number[];
   @Input() layoutNode: any;

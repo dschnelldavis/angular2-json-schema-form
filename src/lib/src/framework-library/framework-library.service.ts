@@ -15,7 +15,7 @@ import { Bootstrap3FrameworkComponent } from './bootstrap-3-framework/bootstrap-
 import { FlexLayoutRootComponent } from './material-design-framework/flex-layout-root.component';
 import { FlexLayoutSectionComponent } from './material-design-framework/flex-layout-section.component';
 import { MaterialAddReferenceComponent } from './material-design-framework/material-add-reference.component';
-import { MaterialAnyOfComponent } from './material-design-framework/material-any-of.component';
+import { MaterialOneOfComponent } from './material-design-framework/material-one-of.component';
 import { MaterialButtonComponent } from './material-design-framework/material-button.component';
 import { MaterialButtonGroupComponent } from './material-design-framework/material-button-group.component';
 import { MaterialCheckboxComponent } from './material-design-framework/material-checkbox.component';
@@ -58,8 +58,8 @@ export class FrameworkLibraryService {
   activeFramework: Framework = null;
   stylesheets: (HTMLStyleElement|HTMLLinkElement)[];
   scripts: HTMLScriptElement[];
-  loadExternalAssets: boolean = false;
-  defaultFramework: string = 'material-design';
+  loadExternalAssets = false;
+  defaultFramework = 'material-design';
   frameworkLibrary: FrameworkLibrary = {
     'no-framework': {
       framework: NoFrameworkComponent
@@ -70,7 +70,7 @@ export class FrameworkLibraryService {
         'root':         FlexLayoutRootComponent,
         'section':      FlexLayoutSectionComponent,
         '$ref':         MaterialAddReferenceComponent,
-        'any-of':       MaterialAnyOfComponent,
+        'one-of':       MaterialOneOfComponent,
         'number':       MaterialNumberComponent,
         'slider':       MaterialSliderComponent,
         'text':         MaterialInputComponent,
@@ -120,15 +120,15 @@ export class FrameworkLibraryService {
     @Inject(WidgetLibraryService) private widgetLibrary: WidgetLibraryService
   ) { }
 
-  public setLoadExternalAssets(loadExternalAssets: boolean = true): void {
+  public setLoadExternalAssets(loadExternalAssets = true): void {
     this.loadExternalAssets = !!loadExternalAssets;
   }
 
   public setFramework(
-    framework?: string|Framework, loadExternalAssets: boolean = this.loadExternalAssets
+    framework?: string|Framework, loadExternalAssets = this.loadExternalAssets
   ): boolean {
     if (!framework) { return false; }
-    let registerNewWidgets: boolean = false;
+    let registerNewWidgets = false;
     if (!framework || framework === 'default') {
       this.activeFramework = this.frameworkLibrary[this.defaultFramework];
       registerNewWidgets = true;

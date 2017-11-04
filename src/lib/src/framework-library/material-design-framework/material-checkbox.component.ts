@@ -74,12 +74,12 @@ export class MaterialCheckboxComponent implements OnInit {
   formControl: AbstractControl;
   controlName: string;
   controlValue: any;
-  controlDisabled: boolean = false;
-  boundControl: boolean = false;
+  controlDisabled = false;
+  boundControl = false;
   options: any;
   trueValue: any = true;
   falseValue: any = false;
-  showSlideToggle: boolean = false;
+  showSlideToggle = false;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];

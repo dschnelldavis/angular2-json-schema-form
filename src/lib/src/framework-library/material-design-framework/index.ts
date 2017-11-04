@@ -1,7 +1,7 @@
 import { FlexLayoutRootComponent } from './flex-layout-root.component';
 import { FlexLayoutSectionComponent } from './flex-layout-section.component';
 import { MaterialAddReferenceComponent } from './material-add-reference.component';
-import { MaterialAnyOfComponent } from './material-any-of.component';
+import { MaterialOneOfComponent } from './material-one-of.component';
 import { MaterialButtonComponent } from './material-button.component';
 import { MaterialButtonGroupComponent } from './material-button-group.component';
 import { MaterialCheckboxComponent } from './material-checkbox.component';
@@ -22,7 +22,7 @@ import { MaterialDesignFrameworkComponent } from './material-design-framework.co
 
 export const MATERIAL_DESIGN_COMPONENTS = [
   FlexLayoutRootComponent, FlexLayoutSectionComponent,
-  MaterialAddReferenceComponent, MaterialAnyOfComponent,
+  MaterialAddReferenceComponent, MaterialOneOfComponent,
   MaterialButtonComponent, MaterialButtonGroupComponent,
   MaterialCheckboxComponent, MaterialCheckboxesComponent,
   MaterialChipListComponent, MaterialDatepickerComponent,
@@ -35,7 +35,7 @@ export const MATERIAL_DESIGN_COMPONENTS = [
 export { FlexLayoutRootComponent } from './flex-layout-root.component';
 export { FlexLayoutSectionComponent } from './flex-layout-section.component';
 export { MaterialAddReferenceComponent } from './material-add-reference.component';
-export { MaterialAnyOfComponent } from './material-any-of.component';
+export { MaterialOneOfComponent } from './material-one-of.component';
 export { MaterialButtonComponent } from './material-button.component';
 export { MaterialButtonGroupComponent } from './material-button-group.component';
 export { MaterialCheckboxComponent } from './material-checkbox.component';

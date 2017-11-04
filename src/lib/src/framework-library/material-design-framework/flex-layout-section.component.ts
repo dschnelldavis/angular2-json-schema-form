@@ -123,11 +123,11 @@ export class FlexLayoutSectionComponent implements OnInit {
   formControl: AbstractControl;
   controlName: string;
   controlValue: any;
-  controlDisabled: boolean = false;
-  boundControl: boolean = false;
+  controlDisabled = false;
+  boundControl = false;
   options: any;
-  expanded: boolean = true;
-  containerType: string = 'div';
+  expanded = true;
+  containerType = 'div';
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];

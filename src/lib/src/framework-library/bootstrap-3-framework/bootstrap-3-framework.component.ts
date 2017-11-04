@@ -90,7 +90,7 @@ import {
   `],
 })
 export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
-  frameworkInitialized: boolean = false;
+  frameworkInitialized = false;
   widgetOptions: any; // Options passed to child widget
   widgetLayoutNode: any; // layoutNode passed to child widget
   options: any; // Options used in this framework
@@ -98,7 +98,7 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
   debugOutput: any = '';
   debug: any = '';
   parentArray: any = null;
-  isOrderable: boolean = false;
+  isOrderable = false;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];

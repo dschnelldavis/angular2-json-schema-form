@@ -67,10 +67,10 @@ export class RadiosComponent implements OnInit {
   formControl: AbstractControl;
   controlName: string;
   controlValue: any;
-  controlDisabled: boolean = false;
-  boundControl: boolean = false;
+  controlDisabled = false;
+  boundControl = false;
   options: any;
-  layoutOrientation: string = 'vertical';
+  layoutOrientation = 'vertical';
   radiosList: any[] = [];
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];

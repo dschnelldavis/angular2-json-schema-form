@@ -13,12 +13,12 @@ declare var ace: any;
 })
 export class AceEditorDirective {
   _options: any = {};
-  _highlightActiveLine: boolean = false;
-  _showGutter: boolean = false;
-  _readOnly: boolean = false;
-  _theme: string = 'sqlserver';
-  _mode: string = 'json';
-  _autoUpdateContent: boolean = true;
+  _highlightActiveLine = false;
+  _showGutter = false;
+  _readOnly = false;
+  _theme = 'sqlserver';
+  _mode = 'json';
+  _autoUpdateContent = true;
   editor: any;
   oldText: any;
   @Output('textChanged') textChanged = new EventEmitter();

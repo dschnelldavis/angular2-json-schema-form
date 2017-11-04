@@ -63,7 +63,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
 })
 export class SectionComponent implements OnInit {
   options: any;
-  expanded: boolean = true;
+  expanded = true;
   containerType: string;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];

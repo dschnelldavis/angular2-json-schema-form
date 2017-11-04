@@ -60,8 +60,8 @@ export class MaterialDatepickerComponent implements OnInit, OnChanges {
   controlName: string;
   controlValue: any;
   dateValue: any;
-  controlDisabled: boolean = false;
-  boundControl: boolean = false;
+  controlDisabled = false;
+  boundControl = false;
   options: any;
   autoCompleteList: string[] = [];
   @Input() layoutNode: any;

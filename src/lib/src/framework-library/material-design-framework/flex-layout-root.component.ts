@@ -28,7 +28,7 @@ export class FlexLayoutRootComponent implements OnInit {
   @Input() dataIndex: number[];
   @Input() layoutIndex: number[];
   @Input() layout: any[];
-  @Input() isFlexItem: boolean = false;
+  @Input() isFlexItem = false;
 
   constructor(
     private jsf: JsonSchemaFormService

@@ -1,20 +1,20 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 
-import { JsonSchemaFormService } from '../json-schema-form.service';
+import { JsonSchemaFormService } from '../../json-schema-form.service';
 
 // TODO: Add this control
 
 @Component({
-  selector: 'any-of-widget',
+  selector: 'material-one-of-widget',
   template: ``,
 })
-export class AnyOfComponent implements OnInit {
+export class MaterialOneOfComponent implements OnInit {
   formControl: AbstractControl;
   controlName: string;
   controlValue: any;
-  controlDisabled: boolean = false;
-  boundControl: boolean = false;
+  controlDisabled = false;
+  boundControl = false;
   options: any;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];

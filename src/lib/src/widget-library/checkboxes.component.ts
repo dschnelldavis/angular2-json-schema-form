@@ -60,8 +60,8 @@ export class CheckboxesComponent implements OnInit {
   formControl: AbstractControl;
   controlName: string;
   controlValue: any;
-  controlDisabled: boolean = false;
-  boundControl: boolean = false;
+  controlDisabled = false;
+  boundControl = false;
   options: any;
   layoutOrientation: string;
   formArray: AbstractControl;

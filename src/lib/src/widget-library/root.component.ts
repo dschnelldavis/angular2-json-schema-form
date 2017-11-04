@@ -53,7 +53,7 @@ export class RootComponent {
   @Input() layoutIndex: number[];
   @Input() layout: any[];
   @Input() isOrderable: boolean;
-  @Input() isFlexItem: boolean = false;
+  @Input() isFlexItem = false;
 
   constructor(
     private jsf: JsonSchemaFormService

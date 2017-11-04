@@ -57,10 +57,10 @@ export class MaterialRadiosComponent implements OnInit {
   formControl: AbstractControl;
   controlName: string;
   controlValue: any;
-  controlDisabled: boolean = false;
-  boundControl: boolean = false;
+  controlDisabled = false;
+  boundControl = false;
   options: any;
-  flexDirection: string = 'column';
+  flexDirection = 'column';
   radiosList: any[] = [];
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];

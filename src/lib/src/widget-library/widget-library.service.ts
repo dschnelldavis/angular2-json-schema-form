@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { hasOwn } from '../shared/utility.functions';
 
 import { AddReferenceComponent } from './add-reference.component';
-import { AnyOfComponent } from './any-of.component';
+import { OneOfComponent } from './one-of.component';
 import { ButtonComponent } from './button.component';
 import { CheckboxComponent } from './checkbox.component';
 import { CheckboxesComponent } from './checkboxes.component';
@@ -28,7 +28,7 @@ import { TextareaComponent } from './textarea.component';
 @Injectable()
 export class WidgetLibraryService {
 
-  defaultWidget: string = 'text';
+  defaultWidget = 'text';
   widgetLibrary: any = {
 
   // Angular JSON Schema Form administrative widgets
@@ -92,8 +92,8 @@ export class WidgetLibraryService {
     'flex': 'section', // A flexbox container <div style="display: flex">
 
   // Non-HTML layout widgets
-    'any-of': AnyOfComponent, // A select box that changes another input
-                              // TODO: Finish 'any-of' widget
+    'one-of': OneOfComponent, // A select box that changes another input
+                              // TODO: Finish 'one-of' widget
     'array': 'section', // A list you can add, remove and reorder <fieldset>
     'tabarray': 'tabs', // A tabbed version of array
     'tab': 'section', // A tab group, similar to a fieldset or section <fieldset>
@@ -107,8 +107,8 @@ export class WidgetLibraryService {
   // Widgets included for compatibility with JSON Form API
     'advancedfieldset': 'section', // Adds 'Advanced settings' title <fieldset>
     'authfieldset': 'section', // Adds 'Authentication settings' title <fieldset>
-    'optionfieldset': 'any-of', // Option control, displays selected sub-item <fieldset>
-    'selectfieldset': 'any-of', // Select control, displays selected sub-item <fieldset>
+    'optionfieldset': 'one-of', // Option control, displays selected sub-item <fieldset>
+    'selectfieldset': 'one-of', // Select control, displays selected sub-item <fieldset>
     'conditional': 'section', // Identical to 'section' (depeciated) <div>
     'actions': 'section', // Horizontal button list, can only submit, uses buttons as items <div>
     'tagsinput': 'section', // For entering short text tags <div>
@@ -174,7 +174,7 @@ export class WidgetLibraryService {
     return true;
   }
 
-  hasWidget(type: string, widgetSet: string = 'activeWidgets'): boolean {
+  hasWidget(type: string, widgetSet = 'activeWidgets'): boolean {
     if (!type || typeof type !== 'string') { return false; }
     return hasOwn(this[widgetSet], type);
   }
@@ -195,7 +195,7 @@ export class WidgetLibraryService {
     return this.setActiveWidgets();
   }
 
-  unRegisterAllWidgets(unRegisterFrameworkWidgets: boolean = true): boolean {
+  unRegisterAllWidgets(unRegisterFrameworkWidgets = true): boolean {
     this.registeredWidgets = { };
     if (unRegisterFrameworkWidgets) { this.frameworkWidgets = { }; }
     return this.setActiveWidgets();
@@ -215,7 +215,7 @@ export class WidgetLibraryService {
     return false;
   }
 
-  getWidget(type?: string, widgetSet: string = 'activeWidgets'): any {
+  getWidget(type?: string, widgetSet = 'activeWidgets'): any {
     if (this.hasWidget(type, widgetSet)) {
       return this[widgetSet][type];
     } else if (this.hasWidget(this.defaultWidget, widgetSet)) {

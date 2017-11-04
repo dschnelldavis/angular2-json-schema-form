@@ -34,8 +34,8 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
 export class TabsComponent implements OnInit {
   options: any;
   itemCount: number;
-  selectedItem: number = 0;
-  showAddTab: boolean = true;
+  selectedItem = 0;
+  showAddTab = true;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
   @Input() dataIndex: number[];

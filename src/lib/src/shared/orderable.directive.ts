@@ -30,8 +30,8 @@ import { JsonPointer } from '../shared/jsonpointer.functions';
 export class OrderableDirective implements OnInit {
   arrayLayoutIndex: string;
   element: any;
-  overParentElement: boolean = false;
-  overChildElement: boolean = false;
+  overParentElement = false;
+  overChildElement = false;
   @Input() orderable: boolean;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];

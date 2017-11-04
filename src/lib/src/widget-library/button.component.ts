@@ -27,8 +27,8 @@ export class ButtonComponent implements OnInit {
   formControl: AbstractControl;
   controlName: string;
   controlValue: any;
-  controlDisabled: boolean = false;
-  boundControl: boolean = false;
+  controlDisabled = false;
+  boundControl = false;
   options: any;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];

@@ -67,7 +67,7 @@ import { hasOwn, isArray, toTitleCase } from '../../shared';
   `],
 })
 export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
-  frameworkInitialized: boolean = false;
+  frameworkInitialized = false;
   controlType: string;
   inputType: string;
   options: any; // Options used in this framework
@@ -75,7 +75,7 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
   widgetOptions: any; // Options passed to child widget
   formControl: any = null;
   parentArray: any = null;
-  isOrderable: boolean = false;
+  isOrderable = false;
   dynamicTitle: string = null;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
