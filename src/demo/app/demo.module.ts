@@ -5,8 +5,8 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import {
-  MatButtonModule, MatCardModule, MatCheckboxModule, MatIconModule, MatMenuModule,
-  MatSelectModule, MatToolbarModule, MATERIAL_COMPATIBILITY_MODE
+  MatButtonModule, MatCardModule, MatCheckboxModule, MatIconModule,
+  MatMenuModule, MatSelectModule, MatToolbarModule
 } from '@angular/material';
 import { RouterModule } from '@angular/router';
 
@@ -28,7 +28,6 @@ import { routes } from './demo.routes';
     MatIconModule, MatMenuModule, MatSelectModule, MatToolbarModule,
     RouterModule.forRoot(routes), JsonSchemaFormModule
   ],
-  providers: [ { provide: MATERIAL_COMPATIBILITY_MODE, useValue: true } ],
   bootstrap: [ DemoRootComponent ]
 })
 export class DemoModule { }
