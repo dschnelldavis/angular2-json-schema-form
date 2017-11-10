@@ -39,11 +39,9 @@ export class FlexLayoutRootComponent implements OnInit {
   // Set attributes for flexbox child
   // (container attributes are set in flex-layout-section.component)
   getFlexAttribute(node: any, attribute: string) {
-    if (!node || !attribute) { return null; }
     const index = ['flex-grow', 'flex-shrink', 'flex-basis'].indexOf(attribute);
-    const options = node.options || {};
-    return (options.flex || '').split(/\s+/)[index] || options[attribute] ||
-      ['1', '1', 'auto'][index];
+    return ((node.options || {}).flex || '').split(/\s+/)[index] ||
+      (node.options || {})[attribute] || ['1', '1', 'auto'][index];
   }
 
   trackByItem(layoutNode: any) {

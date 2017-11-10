@@ -53,6 +53,8 @@ import { dateToString, hasOwn, stringToDate } from '../../shared';
       [innerHTML]="options?.errorMessage"></mat-error>`,
   styles: [`
     mat-error { font-size: 75%; margin-top: -1rem; margin-bottom: 0.5rem; }
+    ::ng-deep mat-form-field .mat-form-field-wrapper .mat-form-field-flex
+      .mat-form-field-infix { width: initial; }
   `],
 })
 export class MaterialDatepickerComponent implements OnInit, OnChanges {
