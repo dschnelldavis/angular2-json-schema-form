@@ -3,30 +3,28 @@ src
 compiled
 out-ngc
 docs
+node_modules
+*.log
 
 # Config
 .angular-cli.json
 .editorconfig
+.firebaserc
 .gitignore
+.npmignore
+firebase.json
 tslint.json
 typedoc.json
 
-# Node
-node_modules
-npm-debug.log
-
-# IDE & OS
+# IDE
 .idea
 .project
 .settings
 .idea/*
 *.iml
 *.swp
-Thumbs.db
-Desktop.ini
-.DS_Store
 
-# Misc
-.firebaserc
-firebase.json
-firebase-debug.log
+# System Files
+.DS_Store
+Desktop.ini
+Thumbs.db

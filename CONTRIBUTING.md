@@ -31,7 +31,7 @@ This library is released under the [MIT](https://opensource.org/licenses/MIT) Li
 
 
 ## <a name="coc"></a> Code of Conduct
-Be courteous to other people. If you're unclear about how to do that, please read and follow our [Code of Conduct][code-of-conduct].
+Be courteous to other people. If you're not sure how to do that, please read and follow our [Code of Conduct][code-of-conduct].
 
 [new-issue]: https://github.com/dschnelldavis/angular2-json-schema-form/issues/new
 [pull-requests]: https://github.com/dschnelldavis/angular2-json-schema-form/pulls

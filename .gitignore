@@ -1,25 +1,23 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
 # compiled output
-/compiled
-/dist
-/docs/api
-/out-ngc
-/tmp
+compiled
+dist
+docs/api
+out-ngc
+tmp
 
 # dependencies
-/node_modules
+node_modules
 
 # IDEs and editors
-/.idea
+.idea
 .project
 .classpath
 .c9/
 *.launch
 .settings/
 *.sublime-workspace
-
-# IDE - VSCode
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
@@ -27,21 +25,22 @@
 !.vscode/extensions.json
 
 # misc
-/.sass-cache
-/connect.lock
-/coverage
-/libpeerconnection.log
+.sass-cache
+connect.lock
+coverage
+libpeerconnection.log
 npm-debug.log
 testem.log
-/typings
+typings
 .firebaserc
 firebase.json
 firebase-debug.log
 
 # e2e
-/e2e/*.js
-/e2e/*.map
+e2e/*.js
+e2e/*.map
 
-# System Files
+# system files
 .DS_Store
+Desktop.ini
 Thumbs.db
