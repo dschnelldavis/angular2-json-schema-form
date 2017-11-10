@@ -25,7 +25,7 @@ const writeFile = promiseify(fs.writeFile);
 
 /**
  * Inline resources in a tsc/ngc compilation.
- * @param projectPath {string} Path to the project.
+ * @param { string } projectPath Path to the project.
  */
 function inlineResources(projectPath) {
 
@@ -41,17 +41,15 @@ function inlineResources(projectPath) {
         return path.join(path.dirname(fullFilePath), url);
       }))
       .then(content => writeFile(fullFilePath, content))
-      .catch(err => {
-        console.error('An error occured: ', err);
-      });
+      .catch(err => console.error('An error occured: ', err));
   }));
 }
 
 /**
  * Inline resources from a string content.
- * @param content {string} The source file's content.
- * @param urlResolver {Function} A resolver that takes a URL and return a path.
- * @returns {string} The content with resources inlined.
+ * @param  { string } content The source file's content.
+ * @param  { Function } urlResolver A resolver that takes a URL and return a path.
+ * @return { string } The content with resources inlined.
  */
 function inlineResourcesFromString(content, urlResolver) {
   // Curry through the inlining functions.
@@ -63,11 +61,12 @@ function inlineResourcesFromString(content, urlResolver) {
 }
 
 /**
- * Inline the templates for a source file. Simply search for instances of `templateUrl: ...` and
- * replace with `template: ...` (with the content of the file included).
- * @param content {string} The source file's content.
- * @param urlResolver {Function} A resolver that takes a URL and return a path.
- * @return {string} The content with all templates inlined.
+ * Inline the templates for a source file.
+ * Search for instances of `templateUrl: ...` and replace with `template: ...`
+ * (with the content of the file included).
+ * @param  { string } content The source file's content.
+ * @param  { Function } urlResolver A resolver that takes a URL and return a path.
+ * @return { string } The content with all templates inlined.
  */
 function inlineTemplate(content, urlResolver) {
   return content.replace(/templateUrl:\s*'([^']+?\.html)'/g, function (m, templateUrl) {
@@ -83,9 +82,9 @@ function inlineTemplate(content, urlResolver) {
 /**
  * Inline the styles for a source file. Search for instances of `styleUrls: [...]`
  * and replace with `styles: [...]` (with the content of the file included).
- * @param urlResolver {Function} A resolver that takes a URL and return a path.
- * @param content {string} The source file's content.
- * @return {string} The content with all styles inlined.
+ * @param  { Function } urlResolver A resolver that takes a URL and return a path.
+ * @param  { string } content The source file's content.
+ * @return { string } The content with all styles inlined.
  */
 function inlineStyle(content, urlResolver) {
   return content.replace(/styleUrls:\s*(\[[\s\S]*?\])/gm, function (m, styleUrls) {
@@ -104,8 +103,8 @@ function inlineStyle(content, urlResolver) {
 
 /**
  * Remove every mention of `moduleId: module.id`.
- * @param content {string} The source file's content.
- * @returns {string} The content with all moduleId: mentions removed.
+ * @param  { string } content The source file's content.
+ * @return { string } The content with all moduleId: mentions removed.
  */
 function removeModuleId(content) {
   return content.replace(/\s*moduleId:\s*module\.id\s*,?\s*/gm, '');

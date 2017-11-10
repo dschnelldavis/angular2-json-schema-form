@@ -21,8 +21,8 @@ import { JsonPointer, Pointer } from './jsonpointer.functions';
  *
  * Example: ({ a: b }, { a: d }) => { allOf: [ { a: b }, { a: d } ] }
  *
- * @param {...schema} schemas - one or more input schemas
- * @return {any} - merged schema
+ * @param  { any } schemas - one or more input schemas
+ * @return { any } - merged schema
  */
 export function mergeSchemas(...schemas) {
   schemas = schemas.filter(schema => !isEmpty(schema));

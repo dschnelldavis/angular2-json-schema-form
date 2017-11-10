@@ -31,11 +31,11 @@ import { buildFormGroupTemplate, getControl } from './form-group.functions';
 /**
  * 'buildLayout' function
  *
- * @param {any} jsf
- * @param {any} widgetLibrary
- * @return {any[]}
+ * @param  { any } jsf
+ * @param  { any } widgetLibrary
+ * @return { any[] }
  */
-export function buildLayout(jsf: any, widgetLibrary: any): any[] {
+export function buildLayout(jsf, widgetLibrary) {
   let hasSubmitButton = !JsonPointer.get(jsf, '/formOptions/addSubmit');
   let formLayout = mapLayout(jsf.layout, (layoutItem, index, layoutPointer) => {
     let currentIndex = index;
@@ -436,22 +436,23 @@ export function buildLayout(jsf: any, widgetLibrary: any): any[] {
 /**
  * 'buildLayoutFromSchema' function
  *
- * @param {any} jsf -
- * @param {any} widgetLibrary -
- * @param {string = ''} schemaPointer -
- * @param {string = ''} dataPointer -
- * @param {boolean = false} arrayItem -
- * @param {string = null} arrayItemType -
- * @param {boolean = null} removable -
- * @param {boolean = false} forRefLibrary -
- * @param {string = ''} dataPointerPrefix -
- * @return {any}
+ * @param  { any } jsf -
+ * @param  { any } widgetLibrary -
+ * @param  { any } nodeValue -
+ * @param  { string = '' } schemaPointer -
+ * @param  { string = '' } dataPointer -
+ * @param  { boolean = false } arrayItem -
+ * @param  { string = null } arrayItemType -
+ * @param  { boolean = null } removable -
+ * @param  { boolean = false } forRefLibrary -
+ * @param  { string = '' } dataPointerPrefix -
+ * @return { any }
  */
 export function buildLayoutFromSchema(
-  jsf: any, widgetLibrary: any, nodeValue: any = null, schemaPointer = '',
+  jsf, widgetLibrary, nodeValue = null, schemaPointer = '',
   dataPointer = '', arrayItem = false, arrayItemType: string = null,
   removable: boolean = null, forRefLibrary = false, dataPointerPrefix = ''
-): any {
+) {
   const schema = JsonPointer.get(jsf.schema, schemaPointer);
   if (!hasOwn(schema, 'type') && !hasOwn(schema, '$ref') &&
     !hasOwn(schema, 'x-schema-form')
@@ -754,7 +755,7 @@ export function buildLayoutFromSchema(
       if (!hasOwn(jsf.layoutRefLibrary, dataRef)) {
         // Set to null first to prevent recursive reference from causing endless loop
         jsf.layoutRefLibrary[dataRef] = null;
-        const newLayout: any = buildLayoutFromSchema(
+        const newLayout = buildLayoutFromSchema(
           jsf, widgetLibrary, null, schemaRef, '',
           newNode.arrayItem, newNode.arrayItemType, true, true, dataPointer
         );
@@ -787,19 +788,14 @@ export function buildLayoutFromSchema(
  * If an item from the source layout causes an error and returns null, it is
  * skipped without error, and the function will still return all non-null items.
  *
- * @param {any[]} layout - the layout to map
- * @param {(v: any, i?: number, l?: any, p?: string) => any}
+ * @param  { any[] } layout - the layout to map
+ * @param  { (v: any, i?: number, l?: any, p?: string) => any }
  *   function - the funciton to invoke on each element
- * @param {any = ''} layoutPointer - the layoutPointer to layout, inside rootLayout
- * @param {any[] = layout} rootLayout - the root layout, which conatins layout
- * @return {[type]}
+ * @param  { string|string[] = '' } layoutPointer - the layoutPointer to layout, inside rootLayout
+ * @param  { any[] = layout } rootLayout - the root layout, which conatins layout
+ * @return { any[] }
  */
-export function mapLayout(
-  layout: any[],
-  fn: (v: any, i?: number, p?: string, l?: any) => any,
-  layoutPointer = '',
-  rootLayout: any[] = layout
-): any[] {
+export function mapLayout(layout, fn, layoutPointer = '', rootLayout = layout) {
   let indexPad = 0;
   let newLayout: any[] = [];
   forEach(layout, (item, index) => {
@@ -834,12 +830,14 @@ export function mapLayout(
  * 'getLayoutNode' function
  * Copy a new layoutNode from layoutRefLibrary
  *
- * @param {any} refNode -
- * @param {any} layoutRefLibrary -
- * @return {any} copied layoutNode
+ * @param  { any } refNode -
+ * @param  { any } layoutRefLibrary -
+ * @param  { any = null } widgetLibrary -
+ * @param  { any = null } nodeValue -
+ * @return { any } copied layoutNode
  */
 export function getLayoutNode(
-  refNode: any, jsf: any, widgetLibrary: any = null, nodeValue: any = null
+  refNode, jsf, widgetLibrary: any = null, nodeValue: any = null
 ) {
 
   // If recursive reference and building initial layout, return Add button
@@ -889,16 +887,15 @@ export function getLayoutNode(
 /**
  * 'buildTitleMap' function
  *
- * @param {any} titleMap -
- * @param {any} enumList -
- * @param {boolean = true} fieldRequired -
- * @param {boolean = true} flatList -
- * @return { { name: string, value: any }[] }
- *   || { { group: string, items: { name: string, value: any }[] }[] }
+ * @param  { any } titleMap -
+ * @param  { any } enumList -
+ * @param  { boolean = true } fieldRequired -
+ * @param  { boolean = true } flatList -
+ * @return { TitleMapItem[] }
  */
 export function buildTitleMap(
-  titleMap: any, enumList: any, fieldRequired = true, flatList = true
-): TitleMapItem[] {
+  titleMap, enumList, fieldRequired = true, flatList = true
+) {
   let newTitleMap: TitleMapItem[] = [];
   let hasEmptyValue = false;
   if (titleMap) {
@@ -906,16 +903,16 @@ export function buildTitleMap(
       if (enumList) {
         for (let i of Object.keys(titleMap)) {
           if (isObject(titleMap[i])) { // JSON Form style
-            const value: any = titleMap[i].value;
+            const value = titleMap[i].value;
             if (enumList.includes(value)) {
-              const name: string = titleMap[i].name;
+              const name = titleMap[i].name;
               newTitleMap.push({ name, value });
               if (value === undefined || value === null) { hasEmptyValue = true; }
             }
           } else if (isString(titleMap[i])) { // React Jsonschema Form style
             if (i < enumList.length) {
-              const name: string = titleMap[i];
-              const value: any = enumList[i];
+              const name = titleMap[i];
+              const value = enumList[i];
               newTitleMap.push({ name, value });
               if (value === undefined || value === null) { hasEmptyValue = true; }
             }
@@ -931,24 +928,24 @@ export function buildTitleMap(
       }
     } else if (enumList) { // Alternate JSON Form style, with enum list
       for (let i of Object.keys(enumList)) {
-        let value: any = enumList[i];
+        let value = enumList[i];
         if (hasOwn(titleMap, value)) {
-          let name: string = titleMap[value];
+          let name = titleMap[value];
           newTitleMap.push({ name, value });
           if (value === undefined || value === null) { hasEmptyValue = true; }
         }
       }
     } else { // Alternate JSON Form style, without enum list
       for (let value of Object.keys(titleMap)) {
-        let name: string = titleMap[value];
+        let name = titleMap[value];
         newTitleMap.push({ name, value });
         if (value === undefined || value === null) { hasEmptyValue = true; }
       }
     }
   } else if (enumList) { // Build map from enum list alone
     for (let i of Object.keys(enumList)) {
-      let name: string = enumList[i];
-      let value: any = enumList[i];
+      let name = enumList[i];
+      let value = enumList[i];
       newTitleMap.push({ name, value});
       if (value === undefined || value === null) { hasEmptyValue = true; }
     }

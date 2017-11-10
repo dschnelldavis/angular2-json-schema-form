@@ -10,12 +10,12 @@
  * And additional details from the official JSON Schema documentation:
  *   http://json-schema.org
  *
- * @param {object} originalSchema - JSON schema (draft 1, 2, 3, 4, or 6)
- * @param {OptionObject = {}} options - options: parent schema changed?, schema draft number?
- * @return {object} - JSON schema (draft 6)
+ * @param  { object } originalSchema - JSON schema (draft 1, 2, 3, 4, or 6)
+ * @param  { OptionObject = {} } options - options: parent schema changed?, schema draft number?
+ * @return { object } - JSON schema (draft 6)
  */
 export interface OptionObject { changed?: boolean, draft?: number };
-export function convertSchemaToDraft6(schema: any, options: OptionObject = {}): any {
+export function convertSchemaToDraft6(schema, options: OptionObject = {}) {
   let draft: number = options.draft || null;
   let changed: boolean = options.changed || false;
 

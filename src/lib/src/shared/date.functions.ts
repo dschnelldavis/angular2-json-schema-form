@@ -1,10 +1,11 @@
 /**
  * 'dateToString' function
  *
- * @param  {Date} date
- * @return {string}
+ * @param  { Date | string } date
+ * @param  { any } options
+ * @return { string }
  */
-export function dateToString(date: Date|string, options: any = {}): string {
+export function dateToString(date, options: any = {}) {
   const dateFormat = options.dateFormat || 'YYYY-MM-DD';
   // TODO: Use options.locale to change default format and names
   // const locale = options.locale || 'en-US';
@@ -39,10 +40,10 @@ export function ordinal(number: number|string): string {
 /**
  * 'stringToDate' function
  *
- * @param  {string} dateString
- * @return {Date}
+ * @param  { string } dateString
+ * @return { Date }
  */
-export function stringToDate(dateString: string): Date {
+export function stringToDate(dateString) {
   const getDate: string = findDate(dateString);
   if (!getDate) { return null; }
   let dateParts: number[] = [];
@@ -75,10 +76,10 @@ export function stringToDate(dateString: string): Date {
 /**
  * 'findDate' function
  *
- * @param  {string} text
- * @return {string}
+ * @param  { string } text
+ * @return { string }
  */
-export function findDate(text: string): string {
+export function findDate(text) {
   if (!text) { return null; }
   let foundDate: any[];
   // Match ...YYYY-MM-DD...

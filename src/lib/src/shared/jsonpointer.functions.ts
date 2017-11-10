@@ -29,18 +29,18 @@ export class JsonPointer {
    *
    * Uses a JSON Pointer to retrieve a value from an object.
    *
-   * @param {object} object - Object to get value from
-   * @param {Pointer} pointer - JSON Pointer (string or array)
-   * @param {number = 0} startSlice - Zero-based index of first Pointer key to use
-   * @param {number} endSlice - Zero-based index of last Pointer key to use
-   * @param {boolean = false} getBoolean - Return only true or false?
-   * @param {boolean = false} errors - Show error if not found?
-   * @return {object} - Located value (or true or false if getBoolean = true)
+   * @param  { object } object - Object to get value from
+   * @param  { Pointer } pointer - JSON Pointer (string or array)
+   * @param  { number = 0 } startSlice - Zero-based index of first Pointer key to use
+   * @param  { number } endSlice - Zero-based index of last Pointer key to use
+   * @param  { boolean = false } getBoolean - Return only true or false?
+   * @param  { boolean = false } errors - Show error if not found?
+   * @return { object } - Located value (or true or false if getBoolean = true)
    */
   static get(
-    object: any, pointer: Pointer, startSlice = 0,
-    endSlice: number = null, getBoolean = false, errors = false
-  ): any {
+    object, pointer, startSlice = 0, endSlice: number = null,
+    getBoolean = false, errors = false
+  ) {
     if (object === null) { return getBoolean ? false : undefined; }
     let keyArray: any[] = this.parse(pointer, errors);
     if (typeof object === 'object' && keyArray !== null) {
@@ -81,25 +81,25 @@ export class JsonPointer {
   }
 
   /**
-   * 'get' function
+   * 'getCopy' function
    *
    * Uses a JSON Pointer to deeply clone a value from an object.
    *
-   * @param {object} object - Object to get value from
-   * @param {Pointer} pointer - JSON Pointer (string or array)
-   * @param {number = 0} startSlice - Zero-based index of first Pointer key to use
-   * @param {number} endSlice - Zero-based index of last Pointer key to use
-   * @param {boolean = false} getBoolean - Return only true or false?
-   * @param {boolean = false} errors - Show error if not found?
-   * @return {object} - Located value (or true or false if getBoolean = true)
+   * @param  { object } object - Object to get value from
+   * @param  { Pointer } pointer - JSON Pointer (string or array)
+   * @param  { number = 0 } startSlice - Zero-based index of first Pointer key to use
+   * @param  { number } endSlice - Zero-based index of last Pointer key to use
+   * @param  { boolean = false } getBoolean - Return only true or false?
+   * @param  { boolean = false } errors - Show error if not found?
+   * @return { object } - Located value (or true or false if getBoolean = true)
    */
   static getCopy(
-    object: any, pointer: Pointer, startSlice = 0,
-    endSlice: number = null, getBoolean = false, errors = false
-  ): any {
-    return this.forEachDeepCopy(this.get(
-      object, pointer, startSlice, endSlice, getBoolean, errors
-    ));
+    object, pointer, startSlice = 0, endSlice: number = null,
+    getBoolean = false, errors = false
+  ) {
+    const objectToCopy =
+      this.get(object, pointer, startSlice, endSlice, getBoolean, errors);
+    return this.forEachDeepCopy(objectToCopy);
   }
 
   /**
@@ -109,22 +109,21 @@ export class JsonPointer {
    * checks each object for a value specified by the pointer,
    * and returns the first value found.
    *
-   * @param {[object, pointer][]} items - Array of objects and pointers to check
-   * @param {any = null} defaultValue - Value to return if nothing found
-   * @param {boolean = false} getCopy - Return a copy instead?
-   * @return {any} - First value found
+   * @param  { [object, pointer][] } items - Array of objects and pointers to check
+   * @param  { any = null } defaultValue - Value to return if nothing found
+   * @param  { boolean = false } getCopy - Return a copy instead?
+   * @return { any } - First value found
    */
-  static getFirst(
-    items: any, defaultValue: any = null, getCopy = false
-  ): any {
+  static getFirst(items, defaultValue: any = null, getCopy = false) {
     if (isEmpty(items)) { return; }
     if (isArray(items)) {
       for (let item of items) {
         if (isEmpty(item)) { continue; }
         if (isArray(item) && item.length >= 2) {
           if (isEmpty(item[0]) || isEmpty(item[1])) { continue; }
-          const value: any = getCopy ?
-            this.getCopy(item[0], item[1]) : this.get(item[0], item[1]);
+          const value = getCopy ?
+            this.getCopy(item[0], item[1]) :
+            this.get(item[0], item[1]);
           if (value) { return value; }
           continue;
         }
@@ -137,8 +136,9 @@ export class JsonPointer {
     if (isMap(items)) {
       for (let [object, pointer] of items) {
         if (object === null || !this.isJsonPointer(pointer)) { continue; }
-        const value: any = getCopy ?
-          this.getCopy(object, pointer) : this.get(object, pointer);
+        const value = getCopy ?
+          this.getCopy(object, pointer) :
+          this.get(object, pointer);
         if (value) { return value; }
       }
       return defaultValue;
@@ -153,12 +153,13 @@ export class JsonPointer {
    *
    * Similar to getFirst, but always returns a copy.
    *
-   * @param {[object, pointer][]} items - Array of objects and pointers to check
-   * @param {any = null} defaultValue - Value to return if nothing found
-   * @return {any} - Copy of first value found
+   * @param  { [object, pointer][] } items - Array of objects and pointers to check
+   * @param  { any = null } defaultValue - Value to return if nothing found
+   * @return { any } - Copy of first value found
    */
-  static getFirstCopy(items: any, defaultValue: any = null): any {
-    return this.getFirst(items, defaultValue, true);
+  static getFirstCopy(items, defaultValue: any = null) {
+    const firstCopy = this.getFirst(items, defaultValue, true);
+    return firstCopy;
   }
 
   /**
@@ -176,17 +177,16 @@ export class JsonPointer {
    * and
    * So set([1, 2, 3], '/1', 4, true) => [1, 4, 2, 3]
    *
-   * @param {object} object - The object to set value in
-   * @param {Pointer} pointer - The JSON Pointer (string or array)
-   * @param {any} value - The new value to set
-   * @return {object} - The original object, modified with the set value
+   * @param  { object } object - The object to set value in
+   * @param  { Pointer } pointer - The JSON Pointer (string or array)
+   * @param  { any } value - The new value to set
+   * @param  { boolean } insert - insert value?
+   * @return { object } - The original object, modified with the set value
    */
-  static set(
-    object: any, pointer: Pointer, value: any, insert = false
-  ): any {
-    const keyArray: string[] = this.parse(pointer);
+  static set(object, pointer, value, insert = false) {
+    const keyArray = this.parse(pointer);
     if (keyArray !== null) {
-      let subObject: any = object;
+      let subObject = object;
       for (let i = 0; i < keyArray.length - 1; ++i) {
         let key = keyArray[i];
         if (key === '-' && isArray(subObject)) {
@@ -227,18 +227,17 @@ export class JsonPointer {
    * is an array, the function will insert the value as a new item at the
    * specified location in the array, rather than overwriting the existing value.
    *
-   * @param {object} object - The object to copy and set value in
-   * @param {Pointer} pointer - The JSON Pointer (string or array)
-   * @param {any} value - The value to set
-   * @return {object} - The new object with the set value
+   * @param  { object } object - The object to copy and set value in
+   * @param  { Pointer } pointer - The JSON Pointer (string or array)
+   * @param  { any } value - The value to set
+   * @param  { boolean } insert - insert value?
+   * @return { object } - The new object with the set value
    */
-  static setCopy(
-    object: any, pointer: Pointer, value: any, insert = false
-  ): any {
-    const keyArray: string[] = this.parse(pointer);
+  static setCopy(object, pointer, value, insert = false) {
+    const keyArray = this.parse(pointer);
     if (keyArray !== null) {
-      let newObject: any = copy(object);
-      let subObject: any = newObject;
+      let newObject = copy(object);
+      let subObject = newObject;
       for (let i = 0; i < keyArray.length - 1; ++i) {
         let key = keyArray[i];
         if (key === '-' && isArray(subObject)) {
@@ -276,13 +275,14 @@ export class JsonPointer {
    *
    * Calls 'set' with insert = TRUE
    *
-   * @param {object} object - object to insert value in
-   * @param {Pointer} pointer - JSON Pointer (string or array)
-   * @param {any} value - value to insert
-   * @return {object}
+   * @param  { object } object - object to insert value in
+   * @param  { Pointer } pointer - JSON Pointer (string or array)
+   * @param  { any } value - value to insert
+   * @return { object }
    */
-  static insert(object: any, pointer: Pointer, value: any): any {
-    return this.set(object, pointer, value, true);
+  static insert(object, pointer, value) {
+    const updatedObject = this.set(object, pointer, value, true);
+    return updatedObject;
   }
 
   /**
@@ -290,13 +290,14 @@ export class JsonPointer {
    *
    * Calls 'setCopy' with insert = TRUE
    *
-   * @param {object} object - object to insert value in
-   * @param {Pointer} pointer - JSON Pointer (string or array)
-   * @param {any} value - value to insert
-   * @return {object}
+   * @param  { object } object - object to insert value in
+   * @param  { Pointer } pointer - JSON Pointer (string or array)
+   * @param  { any } value - value to insert
+   * @return { object }
    */
-  static insertCopy(object: any, pointer: Pointer, value: any): any {
-    return this.setCopy(object, pointer, value, true);
+  static insertCopy(object, pointer, value) {
+    const updatedObject = this.setCopy(object, pointer, value, true);
+    return updatedObject;
   }
 
   /**
@@ -304,12 +305,12 @@ export class JsonPointer {
    *
    * Uses a JSON Pointer to remove a key and its attribute from an object
    *
-   * @param {object} object - object to delete attribute from
-   * @param {Pointer} pointer - JSON Pointer (string or array)
-   * @return {object}
+   * @param  { object } object - object to delete attribute from
+   * @param  { Pointer } pointer - JSON Pointer (string or array)
+   * @return { object }
    */
-  static remove(object: any, pointer: Pointer): any {
-    let keyArray: any[] = this.parse(pointer);
+  static remove(object, pointer) {
+    let keyArray = this.parse(pointer);
     if (keyArray !== null && keyArray.length) {
       let lastKey = keyArray.pop();
       let parentObject = this.get(object, keyArray);
@@ -330,12 +331,13 @@ export class JsonPointer {
    *
    * Tests if an object has a value at the location specified by a JSON Pointer
    *
-   * @param {object} object - object to chek for value
-   * @param {Pointer} pointer - JSON Pointer (string or array)
-   * @return {boolean}
+   * @param  { object } object - object to chek for value
+   * @param  { Pointer } pointer - JSON Pointer (string or array)
+   * @return { boolean }
    */
-  static has(object: any, pointer: Pointer): boolean {
-    return this.get(object, pointer, 0, null, true);
+  static has(object, pointer) {
+    const hasValue = this.get(object, pointer, 0, null, true);
+    return hasValue;
   }
 
   /**
@@ -343,10 +345,10 @@ export class JsonPointer {
    *
    * Returns a (pointer -> value) dictionary for an object
    *
-   * @param {Object} object - The object to create a dictionary from
-   * @return {Object} - The resulting dictionary object
+   * @param  { object } object - The object to create a dictionary from
+   * @return { object } - The resulting dictionary object
    */
-  static dict(object: any): any {
+  static dict(object) {
     let results: any = {};
     this.forEachDeep(object, (value, pointer) => {
       if (typeof value !== 'object') { results[pointer] = value; }
@@ -375,16 +377,17 @@ export class JsonPointer {
    * including optional 4th and 5th parameterss to specify the initial
    * root object and pointer.
    *
-   * @param {object} object - the initial object or array
-   * @param {(v: any, k?: string, o?: any, p?: any) => any} function - iteratee function
-   * @param {boolean = false} bottomUp - optional, set to TRUE to reverse direction
-   * @param {object = object} rootObject - optional, root object or array
-   * @param {string = ''} pointer - optional, JSON Pointer to object within rootObject
+   * @param  { object } object - the initial object or array
+   * @param  { (v: any, p?: string, o?: any) => any } function - iteratee function
+   * @param  { boolean = false } bottomUp - optional, set to TRUE to reverse direction
+   * @param  { object = object } rootObject - optional, root object or array
+   * @param  { string = '' } pointer - optional, JSON Pointer to object within rootObject
+   * @return { object } - The modified object
    */
   static forEachDeep(
-    object: any, fn: (v: any, p?: string, o?: any) => any = (v) => v,
-    bottomUp = false, pointer = '', rootObject: any = object
-  ): void {
+    object, fn: (v: any, p?: string, o?: any) => any = (v) => v,
+    bottomUp = false, pointer = '', rootObject = object
+  ) {
     if (typeof fn !== 'function') {
       console.error(`forEachDeep error: Iterator is not a function:`, fn);
       return;
@@ -406,16 +409,17 @@ export class JsonPointer {
    * the same keys and indexes, but with values replaced with the result of
    * the iteratee function.
    *
-   * @param {object} object - the initial object or array
-   * @param {(v: any, k?: string, o?: any, p?: any) => any} function - iteratee function
-   * @param {boolean = false} bottomUp - optional, set to TRUE to reverse direction
-   * @param {object = object} rootObject - optional, root object or array
-   * @param {string = ''} pointer - optional, JSON Pointer to object within rootObject
+   * @param  { object } object - the initial object or array
+   * @param  { (v: any, k?: string, o?: any, p?: any) => any } function - iteratee function
+   * @param  { boolean = false } bottomUp - optional, set to TRUE to reverse direction
+   * @param  { object = object } rootObject - optional, root object or array
+   * @param  { string = '' } pointer - optional, JSON Pointer to object within rootObject
+   * @return { object } - The copied object
    */
   static forEachDeepCopy(
-    object: any, fn: (v: any, p?: string, o?: any) => any = (v) => v,
-    bottomUp = false, pointer = '', rootObject: any = object
-  ): any {
+    object, fn: (v: any, p?: string, o?: any) => any = (v) => v,
+    bottomUp = false, pointer = '', rootObject = object
+  ) {
     if (typeof fn !== 'function') {
       console.error(`forEachDeepCopy error: Iterator is not a function:`, fn);
       return null;
@@ -441,11 +445,12 @@ export class JsonPointer {
    *
    * Escapes a string reference key
    *
-   * @param {string} key - string key to escape
-   * @return {string} - escaped key
+   * @param  { string } key - string key to escape
+   * @return { string } - escaped key
    */
-  static escape(key: string): string {
-    return key.toString().replace(/~/g, '~0').replace(/\//g, '~1');
+  static escape(key) {
+    const escaped = key.toString().replace(/~/g, '~0').replace(/\//g, '~1');
+    return escaped;
   }
 
   /**
@@ -453,11 +458,12 @@ export class JsonPointer {
    *
    * Unescapes a string reference key
    *
-   * @param {string} key - string key to unescape
-   * @return {string} - unescaped key
+   * @param  { string } key - string key to unescape
+   * @return { string } - unescaped key
    */
-  static unescape(key: string): string {
-    return key.toString().replace(/~1/g, '/').replace(/~0/g, '~');
+  static unescape(key) {
+    const unescaped = key.toString().replace(/~1/g, '/').replace(/~0/g, '~');
+    return unescaped;
   }
 
   /**
@@ -466,11 +472,11 @@ export class JsonPointer {
    * Converts a string JSON Pointer into a array of keys
    * (if input is already an an array of keys, it is returned unchanged)
    *
-   * @param {Pointer} pointer - JSON Pointer (string or array)
-   * @param {boolean = false} errors - Show error if invalid pointer?
-   * @return {string[]} - JSON Pointer array of keys
+   * @param  { Pointer } pointer - JSON Pointer (string or array)
+   * @param  { boolean = false } errors - Show error if invalid pointer?
+   * @return { string[] } - JSON Pointer array of keys
    */
-  static parse(pointer: Pointer, errors = false): string[] {
+  static parse(pointer, errors = false) {
     if (!this.isJsonPointer(pointer)) {
       if (errors) { console.error(`parse error: Invalid JSON Pointer: ${pointer}`); }
       return null;
@@ -491,13 +497,12 @@ export class JsonPointer {
    *
    * The optional second parameter is a default which will replace any empty keys.
    *
-   * @param {Pointer} pointer - JSON Pointer (string or array)
-   * @param {boolean = false} errors - Show error if invalid pointer?
-   * @returns {string} - JSON Pointer string
+   * @param  { Pointer } pointer - JSON Pointer (string or array)
+   * @param  { string | number = '' } defaultValue - Default value
+   * @param  { boolean = false } errors - Show error if invalid pointer?
+   * @return { string } - JSON Pointer string
    */
-  static compile(
-    pointer: Pointer, defaultValue: string | number = '', errors = false
-  ): string {
+  static compile(pointer, defaultValue = '', errors = false) {
     if (pointer === '#') { return ''; }
     if (!this.isJsonPointer(pointer)) {
       if (errors) { console.error(`compile error: Invalid JSON Pointer: ${pointer}`); }
@@ -520,11 +525,11 @@ export class JsonPointer {
    *
    * Extracts name of the final key from a JSON Pointer.
    *
-   * @param {Pointer} pointer - JSON Pointer (string or array)
-   * @param {boolean = false} errors - Show error if invalid pointer?
-   * @returns {string} - the extracted key
+   * @param  { Pointer } pointer - JSON Pointer (string or array)
+   * @param  { boolean = false } errors - Show error if invalid pointer?
+   * @return { string } - the extracted key
    */
-  static toKey(pointer: Pointer, errors = false): string {
+  static toKey(pointer, errors = false) {
     let keyArray = this.parse(pointer, errors);
     if (keyArray === null) { return null; }
     if (!keyArray.length) { return ''; }
@@ -538,10 +543,10 @@ export class JsonPointer {
    * Returns true if a string is empty, or starts with '/' or '#/'.
    * Returns true if an array contains only string values.
    *
-   * @param {any} value - value to check
-   * @returns {boolean} - true if value is a valid JSON Pointer, otherwise false
+   * @param  { any } value - value to check
+   * @return { boolean } - true if value is a valid JSON Pointer, otherwise false
    */
-  static isJsonPointer(value: any): boolean {
+  static isJsonPointer(value) {
     if (isArray(value)) {
       return value.every(key => typeof key === 'string');
     } else if (isString(value)) {
@@ -558,16 +563,15 @@ export class JsonPointer {
    *
    * Checks whether one JSON Pointer is a subset of another.
    *
-   * @param {Pointer} shortPointer - potential subset JSON Pointer
-   * @param {Pointer} longPointer - potential superset JSON Pointer
-   * @param {boolean = false} trueIfMatching - return true if pointers match?
-   * @param {boolean = false} errors - Show error if invalid pointer?
-   * @return {boolean} - true if shortPointer is a subset of longPointer, false if not
+   * @param  { Pointer } shortPointer - potential subset JSON Pointer
+   * @param  { Pointer } longPointer - potential superset JSON Pointer
+   * @param  { boolean = false } trueIfMatching - return true if pointers match?
+   * @param  { boolean = false } errors - Show error if invalid pointer?
+   * @return { boolean } - true if shortPointer is a subset of longPointer, false if not
    */
   static isSubPointer(
-    shortPointer: Pointer, longPointer: Pointer,
-    trueIfMatching = false, errors = false
-  ): boolean {
+    shortPointer, longPointer, trueIfMatching = false, errors = false
+  ) {
     if (!this.isJsonPointer(shortPointer) || !this.isJsonPointer(longPointer)) {
       if (errors) {
         let invalid = ''
@@ -593,13 +597,13 @@ export class JsonPointer {
    * the array [4, 2] would result in the indexed pointer '/foo/4/bar/2/baz'
    *
    * @function
-   * @param {string | string[]} genericPointer - The generic pointer
-   * @param {number[]} indexArray - The array of numeric indexes
-   * @param {Map<string, number>} arrayMap - An optional array map
-   * @return {string} - The merged pointer with indexes
+   * @param  { Pointer } genericPointer - The generic pointer
+   * @param  { number[] } indexArray - The array of numeric indexes
+   * @param  { Map<string, number> } arrayMap - An optional array map
+   * @return { string } - The merged pointer with indexes
    */
   static toIndexedPointer(
-    genericPointer: Pointer, indexArray: number[], arrayMap: Map<string, number> = null
+    genericPointer, indexArray, arrayMap: Map<string, number> = null
   ) {
     if (this.isJsonPointer(genericPointer) && isArray(indexArray)) {
       let indexedPointer = this.compile(genericPointer);
@@ -641,13 +645,11 @@ export class JsonPointer {
    * The structure of the arrayMap is: [['path to array', number of tuple items]...]
    *
    * @function
-   * @param {Pointer} indexedPointer - The indexed pointer (array or string)
-   * @param {Map<string, number>} arrayMap - The optional array map (for preserving tuple indexes)
-   * @return {string} - The generic pointer with indexes removed
+   * @param  { Pointer } indexedPointer - The indexed pointer (array or string)
+   * @param  { Map<string, number> } arrayMap - The optional array map (for preserving tuple indexes)
+   * @return { string } - The generic pointer with indexes removed
    */
-  static toGenericPointer(
-    indexedPointer: Pointer, arrayMap: Map<string, number> = new Map<string, number>()
-  ) {
+  static toGenericPointer(indexedPointer, arrayMap = new Map<string, number>()) {
     if (this.isJsonPointer(indexedPointer) && isMap(arrayMap)) {
       let pointerArray = this.parse(indexedPointer);
       for (let i = 1; i < pointerArray.length; i++) {
@@ -674,15 +676,13 @@ export class JsonPointer {
    * Accepts a JSON Pointer for a data object and returns a JSON Pointer for the
    * matching control in an Angular FormGroup.
    *
-   * @param {Pointer} dataPointer - JSON Pointer (string or array) to a data object
-   * @param {FormGroup} formGroup - Angular FormGroup to get value from
-   * @param {boolean = false} controlMustExist - Only return if control exists?
-   * @return {Pointer} - JSON Pointer (string) to the formGroup object
+   * @param  { Pointer } dataPointer - JSON Pointer (string or array) to a data object
+   * @param  { FormGroup } formGroup - Angular FormGroup to get value from
+   * @param  { boolean = false } controlMustExist - Only return if control exists?
+   * @return { Pointer } - JSON Pointer (string) to the formGroup object
    */
-  static toControlPointer(
-    dataPointer: Pointer, formGroup: any, controlMustExist = false
-  ): string {
-    const dataPointerArray: string[] = this.parse(dataPointer);
+  static toControlPointer(dataPointer, formGroup, controlMustExist = false) {
+    const dataPointerArray = this.parse(dataPointer);
     let controlPointerArray: string[] = [];
     let subGroup = formGroup;
     if (dataPointerArray !== null) {
@@ -720,11 +720,11 @@ export class JsonPointer {
    *
    * Returns a Pointer to the sub-schema for the value inside the object's schema.
    *
-   * @param {Pointer} dataPointer - JSON Pointer (string or array) to an object
-   * @param {any} schema - JSON schema for the object
-   * @return {Pointer} - JSON Pointer (string) to the object's schema
+   * @param  { Pointer } dataPointer - JSON Pointer (string or array) to an object
+   * @param  { any } schema - JSON schema for the object
+   * @return { Pointer } - JSON Pointer (string) to the object's schema
    */
-  static toSchemaPointer(dataPointer: Pointer, schema: any): string {
+  static toSchemaPointer(dataPointer, schema) {
     if (this.isJsonPointer(dataPointer) && typeof schema === 'object') {
       const pointerArray = this.parse(dataPointer);
       if (!pointerArray.length) { return ''; }
@@ -782,12 +782,12 @@ export class JsonPointer {
    * definitions or additionalProperties) where the corresponding value
    * location cannot be determined.
    *
-   * @param {Pointer} schemaPointer - JSON Pointer (string or array) to a JSON schema
-   * @param {any} schema - the JSON schema
-   * @param {boolean = false} errors - Show errors?
-   * @return {Pointer} - JSON Pointer (string) to the value in the data object
+   * @param  { Pointer } schemaPointer - JSON Pointer (string or array) to a JSON schema
+   * @param  { any } schema - the JSON schema
+   * @param  { boolean = false } errors - Show errors?
+   * @return { Pointer } - JSON Pointer (string) to the value in the data object
    */
-  static toDataPointer(schemaPointer: Pointer, schema: any, errors = false): string {
+  static toDataPointer(schemaPointer, schema, errors = false) {
     if (this.isJsonPointer(schemaPointer) && typeof schema === 'object' &&
       this.has(schema, schemaPointer)
     ) {
@@ -841,10 +841,10 @@ export class JsonPointer {
    * Based on mike-marcacci's excellent objectpath parse function:
    * https://github.com/mike-marcacci/objectpath
    *
-   * @param {string} path - The object path to parse
-   * @return {string[]} - The resulting array of keys
+   * @param  { Pointer } path - The object path to parse
+   * @return { string[] } - The resulting array of keys
    */
-  static parseObjectPath(path: string | string[]): string[] {
+  static parseObjectPath(path) {
     if (isArray(path)) { return <string[]>path; }
     if (this.isJsonPointer(path)) { return this.parse(path); }
     if (typeof path === 'string') {

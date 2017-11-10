@@ -372,9 +372,9 @@ export function setRequiredFields(schema: any, formControlTemplate: any): boolea
  * 'formatFormData' function
  *
  * @param {any} formData - Angular FormGroup data object
- * @param  {Map<string, any>} dataMap -
- * @param  {Map<string, string>} recursiveRefMap -
- * @param  {Map<string, number>} arrayMap -
+ * @param {Map<string, any>} dataMap -
+ * @param {Map<string, string>} recursiveRefMap -
+ * @param {Map<string, number>} arrayMap -
  * @param {boolean = false} fixErrors - if TRUE, tries to fix data
  * @return {any} - formatted data object
  */

@@ -268,7 +268,7 @@ export function toTitleCase(input: string, forceWords?: string|string[]): string
   let forceArray: string[] = ['a', 'an', 'and', 'as', 'at', 'but', 'by', 'en',
    'for', 'if', 'in', 'nor', 'of', 'on', 'or', 'per', 'the', 'to', 'v', 'v.',
    'vs', 'vs.', 'via'];
-  if (isString(forceWords)) { forceWords = forceWords.split('|'); }
+  if (isString(forceWords)) { forceWords = (<string>forceWords).split('|'); }
   if (isArray(forceWords)) { forceArray = forceArray.concat(forceWords); }
   const forceArrayLower: string[] = forceArray.map(w => w.toLowerCase());
   const noInitialCase: boolean =

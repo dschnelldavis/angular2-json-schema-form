@@ -1,3 +1,6 @@
+// Modified from angular-quickstart-lib
+// https://github.com/filipesilva/angular-quickstart-lib/blob/master/build.js
+
 'use strict';
 
 const fs = require('fs');
@@ -28,15 +31,13 @@ return Promise.resolve()
     .then(() => console.log('Inlining succeeded.'))
   )
   // Compile to ES2015.
-  .then(() => ngc({ project: `${tempLibFolder}/tsconfig.json` })
+  .then(() => ngc(['--project', `${tempLibFolder}/tsconfig.json`]))
     .then(exitCode => exitCode === 0 ? Promise.resolve() : Promise.reject())
     .then(() => console.log('ES2015 compilation succeeded.'))
-  )
   // Compile to ES5.
-  .then(() => ngc({ project: `${tempLibFolder}/tsconfig.es5.json` })
+  .then(() => ngc(['--project', `${tempLibFolder}/tsconfig.es5.json`]))
     .then(exitCode => exitCode === 0 ? Promise.resolve() : Promise.reject())
     .then(() => console.log('ES5 compilation succeeded.'))
-  )
   // Copy typings and metadata to `dist/` folder.
   .then(() => Promise.resolve()
     .then(() => _relativeCopy('**/*.d.ts', es2015OutputFolder, distFolder))
@@ -133,10 +134,6 @@ return Promise.resolve()
       })
     });
 
-// return rollup.rollup(fesm5config.input)
-//   .then(bundle => bundle.write(fesm5config.output))
-//   .then(() => console.log('fesm5config bundle generated successfully.'));
-// console.log(umdConfig, minifiedUmdConfig, fesm5config, fesm2015config);
     const allBundles = [umdConfig, minifiedUmdConfig, fesm5config, fesm2015config]
       .map(cfg => rollup.rollup(cfg).then(bundle => bundle.write(cfg.output)));
 

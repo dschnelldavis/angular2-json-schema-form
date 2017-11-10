@@ -261,10 +261,8 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
    *
    * - Create the master 'formGroupTemplate' then from it 'formGroup'
    *   the Angular formGroup used to control the reactive form.
-   *
-   * @return {void}
    */
-  initializeForm(): void {
+  initializeForm() {
     if (this.schema || this.layout || this.data || this.form || this.JSONSchema || this.UISchema) {
 
       this.jsf.resetAllValues();  // Reset all form values to defaults

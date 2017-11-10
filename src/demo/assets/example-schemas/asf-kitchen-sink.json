@@ -118,7 +118,7 @@
                   "key": "name",
                   "placeholder": "Check the console",
                   "onChange": "log(modelValue)",
-                  "feedback": "{'glyphicon': true, 'glyphicon-ok': hasSuccess(), 'glyphicon-star': !hasSuccess() }"
+                  "feedback": "{ 'glyphicon': true, 'glyphicon-ok': hasSuccess(), 'glyphicon-star': !hasSuccess() }"
                 },
                 { "key": "favorite", "feedback": false }
               ]

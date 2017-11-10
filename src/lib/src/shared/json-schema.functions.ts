@@ -48,10 +48,10 @@ import { JsonValidators } from './json.validators';
  *
  * TODO: Build a JSON Schema from a JSON Form layout
  *
- * @param {any[]} layout - The JSON Form layout
- * @return {JSON Schema} - The new JSON Schema
+ * @param  { any[] } layout - The JSON Form layout
+ * @return { any } - The new JSON Schema
  */
-export function buildSchemaFromLayout(layout: any[]): any {
+export function buildSchemaFromLayout(layout) {
   return;
   // let newSchema: any = { };
   // const walkLayout = (layoutItems: any[], callback: Function): any[] => {
@@ -82,12 +82,14 @@ export function buildSchemaFromLayout(layout: any[]): any {
  *
  * Build a JSON Schema from a data object
  *
- * @param {any} data - The data object
- * @return {JSON Schema} - The new JSON Schema
+ * @param  { any } data - The data object
+ * @param  { boolean = false } requireAllFields - Require all fields?
+ * @param  { boolean = true } isRoot - is root
+ * @return { any } - The new JSON Schema
  */
 export function buildSchemaFromData(
-  data: any, requireAllFields = false, isRoot = true
-): any {
+  data, requireAllFields = false, isRoot = true
+) {
   let newSchema: any = {};
   const getFieldType = (value: any): string => {
     const fieldType = getType(value, 'strict');
@@ -127,14 +129,12 @@ export function buildSchemaFromData(
  * 'schemaPointer': a pointer to the value's schema within the object's schema
  * 'parentSchemaPointer': a pointer to the schema for the value's parent object or array
  *
- * @param {JSON Schema} schema - The schema to get the sub-schema from
- * @param {Pointer} dataPointer - JSON Pointer (string or array)
- * @param {boolean = false} returnContainer - Return containing object instead?
- * @return {schema} - The located sub-schema
+ * @param  { any } schema - The schema to get the sub-schema from
+ * @param  { Pointer } dataPointer - JSON Pointer (string or array)
+ * @param  { string = 'schema' } returnType - what to return?
+ * @return { any } - The located sub-schema
  */
-export function getFromSchema(
-  schema: any, dataPointer: Pointer, returnType = 'schema'
-): any {
+export function getFromSchema(schema, dataPointer, returnType = 'schema') {
   const dataPointerArray: any[] = JsonPointer.parse(dataPointer);
   if (dataPointerArray === null) {
     console.error(`getFromSchema error: Invalid JSON Pointer: ${dataPointer}`);
@@ -220,15 +220,14 @@ export function getFromSchema(
  * recursiveRefMap: [['/stuff/and/more/and/more', '/stuff/and/more/']]
  * returned:        '/stuff/and/more/stuff'
  *
- * @param  {Pointer} pointer -
- * @param  {Map<string, string>} recursiveRefMap -
- * @param  {Map<string, number>} arrayMap - optional
- * @return {string} -
+ * @param  { Pointer } pointer -
+ * @param  { Map<string, string> } recursiveRefMap -
+ * @param  { Map<string, number> = new Map() } arrayMap - optional
+ * @return { string } -
  */
 export function removeRecursiveReferences(
-  pointer: Pointer, recursiveRefMap: Map<string, string>,
-  arrayMap: Map<string, any> = new Map()
-): string {
+  pointer, recursiveRefMap, arrayMap = new Map()
+) {
   if (!pointer) { return ''; }
   let genericPointer =
     JsonPointer.toGenericPointer(JsonPointer.compile(pointer), arrayMap);
@@ -253,10 +252,11 @@ export function removeRecursiveReferences(
 /**
  * 'getInputType' function
  *
- * @param {any} schema
- * @return {string}
+ * @param  { any } schema
+ * @param  { any = null } layoutNode
+ * @return { string }
  */
-export function getInputType(schema: any, layoutNode: any = null): string {
+export function getInputType(schema, layoutNode: any = null) {
   // x-schema-form = Angular Schema Form compatibility
   // widget & component = React Jsonschema Form compatibility
   let controlType = JsonPointer.getFirst([
@@ -327,13 +327,12 @@ export function getInputType(schema: any, layoutNode: any = null): string {
  * Checks layout and schema nodes for 'inline: true', and converts
  * 'radios' or 'checkboxes' to 'radios-inline' or 'checkboxes-inline'
  *
- * @param {string} controlType -
- * @param {JSON Schema} schema -
- * @return {string}
+ * @param  { string } controlType -
+ * @param  { any } schema -
+ * @param  { any = null } layoutNode -
+ * @return { string }
  */
-export function checkInlineType(
-  controlType: string, schema: any, layoutNode: any = null
-): string {
+export function checkInlineType(controlType, schema, layoutNode: any = null) {
   if (!isString(controlType) || (
     controlType.slice(0, 8) !== 'checkbox' && controlType.slice(0, 5) !== 'radio'
   )) {
@@ -366,11 +365,11 @@ export function checkInlineType(
  *
  * Checks a JSON Schema to see if an item is required
  *
- * @param {schema} schema - the schema to check
- * @param {string} pointer - the pointer to the item to check
- * @return {boolean} - true if the item is required, false if not
+ * @param  { any } schema - the schema to check
+ * @param  { string } schemaPointer - the pointer to the item to check
+ * @return { boolean } - true if the item is required, false if not
  */
-export function isInputRequired(schema: any, schemaPointer: string): boolean {
+export function isInputRequired(schema, schemaPointer) {
   if (!isObject(schema)) {
     console.error('isInputRequired error: Input schema must be an object.');
     return false;
@@ -401,12 +400,12 @@ export function isInputRequired(schema: any, schemaPointer: string): boolean {
 /**
  * 'updateInputOptions' function
  *
- * @param {any} layoutNode
- * @param {any} schema
- * @param {any} jsf
- * @return {void}
+ * @param  { any } layoutNode
+ * @param  { any } schema
+ * @param  { any } jsf
+ * @return { void }
  */
-export function updateInputOptions(layoutNode: any, schema: any, jsf: any) {
+export function updateInputOptions(layoutNode, schema, jsf) {
   if (!isObject(layoutNode) || !isObject(layoutNode.options)) { return; }
 
   // Set all option values in layoutNode.options
@@ -468,10 +467,10 @@ export function updateInputOptions(layoutNode: any, schema: any, jsf: any) {
 /**
  * 'getTitleMapFromOneOf' function
  *
- * @param {schema} schema
- * @param {boolean = null} flatList
- * @param {boolean = false} validateOnly
- * @return {validators}
+ * @param  { schema } schema
+ * @param  { boolean = null } flatList
+ * @param  { boolean = false } validateOnly
+ * @return { validators }
  */
 export function getTitleMapFromOneOf(
   schema: any = {}, flatList: boolean = null, validateOnly = false
@@ -512,10 +511,10 @@ export function getTitleMapFromOneOf(
 /**
  * 'getControlValidators' function
  *
- * @param {schema} schema
- * @return {validators}
+ * @param { any } schema
+ * @return { validators }
  */
-export function getControlValidators(schema: any) {
+export function getControlValidators(schema) {
   if (!isObject(schema)) { return null; }
   let validators: any = { };
   if (hasOwn(schema, 'type')) {
@@ -560,13 +559,16 @@ export function getControlValidators(schema: any) {
  * Find all $ref links in schema and save links and referenced schemas in
  * schemaRefLibrary, schemaRecursiveRefMap, and dataRecursiveRefMap
  *
- * @param {schema} schema
- * @return {void}
+ * @param { any } schema
+ * @param { any } schemaRefLibrary
+ * @param { Map<string, string> } schemaRecursiveRefMap
+ * @param { Map<string, string> } dataRecursiveRefMap
+ * @param { Map<string, number> } arrayMap
+ * @return { any }
  */
 export function resolveSchemaReferences(
-  schema: any, schemaRefLibrary: any, schemaRecursiveRefMap: Map<string, string>,
-  dataRecursiveRefMap: Map<string, string>, arrayMap: Map<string, number>
-): any {
+  schema, schemaRefLibrary, schemaRecursiveRefMap, dataRecursiveRefMap, arrayMap
+) {
   if (!isObject(schema)) {
     console.error('resolveSchemaReferences error: schema must be an object.');
     return;
@@ -674,18 +676,17 @@ export function resolveSchemaReferences(
 /**
  * 'getSubSchema' function
  *
- * @param {schema} schema
- * @param {Pointer} pointer
- * @param {object} schemaRefLibrary
- * @param {Map<string, string>} schemaRecursiveRefMap
- * @param {boolean = true} compile
- * @param {Pointer = pointer} initialPointer
- * @return {schema}
+ * @param  { any } schema
+ * @param  { Pointer } pointer
+ * @param  { object } schemaRefLibrary
+ * @param  { Map<string, string> } schemaRecursiveRefMap
+ * @param  { string[] = [] } usedPointers
+ * @return { any }
  */
 export function getSubSchema(
-  schema: any, pointer: Pointer, schemaRefLibrary: any = null,
+  schema, pointer, schemaRefLibrary = null,
   schemaRecursiveRefMap: Map<string, string> = null, usedPointers: string[] = []
-): any {
+) {
   if (!schemaRefLibrary || !schemaRecursiveRefMap) {
     return JsonPointer.getCopy(schema, pointer);
   }
@@ -736,7 +737,7 @@ export function getSubSchema(
       }
     }
     return subSchema;
-  }, true, pointer);
+  }, true, <string>pointer);
 }
 
 /**
@@ -745,10 +746,10 @@ export function getSubSchema(
  * Attempt to convert an allOf schema object into
  * a non-allOf schema object with equivalent rules.
  *
- * @param {any} schema - allOf schema object
- * @return {any} - converted schema object
+ * @param  { any } schema - allOf schema object
+ * @return { any } - converted schema object
  */
-export function combineAllOf(schema: any): any {
+export function combineAllOf(schema) {
   if (!isObject(schema) || !isArray(schema.allOf)) { return schema; }
   let mergedSchema = mergeSchemas(...schema.allOf);
   if (Object.keys(schema).length > 1) {
@@ -765,10 +766,10 @@ export function combineAllOf(schema: any): any {
  * Fixes an incorrectly placed required list inside an array schema, by moving
  * it into items.properties or additionalItems.properties, where it belongs.
  *
- * @param {any} schema - allOf schema object
- * @return {any} - converted schema object
+ * @param  { any } schema - allOf schema object
+ * @return { any } - converted schema object
  */
-export function fixRequiredArrayProperties(schema: any): any {
+export function fixRequiredArrayProperties(schema) {
   if (schema.type === 'array' && isArray(schema.required)) {
     let itemsObject = hasOwn(schema.items, 'properties') ? 'items' :
       hasOwn(schema.additionalItems, 'properties') ? 'additionalItems' : null;

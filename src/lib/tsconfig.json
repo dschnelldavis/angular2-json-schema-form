@@ -13,7 +13,6 @@
     "./typings.d.ts"
   ],
   "angularCompilerOptions": {
-    "annotateForClosureCompiler": true,
     "strictMetadataEmit": true,
     "skipTemplateCodegen": true,
     "flatModuleOutFile": "angular2-json-schema-form.js",

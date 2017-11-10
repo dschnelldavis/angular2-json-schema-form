@@ -56,13 +56,12 @@ export type AsyncIValidatorFn = (c: AbstractControl, i?: boolean) => any;
  * an array of the same length containing a combination of error messages
  * (from invalid validators) and null values (from valid validators)
  *
- * @param {AbstractControl} control - control to validate
- * @param {IValidatorFn[]} validators - array of validators
- * @return {any[]} - array of nulls and error message
+ * @param  { AbstractControl } control - control to validate
+ * @param  { IValidatorFn[] } validators - array of validators
+ * @param  { boolean } invert - invert?
+ * @return { PlainObject[] } - array of nulls and error message
  */
-export function _executeValidators(
-  control: AbstractControl, validators: IValidatorFn[], invert = false
-): PlainObject[] {
+export function _executeValidators(control, validators, invert = false) {
   return validators.map(validator => validator(control, invert));
 }
 
@@ -73,13 +72,12 @@ export function _executeValidators(
  * an array of observabe results of the same length containing a combination of
  * error messages (from invalid validators) and null values (from valid ones)
  *
- * @param {AbstractControl} control - control to validate
- * @param {AsyncIValidatorFn[]} validators - array of async validators
- * @return {any[]} - array of observable nulls and error message
+ * @param  { AbstractControl } control - control to validate
+ * @param  { AsyncIValidatorFn[] } validators - array of async validators
+ * @param  { boolean } invert - invert?
+ * @return { any[] } - array of observable nulls and error message
  */
-export function _executeAsyncValidators(
-  control: AbstractControl, validators: AsyncIValidatorFn[], invert = false
-): any[] {
+export function _executeAsyncValidators(control, validators, invert = false) {
   return validators.map(validator => validator(control, invert));
 }
 
@@ -90,10 +88,10 @@ export function _executeAsyncValidators(
  * Automatically detects and ignores null and undefined inputs.
  * Also detects duplicated boolean 'not' keys and XORs their values.
  *
- * @param {PlainObject[]} object - one or more objects to merge
- * @return {PlainObject} - merged object
+ * @param  { PlainObject[] } objects - one or more objects to merge
+ * @return { PlainObject } - merged object
  */
-export function _mergeObjects(...objects: PlainObject[]): PlainObject {
+export function _mergeObjects(...objects) {
   let mergedObject: PlainObject = { };
   for (let currentObject of objects) {
     if (isObject(currentObject)) {
@@ -118,10 +116,10 @@ export function _mergeObjects(...objects: PlainObject[]): PlainObject {
  * Merges an array of objects.
  * Used for combining the validator errors returned from 'executeValidators'
  *
- * @param {PlainObject[]} arrayOfErrors - array of objects
- * @return {PlainObject} - merged object, or null if no usable input objectcs
+ * @param  { PlainObject[] } arrayOfErrors - array of objects
+ * @return { PlainObject } - merged object, or null if no usable input objectcs
  */
-export function _mergeErrors(arrayOfErrors: PlainObject[]): PlainObject {
+export function _mergeErrors(arrayOfErrors) {
   const mergedErrors = _mergeObjects(...arrayOfErrors);
   return isEmpty(mergedErrors) ? null : mergedErrors;
 }
@@ -132,10 +130,10 @@ export function _mergeErrors(arrayOfErrors: PlainObject[]): PlainObject {
  * Checks if a variable contains a value of any type.
  * Returns true even for otherwise 'falsey' values of 0, '', and false.
  *
- * @param {any} object - the value to check
- * @return {boolean} - false if undefined or null, otherwise true
+ * @param  { any } value - the value to check
+ * @return { boolean } - false if undefined or null, otherwise true
  */
-export function isDefined(value: any): boolean {
+export function isDefined(value) {
   return value !== undefined && value !== null;
 }
 
@@ -148,10 +146,10 @@ export function isDefined(value: any): boolean {
  * (Stricter than 'isDefined' because it also returns false for '',
  * though it stil returns true for otherwise 'falsey' values 0 and false.)
  *
- * @param {any} object - the value to check
- * @return {boolean} - false if undefined, null, or '', otherwise true
+ * @param  { any } value - the value to check
+ * @return { boolean } - false if undefined, null, or '', otherwise true
  */
-export function hasValue(value: any): boolean {
+export function hasValue(value) {
   return value !== undefined && value !== null && value !== '';
 }
 
@@ -160,10 +158,10 @@ export function hasValue(value: any): boolean {
  *
  * Similar to !hasValue, but also returns true for empty arrays and objects.
  *
- * @param {any} object - the value to check
- * @return {boolean} - false if undefined, null, or '', otherwise true
+ * @param  { any } value - the value to check
+ * @return { boolean } - false if undefined, null, or '', otherwise true
  */
-export function isEmpty(value: any): boolean {
+export function isEmpty(value) {
   if (isArray(value)) { return !value.length; }
   if (isObject(value)) { return !Object.keys(value).length; }
   return value === undefined || value === null || value === '';
@@ -174,11 +172,10 @@ export function isEmpty(value: any): boolean {
  *
  * Checks if a value is a string.
  *
- * @param {any} object - the value to check
- * @param {any = false} strict - if truthy, also checks JavaScript tyoe
- * @return {boolean} - true if string, false if not
+ * @param  { any } value - the value to check
+ * @return { boolean } - true if string, false if not
  */
-export function isString(value: any): value is string {
+export function isString(value) {
   return typeof value === 'string';
 }
 
@@ -187,11 +184,11 @@ export function isString(value: any): value is string {
  *
  * Checks if a value is a regular number, numeric string, or JavaScript Date.
  *
- * @param {any} object - the value to check
- * @param {any = false} strict - if truthy, also checks JavaScript tyoe
- * @return {boolean} - true if number, false if not
+ * @param  { any } value - the value to check
+ * @param  { any = false } strict - if truthy, also checks JavaScript tyoe
+ * @return { boolean } - true if number, false if not
  */
-export function isNumber(value: any, strict: any = false): boolean {
+export function isNumber(value, strict: any = false) {
   if (strict && typeof value !== 'number') { return false; }
   return !isNaN(value) && value !== value / 0;
 }
@@ -201,11 +198,11 @@ export function isNumber(value: any, strict: any = false): boolean {
  *
  * Checks if a value is an integer.
  *
- * @param {any} object - the value to check
- * @param {any = false} strict - if truthy, also checks JavaScript tyoe
- * @return {boolean} - true if number, false if not
+ * @param  { any } value - the value to check
+ * @param  { any = false } strict - if truthy, also checks JavaScript tyoe
+ * @return {boolean } - true if number, false if not
  */
-export function isInteger(value: any, strict: any = false): boolean {
+export function isInteger(value, strict: any = false) {
   if (strict && typeof value !== 'number') { return false; }
   return !isNaN(value) &&  value !== value / 0 && value % 1 === 0;
 }
@@ -215,12 +212,12 @@ export function isInteger(value: any, strict: any = false): boolean {
  *
  * Checks if a value is a boolean.
  *
- * @param {any} object - the value to check
- * @param {any = null} option - if 'strict', also checks JavaScript type
+ * @param  { any } value - the value to check
+ * @param  { any = null } option - if 'strict', also checks JavaScript type
  *                              if TRUE or FALSE, checks only for that value
- * @return {boolean} - true if boolean, false if not
+ * @return { boolean } - true if boolean, false if not
  */
-export function isBoolean(value: any, option: any = null): boolean {
+export function isBoolean(value, option: any = null) {
   if (option === 'strict') { return value === true || value === false; }
   if (option === true) {
     return value === true || value === 1 || value === 'true' || value === '1';
@@ -295,11 +292,11 @@ export function isSymbol(item: any): boolean {
  * getType('true', 'strict') = 'string'
  * getType(true, 'strict') = 'boolean'
  *
- * @param {any} value - value to check
- * @param {any = false} strict - if truthy, also checks JavaScript tyoe
- * @return {boolean}
+ * @param  { any } value - value to check
+ * @param  { any = false } strict - if truthy, also checks JavaScript tyoe
+ * @return { SchemaType }
  */
-export function getType(value: any, strict: any = false): SchemaType {
+export function getType(value, strict: any = false) {
   if (!isDefined(value)) { return 'null'; }
   if (isArray(value)) { return 'array'; }
   if (isObject(value)) { return 'object'; }
@@ -316,11 +313,11 @@ export function getType(value: any, strict: any = false): SchemaType {
  * Checks wether an input (probably string) value contains data of
  * a specified JSON Schema type
  *
- * @param {PrimitiveValue} value - value to check
- * @param {SchemaPrimitiveType} type - type to check
- * @return {boolean}
+ * @param  { PrimitiveValue } value - value to check
+ * @param  { SchemaPrimitiveType } type - type to check
+ * @return { boolean }
  */
-export function isType(value: PrimitiveValue, type: SchemaPrimitiveType): boolean {
+export function isType(value, type) {
   switch (type) {
     case 'string':
       return isString(value) || isDate(value);
@@ -344,10 +341,10 @@ export function isType(value: PrimitiveValue, type: SchemaPrimitiveType): boolea
  * Checks wether an input value is a JavaScript primitive type:
  * string, number, boolean, or null.
  *
- * @param {any} value - value to check
- * @return {boolean}
+ * @param  { any } value - value to check
+ * @return { boolean }
  */
-export function isPrimitive(value: any): boolean {
+export function isPrimitive(value) {
   return (isString(value) || isNumber(value) ||
     isBoolean(value, 'strict') || value === null);
 }
@@ -378,16 +375,12 @@ export function isPrimitive(value: any): boolean {
  * toJavaScriptType('10.5', 'integer') = null // '10.5' is not an integer
  * toJavaScriptType( 10.5,  'integer') = null //  10.5  is still not an integer
  *
- * @param {PrimitiveValue} value - value to convert
- * @param {SchemaPrimitiveType | SchemaPrimitiveType[]} types - types to convert to
- * @param {boolean = false} strictIntegers - if FALSE, treat integers as numbers
- * @return {boolean}
+ * @param  { PrimitiveValue } value - value to convert
+ * @param  { SchemaPrimitiveType | SchemaPrimitiveType[] } types - types to convert to
+ * @param  { boolean = false } strictIntegers - if FALSE, treat integers as numbers
+ * @return { PrimitiveValue }
  */
-export function toJavaScriptType(
-  value: any,
-  types: SchemaPrimitiveType | SchemaPrimitiveType[],
-  strictIntegers = true
-): PrimitiveValue {
+export function toJavaScriptType(value, types, strictIntegers = true)  {
   if (!isDefined(value)) { return null; }
   if (isString(types)) { types = [types]; }
   if (strictIntegers && inArray('integer', types)) {
@@ -457,13 +450,11 @@ export function toJavaScriptType(
  * toSchemaType(true, ['number','string']) = 'true' // string
  * toSchemaType(true, ['number']) = 1 // number
  *
- * @param {PrimitiveValue} value - value to convert
- * @param {SchemaPrimitiveType[]} types - allowed types to convert to
- * @return {boolean}
+ * @param  { PrimitiveValue } value - value to convert
+ * @param  { SchemaPrimitiveType | SchemaPrimitiveType[] } types - allowed types to convert to
+ * @return { PrimitiveValue }
  */
-export function toSchemaType(
-  value: PrimitiveValue, types: SchemaPrimitiveType | SchemaPrimitiveType[]
-): PrimitiveValue {
+export function toSchemaType(value, types) {
   if (!isArray(<SchemaPrimitiveType>types)) {
     types = <SchemaPrimitiveType[]>[types];
   }
@@ -525,40 +516,40 @@ export function toSchemaType(
 /**
  * 'isPromise' function
  *
- * @param {object} object
- * @return {boolean}
+ * @param  { any } object
+ * @return { boolean }
  */
-export function isPromise(object: any): object is Promise<any> {
+export function isPromise(object): object is Promise<any> {
   return !!object && typeof object.then === 'function';
 }
 
 /**
  * 'isObservable' function
  *
- * @param {object} object
- * @return {boolean}
+ * @param  { any } object
+ * @return { boolean }
  */
-export function isObservable(object: any): object is Observable<any> {
+export function isObservable(object): object is Observable<any> {
   return !!object && typeof object.subscribe === 'function';
 }
 
 /**
  * '_toPromise' function
  *
- * @param {object} object
- * @return {Promise<any>}
+ * @param  { object } object
+ * @return { Promise<any> }
  */
-export function _toPromise(object: any): Promise<any> {
+export function _toPromise(object): Promise<any> {
   return isPromise(object) ? object : toPromise.call(object);
 }
 
 /**
  * 'toObservable' function
  *
- * @param {object} object
- * @return {Observable<any>}
+ * @param  { object } object
+ * @return { Observable<any> }
  */
-export function toObservable(object: any): Observable<any> {
+export function toObservable(object): Observable<any> {
   const observable = isPromise(object) ? fromPromise(object) : object;
   if (isObservable(observable)) { return observable; }
   console.error('toObservable error: Expected validator to return Promise or Observable.');
@@ -576,14 +567,12 @@ export function toObservable(object: any): Observable<any> {
  * are found in the array list, and false if any element is not found. If the
  * item to find is not an array, setting allIn to TRUE has no effect.
  *
- * @param {any|any[]} item - the item to search for
- * @param {any[]} array - the array to search
- * @param {boolean = false} allIn - if TRUE, all items must be in array
- * @return {boolean} - true if item(s) in array, false otherwise
+ * @param  { any|any[] } item - the item to search for
+ * @param  { any[] } array - the array to search
+ * @param  { boolean = false } allIn - if TRUE, all items must be in array
+ * @return { boolean } - true if item(s) in array, false otherwise
  */
-export function inArray(
-  item: any|any[], array: any[], allIn = false
-): boolean {
+export function inArray(item, array, allIn = false) {
   if (!isDefined(item) || !isArray(array)) { return false; }
   return isArray(item) ?
     item[allIn ? 'every' : 'some'](subItem => array.includes(subItem)) :
@@ -595,10 +584,10 @@ export function inArray(
  *
  * Returns true if exactly one of two values is truthy.
  *
- * @param {any} value1 - first value to check
- * @param {any} value2 - second value to check
- * @return {boolean} - true if exactly one input value is truthy, false if not
+ * @param  { any } value1 - first value to check
+ * @param  { any } value2 - second value to check
+ * @return { boolean } - true if exactly one input value is truthy, false if not
  */
-export function xor(value1: any, value2: any): boolean {
+export function xor(value1, value2) {
   return (!!value1 && !value2) || (!value1 && !!value2);
 }
