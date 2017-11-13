@@ -10,6 +10,9 @@ import { NoFrameworkComponent } from './no-framework.component';
 // https://github.com/valor-software/ng2-bootstrap
 import { Bootstrap3FrameworkComponent } from './bootstrap-3-framework/bootstrap-3-framework.component';
 
+// Bootstrap 4 Framework
+import { Bootstrap4FrameworkComponent } from './bootstrap-4-framework/bootstrap-4-framework.component';
+
 // Material Design Framework
 // https://github.com/angular/material2
 import { FlexLayoutRootComponent } from './material-design-framework/flex-layout-root.component';
@@ -113,7 +116,18 @@ export class FrameworkLibraryService {
         '//ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js',
         '//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js',
       ],
-    }
+    },
+    'bootstrap-4': {
+        framework: Bootstrap4FrameworkComponent,
+        stylesheets: [
+            '//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css'
+        ],
+        scripts: [
+            '//code.jquery.com/jquery-3.2.1.slim.min.js',
+            '//cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js',
+            '//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js',
+        ],
+      }
   };
 
   constructor(
