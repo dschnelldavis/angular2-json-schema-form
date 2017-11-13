@@ -81,6 +81,7 @@ export { MaterialDesignFrameworkModule } from './src/framework-library/material-
 export { NoFrameworkComponent } from './src/framework-library/no-framework.component';
 
 export { Bootstrap3FrameworkComponent } from './src/framework-library/bootstrap-3-framework/bootstrap-3-framework.component';
+export { Bootstrap4FrameworkComponent } from './src/framework-library/bootstrap-4-framework/bootstrap-4-framework.component';
 
 export { FrameworkLibraryService } from './src/framework-library/framework-library.service';
 export { FrameworkLibraryModule } from './src/framework-library/framework-library.module';
