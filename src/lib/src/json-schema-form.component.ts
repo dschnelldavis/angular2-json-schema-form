@@ -1,8 +1,8 @@
 import {
   ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter,
-  forwardRef, Input, Output, OnChanges, OnInit, Renderer2
+  forwardRef, Input, Output, OnChanges, OnInit
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormGroup } from '@angular/forms';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 import * as _ from 'lodash';
@@ -85,14 +85,14 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
   objectWrap = false; // Is non-object input schema wrapped in an object?
 
   formValuesInput: string; // Name of the input providing the form data
-  inputHistory: { // Previous input values, to detect which input triggers onChanges
+  previousInputs: { // Previous input values, to detect which input triggers onChanges
     schema: any, layout: any[], data: any, options: any, framework: any|string,
     widgets: any, form: any, model: any, JSONSchema: any, UISchema: any,
-    formData: any, ngModel: any, loadExternalAssets: boolean, debug: boolean,
+    formData: any, loadExternalAssets: boolean, debug: boolean,
   } = {
     schema: null, layout: null, data: null, options: null, framework: null,
     widgets: null, form: null, model: null, JSONSchema: null, UISchema: null,
-    formData: null, ngModel: null, loadExternalAssets: null, debug: null,
+    formData: null, loadExternalAssets: null, debug: null,
   };
 
   // Recommended inputs
@@ -114,12 +114,19 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
   @Input() UISchema: any; // UI schema - alternate form layout format
   @Input() formData: any; // Alternate input for form data
 
-  // Angular form control style compatibility input
-  @Input() ngModel: any; // Alternate input for form data
+  @Input() ngModel: any; // Alternate input for Angular forms
 
   // Development inputs, for testing and debugging
   @Input() loadExternalAssets: boolean; // Load external framework assets?
   @Input() debug: boolean; // Show debug information?
+
+  @Input()
+  get value(): any {
+    return this.objectWrap ? this.jsf.data['1'] : this.jsf.data;
+  };
+  set value(value: any) {
+    this.setFormValues(value, false);
+  }
 
   // Outputs
   @Output() onChanges = new EventEmitter<any>(); // Live unvalidated internal form data
@@ -128,6 +135,7 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
   @Output() validationErrors = new EventEmitter<any>(); // Validation errors (if any)
   @Output() formSchema = new EventEmitter<any>(); // Final schema used to create form
   @Output() formLayout = new EventEmitter<any>(); // Final layout used to create form
+
   // Outputs for possible 2-way data binding
   // Only the one input providing the initial form data will be bound.
   // If there is no inital data, input '{}' to activate 2-way data binding.
@@ -145,7 +153,6 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
     private frameworkLibrary: FrameworkLibraryService,
     private widgetLibrary: WidgetLibraryService,
     public jsf: JsonSchemaFormService,
-    public renderer: Renderer2,
     private sanitizer: DomSanitizer
   ) { }
 
@@ -161,23 +168,49 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
     return scripts.map(script => load(script));
   }
 
-  ngOnInit() { }
+  ngOnInit() {
+    this.updateForm();
+  }
 
   ngOnChanges() {
+    this.updateForm();
+  }
+
+  writeValue(value: any) {
+    this.setFormValues(value, false);
+    if (!this.formValuesInput) { this.formValuesInput = 'ngModel'; }
+  }
+
+  registerOnChange(fn: Function) {
+    this.onChange = fn;
+  }
+
+  registerOnTouched(fn: Function) {
+    this.onTouched = fn;
+  }
+
+  setDisabledState(isDisabled: boolean) {
+    if (this.jsf.formOptions.formDisabled !== !!isDisabled) {
+      this.jsf.formOptions.formDisabled = !!isDisabled;
+      this.initializeForm();
+    }
+  }
+
+  updateForm() {
     if (!this.formInitialized) {
       this.initializeForm();
     } else if (this.formValuesInput) {
 
       // Get names of changed inputs
-      let changedInput = Object.keys(this.inputHistory)
-        .filter(input => this.inputHistory[input] !== this[input]);
+      let changedInput = Object.keys(this.previousInputs)
+        .filter(input => this.previousInputs[input] !== this[input]);
       let resetFirst = true;
       if (changedInput.length === 1 && changedInput[0] === 'form' &&
         this.formValuesInput.startsWith('form.')
       ) {
         // If only 'form' input changed, get names of changed keys
-        changedInput = Object.keys(this.inputHistory.form || {})
-          .filter(key => !_.isEqual(this.inputHistory.form[key], this.form[key]))
+        changedInput = Object.keys(this.previousInputs.form || {})
+          .filter(key => !_.isEqual(this.previousInputs.form[key], this.form[key]))
           .map(key => `form.${key}`);
         resetFirst = false;
       }
@@ -191,50 +224,39 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
           this.setFormValues(this[input][key], resetFirst);
         }
 
-      // Otherwise, re-render the entire form
-      } else {
+      // If anything else has changed, re-render the entire form
+      } else if (changedInput.length) {
         this.initializeForm();
         if (this.onChange) { this.onChange(this.jsf.formValues); }
         if (this.onTouched) { this.onTouched(this.jsf.formValues); }
       }
 
-      // Save changed inputs
-      Object.keys(this.inputHistory)
-        .filter(input => this.inputHistory[input] !== this[input])
-        .forEach(input => this.inputHistory[input] = this[input]);
+      // Update previous inputs
+      Object.keys(this.previousInputs)
+        .filter(input => this.previousInputs[input] !== this[input])
+        .forEach(input => this.previousInputs[input] = this[input]);
     } else {
       this.initializeForm();
     }
   }
 
-  writeValue(value: any) {
-    this.setFormValues(value, false);
-  }
-
-  registerOnChange(fn: Function) {
-    this.onChange = fn;
-  }
-
-  registerOnTouched(fn: Function) {
-    this.onTouched = fn;
-  }
-
-  setDisabledState(isDisabled: boolean) {
-    if (this.jsf.formOptions.formDisabled !== isDisabled) {
-      this.jsf.formOptions.formDisabled = isDisabled;
-      this.initializeForm();
-    }
-  }
-
   setFormValues(formValues: any, resetFirst = true) {
-    let newFormValues = formValues;
-    if (this.objectWrap && !isObject(formValues)) {
-      newFormValues = { '1': formValues };
+    if (formValues) {
+      let newFormValues = this.objectWrap ? formValues['1'] : formValues;
+      if (!this.jsf.formGroup) {
+        this.jsf.formValues = formValues;
+        this.activateForm();
+      } else if (resetFirst) {
+        this.jsf.formGroup.reset();
+      }
+      if (this.jsf.formGroup) {
+        this.jsf.formGroup.patchValue(newFormValues);
+      }
+      if (this.onChange) { this.onChange(newFormValues); }
+      if (this.onTouched) { this.onTouched(newFormValues); }
+    } else {
+      this.jsf.formGroup.reset();
     }
-    if (resetFirst) { this.jsf.formGroup.reset(); }
-    this.jsf.formGroup.patchValue(newFormValues);
-    if (this.onChange) { this.onChange(newFormValues); }
-    if (this.onTouched) { this.onTouched(newFormValues); }
   }
 
   submitForm() {
@@ -263,7 +285,11 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
    *   the Angular formGroup used to control the reactive form.
    */
   initializeForm() {
-    if (this.schema || this.layout || this.data || this.form || this.JSONSchema || this.UISchema) {
+    if (
+      this.schema || this.layout || this.data || this.form || this.model ||
+      this.JSONSchema || this.UISchema || this.formData || this.ngModel ||
+      this.jsf.data
+    ) {
 
       this.jsf.resetAllValues();  // Reset all form values to defaults
       this.initializeOptions();   // Update options
@@ -312,8 +338,8 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
         // vars.push(this.jsf.dataRecursiveRefMap);
         this.debugOutput = vars.map(v => JSON.stringify(v, null, 2)).join('\n');
       }
+      this.formInitialized = true;
     }
-    this.formInitialized = true;
   }
 
   /**
@@ -457,26 +483,25 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
    * defulat or previously submitted values used to populate form
    * Use first available input:
    * 1. data - recommended
-   * 2. ngModel - Angular Form input style
-   * 3. model - Angular Schema Form style
-   * 4. form.value - JSON Form style
-   * 5. form.data - Single input style
-   * 6. formData - React JSON Schema Form style
-   * 7. form.formData - For easier testing of React JSON Schema Forms
-   * 8. (none) no data - initialize data from schema and layout defaults only
+   * 2. model - Angular Schema Form style
+   * 3. form.value - JSON Form style
+   * 4. form.data - Single input style
+   * 5. formData - React JSON Schema Form style
+   * 6. form.formData - For easier testing of React JSON Schema Forms
+   * 7. (none) no data - initialize data from schema and layout defaults only
    */
   private initializeData() {
     if (hasValue(this.data)) {
       this.jsf.formValues = _.cloneDeep(this.data);
       this.formValuesInput = 'data';
-    } else if (hasValue(this.ngModel)) {
-      this.jsf.AngularSchemaFormCompatibility = true;
-      this.jsf.formValues = _.cloneDeep(this.ngModel);
-      this.formValuesInput = 'ngModel';
     } else if (hasValue(this.model)) {
       this.jsf.AngularSchemaFormCompatibility = true;
       this.jsf.formValues = _.cloneDeep(this.model);
       this.formValuesInput = 'model';
+    } else if (hasValue(this.ngModel)) {
+      this.jsf.AngularSchemaFormCompatibility = true;
+      this.jsf.formValues = _.cloneDeep(this.ngModel);
+      this.formValuesInput = 'ngModel';
     } else if (isObject(this.form) && hasValue(this.form.value)) {
       this.jsf.JsonFormCompatibility = true;
       this.jsf.formValues = _.cloneDeep(this.form.value);

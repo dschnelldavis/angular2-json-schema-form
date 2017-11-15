@@ -1,6 +1,6 @@
 {
   "name": "angular2-json-schema-form",
-  "version": "0.6.0-alpha.1",
+  "version": "0.6.0-alpha.2",
   "author": {
     "name": "David Schnell-Davis",
     "email": "dschnelldavis@gmail.com"
@@ -59,14 +59,14 @@
     "lodash": "4.x"
   },
   "peerDependencies": {
-    "@angular/cdk": "2.x | 5.x",
-    "@angular/common": "4.x | 5.x",
-    "@angular/core": "4.x | 5.x",
-    "@angular/flex-layout": "2.x | 5.x",
-    "@angular/forms": "4.x | 5.x",
-    "@angular/material": "2.x | 5.x",
-    "@angular/platform-browser": "4.x | 5.x",
-    "rxjs": "5.x"
+    "@angular/cdk": ">=2.0.0",
+    "@angular/common": ">=4.0.0",
+    "@angular/core": ">=4.0.0",
+    "@angular/flex-layout": ">=2.0.0",
+    "@angular/forms": ">=4.0.0",
+    "@angular/material": ">=2.0.0",
+    "@angular/platform-browser": ">=4.0.0",
+    "rxjs": ">=5.0.0"
   },
   "devDependencies": {
     "@angular/animations": "^5.0.1",
@@ -85,9 +85,9 @@
     "@angular/platform-browser-dynamic": "^5.0.1",
     "@angular/router": "^5.0.1",
     "@types/ace": "^0.0.35",
-    "@types/jasmine": "^2.6.3",
+    "@types/jasmine": "^2.8.0",
     "@types/jasminewd2": "~2.0.2",
-    "@types/node": "^8.0.50",
+    "@types/node": "^8.0.52",
     "brace": "^0.10.0",
     "camelcase": "^4.0.0",
     "codelyzer": "^4.0.1",
@@ -105,7 +105,7 @@
     "karma-jasmine-html-reporter": "^0.2.2",
     "protractor": "^5.2.0",
     "rimraf": "^2.6.1",
-    "rollup": "^0.51.2",
+    "rollup": "^0.51.5",
     "rollup-plugin-commonjs": "^8.2.6",
     "rollup-plugin-node-resolve": "^3.0.0",
     "rollup-plugin-node-resolve-angular": "^2.0.3",

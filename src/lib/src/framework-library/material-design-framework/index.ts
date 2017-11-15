@@ -20,7 +20,7 @@ import { MaterialTextareaComponent } from './material-textarea.component';
 
 import { MaterialDesignFrameworkComponent } from './material-design-framework.component';
 
-export const MATERIAL_DESIGN_COMPONENTS = [
+export const MATERIAL_FRAMEWORK_COMPONENTS = [
   FlexLayoutRootComponent, FlexLayoutSectionComponent,
   MaterialAddReferenceComponent, MaterialOneOfComponent,
   MaterialButtonComponent, MaterialButtonGroupComponent,

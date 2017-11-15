@@ -40,16 +40,16 @@ export class JsonSchemaFormService {
   ajv: any = new Ajv(this.ajvOptions); // AJV: Another JSON Schema Validator
   validateFormData: any = null; // Compiled AJV function to validate active form's schema
 
-  formValues: any = {}; // The form data (default or previously submitted values)
-  schema: any = {}; // The internal JSON Schema
-  layout: any[] = []; // The internal form layout
-  formGroupTemplate: any = {}; // The template used to create formGroup
-  formGroup: any = null; // The Angular formGroup, which powers the reactive form
-  framework: any = null; // The active framework component
-  formOptions: any; // The active options, used to configure the form
+  formValues: any = {}; // Internal form data (may not have correct types)
+  data: any = {}; // Output form data (formValues, formatted with correct data types)
+  schema: any = {}; // Internal JSON Schema
+  layout: any[] = []; // Internal form layout
+  formGroupTemplate: any = {}; // Template used to create formGroup
+  formGroup: any = null; // Angular formGroup, which powers the reactive form
+  framework: any = null; // Active framework component
+  formOptions: any; // Active options, used to configure the form
 
-  data: any = {}; // Form data, formatted with correct data types
-  validData: any = null; // Valid form data (or null)
+  validData: any = null; // Valid form data (or null) (=== isValid ? data : null)
   isValid: boolean = null; // Is current form data valid?
   ajvErrors: any = null; // Ajv errors for current data
   validationErrors: any = null; // Any validation errors for current data
@@ -78,7 +78,7 @@ export class JsonSchemaFormService {
     formDisabled: false, // Set entire form as disabled? (not editable, and disables outputs)
     formReadonly: false, // Set entire form as read only? (not editable, but outputs still enabled)
     fieldsRequired: false, // (set automatically) Are there any required fields in the form?
-    framework: 'material-design', // The framework to load
+    framework: 'no-framework', // The framework to load
     loadExternalAssets: false, // Load external css and JavaScript for framework?
     pristine: { errors: true, success: true },
     supressPropertyTitles: false,
@@ -117,20 +117,30 @@ export class JsonSchemaFormService {
         pattern: 'Must match pattern: {{requiredPattern}}',
         format: function (error) {
           switch (error.requiredFormat) {
+            case 'date':
+              return 'Must be a date, like "2000-12-31"'
+            case 'time':
+              return 'Must be a time, like "1:59" or "01:59.265"'
             case 'date-time':
-              return 'Must be a date-time, formatted like "2000-12-31" or "2000-03-14T01:59.265"'
+              return 'Must be a date-time, like "2000-12-31" or "2000-03-14T01:59.265"'
             case 'email':
-              return 'Must be an email address, formatted like "name@example.com"'
+              return 'Must be an email address, like "name@example.com"'
             case 'hostname':
-              return 'Must be a hostname, formatted like "example.com"'
+              return 'Must be a hostname, like "example.com"'
             case 'ipv4':
-              return 'Must be an IPv4 address, formatted like "127.0.0.1"'
+              return 'Must be an IPv4 address, like "127.0.0.1"'
             case 'ipv6':
-              return 'Must be an IPv6 address, formatted like "1234:5678:9ABC:DEF0:1234:5678:9ABC:DEF0"'
-            case 'uri': case 'url':
-              return 'Must be a url, formatted like "http://www.example.com/page.html"'
+              return 'Must be an IPv6 address, like "1234:5678:9ABC:DEF0:1234:5678:9ABC:DEF0"'
+            case 'uri': case 'uri-reference': case 'uri-template': case 'url':
+              return 'Must be a url, like "http://www.example.com/page.html"'
+            case 'uuid':
+              return 'Must be a uuid, like ""'
             case 'color':
-              return 'Must be a color, formatted like "#FFFFFF"'
+              return 'Must be a color, like "#FFFFFF" or "rgb(255, 255, 255)"'
+            case 'json-pointer': case 'relative-json-pointer':
+              return 'Must be a JSON Pointer, like "/pointer/to/something"'
+            case 'regex':
+              return 'Must be a regular expression, like "(1-)?\\d{3}-\\d{3}-\\d{4}"'
             default:
               return 'Must be a correctly formatted ' + error.requiredFormat
           }

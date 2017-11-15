@@ -62,7 +62,7 @@ export class FrameworkLibraryService {
   stylesheets: (HTMLStyleElement|HTMLLinkElement)[];
   scripts: HTMLScriptElement[];
   loadExternalAssets = false;
-  defaultFramework = 'material-design';
+  defaultFramework = 'no-framework';
   frameworkLibrary: FrameworkLibrary = {
     'no-framework': {
       framework: NoFrameworkComponent
