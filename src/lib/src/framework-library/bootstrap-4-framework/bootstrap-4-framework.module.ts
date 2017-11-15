@@ -9,11 +9,10 @@ import { FrameworkLibraryService } from '../framework-library.service';
 import { Bootstrap4FrameworkComponent } from './bootstrap-4-framework.component';
 
 @NgModule({
-    imports:          [CommonModule, WidgetLibraryModule],
-    declarations:     [Bootstrap4FrameworkComponent],
-    exports:          [Bootstrap4FrameworkComponent],
-    entryComponents:  [Bootstrap4FrameworkComponent],
-    providers:        [WidgetLibraryService, FrameworkLibraryService]
+  imports:         [ CommonModule, WidgetLibraryModule ],
+  declarations:    [ Bootstrap4FrameworkComponent ],
+  exports:         [ Bootstrap4FrameworkComponent ],
+  entryComponents: [ Bootstrap4FrameworkComponent ],
+  providers:       [ WidgetLibraryService, FrameworkLibraryService ]
 })
-export class Bootstrap4FrameworkModule {
-}
+export class Bootstrap4FrameworkModule { }
