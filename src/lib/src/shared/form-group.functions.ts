@@ -83,6 +83,10 @@ export function buildFormGroupTemplate(
   if (!nodeOptions.has('schemaType')) {
     nodeOptions.set('schemaPointer', schemaPointer);
     nodeOptions.set('schemaType', schema.type);
+    if (schema.format) {
+      nodeOptions.set('schemaFormat', schema.format);
+      if (!schema.type) { nodeOptions.set('schemaType', 'string'); }
+    }
     if (controlType) {
       nodeOptions.set('templatePointer', templatePointer);
       nodeOptions.set('templateType', controlType);
@@ -406,8 +410,7 @@ export function formatFormData(
           inArray(schemaType, ['string', 'integer', 'number', 'boolean'])
         ) {
           const newValue = (fixErrors || (value === null && returnEmptyFields)) ?
-            toSchemaType(value, schemaType) :
-            toJavaScriptType(value, schemaType);
+            toSchemaType(value, schemaType) : toJavaScriptType(value, schemaType);
           if (isDefined(newValue) || returnEmptyFields) {
             JsonPointer.set(formattedData, dataPointer, newValue);
           }
@@ -424,6 +427,19 @@ export function formatFormData(
               JsonPointer.set(formattedData, `${dataPointer}/${key}`, {});
             }
           });
+        }
+        // Finish incomplete 'date-time' entries
+        if (dataMap.get(genericPointer).get('schemaFormat') === 'date-time') {
+          // "2000-03-14T01:59:26.535" -> "2000-03-14T01:59:26.535Z" (add "Z")
+          if (/^\d\d\d\d-[0-1]\d-[0-3]\d[t\s][0-2]\d:[0-5]\d:[0-5]\d(?:\.\d+)?$/i.test(value)) {
+            JsonPointer.set(formattedData, dataPointer, `${value}Z`);
+          // "2000-03-14T01:59" -> "2000-03-14T01:59:00Z" (add ":00Z")
+          } else if (/^\d\d\d\d-[0-1]\d-[0-3]\d[t\s][0-2]\d:[0-5]\d$/i.test(value)) {
+            JsonPointer.set(formattedData, dataPointer, `${value}:00Z`);
+          // "2000-03-14" -> "2000-03-14T00:00:00Z" (add "T00:00:00Z")
+          } else if (fixErrors && /^\d\d\d\d-[0-1]\d-[0-3]\d$/i.test(value)) {
+            JsonPointer.set(formattedData, dataPointer, `${value}:00:00:00Z`);
+          }
         }
       } else if (typeof value !== 'object' || isDate(value) ||
         (value === null && returnEmptyFields)

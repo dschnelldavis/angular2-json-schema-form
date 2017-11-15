@@ -7,6 +7,7 @@
     "inlineSources": true,
     "declaration": true,
     "experimentalDecorators": true,
+    "removeComments": true,
     "suppressImplicitAnyIndexErrors": true,
     "skipLibCheck": true,
     "stripInternal": true,

@@ -120,9 +120,9 @@ export class JsonSchemaFormService {
             case 'date':
               return 'Must be a date, like "2000-12-31"'
             case 'time':
-              return 'Must be a time, like "1:59" or "01:59.265"'
+              return 'Must be a time, like "16:20" or "03:14:15.9265"'
             case 'date-time':
-              return 'Must be a date-time, like "2000-12-31" or "2000-03-14T01:59.265"'
+              return 'Must be a date-time, like "2000-03-14T01:59" or "2000-03-14T01:59:26.535Z"'
             case 'email':
               return 'Must be an email address, like "name@example.com"'
             case 'hostname':
@@ -466,7 +466,9 @@ export class JsonSchemaFormService {
     return Object.keys(errors)
       // Hide 'required' error, unless it is the only one
       .filter(errorKey => errorKey !== 'required' || Object.keys(errors).length === 1)
-      .map(errorKey => typeof errorMessages[errorKey] === 'function' ? // If custom error message is a function, return result
+      .map(errorKey =>
+        // If custom error message is a function, return function result
+        typeof errorMessages[errorKey] === 'function' ?
           errorMessages[errorKey](errors[errorKey]) :
         // If custom error message is a string, replace placeholders and return
         typeof errorMessages[errorKey] === 'string' ?
