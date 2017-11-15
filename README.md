@@ -15,7 +15,7 @@ Note: This is currently a personal proof-of-concept project, and is NOT affiliat
 
 [Check out some examples here.](https://angular2-json-schema-form.firebaseapp.com/)
 
-This example playground features over 70 different JSON Schemas for you to try (including all examples used by each of the three libraries listed above), and the ability to quickly view any example formatted with Material Design or Bootstrap 3, or without any formatting.
+This example playground features over 70 different JSON Schemas for you to try (including all examples used by each of the three libraries listed above), and the ability to quickly view any example formatted with Material Design, Bootstrap 3, Bootstrap 4, or without any formatting.
 
 ## Installation
 
@@ -48,40 +48,14 @@ If you want detailed documentation describing the individual functions used in t
 If, after playing with the examples, you decide this library is functional enough to use in your own project, you can [install it from NPM](https://www.npmjs.com/package/angular2-json-schema-form) using either [NPM](https://www.npmjs.com) or [Yarn](https://yarnpkg.com). To install with NPM, run the following from your terminal:
 
 ```shell
-npm install angular2-json-schema-form --save
-npm install @angular/cdk --save
-npm install @angular/flex-layout --save
-npm install @angular/material --save
+npm install angular2-json-schema-form
 ```
 
-IMPORTANT NOTE ABOUT PEER DEPENDANCIES: For now, Angular Material is a required peer dependency for the current version. This will be fixed in a future version, which will offer separate installers for the Bootstrap and Material Design frameworks. But until that happens, even if you don't intend to use Material Design framework, you will need to install Angular Material and its related modules through NPM for your project to build correctly.
-
-Then import JsonSchemaFormModule in your main application module:
-
-```javascript
-import { JsonSchemaFormModule } from 'angular2-json-schema-form';
-```
-
-If you want to use the Angular Material Design framework, also add:
-
-```javascript
-import { FlexLayoutModule }                   from '@angular/flex-layout';
-import { MatInputModule, MatSelectModule }    from '@angular/material';
-```
-
-(For information about which Angular Material modules to import, check the [Angular Material site](https://material.angular.io/guide/getting-started).)
-
-If you don't want to use the Material Design framework, you don't need to import these modules. (To get the project to build correctly, you need to install the Angular Material libraries through NPM, as described above, but you don't need to actually import them.)
-
-Finally, edit the `imports` array in your @NgModule declaration to add `JsonSchemaFormModule`, and, optionally, the Angular Material modules.
-
-Your final app.module.ts should look something like this:
+Then import JsonSchemaFormModule in your main application module, like this:
 
 ```javascript
 import { BrowserModule }                      from '@angular/platform-browser';
 import { NgModule }                           from '@angular/core';
-import { FlexLayoutModule }                   from '@angular/flex-layout';
-import { MatInputModule, MatSelectModule }    from '@angular/material';
 
 import { JsonSchemaFormModule }               from 'angular2-json-schema-form';
 
@@ -89,30 +63,33 @@ import { AppComponent }                       from './app.component';
 
 @NgModule({
   declarations: [ AppComponent ],
-  imports:      [
-    BrowserModule, FlexLayoutModule, MatInputModule, MatSelectModule, JsonSchemaFormModule
-  ],
+  imports:      [ BrowserModule, JsonSchemaFormModule ],
   providers:    [],
   bootstrap:    [ AppComponent ]
 })
 export class AppModule { }
 ```
 
+#### Seed Application Examples
+
+For complete examples of how to install and configure Angular JSON Schema Form to work with each included display framework, check out the following seed applications:
+
+* [Angular JSON Schema Form Material Design Seed App](https://github.com/dschnelldavis/ng-jsf-material-design-seed)
+* [Angular JSON Schema Form Bootstrap 3 Seed App](https://github.com/dschnelldavis/ng-jsf-bootstrap3-seed)
+* [Angular JSON Schema Form Bootstrap 4 Seed App](https://github.com/dschnelldavis/ng-jsf-bootstrap4-seed)
+
 #### Additional notes for Angular CLI
 
 Make sure you are running the latest version of Angular CLI.
 
-Older versions of Angular CLI (e.g. 1.0.1) may fail with the error `Critical dependency: the request of a dependency is an expression` while trying to compile ajv (Another JSON Schema Validator). But this error has been fixed in newer versions. So if you receive that error, just upgrade your Angular CLI to the latest version.
+Older versions of Angular CLI (e.g. 1.0.1) may fail with the error `Critical dependency: the request of a dependency is an expression` while trying to compile ajv (Another JSON Schema Validator). But this error has been fixed in newer versions. So if you receive that error, upgrade your Angular CLI to the latest version.
 
 #### Additional notes for SystemJS
 
 If you use SystemJS, you will also need to make the following changes to your systemjs.config.js file. (If you're using a recent version of Angular CLI, or you don't have a systemjs.config.js file in your project, that means you're not using SystemJS, and you can safely ignore this section.)
 
-Add these lines to the 'map' section of systemjs.config.js, if they do not already exist:
+Add these lines to the 'map' section of systemjs.config.js:
 ```javascript
-'@angular/animations':       'npm:@angular/animations/bundles/animations.umd.js',
-'@angular/cdk':              'npm:@angular/cdk/bundles/cdk.umd.js',
-'@angular/material':         'npm:@angular/material/bundles/material.umd.js',
 'angular2-json-schema-form': 'npm:angular2-json-schema-form/bundles/angular2-json-schema-form.umd.js',
 'ajv':                       'npm:ajv/dist/ajv.min.js',
 'lodash':                    'npm:lodash/lodash.min.js'
@@ -122,16 +99,20 @@ Add these lines to the 'map' section of systemjs.config.js, if they do not alrea
 
 ### Basic use
 
-For basic use, after loading the JsonSchemaFormModule as described above, to add a form to your Angular component, simply add the following to your component's template:
+For basic use, after loading JsonSchemaFormModule as described above, to display a form in your Angular component, simply add the following to your component's template:
 
 ```html
 <json-schema-form
+  framework="bootstrap-3"
+  loadExternalAssets="true"
   [schema]="yourJsonSchema"
   (onSubmit)="yourOnSubmitFn($event)">
 </json-schema-form>
 ```
 
-Where the `schema` input is a valid JSON schema object (v3 or v4), and the `onSubmit` output calls a function to process the submitted form data, which will be passed as a JSON object. If you don't already have your own schemas, you can find a whole bunch of samples to test with in the `src/demo/assets/example-schemas` folder, as described above.
+Where the `framework` is the name of the display framework to use (`bootstrap-3`, `bootstrap-4`, `material-design`, or `no-framework`), `schema` is a valid JSON schema object, and `onSubmit` calls a function to process the submitted JSON form data. If you don't already have your own schemas, you can find a bunch of samples to test with in the `src/demo/assets/example-schemas` folder, as described above.
+
+(Note: Setting `loadExternalAssets="true"` will automatically load any additional assets needed by the display framework. It is useful when you are trying out this library, but should be removed in production sites, which should instead load all required assets separately. For full details see 'Changing or adding frameworks', below.)
 
 ### Data-only mode
 
@@ -139,6 +120,8 @@ Angular JSON Schema Form can also create a form entirely from a JSON object—wi
 
 ```html
 <json-schema-form
+  framework="bootstrap-4"
+  loadExternalAssets="true"
   [(ngModel)]="exampleJsonObject">
 </json-schema-form>
 ```
@@ -161,7 +144,7 @@ In this mode, Angular JSON Schema Form automatically generates a schema from you
 
 After displaying a form in this mode, you can also use the `formSchema` and `formLayout` outputs (described in 'Debugging inputs and outputs', below), to return the generated schema and layout, which will give you a head start on writing your own schemas and layouts by showing you examples created from your own data.
 
-Also, notice that the 'ngModel' input supports Angular's 2-way data binding, just like other form controls, which is why an onSubmit function was not necessary (though onSubmit is still available for you to add if you want).
+Also, notice that the 'ngModel' input supports Angular's 2-way data binding, just like other form controls, which is why it is not always necessary to use an onSubmit function.
 
 ### Advanced use
 
@@ -174,8 +157,8 @@ For more control over your form, you may provide these additional inputs:
   * `options` - object to set any global options for the form
   * `widgets` to add custom widgets
   * `framework` - string or object to set which framework to use
-    set to 'material-design' (the default), 'bootstrap-3', 'no-framework',
-    or pass in your own custom framework object
+    set to 'bootstrap-3', 'bootstrap-4', 'material-design', or
+    'no-framework' (the default), or pass in your own custom framework object
 
 If you want more detailed output, you may provide additional functions for `onChanges` to read the values in real time as the form is being filled out, and you may implement your own custom validation indicators from the boolean `isValid` or the detailed `validationErrors` outputs.
 
@@ -188,7 +171,7 @@ Here is an example:
   [(data)]="yourData"
   [options]="yourFormOptions"
   [widgets]="yourCustomWidgets"
-  framework="bootstrap-3"
+  framework="material-design"
   loadExternalAssets="true"
   (onChanges)="yourOnChangesFn($event)"
   (onSubmit)="yourOnSubmitFn($event)"
@@ -196,8 +179,6 @@ Here is an example:
   (validationErrors)="yourValidationErrorsFn($event)">
 </json-schema-form>
 ```
-
-(Note: The `loadExternalAssets` attribute may be useful when you are first trying out this library, but do not use it in production sites - instead separately load any required assets. For full details see 'Changing or adding frameworks', below.)
 
 #### Single-input mode
 
@@ -221,7 +202,7 @@ let yourCompoundInputObject = {
 </json-schema-form>
 ```
 
-You can also mix these two styles depending on your needs. In the example playground, all examples use the combined `form` input for `schema`, `layout`, and `data`, which enables each example to control those three inputs, but the playground uses another input for `framework`, enabling you to change the framework separately from the example.
+You can also mix these two styles depending on your needs. In the example playground, all examples use the combined `form` input for `schema`, `layout`, and `data`, which enables each example to control those three inputs, but the playground uses another input for `framework`, enabling you to change the framework independent of the example.
 
 Combining inputs is useful if you have many unique forms and store each form's data and schema together. If you have one form (or many identical forms), it will likely be more useful to use separate inputs for your data and schema—though even in that case, if you use a custom layout, you could store your schema and layout together and use one input for both.
 
@@ -261,7 +242,7 @@ JSON Form (jQuery) compatibility:
 
 Note: 2-way data binding will work with any dedicated data input,
       including 'data', 'model', 'ngModel', or 'formData'.
-      But 2-way binding will not work with the combined 'form' input.
+      However, 2-way binding will _not_ work with the combined 'form' input.
 
 #### Debugging inputs and outputs
 
@@ -275,7 +256,7 @@ Finally, Angular JSON Schema Form includes some additional inputs and outputs fo
 <json-schema-form
   [schema]="yourJsonSchema"
   [debug]="true"
-  [loadExternalAssets]="true"
+  loadExternalAssets="true"
   (formSchema)="showFormSchemaFn($event)"
   (formLayout)="showFormLayoutFn($event)">
 </json-schema-form>
@@ -283,7 +264,7 @@ Finally, Angular JSON Schema Form includes some additional inputs and outputs fo
 
 ## Customizing
 
-In addition to a large number of user-settable options, Angular JSON Schema Form also has the ability to load custom form control widgets and layout frameworks. All forms are constructed from these basic components. The default widget library includes all standard HTML 5 form controls, as well as several common layout patterns, such as multiple checkboxes and tab sets. The default framework library includes templates to style forms using either Bootstrap 3 or Material Design (or plain HTML with no formatting, which is not useful in production, but can be helpful for development and debugging).
+In addition to a large number of user-settable options, Angular JSON Schema Form also has the ability to load custom form control widgets and layout frameworks. All forms are constructed from these basic components. The default widget library includes all standard HTML 5 form controls, as well as several common layout patterns, such as multiple checkboxes and tab sets. The default framework library includes templates to style forms using Material Design, Bootstrap 3, or Bootstrap 4 (or plain HTML with no formatting, which is not useful in production, but can be helpful for development and debugging).
 
 ### User settings
 
@@ -380,7 +361,7 @@ maxProperties    |  object   | maximumProperties,     currentProperties
 minItems         |  array    | minimumItems,          currentItems
 maxItems         |  array    | maximumItems,          currentItems
 uniqueItems      |  array    | duplicateItems
- contains      * |  array    | requiredItem,          currentItems
+ contains      * |  array    | requiredItem
 
 * Note: The contains and dependencies validators are still in development, and do not yet work correctly.
 
@@ -418,11 +399,11 @@ widgetLibrary.registerWidget('input', YourInputWidgetComponent);
 widgetLibrary.registerWidget('custom-control', YourCustomWidgetComponent);
 ```
 
-To see many examples of widgets, explore the source code, or call `getAllWidgets()` from the `WidgetLibraryService` to see all widgets currently available in the library. All default widget components are in the `/src/lib/src/widget-library` folder, and all custom Material Design widget components are in the `/src/lib/src/framework-library/material-design-framework` folder. (The Bootstrap 3 framework just reformats the default widgets, and so does not include any custom widgets if its own.)
+To see many examples of widgets, explore the source code, or call `getAllWidgets()` from the `WidgetLibraryService` to see all widgets currently available in the library. All default widget components are in the `/src/lib/src/widget-library` folder, and all custom Material Design widget components are in the `/src/lib/src/framework-library/material-design-framework` folder. (The Bootstrap 3 and Bootstrap 4 frameworks just reformat the default widgets, and so do not include any custom widgets of their own.)
 
 ### Changing or adding frameworks
 
-To change the active framework, either use the `framework` input of the `<json-schema-form>` tag, or load the `FrameworkLibraryService` and call `setFramework(yourCustomFramework)`, with either the name of an available framework (by default 'material-design', 'bootstrap-3' or 'no-framework'), or with your own custom framework object in the following format:
+To change the active framework, either use the `framework` input of the `<json-schema-form>` tag, or load the `FrameworkLibraryService` and call `setFramework(yourCustomFramework)`, with either the name of an available framework ('bootstrap-3', 'bootstrap-4', 'material-design', or 'no-framework'), or with your own custom framework object, like so:
 
 ```javascript
 import { YourFrameworkComponent } from './your-framework.component';
@@ -469,7 +450,7 @@ However, if you are creating a production site you should load these assets sepa
 
 #### Two approaches to writing your own frameworks
 
-The two built-in frameworks (in the `/src/lib/src/framework-library` folder) demonstrate different strategies for how frameworks can style form elements. The Bootstrap 3 framework is very lightweight and includes no additional widgets (though it does load some external stylesheets and scripts). It works entirely by adding styles to the default widgets. In contrast, the Material Design framework uses the [Material Design for Angular](https://material.angular.io) library to replace most of the default form control widgets with custom widgets from that library.
+The two built-in frameworks (in the `/src/lib/src/framework-library` folder) demonstrate different strategies for how frameworks can style form elements. The Bootstrap 3 and Bootstrap 4 frameworks are very lightweight and include no additional widgets (though they do load some external stylesheets and scripts). They work entirely by adding styles to the default widgets. In contrast, the Material Design framework uses the [Material Design for Angular](https://material.angular.io) library to replace most of the default form control widgets with custom widgets from that library.
 
 ## Contributions and future development
 
@@ -483,7 +464,7 @@ This library is mostly functional (I'm already using it in another large site, w
 
   * TDD tests—The single biggest flaw in this library is that each change or improvement has the potential to break something else (which has already happened several times). Integrating automated tests into the build process would fix that.
 
-  * More frameworks—Not everyone uses Material Design or Bootstrap 3, so it would be great to create framework plug-ins for [Bootstrap 4](https://github.com/ng-bootstrap/ng-bootstrap), [Foundation 6](https://github.com/zurb/foundation-sites), [Semantic UI](https://github.com/vladotesanovic/ngSemantic), or other web design frameworks.
+  * More frameworks—Not everyone uses Material Design, Bootstrap 3, or [Bootstrap 4](https://github.com/ng-bootstrap/ng-bootstrap), so it would be great to create framework plug-ins for [Foundation 6](https://github.com/zurb/foundation-sites), [Semantic UI](https://github.com/vladotesanovic/ngSemantic), or other web design frameworks.
 
   * More widgets—There are lots of great form controls available, such as the [Pikaday calendar](https://github.com/dbushell/Pikaday), [Spectrum color picker](http://bgrins.github.io/spectrum), and [ACE code editor](https://ace.c9.io), which just need small custom wrappers to convert them into Angular JSON Schema Form plug-ins. In addition, there are a few additional features of HTML, JSON Schema, and Material Design which could be fixed by adding new widgets:
 

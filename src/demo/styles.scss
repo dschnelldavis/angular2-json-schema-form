@@ -4,7 +4,7 @@
 $demo-app-primary: mat-palette($mat-blue);
 $demo-app-accent:  mat-palette($mat-amber, A200, A100, A400);
 $demo-app-warn:    mat-palette($mat-red);
-$demo-app-theme: mat-light-theme($demo-app-primary, $demo-app-accent, $demo-app-warn);
+$demo-app-theme:   mat-light-theme($demo-app-primary, $demo-app-accent, $demo-app-warn);
 @include angular-material-theme($demo-app-theme);
 
 $font-family: 'Roboto', 'Noto', 'Helvetica Neue', sans-serif;
