@@ -466,9 +466,7 @@ export class JsonSchemaFormService {
     return Object.keys(errors)
       // Hide 'required' error, unless it is the only one
       .filter(errorKey => errorKey !== 'required' || Object.keys(errors).length === 1)
-      .map(errorKey =>
-        // If custom error message is a function, return result
-        typeof errorMessages[errorKey] === 'function' ?
+      .map(errorKey => typeof errorMessages[errorKey] === 'function' ? // If custom error message is a function, return result
           errorMessages[errorKey](errors[errorKey]) :
         // If custom error message is a string, replace placeholders and return
         typeof errorMessages[errorKey] === 'string' ?
