@@ -12,6 +12,7 @@ import {
   PlainObject, IValidatorFn, AsyncIValidatorFn
 } from './validator.functions';
 import { forEachCopy } from './utility.functions';
+import { jsonSchemaFormatTests, JsonSchemaFormatNames } from './format-regex.constants';
 
 /**
  * 'JsonValidators' class
@@ -53,15 +54,15 @@ import { forEachCopy } from './utility.functions';
  * NOTE / TODO: The dependencies validator is not complete.
  * NOTE / TODO: The contains validator is not complete.
  *
- * Validators not used by JSON Schema, but included for Angular compatibility,
+ * Validators not used by JSON Schema (but included for compatibility)
  * and their JSON Schema equivalents:
  *
- *   Angular function   : JSON Schema equivalent
- *   -------------------:-----------------------
- *     min(number)      :   minimum(number)
- *     max(number)      :   maximum(number)
- *     requiredTrue()   :   const(true)
- *     email()          :   format('email')
+ *   Angular validator | JSON Schema equivalent
+ *   ------------------|-----------------------
+ *     min(number)     |   minimum(number)
+ *     max(number)     |   maximum(number)
+ *     requiredTrue()  |   const(true)
+ *     email()         |   format('email')
  *
  * Validator transformation functions:
  *   composeAnyOf, composeOneOf, composeAllOf, composeNot
@@ -92,10 +93,6 @@ import { forEachCopy } from './utility.functions';
  * Original Angular Validators:
  * https://github.com/angular/angular/blob/master/packages/forms/src/validators.ts
  */
-
-export type JsonSchemaStringFormat =
-  'date-time'|'email'|'hostname'|'ipv4'|'ipv6'|'uri'|'url'|'color';
-
 export class JsonValidators {
 
   /**
@@ -319,14 +316,17 @@ export class JsonValidators {
    * Requires a control to have a value of a certain format.
    *
    * This validator currently checks the following formsts:
-   * 'date-time'|'email'|'hostname'|'ipv4'|'ipv6'|'uri'|'url'|'color'
+   *   date, time, date-time, email, hostname, ipv4, ipv6,
+   *   uri, uri-reference, uri-template, url, uuid, color,
+   *   json-pointer, relative-json-pointer, regex
    *
-   * TODO: add 'regex'format
+   * Fast format regular expressions copied from AJV:
+   * https://github.com/epoberezkin/ajv/blob/master/lib/compile/formats.js
    *
-   * @param {JsonSchemaStringFormat} requiredFormat - format to check
+   * @param {JsonSchemaFormatNames} requiredFormat - format to check
    * @return {IValidatorFn}
    */
-  static format(requiredFormat: JsonSchemaStringFormat): IValidatorFn {
+  static format(requiredFormat: JsonSchemaFormatNames): IValidatorFn {
     if (!hasValue(requiredFormat)) { return JsonValidators.nullValidator; }
     return (control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
@@ -335,36 +335,14 @@ export class JsonValidators {
       if (!isString(currentValue)) {
         isValid = false;
       } else {
-        switch (requiredFormat) {
-          case 'date-time':
-            isValid = !!currentValue.match(/^([0-9]+)-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])[Tt]([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(\.[0-9]+)?(([Zz])|([\+|\-]([01][0-9]|2[0-3]):[0-5][0-9]))$/);
-            break;
-          case 'email':
-            let parts: string[] = currentValue.split('@');
-            isValid =
-              !!parts && parts.length === 2 &&
-              !!parts[0].match(/^(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")$/)
-              &&
-              !!parts[1].match(/(?=.{1,255}$)[0-9A-Za-z](?:(?:[0-9A-Za-z]|\b-){0,61}[0-9A-Za-z])?(?:\.[0-9A-Za-z](?:(?:[0-9A-Za-z]|\b-){0,61}[0-9A-Za-z])?)*\.?/);
-            break;
-          case 'hostname':
-            isValid = !!currentValue.match(/(?=.{1,255}$)[0-9A-Za-z](?:(?:[0-9A-Za-z]|\b-){0,61}[0-9A-Za-z])?(?:\.[0-9A-Za-z](?:(?:[0-9A-Za-z]|\b-){0,61}[0-9A-Za-z])?)*\.?/);
-            break;
-          case 'ipv4':
-            isValid = !!currentValue.match(/^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/);
-            break;
-          case 'ipv6':
-            isValid = !!currentValue.match(/(([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))/);
-            break;
-          case 'uri': case 'url':
-            isValid = !!currentValue.match(/^((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)$/);
-            break;
-          case 'color':
-            isValid = !!currentValue.match(/^#[A-Fa-f0-9]{6}$/);
-            break;
-          default:
-            console.error(`format validator error: "${requiredFormat}" is not a recognized format.`);
-            isValid = true;
+        const formatTest: Function|RegExp = jsonSchemaFormatTests[requiredFormat];
+        if (typeof formatTest === 'object') {
+          isValid = (<RegExp>formatTest).test(currentValue);
+        } else if (typeof formatTest === 'function') {
+          isValid = (<Function>formatTest)(currentValue);
+        } else {
+          console.error(`format validator error: "${requiredFormat}" is not a recognized format.`);
+          isValid = true;
         }
       }
       return xor(isValid, invert) ?
@@ -378,8 +356,8 @@ export class JsonValidators {
    * Requires a control's numeric value to be greater than or equal to
    * a minimum amount.
    *
-   * Any non-numeric value is also valid (because a non-numeric value doesn't
-   * have a minimum, according to the HTML forms spec).
+   * Any non-numeric value is also valid (according to the HTML forms spec,
+   * a non-numeric value doesn't have a minimum).
    * https://www.w3.org/TR/html5/forms.html#attr-input-max
    *
    * @param {number} minimum - minimum allowed value
@@ -401,8 +379,8 @@ export class JsonValidators {
    *
    * Requires a control's numeric value to be less than a maximum amount.
    *
-   * Any non-numeric value is also valid (because a non-numeric value doesn't
-   * have a maximum, according to the HTML forms spec).
+   * Any non-numeric value is also valid (according to the HTML forms spec,
+   * a non-numeric value doesn't have a maximum).
    * https://www.w3.org/TR/html5/forms.html#attr-input-max
    *
    * @param {number} exclusiveMinimumValue - maximum allowed value
@@ -425,8 +403,8 @@ export class JsonValidators {
    * Requires a control's numeric value to be less than or equal to
    * a maximum amount.
    *
-   * Any non-numeric value is also valid (because a non-numeric value doesn't
-   * have a maximum, according to the HTML forms spec).
+   * Any non-numeric value is also valid (according to the HTML forms spec,
+   * a non-numeric value doesn't have a maximum).
    * https://www.w3.org/TR/html5/forms.html#attr-input-max
    *
    * @param {number} maximumValue - maximum allowed value
@@ -448,8 +426,8 @@ export class JsonValidators {
    *
    * Requires a control's numeric value to be less than a maximum amount.
    *
-   * Any non-numeric value is also valid (because a non-numeric value doesn't
-   * have a maximum, according to the HTML forms spec).
+   * Any non-numeric value is also valid (according to the HTML forms spec,
+   * a non-numeric value doesn't have a maximum).
    * https://www.w3.org/TR/html5/forms.html#attr-input-max
    *
    * @param {number} exclusiveMaximumValue - maximum allowed value
