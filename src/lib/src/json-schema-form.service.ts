@@ -26,7 +26,7 @@ export interface TitleMapItem {
   name?: string, value?: any, checked?: boolean, group?: string, items?: TitleMapItem[]
 };
 export interface ErrorMessages {
-  [control_name: string]: { message: string|Function, code: string }[]
+  [control_name: string]: { message: string|Function|Object, code: string }[]
 };
 
 @Injectable()
