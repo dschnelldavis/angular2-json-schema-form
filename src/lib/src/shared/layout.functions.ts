@@ -66,39 +66,45 @@ export function buildLayout(jsf, widgetLibrary) {
           newNode.options.title = fixTitle(newNode.name);
         }
       }
-      // Convert Angular Schema Form (AngularJS) 'validationMessage' to
-      // Angular JSON Schema Form 'validationMessages'
-      // TV4 codes from https://github.com/geraintluff/tv4/blob/master/source/api.js
-      if (!hasOwn(newNode.options, 'validationMessages') && hasOwn(newNode.options, 'validationMessage')) {
-        if (typeof newNode.options.validationMessage === 'string') {
-          newNode.options.validationMessages = newNode.options.validationMessage;
-        } else {
-          newNode.options.validationMessages = {};
-          Object.keys(newNode.options.validationMessage).forEach(key => {
-            const code = key + '';
-            const newKey =
-              code ===  '0'  ? 'type' :
-              code ===  '1'  ? 'enum' :
-              code === '100' ? 'multipleOf' :
-              code === '101' ? 'minimum' :
-              code === '102' ? 'exclusiveMinimum' :
-              code === '103' ? 'maximum' :
-              code === '104' ? 'exclusiveMaximum' :
-              code === '200' ? 'minLength' :
-              code === '201' ? 'maxLength' :
-              code === '202' ? 'pattern' :
-              code === '300' ? 'minProperties' :
-              code === '301' ? 'maxProperties' :
-              code === '302' ? 'required' :
-              code === '304' ? 'dependencies' :
-              code === '400' ? 'minItems' :
-              code === '401' ? 'maxItems' :
-              code === '402' ? 'uniqueItems' :
-              code === '500' ? 'format' : code + '';
-            newNode.options.validationMessages[newKey] = newNode.options.validationMessage[key];
-          });
+      if (!hasOwn(newNode.options, 'validationMessages')) {
+        if (hasOwn(newNode.options, 'errorMessages')) {
+          newNode.options.validationMessages = newNode.options.errorMessages;
+          delete newNode.options.errorMessages;
+
+        // Convert Angular Schema Form (AngularJS) 'validationMessage' to
+        // Angular JSON Schema Form 'validationMessages'
+        // TV4 codes from https://github.com/geraintluff/tv4/blob/master/source/api.js
+        } else if (hasOwn(newNode.options, 'validationMessage')) {
+          if (typeof newNode.options.validationMessage === 'string') {
+            newNode.options.validationMessages = newNode.options.validationMessage;
+          } else {
+            newNode.options.validationMessages = {};
+            Object.keys(newNode.options.validationMessage).forEach(key => {
+              const code = key + '';
+              const newKey =
+                code ===  '0'  ? 'type' :
+                code ===  '1'  ? 'enum' :
+                code === '100' ? 'multipleOf' :
+                code === '101' ? 'minimum' :
+                code === '102' ? 'exclusiveMinimum' :
+                code === '103' ? 'maximum' :
+                code === '104' ? 'exclusiveMaximum' :
+                code === '200' ? 'minLength' :
+                code === '201' ? 'maxLength' :
+                code === '202' ? 'pattern' :
+                code === '300' ? 'minProperties' :
+                code === '301' ? 'maxProperties' :
+                code === '302' ? 'required' :
+                code === '304' ? 'dependencies' :
+                code === '400' ? 'minItems' :
+                code === '401' ? 'maxItems' :
+                code === '402' ? 'uniqueItems' :
+                code === '500' ? 'format' : code + '';
+              newNode.options.validationMessages[newKey] = newNode.options.validationMessage[key];
+            });
+          }
+          delete newNode.options.validationMessage;
         }
-        delete newNode.options.validationMessage;
       }
     } else if (JsonPointer.isJsonPointer(layoutItem)) {
       newNode.dataPointer = layoutItem;
