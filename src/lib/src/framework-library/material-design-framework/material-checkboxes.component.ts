@@ -23,12 +23,12 @@ import { buildFormGroup, buildTitleMap, hasOwn, JsonPointer } from '../../shared
       </mat-checkbox>
       <label *ngIf="options?.title"
         class="title"
-        [class]="options?.labelHtmlClass"
+        [class]="options?.labelHtmlClass || ''"
         [style.display]="options?.notitle ? 'none' : ''"
         [innerHTML]="options?.title"></label>
       <ul class="checkbox-list" [class.horizontal-list]="horizontalList">
         <li *ngFor="let checkboxItem of checkboxList"
-          [class]="options?.htmlClass">
+          [class]="options?.htmlClass || ''">
           <mat-checkbox type="checkbox"
             [(ngModel)]="checkboxItem.checked"
             [color]="options?.color || 'primary'"

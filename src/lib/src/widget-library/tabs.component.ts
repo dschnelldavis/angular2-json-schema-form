@@ -6,10 +6,10 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
   selector: 'tabs-widget',
   template: `
     <ul
-      [class]="options?.labelHtmlClass">
+      [class]="options?.labelHtmlClass || ''">
       <li *ngFor="let item of layoutNode?.items; let i = index"
-        [class]="options?.itemLabelHtmlClass + (selectedItem === i ?
-          (' ' + options?.activeClass + ' ' + options?.style?.selected) :
+        [class]="(options?.itemLabelHtmlClass || '') + (selectedItem === i ?
+          (' ' + (options?.activeClass || '') + ' ' + (options?.style?.selected || '')) :
           (' ' + options?.style?.unselected))"
         role="presentation"
         data-tabs>
@@ -20,10 +20,12 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
     </ul>
 
     <div *ngFor="let layoutItem of layoutNode?.items; let i = index"
-      [class]="options?.htmlClass">
+      [class]="options?.htmlClass || ''">
 
       <select-framework-widget *ngIf="selectedItem === i"
-        [class]="options?.fieldHtmlClass + ' ' + options?.activeClass + ' ' + options?.style?.selected"
+        [class]="(options?.fieldHtmlClass || '') +
+          ' ' + (options?.activeClass || '') +
+          ' ' + (options?.style?.selected || '')"
         [dataIndex]="layoutNode?.dataType === 'array' ? (dataIndex || []).concat(i) : dataIndex"
         [layoutIndex]="(layoutIndex || []).concat(i)"
         [layoutNode]="layoutItem"></select-framework-widget>

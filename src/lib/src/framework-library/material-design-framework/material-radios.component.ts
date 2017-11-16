@@ -11,7 +11,7 @@ import { buildTitleMap } from '../../shared';
       <div *ngIf="options?.title">
         <label
           [attr.for]="'control' + layoutNode?._id"
-          [class]="options?.labelHtmlClass"
+          [class]="options?.labelHtmlClass || ''"
           [style.display]="options?.notitle ? 'none' : ''"
           [innerHTML]="options?.title"></label>
       </div>

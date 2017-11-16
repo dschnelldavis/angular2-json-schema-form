@@ -5,7 +5,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
 @Component({
   selector: 'tab-widget',
   template: `
-    <div [class]="options?.htmlClass">
+    <div [class]="options?.htmlClass || ''">
       <root-widget
         [dataIndex]="dataIndex"
         [layoutIndex]="layoutIndex"

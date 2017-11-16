@@ -8,7 +8,7 @@ import { buildTitleMap, isArray } from '../../shared';
   selector: 'material-select-widget',
   template: `
     <mat-form-field
-      [class]="options?.htmlClass || null"
+      [class]="options?.htmlClass || ''"
       [floatPlaceholder]="options?.floatPlaceholder || (options?.notitle ? 'never' : 'auto')"
       [style.width]="'100%'">
       <span matPrefix *ngIf="options?.prefix || options?.fieldAddonLeft"

@@ -7,7 +7,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
   selector: 'message-widget',
   template: `
     <span *ngIf="message"
-      [class]="options?.labelHtmlClass"
+      [class]="options?.labelHtmlClass || ''"
       [innerHTML]="message"></span>`,
 })
 export class MessageComponent implements OnInit {

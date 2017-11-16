@@ -7,11 +7,11 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
   selector: 'button-widget',
   template: `
     <div
-      [class]="options?.htmlClass">
+      [class]="options?.htmlClass || ''">
       <button
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
-        [class]="options?.fieldHtmlClass"
+        [class]="options?.fieldHtmlClass || ''"
         [disabled]="controlDisabled"
         [name]="controlName"
         [type]="layoutNode?.type"

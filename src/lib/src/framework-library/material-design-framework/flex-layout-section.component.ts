@@ -7,15 +7,14 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
   selector: 'flex-layout-section-widget',
   template: `
     <div *ngIf="containerType === 'div'"
-      [class]="options?.htmlClass"
+      [class]="options?.htmlClass || ''"
       [class.expandable]="options?.expandable && !expanded"
       [class.expanded]="options?.expandable && expanded">
       <label
-        class="title"
-        [class]="options?.labelHtmlClass"
+        [class]="'legend ' + (options?.labelHtmlClass || '')"
         [style.display]="(options?.notitle || !options?.title) ? 'none' : ''"
         [innerHTML]="options?.title"
-        (click)="toggleExpand()"></label>
+        (click)="toggleExpanded()"></label>
       <flex-layout-root-widget *ngIf="expanded"
         [layout]="layoutNode.items"
         [dataIndex]="dataIndex"
@@ -39,16 +38,15 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
     </div>
 
     <fieldset *ngIf="containerType === 'fieldset'"
-      [class]="options?.htmlClass"
+      [class]="options?.htmlClass || ''"
       [class.expandable]="options?.expandable && !expanded"
       [class.expanded]="options?.expandable && expanded"
       [disabled]="options?.readonly">
       <legend
-        class="title"
-        [class]="options?.labelHtmlClass"
+        [class]="'legend ' + (options?.labelHtmlClass || '')"
         [style.display]="(options?.notitle || !options?.title) ? 'none' : ''"
         [innerHTML]="options?.title"
-        (click)="toggleExpand()"></legend>
+        (click)="toggleExpanded()"></legend>
       <flex-layout-root-widget *ngIf="expanded"
         [layout]="layoutNode.items"
         [dataIndex]="dataIndex"
@@ -72,16 +70,15 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
     </fieldset>
 
     <mat-card *ngIf="containerType === 'card'"
-      [class]="options?.htmlClass"
+      [class]="options?.htmlClass || ''"
       [class.expandable]="options?.expandable && !expanded"
       [class.expanded]="options?.expandable && expanded">
       <mat-card-header>
         <legend
-          class="title"
-          [class]="options?.labelHtmlClass"
+          [class]="'legend ' + (options?.labelHtmlClass || '')"
           [style.display]="(options?.notitle || !options?.title) ? 'none' : ''"
           [innerHTML]="options?.title"
-          (click)="toggleExpand()">
+          (click)="toggleExpanded()">
         </legend>
       </mat-card-header>
       <mat-card-content *ngIf="expanded">
@@ -114,7 +111,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
     </mat-card>`,
   styles: [`
     fieldset { border: 0; margin: 0; padding: 0; }
-    .title { font-size: 150%; }
+    .legend { font-weight: bold; }
     .expandable > .legend:before { content: '▶'; padding-right: .3em; }
     .expanded > .legend:before { content: '▼'; padding-right: .2em; }
   `],
@@ -138,7 +135,9 @@ export class FlexLayoutSectionComponent implements OnInit {
 
   ngOnInit() {
     this.jsf.initializeControl(this);
-    this.expanded = !this.options.expandable;
+    this.options = this.layoutNode.options || {};
+    this.expanded = typeof this.options.expanded === 'boolean' ?
+      this.options.expanded : !this.options.expandable;
     switch (this.layoutNode.type) {
       case 'section': case 'array': case 'fieldset': case 'advancedfieldset':
       case 'authfieldset': case 'optionfieldset': case 'selectfieldset':
@@ -152,7 +151,7 @@ export class FlexLayoutSectionComponent implements OnInit {
     }
   }
 
-  toggleExpand() {
+  toggleExpanded() {
     if (this.options.expandable) { this.expanded = !this.expanded; }
   }
 
@@ -171,10 +170,10 @@ export class FlexLayoutSectionComponent implements OnInit {
         return flexActive ? 'flex' : 'initial';
       case 'flex-direction': case 'flex-wrap':
         const index = ['flex-direction', 'flex-wrap'].indexOf(attribute);
-        return ((this.options || {})['flex-flow'] || '').split(/\s+/)[index] ||
-          (this.options || {})[attribute] || ['column', 'nowrap'][index];
+        return (this.options['flex-flow'] || '').split(/\s+/)[index] ||
+          this.options[attribute] || ['column', 'nowrap'][index];
       case 'justify-content': case 'align-items': case 'align-content':
-        return (this.options || {})[attribute];
+        return this.options[attribute];
     }
   }
 }

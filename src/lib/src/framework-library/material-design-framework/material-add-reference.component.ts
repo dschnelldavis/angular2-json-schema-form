@@ -6,7 +6,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
 @Component({
   selector: 'material-add-reference-widget',
   template: `
-    <section [class]="options?.htmlClass" align="end">
+    <section [class]="options?.htmlClass || ''" align="end">
       <button mat-raised-button *ngIf="showAddButton"
         [color]="options?.color || 'accent'"
         [disabled]="options?.readonly"

@@ -6,10 +6,10 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
 @Component({
   selector: 'input-widget',
   template: `
-    <div [class]="options?.htmlClass">
+    <div [class]="options?.htmlClass || ''">
       <label *ngIf="options?.title"
         [attr.for]="'control' + layoutNode?._id"
-        [class]="options?.labelHtmlClass"
+        [class]="options?.labelHtmlClass || ''"
         [style.display]="options?.notitle ? 'none' : ''"
         [innerHTML]="options?.title"></label>
       <input *ngIf="boundControl"
@@ -21,7 +21,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
         [attr.pattern]="options?.pattern"
         [attr.placeholder]="options?.placeholder"
         [attr.required]="options?.required"
-        [class]="options?.fieldHtmlClass"
+        [class]="options?.fieldHtmlClass || ''"
         [id]="'control' + layoutNode?._id"
         [name]="controlName"
         [readonly]="options?.readonly ? 'readonly' : null"
@@ -34,7 +34,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
         [attr.pattern]="options?.pattern"
         [attr.placeholder]="options?.placeholder"
         [attr.required]="options?.required"
-        [class]="options?.fieldHtmlClass"
+        [class]="options?.fieldHtmlClass || ''"
         [disabled]="controlDisabled"
         [id]="'control' + layoutNode?._id"
         [name]="controlName"

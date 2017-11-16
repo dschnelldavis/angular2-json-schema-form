@@ -8,21 +8,21 @@ import { buildTitleMap } from '../shared';
   selector: 'checkboxes-widget',
   template: `
     <label *ngIf="options?.title"
-      [class]="options?.labelHtmlClass"
+      [class]="options?.labelHtmlClass || ''"
       [style.display]="options?.notitle ? 'none' : ''"
       [innerHTML]="options?.title"></label>
 
     <!-- 'horizontal' = checkboxes-inline or checkboxbuttons -->
-    <div *ngIf="layoutOrientation === 'horizontal'" [class]="options?.htmlClass">
+    <div *ngIf="layoutOrientation === 'horizontal'" [class]="options?.htmlClass || ''">
       <label *ngFor="let checkboxItem of checkboxList"
         [attr.for]="'control' + layoutNode?._id + '/' + checkboxItem.value"
-        [class]="options?.itemLabelHtmlClass + (checkboxItem.checked ?
-          (' ' + options?.activeClass + ' ' + options?.style?.selected) :
-          (' ' + options?.style?.unselected))">
+        [class]="(options?.itemLabelHtmlClass || '') + (checkboxItem.checked ?
+          (' ' + (options?.activeClass || '') + ' ' + (options?.style?.selected || '')) :
+          (' ' + (options?.style?.unselected || '')))">
         <input type="checkbox"
           [attr.required]="options?.required"
           [checked]="checkboxItem.checked"
-          [class]="options?.fieldHtmlClass"
+          [class]="options?.fieldHtmlClass || ''"
           [disabled]="controlDisabled"
           [id]="'control' + layoutNode?._id + '/' + checkboxItem.value"
           [name]="checkboxItem?.name"
@@ -35,16 +35,16 @@ import { buildTitleMap } from '../shared';
 
     <!-- 'vertical' = regular checkboxes -->
     <div *ngIf="layoutOrientation === 'vertical'">
-      <div *ngFor="let checkboxItem of checkboxList" [class]="options?.htmlClass">
+      <div *ngFor="let checkboxItem of checkboxList" [class]="options?.htmlClass || ''">
         <label
           [attr.for]="'control' + layoutNode?._id + '/' + checkboxItem.value"
-          [class]="options?.itemLabelHtmlClass + (checkboxItem.checked ?
-            (' ' + options?.activeClass + ' ' + options?.style?.selected) :
-            (' ' + options?.style?.unselected))">
+          [class]="(options?.itemLabelHtmlClass || '') + (checkboxItem.checked ?
+            (' ' + (options?.activeClass || '') + ' ' + (options?.style?.selected || '')) :
+            (' ' + (options?.style?.unselected || '')))">
           <input type="checkbox"
             [attr.required]="options?.required"
             [checked]="checkboxItem.checked"
-            [class]="options?.fieldHtmlClass"
+            [class]="options?.fieldHtmlClass || ''"
             [disabled]="controlDisabled"
             [id]="options?.name + '/' + checkboxItem.value"
             [name]="checkboxItem?.name"

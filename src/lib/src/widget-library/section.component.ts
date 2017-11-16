@@ -6,15 +6,15 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
   selector: 'section-widget',
   template: `
     <div *ngIf="containerType === 'div'"
-      [class]="options?.htmlClass"
+      [class]="options?.htmlClass || ''"
       [class.expandable]="options?.expandable && !expanded"
       [class.expanded]="options?.expandable && expanded">
       <label *ngIf="options?.title"
         class="legend"
-        [class]="options?.labelHtmlClass"
+        [class]="options?.labelHtmlClass || ''"
         [innerHTML]="options?.title"
-        [style.display]="options?.notitle ? 'none' : ''"
-        (click)="expand()"></label>
+        [style.display]="(options?.notitle || !options?.title) ? 'none' : ''"
+        (click)="toggleExpanded()"></label>
         <root-widget *ngIf="expanded"
           [dataIndex]="dataIndex"
           [layout]="layoutNode.items"
@@ -31,16 +31,16 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
           [style.justify-content]="getFlexAttribute('justify-content')"></root-widget>
     </div>
     <fieldset *ngIf="containerType === 'fieldset'"
-      [class]="options?.htmlClass"
+      [class]="options?.htmlClass || ''"
       [class.expandable]="options?.expandable && !expanded"
       [class.expanded]="options?.expandable && expanded"
       [disabled]="options?.readonly">
       <legend
         class="legend"
-        [class]="options?.labelHtmlClass"
+        [class]="options?.labelHtmlClass || ''"
         [innerHTML]="options?.title"
-        [style.display]="legendDisplay()"
-        (click)="expand()"></legend>
+        [style.display]="(options?.notitle || !options?.title) ? 'none' : ''"
+        (click)="toggleExpanded()"></legend>
         <root-widget *ngIf="expanded"
           [dataIndex]="dataIndex"
           [layout]="layoutNode.items"
@@ -57,8 +57,9 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
           [style.justify-content]="getFlexAttribute('justify-content')"></root-widget>
     </fieldset>`,
   styles: [`
-    .expandable > .legend:before { content: '▶'; padding-right: .3em; }
-    .expanded > .legend:before { content: '▼'; padding-right: .2em; }
+    .legend { font-weight: bold; }
+    .expandable > legend:before { content: '▶'; padding-right: .3em; }
+    .expanded > legend:before { content: '▼'; padding-right: .2em; }
   `],
 })
 export class SectionComponent implements OnInit {
@@ -74,6 +75,10 @@ export class SectionComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    this.jsf.initializeControl(this);
+    this.options = this.layoutNode.options || {};
+    this.expanded = typeof this.options.expanded === 'boolean' ?
+      this.options.expanded : !this.options.expandable;
     switch (this.layoutNode.type) {
       case 'fieldset': case 'array': case 'tab': case 'advancedfieldset':
       case 'authfieldset': case 'optionfieldset': case 'selectfieldset':
@@ -83,15 +88,9 @@ export class SectionComponent implements OnInit {
         this.containerType = 'div';
       break;
     }
-    this.options = this.layoutNode.options || {};
-    this.expanded = !this.options.expandable;
   }
 
-  legendDisplay(): string {
-    return this.options.notitle || !this.options.title ? 'none' : '';
-  }
-
-  expand() {
+  toggleExpanded() {
     if (this.options.expandable) { this.expanded = !this.expanded; }
   }
 
@@ -111,7 +110,7 @@ export class SectionComponent implements OnInit {
       case 'flex-direction': case 'flex-wrap':
         const index = ['flex-direction', 'flex-wrap'].indexOf(attribute);
         return (this.options['flex-flow'] || '').split(/\s+/)[index] ||
-          this.options[attribute] || ['row', 'nowrap'][index];
+          this.options[attribute] || ['column', 'nowrap'][index];
       case 'justify-content': case 'align-items': case 'align-content':
         return this.options[attribute];
     }

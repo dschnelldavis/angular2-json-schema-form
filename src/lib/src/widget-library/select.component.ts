@@ -8,10 +8,10 @@ import { buildTitleMap, isArray } from '../shared';
   selector: 'select-widget',
   template: `
     <div
-      [class]="options?.htmlClass">
+      [class]="options?.htmlClass || ''">
       <label *ngIf="options?.title"
         [attr.for]="'control' + layoutNode?._id"
-        [class]="options?.labelHtmlClass"
+        [class]="options?.labelHtmlClass || ''"
         [style.display]="options?.notitle ? 'none' : ''"
         [innerHTML]="options?.title"></label>
       <select *ngIf="boundControl"
@@ -19,7 +19,7 @@ import { buildTitleMap, isArray } from '../shared';
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.required]="options?.required"
-        [class]="options?.fieldHtmlClass"
+        [class]="options?.fieldHtmlClass || ''"
         [id]="'control' + layoutNode?._id"
         [name]="controlName">
         <ng-template ngFor let-selectItem [ngForOf]="selectList">
@@ -40,7 +40,7 @@ import { buildTitleMap, isArray } from '../shared';
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.required]="options?.required"
-        [class]="options?.fieldHtmlClass"
+        [class]="options?.fieldHtmlClass || ''"
         [disabled]="controlDisabled"
         [id]="'control' + layoutNode?._id"
         [name]="controlName"

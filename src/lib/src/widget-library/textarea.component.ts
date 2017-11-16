@@ -7,10 +7,10 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
   selector: 'textarea-widget',
   template: `
     <div
-      [class]="options?.htmlClass">
+      [class]="options?.htmlClass || ''">
       <label *ngIf="options?.title"
         [attr.for]="'control' + layoutNode?._id"
-        [class]="options?.labelHtmlClass"
+        [class]="options?.labelHtmlClass || ''"
         [style.display]="options?.notitle ? 'none' : ''"
         [innerHTML]="options?.title"></label>
       <textarea *ngIf="boundControl"
@@ -22,7 +22,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
         [attr.placeholder]="options?.placeholder"
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.required]="options?.required"
-        [class]="options?.fieldHtmlClass"
+        [class]="options?.fieldHtmlClass || ''"
         [id]="'control' + layoutNode?._id"
         [name]="controlName"></textarea>
       <textarea *ngIf="!boundControl"
@@ -33,7 +33,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
         [attr.placeholder]="options?.placeholder"
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.required]="options?.required"
-        [class]="options?.fieldHtmlClass"
+        [class]="options?.fieldHtmlClass || ''"
         [disabled]="controlDisabled"
         [id]="'control' + layoutNode?._id"
         [name]="controlName"

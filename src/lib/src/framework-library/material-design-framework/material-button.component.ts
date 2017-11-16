@@ -7,7 +7,7 @@ import { hasOwn } from '../../shared/utility.functions';
 @Component({
   selector: 'material-button-widget',
   template: `
-    <div class="button-row" [class]="options?.htmlClass">
+    <div class="button-row" [class]="options?.htmlClass || ''">
       <button mat-raised-button
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"

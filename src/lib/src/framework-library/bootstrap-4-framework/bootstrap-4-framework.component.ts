@@ -15,7 +15,7 @@ import {
   selector: 'bootstrap-3-framework',
   template: `
     <div
-      [class]="options?.htmlClass"
+      [class]="options?.htmlClass || ''"
       [class.has-feedback]="options?.feedback && options?.isInputWidget &&
         (formControl?.dirty || options?.feedbackOnRender)"
       [class.has-error]="options?.enableErrorState && formControl?.errors &&
@@ -38,7 +38,7 @@ import {
 
       <label *ngIf="options?.title && layoutNode?.type !== 'tab'"
         [attr.for]="'control' + layoutNode?._id"
-        [class]="options?.labelHtmlClass"
+        [class]="options?.labelHtmlClass || ''"
         [class.sr-only]="options?.notitle"
         [innerHTML]="options?.title"></label>
       <p *ngIf="layoutNode?.type === 'submit' && jsf?.formOptions?.fieldsRequired">

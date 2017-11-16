@@ -58,7 +58,6 @@
       ]
     },
     { "key": "birthday", "type": "date" },
-    { "key": "notes", "type": "textarea" },
     { "key": "phone_numbers",
       "type": "array",
       "listItems": 3,
@@ -75,6 +74,12 @@
           }
         ]
       } ]
+    },
+    { "type": "section",
+      "title": "Notes",
+      "expandable": true,
+      "expanded": false,
+      "items": [ { "key": "notes", "type": "textarea", "notitle": true } ]
     }
   ],
   "data": {
@@ -90,6 +95,7 @@
     "phone_numbers": [
       { "type": "cell", "number": "702-123-4567" },
       { "type": "work", "number": "702-987-6543" }
-    ]
+    ],
+    "notes": "(This is an example of an uninteresting note.)"
   }
 }

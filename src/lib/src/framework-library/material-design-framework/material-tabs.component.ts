@@ -6,7 +6,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
   selector: 'material-tabs-widget',
   template: `
     <nav mat-tab-nav-bar
-      [attr.aria-label]="options?.label || options?.title"
+      [attr.aria-label]="options?.label || options?.title || ''"
       [style.width]="'100%'">
         <a mat-tab-link *ngFor="let item of layoutNode?.items; let i = index"
           [active]="selectedItem === i"
@@ -16,9 +16,9 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
         </a>
     </nav>
     <div *ngFor="let layoutItem of layoutNode?.items; let i = index"
-      [class]="options?.htmlClass">
+      [class]="options?.htmlClass || ''">
       <select-framework-widget *ngIf="selectedItem === i"
-        [class]="options?.fieldHtmlClass + ' ' + options?.activeClass + ' ' + options?.style?.selected"
+        [class]="(options?.fieldHtmlClass || '') + ' ' + (options?.activeClass || '') + ' ' + (options?.style?.selected || '')"
         [dataIndex]="layoutNode?.dataType === 'array' ? (dataIndex || []).concat(i) : dataIndex"
         [layoutIndex]="(layoutIndex || []).concat(i)"
         [layoutNode]="layoutItem"></select-framework-widget>

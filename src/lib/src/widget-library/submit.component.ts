@@ -8,12 +8,12 @@ import { hasOwn } from '../shared/utility.functions';
   selector: 'submit-widget',
   template: `
     <div
-      [class]="options?.htmlClass">
+      [class]="options?.htmlClass || ''">
       <input
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.required]="options?.required"
-        [class]="options?.fieldHtmlClass"
+        [class]="options?.fieldHtmlClass || ''"
         [disabled]="controlDisabled"
         [id]="'control' + layoutNode?._id"
         [name]="controlName"
