@@ -112,7 +112,21 @@ For basic use, after loading JsonSchemaFormModule as described above, to display
 
 Where the `framework` is the name of the display framework to use (`bootstrap-3`, `bootstrap-4`, `material-design`, or `no-framework`), `schema` is a valid JSON schema object, and `onSubmit` calls a function to process the submitted JSON form data. If you don't already have your own schemas, you can find a bunch of samples to test with in the `src/demo/assets/example-schemas` folder, as described above.
 
-(Note: Setting `loadExternalAssets="true"` will automatically load any additional assets needed by the display framework. It is useful when you are trying out this library, but should be removed in production sites, which should instead load all required assets separately. For full details see 'Changing or adding frameworks', below.)
+Setting `loadExternalAssets="true"` will automatically load any additional assets needed by the display framework. It is useful when you are trying out this library, but should be removed in production sites, which should instead load all required assets separately. For full details see 'Changing or adding frameworks', below.
+
+Note: If you prefer brackets around all your attributes, the following is functionally equivalent:
+
+```html
+<json-schema-form
+  [framework]="'bootstrap-3'"
+  [loadExternalAssets]="true"
+  [schema]="yourJsonSchema"
+  (onSubmit)="yourOnSubmitFn($event)">
+</json-schema-form>
+```
+
+If you use this syntax, make sure to include the nested quotes (`"'` and `'"`) around the framework name.
+
 
 ### Data-only mode
 
@@ -282,7 +296,7 @@ To set messages for individual form controls, add them to that control's node in
 let yourFormLayout = [
   { key: 'name',
     title: 'Enter your name',
-    errorMessages: {
+    validationMessages: {
       // Put your error messages for the 'name' field here
     }
   },
@@ -290,12 +304,12 @@ let yourFormLayout = [
 ]
 ```
 
-To set messages for the entire form, add them to the form options, inside the defautWidgetOptions errorMessages object, like this:
+To set messages for the entire form, add them to the form options, inside the defautWidgetOptions validationMessages object, like this:
 
 ```javascript
 let yourFormOptions = {
   defautWidgetOptions: {
-    errorMessages: {
+    validationMessages: {
       // Put your error messages for the entire form here
     }
   }
@@ -304,7 +318,7 @@ let yourFormOptions = {
 
 #### How to format error messages
 
-The errorMessages object—in either a layout node or the form options—contains the names of each error message you want to set as keys, and the corresponding messages as values. Messages may be in any of the following formats:
+The validationMessages object—in either a layout node or the form options—contains the names of each error message you want to set as keys, and the corresponding messages as values. Messages may be in any of the following formats:
 
  * String: A plain text message, which is always the same.
  * String template: A text message that includes Angular template-style {{variables}}, which will be be replaced with values from the returned error object.
@@ -312,7 +326,7 @@ The errorMessages object—in either a layout node or the form options—contain
 
 Here are examples of all three error message types:
 ```javascript
-errorMessages: {
+validationMessages: {
 
   // String error message
   required: 'This field is required.',

@@ -428,6 +428,7 @@ export function formatFormData(
             }
           });
         }
+
         // Finish incomplete 'date-time' entries
         if (dataMap.get(genericPointer).get('schemaFormat') === 'date-time') {
           // "2000-03-14T01:59:26.535" -> "2000-03-14T01:59:26.535Z" (add "Z")

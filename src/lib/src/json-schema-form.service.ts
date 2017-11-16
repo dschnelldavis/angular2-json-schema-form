@@ -110,7 +110,7 @@ export class JsonSchemaFormService {
       disabled: false, // Set control as disabled? (not editable, and excluded from output)
       readonly: false, // Set control as read only? (not editable, but included in output)
       returnEmptyFields: true, // return values for fields that contain no data?
-      errorMessages: { // Default error messages
+      validationMessages: { // Default error messages
         required: 'This field is required.',
         minLength: 'Must be {{minimumLength}} characters or longer (current length: {{currentLength}})',
         maxLength: 'Must be {{maximumLength}} characters or shorter (current length: {{currentLength}})',
@@ -246,7 +246,7 @@ export class JsonSchemaFormService {
         compiledErrors[error.dataPath].push(error.message);
       });
       return compiledErrors;
-    }
+    };
     this.ajvErrors = this.validateFormData.errors;
     this.validationErrors = compileErrors(this.validateFormData.errors);
     if (updateSubscriptions) {
@@ -429,12 +429,12 @@ export class JsonSchemaFormService {
       ctx.controlValue = ctx.formControl.value;
       ctx.controlDisabled = ctx.formControl.disabled;
       ctx.options.errorMessage = ctx.formControl.status === 'VALID' ? null :
-        this.formatErrors(ctx.formControl.errors, ctx.options.errorMessages);
+        this.formatErrors(ctx.formControl.errors, ctx.options.validationMessages);
       ctx.options.showErrors = this.formOptions.validateOnRender === true ||
         (this.formOptions.validateOnRender === 'auto' && hasValue(ctx.controlValue));
       ctx.formControl.statusChanges.subscribe(status =>
         ctx.options.errorMessage = status === 'VALID' ? null :
-          this.formatErrors(ctx.formControl.errors, ctx.options.errorMessages)
+          this.formatErrors(ctx.formControl.errors, ctx.options.validationMessages)
       );
       ctx.formControl.valueChanges.subscribe(value => {
         if (!_.isEqual(ctx.controlValue, value)) { ctx.controlValue = value }
@@ -450,9 +450,9 @@ export class JsonSchemaFormService {
     return ctx.boundControl;
   }
 
-  formatErrors(errors: any, errorMessages: any = {}): string {
+  formatErrors(errors: any, validationMessages: any = {}): string {
     if (isEmpty(errors)) { return null; }
-    if (!isObject(errorMessages)) { errorMessages = {}; }
+    if (!isObject(validationMessages)) { validationMessages = {}; }
     const addSpaces = string => string[0].toUpperCase() + (string.slice(1) || '')
       .replace(/([a-z])([A-Z])/g, '$1 $2').replace(/_/g, ' ');
     const formatError = (error) => typeof error === 'object' ?
@@ -467,20 +467,22 @@ export class JsonSchemaFormService {
       // Hide 'required' error, unless it is the only one
       .filter(errorKey => errorKey !== 'required' || Object.keys(errors).length === 1)
       .map(errorKey =>
+        // If validationMessages is a string, return it
+        typeof validationMessages === 'string' ? validationMessages :
         // If custom error message is a function, return function result
-        typeof errorMessages[errorKey] === 'function' ?
-          errorMessages[errorKey](errors[errorKey]) :
+        typeof validationMessages[errorKey] === 'function' ?
+          validationMessages[errorKey](errors[errorKey]) :
         // If custom error message is a string, replace placeholders and return
-        typeof errorMessages[errorKey] === 'string' ?
+        typeof validationMessages[errorKey] === 'string' ?
           // Does error message have any {{property}} placeholders?
-          errorMessages[errorKey].indexOf('{{') === -1 ?
-            errorMessages[errorKey] :
+          validationMessages[errorKey].indexOf('{{') === -1 ?
+            validationMessages[errorKey] :
             // Replace {{property}} placeholders with values
             Object.keys(errors[errorKey])
               .reduce((errorMessage, errorProperty) => errorMessage.replace(
                 new RegExp('{{' + errorProperty + '}}', 'g'),
                 errors[errorKey][errorProperty]
-              ), errorMessages[errorKey]) :
+              ), validationMessages[errorKey]) :
           // If no custom error message, return formatted error data instead
           addSpaces(errorKey) + ' Error: ' + formatError(errors[errorKey])
       ).join('<br>');

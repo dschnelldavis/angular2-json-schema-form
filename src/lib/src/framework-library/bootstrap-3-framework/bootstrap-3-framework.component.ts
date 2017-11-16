@@ -270,7 +270,7 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
     this.options.helpBlock = status === 'INVALID' &&
       this.options.enableErrorState && this.formControl.errors &&
       (this.formControl.dirty || this.options.feedbackOnRender) ?
-        this.jsf.formatErrors(this.formControl.errors, this.options.errorMessages) :
+        this.jsf.formatErrors(this.formControl.errors, this.options.validationMessages) :
         this.options.description || this.options.help || null;
   }
 
