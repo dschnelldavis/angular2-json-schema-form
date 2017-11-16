@@ -1,4 +1,4 @@
-// AJV fast format regular expressions from:
+// updated from AJV fast format regular expressions:
 // https://github.com/epoberezkin/ajv/blob/master/lib/compile/formats.js
 
 export const jsonSchemaFormatTests = {
@@ -7,6 +7,8 @@ export const jsonSchemaFormatTests = {
 
   'time': /^[0-2]\d:[0-5]\d:[0-5]\d(?:\.\d+)?(?:z|[+-]\d\d:\d\d)?$/i,
 
+  // Modified to allow incomplete entries, such as
+  // "2000-03-14T01:59:26.535" (needs "Z") or "2000-03-14T01:59" (needs ":00Z")
   'date-time': /^\d\d\d\d-[0-1]\d-[0-3]\d[t\s][0-2]\d:[0-5]\d(?::[0-5]\d)?(?:\.\d+)?(?:z|[+-]\d\d:\d\d)?$/i,
 
   // email (sources from jsen validator):

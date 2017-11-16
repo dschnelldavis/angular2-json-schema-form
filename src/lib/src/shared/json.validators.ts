@@ -331,19 +331,21 @@ export class JsonValidators {
     return (control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
       let isValid: boolean;
-      let currentValue: string = control.value;
-      if (!isString(currentValue)) {
-        isValid = false;
-      } else {
+      let currentValue: string|Date = control.value;
+      if (isString(currentValue)) {
         const formatTest: Function|RegExp = jsonSchemaFormatTests[requiredFormat];
         if (typeof formatTest === 'object') {
-          isValid = (<RegExp>formatTest).test(currentValue);
+          isValid = (<RegExp>formatTest).test(<string>currentValue);
         } else if (typeof formatTest === 'function') {
-          isValid = (<Function>formatTest)(currentValue);
+          isValid = (<Function>formatTest)(<string>currentValue);
         } else {
           console.error(`format validator error: "${requiredFormat}" is not a recognized format.`);
           isValid = true;
         }
+      } else {
+        // Allow JavaScript Date objects
+        isValid = ['date', 'time', 'date-time'].includes(requiredFormat) &&
+          Object.prototype.toString.call(currentValue) === '[object Date]';
       }
       return xor(isValid, invert) ?
         null : { 'format': { requiredFormat, currentValue } };
