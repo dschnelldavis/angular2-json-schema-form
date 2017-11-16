@@ -224,7 +224,7 @@ export class JsonSchemaFormService {
         for (const error of value) {
           const err = {};
           err[error['code']] = error['message'];
-          this.formGroup.get(key).setErrors(err);
+          this.formGroup.get(key).setErrors(err, {emitEvent: true});
         }
       }
     });
