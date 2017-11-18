@@ -3,23 +3,25 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import {
-  MatButtonModule, MatButtonToggleModule, MatCardModule, MatCheckboxModule,
-  MatDatepickerModule, MatFormFieldModule, MatGridListModule, MatIconModule,
-  MatInputModule, MatNativeDateModule, MatRadioModule, MatSelectModule,
-  MatSliderModule, MatSlideToggleModule, MatTabsModule, MatTooltipModule,
+  MatAutocompleteModule, MatButtonModule, MatButtonToggleModule, MatCardModule,
+  MatCheckboxModule, MatChipsModule, MatDatepickerModule, MatExpansionModule,
+  MatFormFieldModule, MatIconModule, MatInputModule, MatNativeDateModule,
+  MatRadioModule, MatSelectModule, MatSliderModule, MatSlideToggleModule,
+  MatStepperModule, MatTabsModule, MatTooltipModule,
 } from '@angular/material';
 export const ANGULAR_MATERIAL_MODULES = [
-  MatButtonModule, MatButtonToggleModule, MatCardModule, MatCheckboxModule,
-  MatDatepickerModule, MatFormFieldModule, MatGridListModule, MatIconModule,
-  MatInputModule, MatNativeDateModule, MatRadioModule, MatSelectModule,
-  MatSliderModule, MatSlideToggleModule, MatTabsModule, MatTooltipModule,
+  MatAutocompleteModule, MatButtonModule, MatButtonToggleModule, MatCardModule,
+  MatCheckboxModule, MatChipsModule, MatDatepickerModule, MatExpansionModule,
+  MatFormFieldModule, MatIconModule, MatInputModule, MatNativeDateModule,
+  MatRadioModule, MatSelectModule, MatSliderModule, MatSlideToggleModule,
+  MatStepperModule, MatTabsModule, MatTooltipModule,
 ];
 /**
  * unused @angular/material modules:
- * MatAutocompleteModule, MatChipsModule, MatDialogModule, MatExpansionModule,
- * MatListModule, MatMenuModule, MatPaginatorModule, MatProgressBarModule,
- * MatProgressSpinnerModule, MatSidenavModule, MatSnackBarModule,
- * MatSortModule, MatTableModule, MatToolbarModule, MatStepperModule,
+ * MatDialogModule, MatGridListModule, MatListModule, MatMenuModule,
+ * MatPaginatorModule, MatProgressBarModule, MatProgressSpinnerModule,
+ * MatSidenavModule, MatSnackBarModule, MatSortModule, MatTableModule,
+ * MatToolbarModule,
  */
 
 import { WidgetLibraryModule } from '../../widget-library/widget-library.module';

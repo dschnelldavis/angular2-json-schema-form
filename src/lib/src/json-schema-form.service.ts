@@ -118,31 +118,35 @@ export class JsonSchemaFormService {
         format: function (error) {
           switch (error.requiredFormat) {
             case 'date':
-              return 'Must be a date, like "2000-12-31"'
+              return 'Must be a date, like "2000-12-31"';
             case 'time':
-              return 'Must be a time, like "16:20" or "03:14:15.9265"'
+              return 'Must be a time, like "16:20" or "03:14:15.9265"';
             case 'date-time':
-              return 'Must be a date-time, like "2000-03-14T01:59" or "2000-03-14T01:59:26.535Z"'
+              return 'Must be a date-time, like "2000-03-14T01:59" or "2000-03-14T01:59:26.535Z"';
             case 'email':
-              return 'Must be an email address, like "name@example.com"'
+              return 'Must be an email address, like "name@example.com"';
             case 'hostname':
-              return 'Must be a hostname, like "example.com"'
+              return 'Must be a hostname, like "example.com"';
             case 'ipv4':
-              return 'Must be an IPv4 address, like "127.0.0.1"'
+              return 'Must be an IPv4 address, like "127.0.0.1"';
             case 'ipv6':
-              return 'Must be an IPv6 address, like "1234:5678:9ABC:DEF0:1234:5678:9ABC:DEF0"'
-            case 'uri': case 'uri-reference': case 'uri-template': case 'url':
-              return 'Must be a url, like "http://www.example.com/page.html"'
+              return 'Must be an IPv6 address, like "1234:5678:9ABC:DEF0:1234:5678:9ABC:DEF0"';
+            // TODO: add examples for 'uri', 'uri-reference', and 'uri-template'
+            // case 'uri': case 'uri-reference': case 'uri-template':
+            case 'url':
+              return 'Must be a url, like "http://www.example.com/page.html"';
             case 'uuid':
-              return 'Must be a uuid, like ""'
+              return 'Must be a uuid, like "12345678-9ABC-DEF0-1234-56789ABCDEF0"';
             case 'color':
-              return 'Must be a color, like "#FFFFFF" or "rgb(255, 255, 255)"'
-            case 'json-pointer': case 'relative-json-pointer':
-              return 'Must be a JSON Pointer, like "/pointer/to/something"'
+              return 'Must be a color, like "#FFFFFF" or "rgb(255, 255, 255)"';
+            case 'json-pointer':
+              return 'Must be a JSON Pointer, like "/pointer/to/something"';
+            case 'relative-json-pointer':
+              return 'Must be a relative JSON Pointer, like "2/pointer/to/something"';
             case 'regex':
-              return 'Must be a regular expression, like "(1-)?\\d{3}-\\d{3}-\\d{4}"'
+              return 'Must be a regular expression, like "(1-)?\\d{3}-\\d{3}-\\d{4}"';
             default:
-              return 'Must be a correctly formatted ' + error.requiredFormat
+              return 'Must be a correctly formatted ' + error.requiredFormat;
           }
         },
         minimum: 'Must be {{minimumValue}} or more',
@@ -224,7 +228,7 @@ export class JsonSchemaFormService {
         for (const error of value) {
           const err = {};
           err[error['code']] = error['message'];
-          this.formGroup.get(key).setErrors(err, {emitEvent: true});
+          this.formGroup.get(key).setErrors(err, { emitEvent: true });
         }
       }
     });
@@ -279,8 +283,8 @@ export class JsonSchemaFormService {
 
   setOptions(newOptions: any) {
     if (isObject(newOptions)) {
-      const addOptions = { ...newOptions }
-      // Provide backward compatibility for 'defaultOptions' (old name for 'defautWidgetOptions')
+      const addOptions = _.cloneDeep(newOptions);
+      // Backward compatibility for 'defaultOptions' (renamed 'defautWidgetOptions')
       if (isObject(addOptions.defaultOptions)) {
         Object.assign(this.formOptions.defautWidgetOptions, addOptions.defaultOptions);
         delete addOptions.defaultOptions;
@@ -291,7 +295,7 @@ export class JsonSchemaFormService {
       }
       Object.assign(this.formOptions, addOptions);
 
-      // convert disableErrorState / disableSuccessState to enable...State
+      // convert disableErrorState / disableSuccessState to enable...
       const globalDefaults = this.formOptions.defautWidgetOptions;
       ['ErrorState', 'SuccessState']
         .filter(suffix => hasOwn(globalDefaults, 'disable' + suffix))

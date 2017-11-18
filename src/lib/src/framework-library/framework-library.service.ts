@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@angular/core';
 import { WidgetLibraryService } from '../widget-library/widget-library.service';
 import { hasOwn } from '../shared/utility.functions';
 
-// No framework - unmodified HTML controls, with styles from layout only
+// No framework - plain HTML controls (styles from form layout only)
 import { NoFrameworkComponent } from './no-framework.component';
 
 // Bootstrap 3 Framework
@@ -11,6 +11,7 @@ import { NoFrameworkComponent } from './no-framework.component';
 import { Bootstrap3FrameworkComponent } from './bootstrap-3-framework/bootstrap-3-framework.component';
 
 // Bootstrap 4 Framework
+// https://github.com/ng-bootstrap/ng-bootstrap
 import { Bootstrap4FrameworkComponent } from './bootstrap-4-framework/bootstrap-4-framework.component';
 
 // Material Design Framework
@@ -36,13 +37,12 @@ import { MaterialTabsComponent } from './material-design-framework/material-tabs
 import { MaterialTextareaComponent } from './material-design-framework/material-textarea.component';
 import { MaterialDesignFrameworkComponent } from './material-design-framework/material-design-framework.component';
 
-// Suggested future frameworks:
-// - Bootstrap 4:
-//   https://github.com/ng-bootstrap/ng-bootstrap
-//   http://v4-alpha.getbootstrap.com/components/forms/
+// Possible future frameworks:
 // - Foundation 6:
+//   http://justindavis.co/2017/06/15/using-foundation-6-in-angular-4/
 //   https://github.com/zurb/foundation-sites
 // - Semantic UI:
+//   https://github.com/edcarroll/ng2-semantic-ui
 //   https://github.com/vladotesanovic/ngSemantic
 
 export interface Framework {
@@ -70,35 +70,38 @@ export class FrameworkLibraryService {
     'material-design': {
       framework: MaterialDesignFrameworkComponent,
       widgets: {
-        'root':         FlexLayoutRootComponent,
-        'section':      FlexLayoutSectionComponent,
-        '$ref':         MaterialAddReferenceComponent,
-        'one-of':       MaterialOneOfComponent,
-        'number':       MaterialNumberComponent,
-        'slider':       MaterialSliderComponent,
-        'text':         MaterialInputComponent,
-        'date':         MaterialDatepickerComponent,
-        'file':         MaterialFileComponent,
-        'checkbox':     MaterialCheckboxComponent,
-        'button':       MaterialButtonComponent,
-        'buttonGroup':  MaterialButtonGroupComponent,
-        'select':       MaterialSelectComponent,
-        'textarea':     MaterialTextareaComponent,
-        'checkboxes':   MaterialCheckboxesComponent,
-        'chip-list':    MaterialChipListComponent,
-        'radios':       MaterialRadiosComponent,
-        'stepper':      MaterialStepperComponent,
-        'tabs':         MaterialTabsComponent,
-        'card':         'section',
-        'alt-date':     'date',
-        'range':        'slider',
-        'submit':       'button',
-        'radiobuttons': 'buttonGroup',
-        'color':        'none',
-        'hidden':       'none',
-        'image':        'none',
-        'tagsinput':    'chip-list',
-        'wizard':       'stepper',
+        'root':            FlexLayoutRootComponent,
+        'section':         FlexLayoutSectionComponent,
+        '$ref':            MaterialAddReferenceComponent,
+        'button':          MaterialButtonComponent,
+        'button-group':    MaterialButtonGroupComponent,
+        'checkbox':        MaterialCheckboxComponent,
+        'checkboxes':      MaterialCheckboxesComponent,
+        'chip-list':       MaterialChipListComponent,
+        'date':            MaterialDatepickerComponent,
+        'file':            MaterialFileComponent,
+        'number':          MaterialNumberComponent,
+        'one-of':          MaterialOneOfComponent,
+        'radios':          MaterialRadiosComponent,
+        'select':          MaterialSelectComponent,
+        'slider':          MaterialSliderComponent,
+        'stepper':         MaterialStepperComponent,
+        'tabs':            MaterialTabsComponent,
+        'text':            MaterialInputComponent,
+        'textarea':        MaterialTextareaComponent,
+        'alt-date':        'date',
+        'any-of':          'one-of',
+        'card':            'section',
+        'color':           'text',
+        'expansion-panel': 'section',
+        'hidden':          'none',
+        'image':           'none',
+        'integer':         'number',
+        'radiobuttons':    'button-group',
+        'range':           'slider',
+        'submit':          'button',
+        'tagsinput':       'chip-list',
+        'wizard':          'stepper',
       },
       stylesheets: [
         '//fonts.googleapis.com/icon?family=Material+Icons',
@@ -118,16 +121,16 @@ export class FrameworkLibraryService {
       ],
     },
     'bootstrap-4': {
-        framework: Bootstrap4FrameworkComponent,
-        stylesheets: [
-            '//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css'
-        ],
-        scripts: [
-            '//code.jquery.com/jquery-3.2.1.slim.min.js',
-            '//cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js',
-            '//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js',
-        ],
-      }
+      framework: Bootstrap4FrameworkComponent,
+      stylesheets: [
+        '//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css'
+      ],
+      scripts: [
+        '//code.jquery.com/jquery-3.2.1.slim.min.js',
+        '//cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js',
+        '//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js',
+      ],
+    }
   };
 
   constructor(

@@ -48,6 +48,10 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
         [innerHTML]="options?.suffix || options?.fieldAddonRight"></span>
       <mat-hint *ngIf="options?.description && (!options?.showErrors || !options?.errorMessage)"
         align="end" [innerHTML]="options?.description"></mat-hint>
+      <mat-autocomplete *ngIf="options?.typeahead?.source">
+        <mat-option *ngFor="let word of options?.typeahead?.source"
+          [value]="word">{{word}}</mat-option>
+      </mat-autocomplete>
     </mat-form-field>
     <mat-error *ngIf="options?.showErrors && options?.errorMessage"
       [innerHTML]="options?.errorMessage"></mat-error>`,

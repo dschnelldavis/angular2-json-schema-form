@@ -78,13 +78,11 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
           [class]="'legend ' + (options?.labelHtmlClass || '')"
           [style.display]="(options?.notitle || !options?.title) ? 'none' : ''"
           [innerHTML]="options?.title"
-          (click)="toggleExpanded()">
-        </legend>
+          (click)="toggleExpanded()"></legend>
       </mat-card-header>
       <mat-card-content *ngIf="expanded">
-        <fieldset
-          [disabled]="options?.readonly">
-          <flex-layout-root-widget
+        <fieldset [disabled]="options?.readonly">
+          <flex-layout-root-widget *ngIf="expanded"
             [layout]="layoutNode.items"
             [dataIndex]="dataIndex"
             [layoutIndex]="layoutIndex"
@@ -108,7 +106,43 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
         <mat-error *ngIf="options?.showErrors && options?.errorMessage"
           [innerHTML]="options?.errorMessage"></mat-error>
       </mat-card-footer>
-    </mat-card>`,
+    </mat-card>
+
+    <mat-expansion-panel *ngIf="containerType === 'expansion-panel'"
+      [expanded]="expanded"
+      [hideToggle]="!options?.expandable">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <legend
+            [class]="options?.labelHtmlClass"
+            [style.display]="(options?.notitle || !options?.title) ? 'none' : ''"
+            [innerHTML]="options?.title"
+            (click)="toggleExpanded()"></legend>
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <fieldset [disabled]="options?.readonly">
+        <flex-layout-root-widget *ngIf="expanded"
+          [layout]="layoutNode.items"
+          [dataIndex]="dataIndex"
+          [layoutIndex]="layoutIndex"
+          [isFlexItem]="getFlexAttribute('is-flex')"
+          [class.form-flex-column]="getFlexAttribute('flex-direction') === 'column'"
+          [class.form-flex-row]="getFlexAttribute('flex-direction') === 'row'"
+          [style.display]="getFlexAttribute('display')"
+          [style.flex-direction]="getFlexAttribute('flex-direction')"
+          [style.flex-wrap]="getFlexAttribute('flex-wrap')"
+          [style.justify-content]="getFlexAttribute('justify-content')"
+          [style.align-items]="getFlexAttribute('align-items')"
+          [style.align-content]="getFlexAttribute('align-content')"
+          [fxLayout]="options?.fxLayout"
+          [fxLayoutWrap]="options?.fxLayoutWrap"
+          [fxLayoutGap]="options?.fxLayoutGap"
+          [fxLayoutAlign]="options?.fxLayoutAlign"
+          [attr.fxFlexFill]="options?.fxLayoutAlign"></flex-layout-root-widget>
+      </fieldset>
+      <mat-error *ngIf="options?.showErrors && options?.errorMessage"
+        [innerHTML]="options?.errorMessage"></mat-error>
+    </mat-expansion-panel>`,
   styles: [`
     fieldset { border: 0; margin: 0; padding: 0; }
     .legend { font-weight: bold; }
@@ -146,7 +180,10 @@ export class FlexLayoutSectionComponent implements OnInit {
       case 'card':
         this.containerType = 'card';
       break;
-      default: // 'div', 'flex', 'tab', 'conditional', 'actions', 'tagsinput'
+      case 'expansion-panel':
+        this.containerType = 'expansion-panel';
+      break;
+      default: // 'div', 'flex', 'tab', 'conditional', 'actions'
         this.containerType = 'div';
     }
   }

@@ -3,7 +3,7 @@ import { ChangeDetectorRef, Component, Input, OnChanges, OnInit } from '@angular
 import * as _ from 'lodash';
 
 import { JsonSchemaFormService } from '../../json-schema-form.service';
-import { hasOwn, isArray, toTitleCase } from '../../shared';
+import { hasOwn, isArray, isDefined, toTitleCase } from '../../shared';
 
 @Component({
   selector: 'material-design-framework',
@@ -68,7 +68,6 @@ import { hasOwn, isArray, toTitleCase } from '../../shared';
 })
 export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
   frameworkInitialized = false;
-  controlType: string;
   inputType: string;
   options: any; // Options used in this framework
   widgetLayoutNode: any; // layoutNode passed to child widget
@@ -111,7 +110,7 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
 
   initializeFramework() {
     if (this.layoutNode) {
-      this.options = _.cloneDeep(this.layoutNode.options);
+      this.options = _.cloneDeep(this.layoutNode.options || {});
       this.widgetLayoutNode = {
         ...this.layoutNode,
         options: _.cloneDeep(this.layoutNode.options || {})
@@ -119,109 +118,18 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
       this.widgetOptions = this.widgetLayoutNode.options;
       this.formControl = this.jsf.getFormControl(this);
 
-      if (this.widgetOptions) {
-        if (this.widgetOptions.minimum && this.widgetOptions.maximum) {
-          this.layoutNode.type = 'range';
-        }
+      if (
+        isDefined(this.widgetOptions.minimum) &&
+        isDefined(this.widgetOptions.maximum) &&
+        this.widgetOptions.multipleOf >= 1
+      ) {
+        this.layoutNode.type = 'range';
       }
 
-      // Set control type and associated settings
-      switch (this.layoutNode.type) {
-
-        case 'text':     case 'email':
-        case 'integer':  case 'url':    case 'datetime':       case 'time':
-        case 'number':   case 'search': case 'date-time':      case 'week':
-        case 'updown':   case 'tel':    case 'alt-datetime':   case 'month':
-        case 'password':                case 'datetime-local':
-          this.controlType = 'input';
-          if (this.layoutNode.type === 'integer') {
-            this.inputType = 'number'
-          } else {
-            this.layoutNode.type = {
-              'updown'       : 'number',
-              'alt-date'     : 'date',
-              'datetime'     : 'datetime-local',
-              'date-time'    : 'datetime-local',
-              'alt-datetime' : 'datetime-local',
-            }[this.layoutNode.type] || this.layoutNode.type;
-            this.inputType = this.layoutNode.type;
-          }
-        break;
-
-        case 'date': case 'alt-date':
-          this.controlType = 'date';
-          if (this.layoutNode.type === 'alt-date') {
-            this.layoutNode.type = 'date';
-          }
-        break;
-
-        case 'hidden': case 'color': case 'image':
-          this.controlType = 'none';
-          // TODO: add apropriate widgets for hidden, color, and image
-        break
-
-        case 'range':
-          this.controlType = 'slider';
-        break;
-
-        case 'textarea':
-          this.controlType = 'textarea';
-        break;
-
-        case 'file':
-          this.controlType = 'file';
-        break;
-
-        case 'select':
-          this.controlType = 'select';
-        break;
-
-        case 'checkbox':
-          this.controlType = 'checkbox';
-        break;
-
-        case 'checkboxes': case 'checkboxes-inline': case 'checkboxbuttons':
-          this.controlType = 'checkboxes';
-        break;
-
-        case 'radio': case 'radios': case 'radios-inline':
-          this.controlType = 'radios';
-        break;
-
-        case 'radiobuttons':
-          this.controlType = 'buttonGroup';
-          // TODO: update buttonGroup to also handle checkboxbuttons
-        break;
-
-        case 'reset': case 'submit': case 'button':
-          this.controlType = 'button';
-        break;
-
-        case 'fieldset': case 'conditional':    case 'actions':
-        case 'array':    case 'authfieldset':   case 'optionfieldset':
-        case 'tab':      case 'selectfieldset': case 'advancedfieldset':
-        case 'section':  case 'wizard':
-          this.controlType = 'section';
-        break;
-
-        case 'tabs': case 'tabarray':
-          this.controlType = 'tabs';
-        break;
-
-        case 'help': case 'message': case 'msg': case 'html':
-          this.controlType = 'message';
-        break;
-
-        case 'template':
-          this.controlType = 'template';
-        break;
-
-        default:
-          this.controlType = this.layoutNode.type;
-      }
-
-      if (this.controlType !== 'tabs' &&
-        ((this.widgetOptions || {}).title || '').indexOf('{{') > -1
+      if (
+        this.layoutNode.type !== 'tabs' &&
+        this.layoutNode.type !== 'tabarray' &&
+        (this.widgetOptions.title || '').indexOf('{{') > -1
       ) {
         this.dynamicTitle = this.widgetOptions.title;
         this.updateTitle();
@@ -230,9 +138,11 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
       if (this.layoutNode.arrayItem && this.layoutNode.type !== '$ref') {
         this.parentArray = this.jsf.getParentNode(this);
         if (this.parentArray) {
-          this.isOrderable = this.parentArray.type.slice(0, 3) !== 'tab' &&
+          this.isOrderable =
+            this.parentArray.type.slice(0, 3) !== 'tab' &&
             this.layoutNode.arrayItemType === 'list' &&
-            !this.widgetOptions.readonly && this.parentArray.options.orderable;
+            !this.widgetOptions.readonly &&
+            this.parentArray.options.orderable;
         }
       }
 
