@@ -694,9 +694,11 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
         this.onChanges.emit(this.objectWrap ? data['1'] : data)
       );
       if (this.formValuesInput && this.formValuesInput.indexOf('.') === -1) {
-        this.jsf.dataChanges.subscribe(data =>
-          this[`${this.formValuesInput}Change`].emit(this.objectWrap ? data['1'] : data)
-        );
+        this.jsf.dataChanges.subscribe(data => {
+          if (this.formValuesInput) {
+            this[`${this.formValuesInput}Change`].emit(this.objectWrap ? data['1'] : data)
+          }
+        });
       }
 
       // Trigger change detection on statusChanges to show updated errors
