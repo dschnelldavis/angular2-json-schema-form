@@ -14,7 +14,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
         role="presentation"
         data-tabs>
         <a *ngIf="showAddTab || item.type !== '$ref'"
-          [innerHTML]="setTitle(item, i)"
+          [innerHTML]="setTabTitle(item, i)"
           (click)="select(i)"></a>
       </li>
     </ul>
@@ -74,7 +74,7 @@ export class TabsComponent implements OnInit {
     }
   }
 
-  setTitle(item: any, index: number): string {
-    return this.jsf.setTitle(this, item, index);
+  setTabTitle(item: any, index: number): string {
+    return this.jsf.setArrayItemTitle(this, item, index);
   }
 }

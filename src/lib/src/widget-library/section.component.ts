@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 
+import { toTitleCase } from '../shared';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 
 @Component({
@@ -9,52 +10,50 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
       [class]="options?.htmlClass || ''"
       [class.expandable]="options?.expandable && !expanded"
       [class.expanded]="options?.expandable && expanded">
-      <label *ngIf="options?.title"
+      <label *ngIf="sectionTitle"
         class="legend"
         [class]="options?.labelHtmlClass || ''"
-        [innerHTML]="options?.title"
-        [style.display]="(options?.notitle || !options?.title) ? 'none' : ''"
+        [innerHTML]="sectionTitle"
         (click)="toggleExpanded()"></label>
-        <root-widget *ngIf="expanded"
-          [dataIndex]="dataIndex"
-          [layout]="layoutNode.items"
-          [layoutIndex]="layoutIndex"
-          [isFlexItem]="getFlexAttribute('is-flex')"
-          [isOrderable]="options?.orderable"
-          [class.form-flex-column]="getFlexAttribute('flex-direction') === 'column'"
-          [class.form-flex-row]="getFlexAttribute('flex-direction') === 'row'"
-          [style.align-content]="getFlexAttribute('align-content')"
-          [style.align-items]="getFlexAttribute('align-items')"
-          [style.display]="getFlexAttribute('display')"
-          [style.flex-direction]="getFlexAttribute('flex-direction')"
-          [style.flex-wrap]="getFlexAttribute('flex-wrap')"
-          [style.justify-content]="getFlexAttribute('justify-content')"></root-widget>
+      <root-widget *ngIf="expanded"
+        [dataIndex]="dataIndex"
+        [layout]="layoutNode.items"
+        [layoutIndex]="layoutIndex"
+        [isFlexItem]="getFlexAttribute('is-flex')"
+        [isOrderable]="options?.orderable"
+        [class.form-flex-column]="getFlexAttribute('flex-direction') === 'column'"
+        [class.form-flex-row]="getFlexAttribute('flex-direction') === 'row'"
+        [style.align-content]="getFlexAttribute('align-content')"
+        [style.align-items]="getFlexAttribute('align-items')"
+        [style.display]="getFlexAttribute('display')"
+        [style.flex-direction]="getFlexAttribute('flex-direction')"
+        [style.flex-wrap]="getFlexAttribute('flex-wrap')"
+        [style.justify-content]="getFlexAttribute('justify-content')"></root-widget>
     </div>
     <fieldset *ngIf="containerType === 'fieldset'"
       [class]="options?.htmlClass || ''"
       [class.expandable]="options?.expandable && !expanded"
       [class.expanded]="options?.expandable && expanded"
       [disabled]="options?.readonly">
-      <legend
+      <legend *ngIf="sectionTitle"
         class="legend"
         [class]="options?.labelHtmlClass || ''"
-        [innerHTML]="options?.title"
-        [style.display]="(options?.notitle || !options?.title) ? 'none' : ''"
+        [innerHTML]="sectionTitle"
         (click)="toggleExpanded()"></legend>
-        <root-widget *ngIf="expanded"
-          [dataIndex]="dataIndex"
-          [layout]="layoutNode.items"
-          [layoutIndex]="layoutIndex"
-          [isFlexItem]="getFlexAttribute('is-flex')"
-          [isOrderable]="options?.orderable"
-          [class.form-flex-column]="getFlexAttribute('flex-direction') === 'column'"
-          [class.form-flex-row]="getFlexAttribute('flex-direction') === 'row'"
-          [style.align-content]="getFlexAttribute('align-content')"
-          [style.align-items]="getFlexAttribute('align-items')"
-          [style.display]="getFlexAttribute('display')"
-          [style.flex-direction]="getFlexAttribute('flex-direction')"
-          [style.flex-wrap]="getFlexAttribute('flex-wrap')"
-          [style.justify-content]="getFlexAttribute('justify-content')"></root-widget>
+      <root-widget *ngIf="expanded"
+        [dataIndex]="dataIndex"
+        [layout]="layoutNode.items"
+        [layoutIndex]="layoutIndex"
+        [isFlexItem]="getFlexAttribute('is-flex')"
+        [isOrderable]="options?.orderable"
+        [class.form-flex-column]="getFlexAttribute('flex-direction') === 'column'"
+        [class.form-flex-row]="getFlexAttribute('flex-direction') === 'row'"
+        [style.align-content]="getFlexAttribute('align-content')"
+        [style.align-items]="getFlexAttribute('align-items')"
+        [style.display]="getFlexAttribute('display')"
+        [style.flex-direction]="getFlexAttribute('flex-direction')"
+        [style.flex-wrap]="getFlexAttribute('flex-wrap')"
+        [style.justify-content]="getFlexAttribute('justify-content')"></root-widget>
     </fieldset>`,
   styles: [`
     .legend { font-weight: bold; }
@@ -73,6 +72,10 @@ export class SectionComponent implements OnInit {
   constructor(
     private jsf: JsonSchemaFormService
   ) { }
+
+  get sectionTitle() {
+    return this.options.notitle ? null : this.jsf.setItemTitle(this);
+  }
 
   ngOnInit() {
     this.jsf.initializeControl(this);

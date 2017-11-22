@@ -12,7 +12,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
           [active]="selectedItem === i"
           (click)="select(i)">
           <span *ngIf="showAddTab || item.type !== '$ref'"
-            [innerHTML]="setTitle(item, i)"></span>
+            [innerHTML]="setTabTitle(item, i)"></span>
         </a>
     </nav>
     <div *ngFor="let layoutItem of layoutNode?.items; let i = index"
@@ -63,7 +63,7 @@ export class MaterialTabsComponent implements OnInit {
       this.itemCount < (lastItem.options.maxItems || 1000);
   }
 
-  setTitle(item: any, index: number): string {
-    return this.jsf.setTitle(this, item, index);
+  setTabTitle(item: any, index: number): string {
+    return this.jsf.setArrayItemTitle(this, item, index);
   }
 }

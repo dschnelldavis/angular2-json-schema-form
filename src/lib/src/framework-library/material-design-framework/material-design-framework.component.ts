@@ -127,9 +127,10 @@ export class MaterialDesignFrameworkComponent implements OnInit, OnChanges {
       }
 
       if (
-        this.layoutNode.type !== 'tabs' &&
-        this.layoutNode.type !== 'tabarray' &&
-        (this.widgetOptions.title || '').indexOf('{{') > -1
+        !['$ref', 'advancedfieldset', 'authfieldset', 'button', 'card',
+          'checkbox', 'expansion-panel', 'help', 'message', 'msg', 'section',
+          'submit', 'tabarray', 'tabs'].includes(this.layoutNode.type) &&
+        /{{.+?}}/.test(this.widgetOptions.title || '')
       ) {
         this.dynamicTitle = this.widgetOptions.title;
         this.updateTitle();

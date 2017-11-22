@@ -276,8 +276,8 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
 
   setTitle(): string {
     switch (this.layoutNode.type) {
-      case 'button':  case 'checkbox': case 'help':     case 'msg':
-      case 'message': case 'submit':   case 'tabarray': case '$ref':
+      case 'button': case 'checkbox': case 'section': case 'help': case 'msg':
+      case 'submit': case 'message': case 'tabarray': case 'tabs': case '$ref':
         return null;
       case 'advancedfieldset':
         this.widgetOptions.expandable = true;
@@ -287,22 +287,9 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
         this.widgetOptions.expandable = true;
         this.widgetOptions.title = 'Authentication settings';
         return null;
-      case 'tabs': case 'section':
-        return null;
       default:
-        let thisTitle = this.options.title ||
-          (isNaN(this.layoutNode.name) && this.layoutNode.name !== '-' ?
-            toTitleCase(this.layoutNode.name) : null);
         this.widgetOptions.title = null;
-        return !thisTitle ? null :
-          thisTitle.indexOf('{{') === -1 || !this.formControl || !this.dataIndex ?
-            thisTitle :
-            this.jsf.parseText(
-              thisTitle,
-              this.jsf.getFormControlValue(this),
-              this.jsf.getFormControlGroup(this).value,
-              this.dataIndex[this.dataIndex.length - 1]
-            );
+        return this.jsf.setItemTitle(this);
     }
   }
 

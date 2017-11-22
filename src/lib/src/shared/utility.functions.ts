@@ -13,6 +13,8 @@ import {
 /**
  * 'addClasses' function
  *
+ * Merges two space-delimited lists of CSS classes and removes duplicates.
+ *
  * @param {string | string[] | Set<string>} oldClasses
  * @param {string | string[] | Set<string>} newClasses
  * @return {string | string[] | Set<string>} - Combined classes
@@ -185,9 +187,9 @@ export function hasOwn(object: any, property: string): boolean {
 export function mergeFilteredObject(
   targetObject: PlainObject,
   sourceObject: PlainObject,
-  excludeKeys: any[] = [],
-  keyFn: (string: string) => string = (key: string) => key,
-  valFn: (any: any) => any = (val: any) => val
+  excludeKeys = <string[]>[],
+  keyFn = (key: string): string => key,
+  valFn = (val: any): any => val
 ): PlainObject {
   if (!isObject(sourceObject)) { return targetObject; }
   if (!isObject(targetObject)) { targetObject = {}; }

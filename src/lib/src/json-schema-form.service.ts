@@ -394,7 +394,7 @@ export class JsonSchemaFormService {
     return '';
   }
 
-  setTitle(
+  setArrayItemTitle(
     parentCtx: any = {}, childNode: any = null, index: number = null
   ): string {
     const parentNode = parentCtx.layoutNode;
@@ -418,6 +418,17 @@ export class JsonSchemaFormService {
     const childValue = isArray(parentValues) && index < parentValues.length ?
       parentValues[index] : parentValues;
     return this.parseText(text, childValue, parentValues, index);
+  }
+
+  setItemTitle(ctx: any) {
+    return !ctx.options.title && /^(\d+|-)$/.test(ctx.layoutNode.name) ?
+      null :
+      this.parseText(
+        ctx.options.title || toTitleCase(ctx.layoutNode.name),
+        this.getFormControlValue(this),
+        (this.getFormControlGroup(this) || <any>{}).value,
+        ctx.dataIndex[ctx.dataIndex.length - 1]
+      );
   }
 
   initializeControl(ctx: any, bind = true): boolean {
@@ -479,7 +490,7 @@ export class JsonSchemaFormService {
         // If custom error message is a string, replace placeholders and return
         typeof validationMessages[errorKey] === 'string' ?
           // Does error message have any {{property}} placeholders?
-          validationMessages[errorKey].indexOf('{{') === -1 ?
+          !/{{.+?}}/.test(validationMessages[errorKey]) ?
             validationMessages[errorKey] :
             // Replace {{property}} placeholders with values
             Object.keys(errors[errorKey])

@@ -51,6 +51,6 @@ export class MaterialAddReferenceComponent implements OnInit {
       layoutNode: this.jsf.getParentNode(this),
     };
     return parent.layoutNode.add ||
-      this.jsf.setTitle(parent, this.layoutNode, this.itemCount);
+      this.jsf.setArrayItemTitle(parent, this.layoutNode, this.itemCount);
   }
 }
