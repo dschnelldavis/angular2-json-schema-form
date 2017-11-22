@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
 import { JsonSchemaFormService } from '../../json-schema-form.service';
-import { isDefined, JsonPointer } from '../../shared';
+import { hasValue, JsonPointer } from '../../shared';
 
 @Component({
   selector: 'flex-layout-root-widget',
@@ -17,14 +17,14 @@ import { isDefined, JsonPointer } from '../../shared';
       [fxFlexOrder]="layoutNode?.options?.fxFlexOrder"
       [fxFlexOffset]="layoutNode?.options?.fxFlexOffset"
       [fxFlexAlign]="layoutNode?.options?.fxFlexAlign">
-      <select-framework-widget *ngIf="isConditionallyShown(layoutNode)"
+      <select-framework-widget *ngIf="showWidget(layoutNode)"
         [dataIndex]="layoutNode?.arrayItem ? (dataIndex || []).concat(i) : (dataIndex || [])"
         [layoutIndex]="(layoutIndex || []).concat(i)"
         [layoutNode]="layoutNode"></select-framework-widget>
     <div>`,
   changeDetection: ChangeDetectionStrategy.Default,
 })
-export class FlexLayoutRootComponent implements OnInit {
+export class FlexLayoutRootComponent {
   @Input() dataIndex: number[];
   @Input() layoutIndex: number[];
   @Input() layout: any[];
@@ -34,7 +34,9 @@ export class FlexLayoutRootComponent implements OnInit {
     private jsf: JsonSchemaFormService
   ) { }
 
-  ngOnInit() { }
+  removeItem(item) {
+    this.jsf.removeItem(item);
+  }
 
   // Set attributes for flexbox child
   // (container attributes are set in flex-layout-section.component)
@@ -44,32 +46,7 @@ export class FlexLayoutRootComponent implements OnInit {
       (node.options || {})[attribute] || ['1', '1', 'auto'][index];
   }
 
-  trackByItem(layoutNode: any) {
-    return (layoutNode || {})._id;
-  }
-
-  removeItem(item) {
-    this.jsf.removeItem(item);
-  }
-
-  isConditionallyShown(layoutNode: any): boolean {
-    const arrayIndex = this.dataIndex[this.dataIndex.length - 1];
-    let result = true;
-    if (isDefined((layoutNode.options || {}).condition)) {
-      if (typeof layoutNode.options.condition === 'string') {
-        let pointer = layoutNode.options.condition
-        if (isDefined(arrayIndex)) {
-          pointer = pointer.replace('[arrayIndex]', `[${arrayIndex}]`);
-        }
-        pointer = JsonPointer.parseObjectPath(pointer);
-        result = !!JsonPointer.get(this.jsf.data, pointer);
-        if (!result && pointer[0] === 'model') {
-          result = !!JsonPointer.get({ model: this.jsf.data }, pointer);
-        }
-      } else if (typeof layoutNode.options.condition === 'function') {
-        result = layoutNode.options.condition(this.jsf.data);
-      }
-    }
-    return result;
+  showWidget(layoutNode: any): boolean {
+    return this.jsf.evaluateCondition(layoutNode, this.dataIndex);
   }
 }

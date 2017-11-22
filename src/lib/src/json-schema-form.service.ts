@@ -431,6 +431,34 @@ export class JsonSchemaFormService {
       );
   }
 
+  evaluateCondition(layoutNode: any, dataIndex: number[]): boolean {
+    const arrayIndex = dataIndex && dataIndex[dataIndex.length - 1];
+    let result = true;
+    if (hasValue((layoutNode.options || {}).condition)) {
+      if (typeof layoutNode.options.condition === 'string') {
+        let pointer = layoutNode.options.condition
+        if (hasValue(arrayIndex)) {
+          pointer = pointer.replace('[arrayIndex]', `[${arrayIndex}]`);
+        }
+        pointer = JsonPointer.parseObjectPath(pointer);
+        result = !!JsonPointer.get(this.data, pointer);
+        if (!result && pointer[0] === 'model') {
+          result = !!JsonPointer.get({ model: this.data }, pointer);
+        }
+      } else if (typeof layoutNode.options.condition === 'function') {
+        result = layoutNode.options.condition(this.data);
+      } else if (typeof layoutNode.options.condition.functionBody === 'string') {
+        try {
+          const dynFn = new Function(
+            'model', 'arrayIndices', layoutNode.options.condition.functionBody
+          );
+          result = dynFn(this.data, dataIndex);
+        } catch (e) { }
+      }
+    }
+    return result;
+  }
+
   initializeControl(ctx: any, bind = true): boolean {
     if (!isObject(ctx)) { return false; }
     if (isEmpty(ctx.options)) {
