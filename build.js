@@ -53,9 +53,12 @@ return Promise.resolve()
       external: [
         // List of dependencies
         // https://github.com/rollup/rollup/wiki/JavaScript-API#external
+        '@angular/cdk',
         '@angular/common',
         '@angular/core',
+        '@angular/flex-layout',
         '@angular/forms',
+        '@angular/material',
         '@angular/platform-browser',
         'ajv',
         'hammerjs',
