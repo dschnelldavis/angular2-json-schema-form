@@ -1,0 +1,1004 @@
+{
+  "schema": {
+    "type": "object",
+    "title": "Start a Series",
+    "properties": {
+      "developers": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "minItems": 1,
+          "properties": {
+            "first_name": {
+              "title": "firstName",
+              "type": "string"
+            },
+            "last_name": {
+              "title": "lastName",
+              "type": "string"
+            },
+            "cmsComponent": {
+              "title": "CMS Component or Organization",
+              "type": "string"
+            },
+            "cmsGroup": {
+              "title": "CMS Group (or N/A)",
+              "type": "string"
+            },
+            "cmsDivision": {
+              "title": "CMS Division (or N/A)",
+              "type": "string"
+            },
+            "telephone": {
+              "title": "Telephone",
+              "type": "string"
+            },
+            "email": {
+              "title": "Email",
+              "type": "string",
+              "pattern": "^\\S+@\\S+$"
+            },
+            "address": {
+              "type": "object",
+              "properties": {
+                "street_1": {
+                  "type": "string"
+                },
+                "street_2": {
+                  "type": "string"
+                },
+                "city": {
+                  "type": "string"
+                },
+                "state": {
+                  "type": "string",
+                  "enum": [
+                    "AL",
+                    "AK",
+                    "AS",
+                    "AZ",
+                    "AR",
+                    "CA",
+                    "CO",
+                    "CT",
+                    "DE",
+                    "DC",
+                    "FM",
+                    "FL",
+                    "GA",
+                    "GU",
+                    "HI",
+                    "ID",
+                    "IL",
+                    "IN",
+                    "IA",
+                    "KS",
+                    "KY",
+                    "LA",
+                    "ME",
+                    "MH",
+                    "MD",
+                    "MA",
+                    "MI",
+                    "MN",
+                    "MS",
+                    "MO",
+                    "MT",
+                    "NE",
+                    "NV",
+                    "NH",
+                    "NJ",
+                    "NM",
+                    "NY",
+                    "NC",
+                    "ND",
+                    "MP",
+                    "OH",
+                    "OK",
+                    "OR",
+                    "PW",
+                    "PA",
+                    "PR",
+                    "RI",
+                    "SC",
+                    "SD",
+                    "TN",
+                    "TX",
+                    "UT",
+                    "VT",
+                    "VI",
+                    "VA",
+                    "WA",
+                    "WV",
+                    "WI",
+                    "WY",
+                    "N/A or Other"
+                  ]
+                },
+                "zip_code": {
+                  "type": "string"
+                },
+                "mail_stop": {
+                  "type": "string"
+                },
+                "physical_location": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "street_1",
+                "city",
+                "state",
+                "zip_code"
+              ]
+            }
+          }
+        },
+        "required": [
+          "first_name",
+          "last_name",
+          "cmsComponent",
+          "cmsGroup",
+          "cmsDivision",
+          "telephone",
+          "email",
+          "address"
+        ]
+      },
+      "contractors": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "minItems": 1,
+          "properties": {
+            "first_name": {
+              "title": "firstName",
+              "type": "string"
+            },
+            "last_name": {
+              "title": "lastName",
+              "type": "string"
+            },
+            "organization": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            },
+            "telephone": {
+              "title": "Telephone",
+              "type": "string"
+            },
+            "email": {
+              "title": "Email",
+              "type": "string",
+              "pattern": "^\\S+@\\S+$"
+            },
+            "address": {
+              "type": "object",
+              "properties": {
+                "street_1": {
+                  "type": "string"
+                },
+                "street_2": {
+                  "type": "string"
+                },
+                "city": {
+                  "type": "string"
+                },
+                "state": {
+                  "type": "string",
+                  "enum": [
+                    "AL",
+                    "AK",
+                    "AS",
+                    "AZ",
+                    "AR",
+                    "CA",
+                    "CO",
+                    "CT",
+                    "DE",
+                    "DC",
+                    "FM",
+                    "FL",
+                    "GA",
+                    "GU",
+                    "HI",
+                    "ID",
+                    "IL",
+                    "IN",
+                    "IA",
+                    "KS",
+                    "KY",
+                    "LA",
+                    "ME",
+                    "MH",
+                    "MD",
+                    "MA",
+                    "MI",
+                    "MN",
+                    "MS",
+                    "MO",
+                    "MT",
+                    "NE",
+                    "NV",
+                    "NH",
+                    "NJ",
+                    "NM",
+                    "NY",
+                    "NC",
+                    "ND",
+                    "MP",
+                    "OH",
+                    "OK",
+                    "OR",
+                    "PW",
+                    "PA",
+                    "PR",
+                    "RI",
+                    "SC",
+                    "SD",
+                    "TN",
+                    "TX",
+                    "UT",
+                    "VT",
+                    "VI",
+                    "VA",
+                    "WA",
+                    "WV",
+                    "WI",
+                    "WY",
+                    "N/A or Other"
+                  ]
+                },
+                "zip_code": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "street_1",
+                "city",
+                "state",
+                "zip_code"
+              ]
+            }
+          },
+          "required": [
+            "first_name",
+            "last_name",
+            "organization",
+            "title",
+            "telephone",
+            "email",
+            "address"
+          ]
+        }
+      },
+      "series": {
+        "type": "object",
+        "properties": {
+          "series_title": {
+            "type": "string"
+          },
+          "series_date_range": {
+            "type": "object",
+            "properties": {
+              "series_start_date": {
+                "type": "string"
+              },
+              "series_end_date": {
+                "type": "string"
+              }
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "credit_information": {
+            "type": "object",
+            "properties": {
+              "credit_type": {
+                "type": "string",
+                "enum": [
+                  "CEU",
+                  "CME",
+                  "Both",
+                  "Unsure"
+                ]
+              },
+              "provider_is_cms": {
+                "type": "boolean"
+              },
+              "sponsor": {
+                "type": "string"
+              },
+              "joint_sponsor": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "credit_type",
+              "provider_is_cms",
+              "sponsor",
+              "joint_sponsor"
+            ]
+          },
+          "pilot_testing": {
+            "type": "object",
+            "properties": {
+              "testing_type": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "testing_type"
+            ]
+          },
+          "series_type": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "IP: In Person",
+                "WB: Web-based training (WBT) course",
+                "WE-L: Webinar-live",
+                "WE-E: Recorded webinar",
+                "TC-L: Teleconference-live",
+                "SB-L: Satellite broadcast-live",
+                "SB-E: Recorded satellite broadcast",
+                "PD-L: Podcast-live",
+                "PD-E: Recorded podcast",
+                "PR: Print product",
+                "VI: Video (including CD/DVD)"
+              ]
+            }
+          },
+          "reviewer": {
+            "type": "object",
+            "properties": {
+              "first_name": {
+                "type": "string"
+              },
+              "last_name": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "first_name",
+              "last_name",
+              "email"
+            ]
+          },
+          "financial_compliance": {
+            "type": "object",
+            "properties": {
+              "was_commerical_support_received": {
+                "type": "boolean"
+              },
+              "source_of_funding": {
+                "type": "string"
+              },
+              "amount_of_funding": {
+                "type": "number"
+              },
+              "expenses": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "category": {
+                      "type": "string"
+                    },
+                    "amount": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "category",
+                    "amount"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "was_commerical_support_received"
+            ]
+          },
+          "learning_platform": {
+            "type": "object",
+            "properties": {
+              "requesting_learning_platform_exception": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "requesting_learning_platform_exception"
+            ]
+          }
+        },
+        "required": [
+          "series_title",
+          "series_date",
+          "description",
+          "credit_information",
+          "pilot_testing",
+          "series_type",
+          "speakers",
+          "reviewer",
+          "financial_compliance",
+          "learning_platform"
+        ]
+      }
+    },
+    "required": [
+      "developers",
+      "series"
+    ]
+  },
+  "form": [
+    {
+      "type": "help",
+      "helpvalue": "<div class=\"alert alert-info\">Grid it up with bootstrap</div>"
+    },
+    {
+      "type": "tabs",
+      "itemLabelHtmlClass": "nav-item",
+      "activeClass": "active",
+      "tabs": [
+        {
+          "title": "Developer",
+          "items": [
+            {
+              "type": "message",
+              "msg": "<h3>Primary Series Developer Information</h3>"
+            },
+            {
+              "key": "developers",
+              "notitle": true,
+              "type": "array",
+              "listItems": 1,
+              "items": [
+                {
+                  "type": "div",
+                  "htmlClass": "container",
+                  "title": "<h4>{{ 'Developer ' + $index }}</h4>",
+                  "items": [
+                    {
+                      "type": "flex",
+                      "flex-flow": "row wrap",
+                      "items": [
+                        "developers[].first_name",
+                        "developers[].last_name"
+                      ]
+                    },
+                    {
+                      "type": "flex",
+                      "flex-flow": "row wrap",
+                      "items": [
+                        {
+                          "key": "developers[].cmsComponent",
+                          "title": "CMS Component or Organization"
+                        },
+                        {
+                          "key": "developers[].cmsGroup",
+                          "title": "CMS Group (or N/A)"
+                        },
+                        {
+                          "key": "developers[].cmsDivision",
+                          "title": "CMS Division (or N/A)"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "flex",
+                      "flex-flow": "row wrap",
+                      "items": [
+                        {
+                          "key": "developers[].telephone",
+                          "placeholder": "xxx-xxx-xxxx"
+                        },
+                        "developers[].email"
+                      ]
+                    },
+                    {
+                      "items": [
+                        {
+                          "key": "developers[].address.street_1",
+                          "title": "Address",
+                          "placeholder": "Street"
+                        },
+                        {
+                          "key": "developers[].address.street_2",
+                          "notitle": true
+                        },
+                        {
+                          "type": "div",
+                          "display": "flex",
+                          "flex-direction": "row",
+                          "items": [
+                            {
+                              "key": "developers[].address.city",
+                              "flex": "3 3 150px",
+                              "notitle": true,
+                              "placeholder": "City"
+                            },
+                            {
+                              "key": "developers[].address.state",
+                              "flex": "1 1 50px",
+                              "notitle": true,
+                              "placeholder": "State"
+                            },
+                            {
+                              "key": "developers[].address.zip_code",
+                              "flex": "2 2 100px",
+                              "notitle": true,
+                              "placeholder": "Zip Code"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "div",
+                          "display": "flex",
+                          "flex-direction": "row",
+                          "items": [
+                            {
+                              "key": "developers[].address.mail_stop",
+                              "notitle": true,
+                              "placeholder": "Mail Stop"
+                            },
+                            {
+                              "key": "developers[].address.physical_location",
+                              "notitle": true,
+                              "placeholder": "Physical Location (if different from mailing)"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Contractor",
+          "items": [
+            {
+              "type": "message",
+              "msg": "<h3>Primary Contractor Information (if applicable)</h3>"
+            },
+            {
+              "key": "contractors",
+              "notitle": true,
+              "type": "array",
+              "listItems": 0,
+              "items": [
+                {
+                  "type": "div",
+                  "title": "<h4>{{ 'Contractor ' + $index }}</h4>",
+                  "items": [
+                    {
+                      "type": "flex",
+                      "flex-flow": "row wrap",
+                      "items": [
+                        "contractors[].first_name",
+                        "contractors[].last_name"
+                      ]
+                    },
+                    {
+                      "type": "flex",
+                      "flex-flow": "row wrap",
+                      "items": [
+                        {
+                          "key": "contractors[].organization"
+                        },
+                        "contractors[].title"
+                      ]
+                    },
+                    {
+                      "type": "flex",
+                      "flex-flow": "row wrap",
+                      "items": [
+                        {
+                          "key": "contractors[].telephone",
+                          "placeholder": "xxx-xxx-xxxx"
+                        },
+                        "contractors[].email"
+                      ]
+                    },
+                    {
+                      "items": [
+                        {
+                          "key": "contractors[].address.street_1",
+                          "title": "Address",
+                          "placeholder": "Street"
+                        },
+                        {
+                          "key": "contractors[].address.street_2",
+                          "notitle": true
+                        },
+                        {
+                          "type": "div",
+                          "display": "flex",
+                          "flex-direction": "row",
+                          "items": [
+                            {
+                              "key": "contractors[].address.city",
+                              "flex": "3 3 150px",
+                              "notitle": true,
+                              "placeholder": "City"
+                            },
+                            {
+                              "key": "contractors[].address.state",
+                              "flex": "1 1 50px",
+                              "notitle": true,
+                              "placeholder": "State"
+                            },
+                            {
+                              "key": "contractors[].address.zip_code",
+                              "flex": "2 2 100px",
+                              "notitle": true,
+                              "placeholder": "Zip Code"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Series Information",
+          "notitle": true,
+          "items": [
+            {
+              "title": "Basic Information",
+              "labelHtmlClass": "h3",
+              "type": "section",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                {
+                  "key": "series.series_title"
+                },
+                {
+                  "type": "flex",
+                  "flex-flow": "row wrap",
+                  "items": [
+                    {
+                      "key": "series.series_date_range.series_start_date",
+                      "type": "date"
+                    },
+                    {
+                      "key": "series.series_date_range.series_end_date",
+                      "type": "date"
+                    }
+                  ]
+                },
+                {
+                  "key": "series.description",
+                  "type": "textarea"
+                },
+                {
+                  "label": "Activity Types in Series (check all that apply)",
+                  "key": "series.series_type",
+                  "type": "checkboxes"
+                }
+              ]
+            },
+            {
+              "title": "Credit Information",
+              "labelHtmlClass": "h3",
+              "type": "section",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                {
+                  "title": "What type of credit are you pursuing?",
+                  "key": "series.credit_information.credit_type"
+                },
+                {
+                  "key": "series.credit_information.provider_is_cms",
+                  "title": "Is CMSCE the only organization providing credit?<br/>(Refer to the CMSCE Joint Provider & Co-Sponsor of CE Activities Policy for information on what constitutes a joint sponsor or cosponsor organization.)",
+                  "type": "radios-inline",
+                  "titleMap": [
+                    {
+                      "value": true,
+                      "name": "Yes"
+                    },
+                    {
+                      "value": false,
+                      "name": "No"
+                    }
+                  ]
+                },
+                {
+                  "type": "conditional",
+                  "items": [
+                    {
+                      "type": "message",
+                      "msg": "<p>If no, please provide the name of the co-sponsoring or jointly sponsoring organization.</p>"
+                    },
+                    {
+                      "type": "flex",
+                      "flex-flow": "row wrap",
+                      "items": [
+                        "series.credit_information.sponsor",
+                        "series.credit_information.joint_sponsor"
+                      ]
+                    }
+                  ],
+                  "condition": {
+                    "functionBody": "return model.series.credit_information.provider_is_cms == false;"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Pilot Testing",
+              "labelHtmlClass": "h3",
+              "type": "section",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                {
+                  "type": "message",
+                  "msg": "<p>All activities must be pilot tested to determine the amount of learning time to be used in credit calculations. Pilot testers must be representative of the intended target audience.</p>"
+                },
+                {
+                  "type": "message",
+                  "msg": "<p>A live activity may be used as its own pilot test, but the continuing education credit will not be awarded until after the activity has occurred and the pilot testing information has been submitted to CMSCE.</p>"
+                },
+                {
+                  "title": "How will the activity be pilot tested?",
+                  "key": "series.pilot_testing.testing_type",
+                  "type": "radios",
+                  "titleMap": [
+                    {
+                      "value": "dry run",
+                      "name": "A \"dry run\" or rehearsal of the final content will serve as the pilot test."
+                    },
+                    {
+                      "value": "live activity",
+                      "name": "The live activity will serve as the pilot test."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Physician Reviewer",
+              "labelHtmlClass": "h3",
+              "type": "section",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                {
+                  "type": "message",
+                  "msg": "<p>If you are applying for CME, please provide the name and email address of the physician for your planning committee. You are required to have a physician review the activity objectives and attest that they are suitable for CME.</p>"
+                },
+                {
+                  "type": "flex",
+                  "flex-flow": "row wrap",
+                  "items": [
+                    "series.reviewer.first_name",
+                    "series.reviewer.last_name",
+                    "series.reviewer.email"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Financial/Compliance",
+              "labelHtmlClass": "h3",
+              "type": "section",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                {
+                  "type": "message",
+                  "msg": "<p>In this section, disclose financial information for the activity or series, and report expenses. Activity Developers must follow General Services Administration (GSA) and CMS policies about any honoraria and reimbursement of costs.</p>"
+                },
+                {
+                  "type": "message",
+                  "message": "<p>For non-commercial support funding, please provide information about the activity budget and funding below:</p>"
+                },
+                {
+                  "type": "flex",
+                  "flex-flow": "row wrap",
+                  "items": [
+                    "series.financial_compliance.source_of_funding",
+                    "series.financial_compliance.amount_of_funding"
+                  ]
+                },
+                {
+                  "type": "message",
+                  "msg": "<p>Was commercial support received for this activity?</p>"
+                },
+                {
+                  "type": "message",
+                  "msg": "<p><a href=\"http://www.accme.org/requirements/accreditation-requirements-cme-providers/policies-and-definitions/commercial-support-definition-and-guidance-regarding-written-agreements\" target=\"_blank\">Definition of Commercial Support</a></p>"
+                },
+                {
+                  "key": "series.financial_compliance.was_commerical_support_received",
+                  "type": "radios-inline",
+                  "titleMap": [
+                    {
+                      "value": true,
+                      "name": "Yes"
+                    },
+                    {
+                      "value": false,
+                      "name": "No"
+                    }
+                  ]
+                },
+                {
+                  "type": "conditional",
+                  "condition": "model.series.financial_compliance.was_commerical_support_received",
+                  "items": [
+                    {
+                      "type": "message",
+                      "message": "<p>If yes, you must:</p>"
+                    },
+                    {
+                      "type": "message",
+                      "message": "<ul><li>Email a detailed budget including the source of all funding and specifying activity expenses to be paid from each source to CMSCE@cms.hhs.gov; and</li><li>Attach narrative or other documentation which demonstrates how commercial interests are prevented from influencing decisions made about content creators/presenters and being involved with preparing activity materials.</li></ul>"
+                    },
+                    {
+                      "type": "message",
+                      "message": "<p>If the CE content is based in research, documentation must also demonstrate:</p>"
+                    },
+                    {
+                      "type": "message",
+                      "message": "<ol><li>Implementation and monitoring of rigorous process of external validation and (peer) review of the research to ensure the validity of the research process, the results, and the conclusions; and</li><li>Mechanisms to ensure the selection of content for presentation is based on its relevance and importance to the learners and that persons free of relevant financial relationships handle the topic selection oversight.</li></ol>"
+                    },
+                    {
+                      "type": "message",
+                      "message": "<p>Please list general categories of expenses and the associated amounts:</p>"
+                    },
+                    {
+                      "type": "array",
+                      "key": "series.financial_compliance.expenses",
+                      "title": "Expense",
+                      "notitle": true,
+                      "listItems": 1,
+                      "items": [
+                        {
+                          "type": "div",
+                          "items": [
+                            {
+                              "type": "flex",
+                              "flex-flow": "row wrap",
+                              "items": [
+                                {
+                                  "required": true,
+                                  "key": "series.financial_compliance.expenses[].category",
+                                  "notitle": true,
+                                  "placeholder": "Category"
+                                },
+                                {
+                                  "required": true,
+                                  "key": "series.financial_compliance.expenses[].amount",
+                                  "notitle": true,
+                                  "placeholder": "Amount",
+                                  "htmlClass": "mr-sm-1"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Learning Platform & Policies",
+              "labelHtmlClass": "h3",
+              "type": "section",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                {
+                  "type": "message",
+                  "msg": "<p>All activities must have a process to communicate successful completion of requirements and achievement of continuing education credits to individuals or inform them of failure to successfully complete the activity. CMSCE Activity Developers are asked to deploy their post-assessment via the Medicare Learning Network® (MLN) Learning Management System (LMS) so that official CE certificates can be issued directly and immediately to learners.</p>"
+                },
+                {
+                  "type": "message",
+                  "msg": "<p>Rare exceptions to this policy may be made if the AD has an LMS or other learning platform that can comply with all of the CMSCE Learning Platform Requirements. CMSCE must approve use of alternative learning platforms.</p>"
+                },
+                {
+                  "title": "Do you wish to apply for an exception to use an alternative learning platform?",
+                  "key": "series.learning_platform.requesting_learning_platform_exception",
+                  "type": "radios-inline",
+                  "titleMap": [
+                    {
+                      "value": true,
+                      "name": "Yes"
+                    },
+                    {
+                      "value": false,
+                      "name": "No"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "data": {
+    "developers": [
+      {
+        "first_name": "Scott",
+        "last_name": "Talsma",
+        "telephone": "678-317-4004",
+        "email": "scott@talsma.tv",
+        "address": {
+          "street_1": "3730 Gleneagles Ln",
+          "city": "Tucker",
+          "state": "GA",
+          "zip_code": "30084",
+          "mail_stop": "stop here",
+          "physical_location": "closet"
+        }
+      }
+    ],
+    "contractors": [
+      {
+        "first_name": "Scott",
+        "last_name": "Talsma",
+        "organization": "CMS (straight.flush.tech)",
+        "title": "Primary Consultant",
+        "telephone": "01741717790",
+        "email": "scott@straightflushtech.com",
+        "address": {
+          "street_1": "3730 Gleneagles Ln",
+          "city": "TUCKER",
+          "state": "GA",
+          "zip_code": "30084"
+        }
+      }
+    ],
+
+    "series": {
+      "series_title": "some title here",
+      "series_date_range": {
+        "series_start_date": "2017-01-01",
+        "series_end_date": "2017-02-01"
+      },
+      "description": "",
+      "credit_information": {
+        "credit_type": "CEU",
+        "provider_is_cms": false,
+        "sponsor": "joes deli",
+        "joint_sponsor": "joes 2nd deli"
+      },
+      "pilot_testing": {
+        "testing_type": "dry_run"
+      },
+      "series_type": [
+        "WE-E: Recorded webinar",
+        "TC-L: Teleconference-live",
+        "SB-E: Recorded satellite broadcast"
+      ],
+      "reviewer": {
+        "first_name": "Onida",
+        "last_name": "Wark",
+        "email": "owark2@imdb.com"
+      }
+    }
+  }
+}

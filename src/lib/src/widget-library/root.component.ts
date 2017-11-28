@@ -92,6 +92,14 @@ export class RootComponent {
         }
       } else if (typeof layoutNode.options.condition === 'function') {
         result = layoutNode.options.condition(this.jsf.data);
+      } else if (typeof layoutNode.options.condition.functionBody === 'string') {
+        try {
+          const dynFn = new Function("model", "arrayIndices", layoutNode.options.condition.functionBody);
+          result = dynFn(this.jsf.data, this.dataIndex);
+        } catch (e) {
+          result = true;
+          console.log("condition functionBody errored out on evaluation: " + layoutNode.options.condition.functionBody);
+        }
       }
     }
     return result;

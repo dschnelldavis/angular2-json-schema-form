@@ -164,7 +164,7 @@
     "soul",
     {
       "type": "conditional",
-      "condition": "modelData.soul",
+      "condition": "model.soul",
       "items": [ {
         "key": "soulserial",
         "placeholder": "ex. 666"

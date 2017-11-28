@@ -1,0 +1,289 @@
+{
+  "schema": {
+    "type": "object",
+    "title": "Needs Assessment",
+    "properties": {
+      "target_audience": {
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "enum": [
+            "All Health Care Professionals",
+            "Ambulance Services",
+            "Clinical Laboratory/Independent Diagnostic Testing Facility",
+            "Durable Medical Equipment",
+            "Federally Qualified Health Center",
+            "Health Care Student",
+            "Home Health Agency/Hospice",
+            "Hospital/Critical Access Hospital/Ambulatory Surgical Center",
+            "Medical Billers/Coders",
+            "Nurses",
+            "Pharmacies",
+            "Physicians/Residents",
+            "Other"
+          ]
+        }
+      },
+      "target_audience_other": {
+        "type": "string"
+      },
+      "needs": {
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "type": "object",
+          "properties": {
+            "knowledge_gaps": {
+              "type": "string"
+            },
+            "learner_needs": {
+              "type": "string"
+            },
+            "needs_analysis": {
+              "type": "string"
+            },
+            "source_needs_analysis": {
+              "type": "object",
+              "properties": {
+                "data_sources": {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "Federal Agency Report or Data",
+                      "Legislation/Policy/Regulation",
+                      "Surveys/Focus Group Evaluation/",
+                      "Interviews",
+                      "Literature Review",
+                      "White House Initiative or Executive Order",
+                      "Other"
+                    ]
+                  }
+                },
+                "data_source_other": {
+                  "type": "string"
+                },
+                "data_source_url": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "data_sources",
+                "data_source_url"
+              ]
+            }
+          },
+          "required": [
+            "knowledge_gaps",
+            "learner_needs",
+            "needs_analysis",
+            "source_needs_analysis"
+          ]
+        }
+      }
+    },
+    "required": [
+      "target_audience",
+      "needs"
+    ]
+  },
+  "form": [
+    {
+      "type": "help",
+      "helpvalue": "<div class=\"alert alert-primary\">Needs Assessment</div>"
+    },
+    {
+      "title": "Target Audience",
+      "labelHtmlClass": "h3",
+      "type": "section",
+      "expandable": true,
+      "expanded": false,
+      "items": [
+        {
+          "type": "message",
+          "message": "Each learning activity must be planned in response to the identified needs of a target audience. Defining a target audience is the process of determining which population of learners is best served by the CE Activity. Be as specific as possible in defining the target audience. This will allow for more focused learning objectives to be written in the next step. Remember, the target audience should be determined by a review of the needs analysis results."
+        },
+        {
+          "key": "target_audience",
+          "type": "checkboxes"
+        },
+        {
+          "title": "Other Target Audience",
+          "key": "target_audience_other",
+          "condition": {
+            "functionBody": "return model.target_audience.includes('Other');"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Knowledge/Practice Gaps, Learner Needs, Documentation & Analysis",
+      "labelHtmlClass": "h3",
+      "type": "section",
+      "expandable": true,
+      "expanded": false,
+      "items": [
+        {
+          "title": "Instructions",
+          "labelHtmlClass": "h5",
+          "type": "section",
+          "htmlClass": "alert alert-info",
+          "expandable": true,
+          "items": [
+            {
+              "type": "section",
+              "labelHtmlClass": "h6",
+              "title": "A. Knowledge/Practice Gaps",
+              "items": [
+                {
+                  "type": "message",
+                  "message": "<p>The gap between what learners know and do and what they should know and do is often referred to as a knowledge gap or (in clinical settings) a practice gap.</p>"
+                },
+                {
+                  "type": "message",
+                  "message": "<p>In Column A, list the knowledge/practice gaps that were identified by the needs analysis.</p>"
+                },
+                {
+                  "type": "message",
+                  "message": "<em>EXAMPLE:</em><br/>Many DME suppliers of power wheelchairs are not supplying appropriate documentation of medical necessity."
+                }
+              ]
+            },
+            {
+              "type": "section",
+              "labelHtmlClass": "h6",
+              "title": "B. Learner Needs",
+              "items": [
+                {
+                  "type": "message",
+                  "message": "The knowledge/practice gaps identified will correspond to a knowledge, competence, and/or performance need that must be filled by the CE Activity."
+                },
+                {
+                  "type": "message",
+                  "message": "In Column B, describe the knowledge, competence, and/or performance needs identified that will be filled by this CE Activity. Needs will encompass one or a combination of:"
+                },
+                {
+                  "type": "message",
+                  "message": "<ul><li>Knowledge: To have information they did not previously;</li><li>Competence: To learn how to do something, develop a strategy for doing something; or</li><li>Performance: To change something they are currently doing.</li></ul>"
+                },
+                {
+                  "type": "message",
+                  "message": "<em>EXAMPLE:</em><br/>The providers/suppliers need to know what documentation to provide and how to provide it, and they will need to change practices to include the correct documentation."
+                }
+              ]
+            },
+            {
+              "type": "section",
+              "labelHtmlClass": "h6",
+              "title": "C. Needs Analysis Documentation",
+              "items": [
+                {
+                  "type": "message",
+                  "message": "<p>In Column C, briefly describe how the identified gaps were indicated by the needs analysis.</p>"
+                },
+                {
+                  "type": "message",
+                  "message": "<em>EXAMPLE:</em> The DME MAC claims error data showed this error to be a significant reason for claims for power wheelchairs to be returned."
+                }
+              ]
+            },
+            {
+              "type": "section",
+              "labelHtmlClass": "h6",
+              "title": "D. Source of Needs Analysis",
+              "items": [
+                {
+                  "type": "message",
+                  "message": "<p>Needs analyses may be made from a number of different sources, both formal and informal. Many existing resources provide adequate information for determining CE Activity needs. Check all of the sources of needs analysis used. Submit copies of the supporting documentation with this completed form. If the source or information used for the needs analysis is available online, a web address may be provided in lieu of hard copy documentation. Please provide source URLs on the form as indicated below. If the documentation is extensive, please provide it on a CD.</p>"
+                },
+                {
+                  "type": "message",
+                  "message": "<em>EXAMPLE:</em><br />Open Door Forum<br /> <em>Sample URL:</em> www.notarealwebsite.gov/reports"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "array",
+          "notitle": true,
+          "key": "needs",
+          "listItems": 1,
+          "items": [
+            {
+              "type": "div",
+              "htmlClass": "container",
+              "title": "<h4>{{ 'Gap/Need ' + $index }}</h4>",
+              "items": [
+                {
+                  "type": "textarea",
+                  "title": "A. Knowledge/Practice Gaps",
+                  "key": "needs[].knowledge_gaps"
+                },
+                {
+                  "type": "textarea",
+                  "title": "B. Learner Needs",
+                  "key": "needs[].learner_needs"
+                },
+                {
+                  "type": "textarea",
+                  "title": "C. Needs Analysis Documentation",
+                  "key": "needs[].needs_analysis"
+                },
+                {
+                  "title": "D. Source of Needs Analysis",
+                  "type": "flex",
+                  "flex-flow": "row wrap",
+                  "items": [
+                    {
+                      "type": "checkboxes",
+                      "notitle": true,
+                      "key": "needs[].source_needs_analysis.data_sources"
+                    },
+                    {
+                      "type": "div",
+                      "items": [
+                        {
+                          "key": "needs[].source_needs_analysis.data_source_other",
+                          "condition": {
+                            "functionBody": "return model.needs[arrayIndices[0]].source_needs_analysis.data_sources.includes('Other');"
+                          }
+                        },
+                        {
+                          "key": "needs[].source_needs_analysis.data_source_url"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "data": {
+    "target_audience": [
+      "All Health Care Professionals",
+      "Pharmacies"
+    ],
+    "needs": [
+      {
+        "knowledge_gaps": "blah1",
+        "learner_needs": "blah2",
+        "needs_analysis": "blah3",
+        "source_needs_analysis": {
+          "data_sources": [
+            "Federal Agency Report or Data",
+            "Interviews"
+          ],
+          "data_source_other": "circus poster",
+          "data_source_url": "http://circus.gov"
+        }
+      }
+    ]
+  }
+}

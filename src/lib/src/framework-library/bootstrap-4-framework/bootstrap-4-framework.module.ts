@@ -7,9 +7,10 @@ import { WidgetLibraryService } from '../../widget-library/widget-library.servic
 import { FrameworkLibraryService } from '../framework-library.service';
 
 import { Bootstrap4FrameworkComponent } from './bootstrap-4-framework.component';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
-    imports:          [CommonModule, WidgetLibraryModule],
+    imports:          [CommonModule, WidgetLibraryModule, NgbModule],
     declarations:     [Bootstrap4FrameworkComponent],
     exports:          [Bootstrap4FrameworkComponent],
     entryComponents:  [Bootstrap4FrameworkComponent],

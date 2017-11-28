@@ -19,15 +19,17 @@ import { DemoComponent } from './demo.component';
 import { DemoRootComponent } from './demo-root.component';
 
 import { routes } from './demo.routes';
+import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
+import { CmsceDemoComponent } from './cmsce-demo.component';
 
 @NgModule({
-  declarations: [ AceEditorDirective, DemoComponent, DemoRootComponent ],
+  declarations: [ AceEditorDirective, DemoComponent, DemoRootComponent, CmsceDemoComponent ],
   imports: [
     BrowserModule, BrowserAnimationsModule, FlexLayoutModule, FormsModule,
     HttpClientModule, MatButtonModule, MatCardModule, MatCheckboxModule,
     MatIconModule, MatMenuModule, MatSelectModule, MatToolbarModule,
-    RouterModule.forRoot(routes), JsonSchemaFormModule
+    RouterModule.forRoot(routes), JsonSchemaFormModule, NgbModule.forRoot()
   ],
-  bootstrap: [ DemoRootComponent ]
+  bootstrap: [ DemoRootComponent, CmsceDemoComponent ]
 })
 export class DemoModule { }

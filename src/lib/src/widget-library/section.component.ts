@@ -57,8 +57,8 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
           [style.justify-content]="getFlexAttribute('justify-content')"></root-widget>
     </fieldset>`,
   styles: [`
-    .expandable > .legend:before { content: '▶'; padding-right: .3em; }
-    .expanded > .legend:before { content: '▼'; padding-right: .2em; }
+    .expandable .legend:before, .expandable > label:before { content: '▶'; padding-right: .3em; }
+    .expanded .legend:before, .expanded > label:before { content: '▼'; padding-right: .2em; }
   `],
 })
 export class SectionComponent implements OnInit {
@@ -84,7 +84,7 @@ export class SectionComponent implements OnInit {
       break;
     }
     this.options = this.layoutNode.options || {};
-    this.expanded = !this.options.expandable;
+    this.expanded = !this.options.expandable || (this.options.expanded ? this.options.expanded : false);
   }
 
   legendDisplay(): string {

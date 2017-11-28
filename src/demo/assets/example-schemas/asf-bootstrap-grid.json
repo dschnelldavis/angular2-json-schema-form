@@ -32,19 +32,19 @@
       "helpvalue": "<div class=\"alert alert-info\">Grid it up with bootstrap</div>"
     },
     {
-      "type": "section",
+      "type": "flex",
       "htmlClass": "row",
       "items": [
         {
-          "type": "section",
-          "htmlClass": "col-xs-6",
+          "type": "flex",
+          "htmlClass": "col-sm-6",
           "items": [
             "name"
           ]
         },
         {
-          "type": "section",
-          "htmlClass": "col-xs-6",
+          "type": "flex",
+          "htmlClass": "col-sm-6",
           "items": [
             "email"
           ]

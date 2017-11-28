@@ -1,0 +1,1030 @@
+{
+  "schema": {
+    "type": "object",
+    "title": "Disclosure and Attestation",
+    "properties": {
+      "contact_info": {
+        "type": "object",
+        "properties": {
+          "calendar_year": {
+            "type": "number"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "professional_title": {
+            "type": "string"
+          },
+          "cmsComponent": {
+            "type": "string"
+          },
+          "cmsGroup": {
+            "type": "string"
+          },
+          "cmsDivision": {
+            "type": "string"
+          },
+          "address": {
+            "type": "object",
+            "properties": {
+              "street_1": {
+                "type": "string"
+              },
+              "city": {
+                "type": "string"
+              },
+              "state": {
+                "type": "string",
+                "enum": [
+                  "AL",
+                  "AK",
+                  "AS",
+                  "AZ",
+                  "AR",
+                  "CA",
+                  "CO",
+                  "CT",
+                  "DE",
+                  "DC",
+                  "FM",
+                  "FL",
+                  "GA",
+                  "GU",
+                  "HI",
+                  "ID",
+                  "IL",
+                  "IN",
+                  "IA",
+                  "KS",
+                  "KY",
+                  "LA",
+                  "ME",
+                  "MH",
+                  "MD",
+                  "MA",
+                  "MI",
+                  "MN",
+                  "MS",
+                  "MO",
+                  "MT",
+                  "NE",
+                  "NV",
+                  "NH",
+                  "NJ",
+                  "NM",
+                  "NY",
+                  "NC",
+                  "ND",
+                  "MP",
+                  "OH",
+                  "OK",
+                  "OR",
+                  "PW",
+                  "PA",
+                  "PR",
+                  "RI",
+                  "SC",
+                  "SD",
+                  "TN",
+                  "TX",
+                  "UT",
+                  "VT",
+                  "VI",
+                  "VA",
+                  "WA",
+                  "WV",
+                  "WI",
+                  "WY",
+                  "N/A or Other"
+                ]
+              },
+              "zip_code": {
+                "type": "string"
+              },
+              "mail_stop": {
+                "type": "string"
+              },
+              "physical_location": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "street_1",
+              "city",
+              "state",
+              "zip_code",
+              "mail_stop",
+              "physical_location"
+            ]
+          },
+          "telephone": {
+            "type": "string"
+          },
+          "fax": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "properties": {
+                "role_type": {
+                  "type": "string",
+                  "enum": [
+                    "Presenter, moderator, panelist, other facilitator role",
+                    "CE Planner/Developer",
+                    "Physician Reviewer",
+                    "Other"
+                  ]
+                },
+                "role_type_other": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "role_type"
+              ]
+            }
+          }
+        },
+        "required": [
+          "calendar_year",
+          "first_name",
+          "last_name",
+          "professional_title",
+          "cmsComponent",
+          "cmsGroup",
+          "cmsDivision",
+          "address",
+          "telephone",
+          "fax",
+          "email",
+          "role"
+        ]
+      },
+      "education_info": {
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "type": "object",
+          "properties": {
+            "degree": {
+              "type": "string"
+            },
+            "institution": {
+              "type": "string"
+            },
+            "area_of_study": {
+              "type": "string"
+            },
+            "city": {
+              "type": "string"
+            },
+            "state": {
+              "type": "string",
+              "enum": [
+                "AL",
+                "AK",
+                "AS",
+                "AZ",
+                "AR",
+                "CA",
+                "CO",
+                "CT",
+                "DE",
+                "DC",
+                "FM",
+                "FL",
+                "GA",
+                "GU",
+                "HI",
+                "ID",
+                "IL",
+                "IN",
+                "IA",
+                "KS",
+                "KY",
+                "LA",
+                "ME",
+                "MH",
+                "MD",
+                "MA",
+                "MI",
+                "MN",
+                "MS",
+                "MO",
+                "MT",
+                "NE",
+                "NV",
+                "NH",
+                "NJ",
+                "NM",
+                "NY",
+                "NC",
+                "ND",
+                "MP",
+                "OH",
+                "OK",
+                "OR",
+                "PW",
+                "PA",
+                "PR",
+                "RI",
+                "SC",
+                "SD",
+                "TN",
+                "TX",
+                "UT",
+                "VT",
+                "VI",
+                "VA",
+                "WA",
+                "WV",
+                "WI",
+                "WY",
+                "N/A or Other"
+              ]
+            }
+          },
+          "required": [
+            "degree",
+            "institution",
+            "area_of_study",
+            "city",
+            "state"
+          ]
+        }
+      },
+      "biographical_info": {
+        "type": "object",
+        "properties": {
+          "professional_experience": {
+            "type": "string"
+          },
+          "qualifications_for_activity": {
+            "type": "string"
+          },
+          "recent_professional_development": {
+            "type": "object",
+            "properties": {
+              "development_type": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "Any internal or external training including live training ",
+                    "Podcasts",
+                    "Web-based training",
+                    "Webinars ",
+                    "Review of journals, books, or other publications related to your profession",
+                    "Meetings or conferences in which education on topics related to your profession were provided",
+                    "Other"
+                  ]
+                }
+              },
+              "development_type_other": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "development_type"
+            ]
+          }
+        },
+        "required": [
+          "professional_experience",
+          "qualifications_for_activity",
+          "recent_professional_development"
+        ]
+      },
+      "financial_disclosure": {
+        "type": "object",
+        "properties": {
+          "has_commercial_interest": {
+            "type": "boolean"
+          },
+          "financial_relationships": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "properties": {
+                "relationship_type": {
+                  "type": "string",
+                  "enum": [
+                    "Consultant",
+                    "Speaker's Bureau",
+                    "Grant/Research Support (prinicipal investor or working directly for company's agent)",
+                    "Stock Shareholder",
+                    "Other e.g. \"in-kind\", royalty, employee"
+                  ]
+                },
+                "relationship_type_other": {
+                  "type": "string"
+                },
+                "company_name": {
+                  "type": "string"
+                },
+                "relationship_ongoing": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "relationship_type",
+                "relationship_type_other",
+                "company_name",
+                "relationship_ongoing"
+              ]
+            }
+          }
+        },
+        "required": [
+          "has_commercial_interest",
+          "financial_relationships"
+        ]
+      },
+      "compliance": {
+        "type": "object",
+        "properties": {
+          "all_financial_relationships_disclosed": {
+            "type": "boolean"
+          },
+          "involvement_not_commercial": {
+            "type": "boolean"
+          },
+          "no_compensation": {
+            "type": "boolean"
+          },
+          "material_rights_cleared": {
+            "type": "boolean"
+          },
+          "understand_disclosure_required": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "all_financial_relationships_disclosed",
+          "involvement_not_commercial",
+          "no_compensation",
+          "material_rights_cleared",
+          "understand_disclosure_required"
+        ]
+      }
+    },
+    "required": [
+      "contact_info",
+      "education_info",
+      "biographical_info",
+      "financial_disclosure",
+      "compliance"
+    ]
+  },
+  "form": [
+    {
+      "type": "message",
+      "message": "<div class=\"alert alert-info\">Disclosure & Attestation </div>"
+    },
+    {
+      "type": "section",
+      "title": "Section I: Contact Information",
+      "labelHtmlClass": "h3",
+      "expandable": true,
+      "expanded": false,
+      "items": [
+        {
+          "type": "flex",
+          "flex-flow": "row wrap",
+          "items": [
+            "contact_info.calendar_year"
+          ]
+        },
+        {
+          "type": "flex",
+          "flex-flow": "row wrap",
+          "items": [
+            "contact_info.first_name",
+            "contact_info.last_name"
+          ]
+        },
+        "contact_info.professional_title",
+        {
+          "type": "flex",
+          "flex-flow": "row wrap",
+          "items": [
+            {
+              "key": "contact_info.cmsComponent",
+              "title": "CMS Component or Organization"
+            },
+            {
+              "key": "contact_info.cmsGroup",
+              "title": "CMS Group (or N/A)"
+            },
+            {
+              "key": "contact_info.cmsDivision",
+              "title": "CMS Division (or N/A)"
+            }
+          ]
+        },
+        {
+          "type": "flex",
+          "flex-flow": "row wrap",
+          "items": [
+            {
+              "key": "contact_info.telephone",
+              "placeholder": "xxx-xxx-xxxx"
+            },
+            "contact_info.email"
+          ]
+        },
+        {
+          "type": "section",
+          "items": [
+            {
+              "title": "Business Address",
+              "key": "contact_info.address.street_1",
+              "placeholder": "Street"
+            },
+            {
+              "key": "contact_info.address.street_2",
+              "notitle": true
+            },
+            {
+              "type": "div",
+              "display": "flex",
+              "flex-direction": "row",
+              "items": [
+                {
+                  "key": "contact_info.address.city",
+                  "flex": "3 3 150px",
+                  "notitle": true,
+                  "placeholder": "City"
+                },
+                {
+                  "key": "contact_info.address.state",
+                  "flex": "1 1 50px",
+                  "notitle": true,
+                  "placeholder": "State"
+                },
+                {
+                  "key": "contact_info.address.zip_code",
+                  "flex": "2 2 100px",
+                  "notitle": true,
+                  "placeholder": "Zip Code"
+                }
+              ]
+            },
+            {
+              "type": "div",
+              "display": "flex",
+              "flex-direction": "row",
+              "items": [
+                {
+                  "key": "contact_info.address.mail_stop",
+                  "notitle": true,
+                  "placeholder": "Mail Stop"
+                },
+                {
+                  "key": "contact_info.address.physical_location",
+                  "notitle": true,
+                  "placeholder": "Physical Location (if different from mailing)"
+                }
+              ]
+            },
+            {
+              "key": "contact_info.role",
+              "hideTitle": true,
+              "type": "array",
+              "listItems": 1,
+              "items": [
+                "contact_info.role[].role_type",
+                {
+                  "key": "contact_info.role[].role_type_other",
+                  "condition": {
+                    "functionBody": "return model.contact_info.role[$index].role_type == 'Other';"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Section II: Education Information",
+      "labelHtmlClass": "h3",
+      "expandable": true,
+      "expanded": false,
+      "items": [
+        {
+          "notitle": true,
+          "key": "education_info",
+          "hideTitle": true,
+          "type": "array",
+          "listItems": 1,
+          "title": "{{ 'Degree/Credential ' + $index }}",
+          "items": [
+            {
+              "type": "div",
+              "htmlClass": "container",
+              "title": "{{ 'Degree/Credential ' + $index }}",
+              "labelHtmlClass": "h4",
+              "items": [
+                {
+                  "type": "div",
+                  "display": "flex",
+                  "flex-direction": "row",
+                  "items": [
+                    {
+                      "key": "education_info[].degree",
+                      "flex": "2 2 100px",
+                      "notitle": true,
+                      "placeholder": "Degree/Certification/Credential (e.g. MA, MBA, PMP)"
+                    },
+                    {
+                      "key": "education_info[].area_of_study",
+                      "flex": "2 2 100px",
+                      "notitle": true,
+                      "placeholder": "Area of Study"
+                    }
+                  ]
+                },
+                {
+                  "type": "div",
+                  "display": "flex",
+                  "flex-direction": "row",
+                  "items": [
+                    {
+                      "key": "education_info[].institution",
+                      "flex": "2 2 100px",
+                      "notitle": true,
+                      "placeholder": "Institution"
+                    },
+                    {
+                      "key": "education_info[].city",
+                      "flex": "2 2 100px",
+                      "notitle": true,
+                      "placeholder": "City"
+                    },
+                    {
+                      "key": "education_info[].state",
+                      "flex": "1 1 50px",
+                      "placeholde": "State",
+                      "notitle": true
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Section III: Biographical Information, Professional Experience & Development",
+      "labelHtmlClass": "h3",
+      "expandable": true,
+      "expanded": false,
+      "items": [
+        {
+          "type": "section",
+          "labelHtmlClass": "h4",
+          "title": "1. Professional Experience and Additional Information:",
+          "items": [
+            {
+              "type": "message",
+              "message": "(Write this in the third person, e.g., Ms. Doe, so this information can be copied and given to learners.)"
+            },
+            {
+              "type": "section",
+              "title": "Example",
+              "htmlClass": "alert alert-info",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                {
+                  "type": "message",
+                  "message": "<p>Ms. Doe has been employed by _______, a Medicare Administrative Contractor (MAC), from January 2011-July 2012 as a Director of Compliance. From January 2009-December 2012, she was employed in the same capacity by the organization when it was a Fiscal Intermediary (FI).</p>"
+                }
+              ]
+            },
+            {
+              "key": "biographical_info.professional_experience",
+              "notitle": true,
+              "type": "textarea"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "labelHtmlClass": "h4",
+          "title": "2. What qualifies you to plan/develop/present this activity?",
+          "items": [
+            {
+              "type": "message",
+              "message": "(Write this in the third person, e.g., Ms. Doe, so this information can be copied and given to learners. Include information about your professional experience that prepared you to plan, administer and/or conduct and deliver this learning/training activity, particularly education/experience related to instructional methods and learning processes.)"
+            },
+            {
+              "type": "section",
+              "title": "Example",
+              "htmlClass": "alert alert-info",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                {
+                  "type": "message",
+                  "message": "EXAMPLE: Ms. Doe earned a Juris Doctorate, with distinction, in health law and has developed education for Medicare providers on Medicare Parts A, B, and C in various formats such as printed materials, Web-Based Training (WBT) courses, and slide presentations. Ms. Doe has conducted seminars, teleconferences, and one-on-one training for Medicare Part A providers on Medicare law and regulations, including fraud and abuse laws.</p>"
+                }
+              ]
+            },
+            {
+              "key": "biographical_info.qualifications_for_activity",
+              "notitle": true,
+              "type": "textarea"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "labelHtmlClass": "h4",
+          "title": "3. What professional development have you participated in in the past 12 months?",
+          "items": [
+            {
+              "title": "Development Type (select all that apply)",
+              "key": "biographical_info.recent_professional_development.development_type",
+              "type": "checkboxes"
+            },
+            {
+              "key": "biographical_info.recent_professional_development.development_type_other",
+              "condition": {
+                "functionBody": "return model.biographical_info.recent_professional_development.development_type.includes('Other')"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Section IV: Financial Disclosure & Attestations",
+      "labelHtmlClass": "h3",
+      "expandable": true,
+      "expanded": false,
+      "items": [
+        {
+          "type": "message",
+          "message": "<p>The information provided below addresses several requirements of the accrediting body to help ensure independence of CE Activities, avoid disputes, and protect owners of intellectual property rights for the design and delivery of continuing education and training. Everyone in a position to affect or influence the content of a CE Activity must disclose all relevant financial relationships with commercial interests to the CE provider. This information must be disclosed to participants prior to the beginning of the activity.</p>"
+        },
+        {
+          "type": "section",
+          "title": "Definitions",
+          "notitle": true,
+          "items": [
+            {
+              "type": "message",
+              "htmlClass": "h4",
+              "message": "<p>Please review these definitions before completing your form.</p>"
+            },
+            {
+              "type": "section",
+              "title": "Financial Relationships",
+              "labelHtmlClass": "h5",
+              "expandable": true,
+              "items": [
+                {
+                  "type": "message",
+                  "message": "Financial relationships are those relationships in which the individual benefits by receiving a salary, royalty, intellectual property rights, consulting fee, honoraria, ownership interest (e.g., stocks, stock options or other ownership interest, excluding diversified mutual funds) or other financial benefit. Financial benefits are usually associated with roles such as employment, management position, independent contractor (including contracted research), consulting, speaking and teaching, membership on advisory committees or review panels, board membership, and other activities for which remuneration is received or expected. The relationships of the person involved in the CE Activity are considered to include the relationships of a spouse or partner. Financial relationships relevant to the CE Activity are those in which an individual (including the individual's spouse/domestic partner) has both: (1) a personal financial (any amount) relationship with a commercial interest producing health care goods/services in the past 12 months (whether relationship has now ended or is currently active) and (2) control in planning or presenting educational content addressing specific products of the commercial interest (not simply a whole class of products as a group)."
+                }
+              ]
+            },
+            {
+              "type": "section",
+              "title": "Relevant Financial Relationships",
+              "labelHtmlClass": "h5",
+              "expandable": true,
+              "items": [
+                {
+                  "type": "message",
+                  "message": "Relevant financial relationships are defined as any financial relationship with a commercial interest in any amount occurring within the past 12 months."
+                }
+              ]
+            },
+            {
+              "type": "section",
+              "title": "Commercial Interest",
+              "labelHtmlClass": "h5",
+              "expandable": true,
+              "items": [
+                {
+                  "type": "message",
+                  "message": "A commercial interest is any entity producing, marketing, re-selling, or distributing health care goods or services consumed by, or used on, patients."
+                }
+              ]
+            },
+            {
+              "type": "section",
+              "title": "Conflict of Interest",
+              "labelHtmlClass": "h5",
+              "expandable": true,
+              "items": [
+                {
+                  "type": "message",
+                  "message": "Conflicts of interest are created by circumstances in which an individual has an opportunity to affect CE content about products or services of a commercial interest with which she/he has a financial relationship."
+                }
+              ]
+            },
+            {
+              "type": "section",
+              "title": "Protecting Intellectual Property Rights",
+              "labelHtmlClass": "h5",
+              "expandable": true,
+              "items": [
+                {
+                  "type": "message",
+                  "message": "Protecting intellectual property rights means the activity must be original and must not contain any material that would violate the copyrights, trademarks, or other property rights of others. The content creator/presenter must obtain sufficient rights with respect to any third-party materials included in the activity to provide the license herein."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "labelHtmlClass": "h4",
+          "title": "1. Disclosure: Regarding my role in the CE Activity, currently or in the last 12 month (check one):",
+          "items": [
+            {
+              "key": "financial_disclosure.has_commercial_interest",
+              "type": "radios",
+              "notitle": true,
+              "titleMap": [
+                {
+                  "value": "false",
+                  "name": "I (or my spouse/partner) have/had no relevant personal financial relationship with a commercial interest."
+                },
+                {
+                  "value": "true",
+                  "name": "I (or my spouse/partner) have/had a personal financial relationship with a commercial interest."
+                }
+              ]
+            },
+            {
+              "key": "financial_disclosure.financial_relationships",
+              "condition": "financial_disclosure.has_commercial_interest",
+              "hideTitle": true,
+              "type": "array",
+              "listItems": 0,
+              "items": [
+                {
+                  "type": "flex",
+                  "flex-flow": "row nowrap",
+                  "removable": false,
+                  "items": [
+                    {
+                      "type": "message",
+                      "message": "Type of Personal Financial Relationship",
+                      "flex": "3 3 150px"
+                    },
+                    {
+                      "type": "message",
+                      "message": "Name of Company(ies)",
+                      "flex": "3 3 150px"
+                    },
+                    {
+                      "type": "message",
+                      "message": "Relationship Status",
+                      "flex": "2 2 100px"
+                    }
+                  ]
+                },
+                {
+                  "type": "flex",
+                  "flex-flow": "row nowrap",
+                  "items": [
+                    {
+                      "type": "div",
+                      "notitle": true,
+                      "flex": "3 3 150px",
+                      "items": [
+                        {
+                          "notitle": true,
+                          "key": "financial_disclosure.financial_relationships[].relationship_type"
+                        },
+                        {
+                          "notitle": true,
+                          "placeholder": "Other: Please describe",
+                          "key": "financial_disclosure.financial_relationships[].relationship_type_other",
+                          "condition": {
+                            "functionBody": "return model.financial_disclosure.financial_relationships[arrayIndices[0]].relationship_type == 'Other e.g. \"in-kind\", royalty, employee'"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "key": "financial_disclosure.financial_relationships[].company_name",
+                      "placeholder": "Company Name",
+                      "notitle": true,
+                      "flex": "3 3 150px"
+                    },
+                    {
+                      "key": "financial_disclosure.financial_relationships[].relationship_ongoing",
+                      "notitle": true,
+                      "flex": "2 2 150px",
+                      "type": "radios-inline",
+                      "notitle": true,
+                      "htmlClass": "ml-sm-2 text-center",
+                      "titleMap": [
+                        {
+                          "value": "false",
+                          "name": "Ended"
+                        },
+                        {
+                          "value": "true",
+                          "name": "Current"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "labelHtmlClass": "h4",
+          "title": "2. Please indicate your understanding of and willingness to comply with each statement below.",
+          "items": [
+            {
+              "type": "flex",
+              "flex-flow": "row wrap",
+              "items": [
+                {
+                  "type": "message",
+                  "flex": "6 6 300px",
+                  "message": "I have disclosed to the Centers for Medicare & Medicaid Services (CMS) all relevant financial relationships. If I am a presenter for a lecture/didactic session, I will also disclose these relationships to learners (verbally, through a slide, etc.), so they may form their own opinions as to possible bias in either exposition or conclusion. I am aware that CMS will disclose this information to learners through additional means and, where evaluation forms are used, ask participants to indicate their opinions regarding possible bias."
+                },
+                {
+                  "key": "compliance.all_financial_relationships_disclosed",
+                  "htmlClass": "ml-sm-2 text-center",
+                  "type": "checkbox",
+                  "title": "I agree.",
+                  "flex": "1 1 100px"
+                }
+              ]
+            },
+            {
+              "type": "flex",
+              "flex-flow": "row wrap",
+              "items": [
+                {
+                  "type": "message",
+                  "flex": "6 6 300px",
+                  "message": "My involvement will promote quality or improvements in health care and will not promote a specific proprietary business interest of a commercial interest. Any content, with which I am involved, will be well-balanced, evidence-based and unbiased."
+                },
+                {
+                  "key": "compliance.involvement_not_commercial",
+                  "htmlClass": "ml-sm-2 text-center",
+                  "type": "checkbox",
+                  "title": "I agree.",
+                  "flex": "1 1 100px"
+                }
+              ]
+            },
+            {
+              "type": "flex",
+              "flex-flow": "row wrap",
+              "items": [
+                {
+                  "type": "message",
+                  "flex": "6 6 300px",
+                  "message": "I will not accept honoraria, payments, or reimbursements related to this activity, unless agreed upon directly with CMS."
+                },
+                {
+                  "key": "compliance.no_compensation",
+                  "htmlClass": "ml-sm-2 text-center",
+                  "type": "checkbox",
+                  "title": "I agree.",
+                  "flex": "1 1 100px"
+                }
+              ]
+            },
+            {
+              "type": "flex",
+              "flex-flow": "row wrap",
+              "items": [
+                {
+                  "type": "message",
+                  "flex": "6 6 300px",
+                  "message": "I confirm that (1) the materials are original, or (2) that I have obtained sufficient rights with respect to any third-party materials included in the materials to provide the license herein and that they do not contain any material that would violate the copyrights, trademarks, or other property rights of others."
+                },
+                {
+                  "key": "compliance.material_rights_cleared",
+                  "htmlClass": "ml-sm-2 text-center",
+                  "type": "checkbox",
+                  "title": "I agree.",
+                  "flex": "1 1 100px"
+                }
+              ]
+            },
+            {
+              "type": "flex",
+              "flex-flow": "row wrap",
+              "items": [
+                {
+                  "type": "message",
+                  "flex": "6 6 300px",
+                  "message": "I understand that if I refuse to disclose relevant financial relationships, I will be disqualified from being a planning committee member, a teacher, or an author of CE, and cannot have control of, or responsibility for, the development, management, presentation, or evaluation of the CE Activity."
+                },
+                {
+                  "key": "compliance.understand_disclosure_required",
+                  "htmlClass": "ml-sm-2 text-center",
+                  "type": "checkbox",
+                  "title": "I agree.",
+                  "flex": "1 1 100px"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "data": {
+    "contact_info": {
+      "calendar_year": 2017,
+      "first_name": "joe",
+      "last_name": "smith",
+      "role": [
+        {
+          "role_type": "Other",
+          "role_type_other": "circus monkey"
+        },
+        {
+          "role_type": "Presenter, moderator, panalist, other facilitator role"
+        }
+      ],
+      "professional_title": "monkey",
+      "cmsComponent": "cmsComponent - sample entry",
+      "cmsGroup": "cmsGroup - sample entry",
+      "cmsDivision": "cmsDivision - sample entry",
+      "address": {
+        "street_1": "3730 Gleneagles Ln",
+        "city": "Tucker",
+        "state": "GA",
+        "zip_code": "30084",
+        "mail_stop": "stop here",
+        "physical_location": "closet"
+      },
+      "telephone": "678-317-4004",
+      "fax": "678-317-4004",
+      "email": "scott@talsma.tv"
+    },
+    "education_info": [
+      {
+        "degree": "mba",
+        "institution": "devry",
+        "area_of_study": "chem",
+        "city": "Tucker",
+        "state": "GA"
+      }
+    ],
+    "biographical_info": {
+      "professional_experience": "blah blah blah ",
+      "qualifications_for_activity": "blah blah blah ",
+      "recent_professional_development": {
+        "development_type": [
+          "Podcasts",
+          "eating"
+        ],
+        "development_type_other": "blah"
+      }
+    },
+    "financial_disclosure": {
+      "has_commercial_interest": true,
+      "financial_relationships": [
+        {
+          "relationship_type": "consultant",
+          "relationship_type_other": "consultant",
+          "company_name": "ACME Widgets",
+          "relationship_ongoing": true
+        }
+      ]
+    },
+    "compliance": {
+      "all_financial_relationships_disclosed": true,
+      "involvement_not_commercial": true,
+      "no_compensation": true,
+      "material_rights_cleared": true,
+      "understand_disclosure_required": true
+    }
+  }
+}

@@ -115,8 +115,8 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
   styles: [`
     fieldset { border: 0; margin: 0; padding: 0; }
     .title { font-size: 150%; }
-    .expandable > .legend:before { content: '▶'; padding-right: .3em; }
-    .expanded > .legend:before { content: '▼'; padding-right: .2em; }
+    .expandable > .legend:before, .expandable > label:before { content: '▶'; padding-right: .3em; }
+    .expanded > .legend:before, .expanded > label:before { content: '▼'; padding-right: .2em; }
   `],
 })
 export class FlexLayoutSectionComponent implements OnInit {
@@ -138,7 +138,7 @@ export class FlexLayoutSectionComponent implements OnInit {
 
   ngOnInit() {
     this.jsf.initializeControl(this);
-    this.expanded = !this.options.expandable;
+    this.expanded = !this.options.expandable || (this.options.expanded ? this.options.expanded : false);
     switch (this.layoutNode.type) {
       case 'section': case 'array': case 'fieldset': case 'advancedfieldset':
       case 'authfieldset': case 'optionfieldset': case 'selectfieldset':

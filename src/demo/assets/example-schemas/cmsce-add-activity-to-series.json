@@ -1,0 +1,208 @@
+{
+  "schema": {
+    "type": "object",
+    "title": "Start an Activity",
+    "properties": {
+      "activity": {
+        "type": "object",
+        "properties": {
+          "activity_title": {
+            "type": "string"
+          },
+          "activity_date": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "credit_information": {
+            "type": "object",
+            "properties": {
+              "credit_type": {
+                "type": "string",
+                "enum": [
+                  "CEU",
+                  "CME",
+                  "Both",
+                  "Unsure"
+                ]
+              }
+            },
+            "required": [
+              "credit_type"
+            ]
+          },
+          "activity_type": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "IP: In Person",
+                "WB: Web-based training (WBT) course",
+                "WE-L: Webinar-live",
+                "WE-E: Recorded webinar",
+                "TC-L: Teleconference-live",
+                "SB-L: Satellite broadcast-live",
+                "SB-E: Recorded satellite broadcast",
+                "PD-L: Podcast-live",
+                "PD-E: Recorded podcast",
+                "PR: Print product",
+                "VI: Video (including CD/DVD)"
+              ]
+            }
+          },
+          "speakers": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "properties": {
+                "first_name": {
+                  "type": "string"
+                },
+                "last_name": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "first_name",
+                "last_name",
+                "email"
+              ]
+            }
+          }
+        },
+        "required": [
+          "activity_title",
+          "activity_date",
+          "description",
+          "credit_information",
+          "activity_type",
+          "speakers"
+        ]
+      }
+    },
+    "required": [
+      "activity"
+    ]
+  },
+  "form": [
+    {
+      "type": "help",
+      "helpvalue": "<div class=\"alert alert-info\">Add an Activity to a Series</div>"
+    },
+    {
+      "title": "Basic Information",
+      "labelHtmlClass": "h3",
+      "type": "section",
+      "expandable": true,
+      "expanded": true,
+      "items": [
+        {
+          "key": "activity.activity_title"
+        },
+        {
+          "key": "activity.activity_date",
+          "type": "date"
+        },
+        {
+          "key": "activity.description",
+          "type": "textarea"
+        },
+        {
+          "label": "Activity Type (select all that apply)",
+          "key": "activity.activity_type",
+          "type": "checkboxes"
+        }
+      ]
+    },
+    {
+      "title": "Credit Information",
+      "labelHtmlClass": "h3",
+      "type": "section",
+      "expandable": true,
+      "expanded": false,
+      "items": [
+        {
+          "title": "What type of credit are you pursuing?",
+          "key": "activity.credit_information.credit_type"
+        }
+      ]
+    },
+    {
+      "title": "Speakers/Presenters/Content Creators",
+      "labelHtmlClass": "h3",
+      "type": "section",
+      "expandable": true,
+      "expanded": false,
+      "items": [
+        {
+          "type": "array",
+          "key": "activity.speakers",
+          "listItems": 1,
+          "items": [
+            {
+              "type": "div",
+              "htmlClass": "container",
+              "title": "<h4>{{ 'Contributor ' + $index }}</h4>",
+              "items": [
+                {
+                  "type": "flex",
+                  "flex-flow": "row wrap",
+                  "items": [
+                    "activity.speakers[].first_name",
+                    "activity.speakers[].last_name",
+                    "activity.speakers[].email"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "data": {
+    "activity": {
+      "activity_title": "some title here",
+      "activity_date": "2017-01-01",
+      "description": "",
+      "credit_information": {
+        "credit_type": "CEU",
+        "provider_is_cms": false,
+        "sponsor": "joes deli",
+        "joint_sponsor": "joes 2nd deli"
+      },
+      "activity_type": [
+        "WE-E: Recorded webinar",
+        "TC-L: Teleconference-live",
+        "SB-E: Recorded satellite broadcast"
+      ],
+      "speakers": [
+        {
+          "first_name": "Rosamund",
+          "last_name": "Bredee",
+          "email": "rbredee0@cargocollective.com"
+        },
+        {
+          "first_name": "Cecil",
+          "last_name": "McPeake",
+          "email": "cmcpeake1@hud.gov"
+        },
+        {
+          "first_name": "Dorri",
+          "last_name": "Dudlestone",
+          "email": "ddudlestone2@blogspot.com"
+        },
+        {
+          "first_name": "Hermon",
+          "last_name": "Crenshaw",
+          "email": "hcrenshaw3@redcross.org"
+        }
+      ]
+    }
+  }
+}

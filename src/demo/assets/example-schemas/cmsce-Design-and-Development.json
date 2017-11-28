@@ -1,0 +1,630 @@
+{
+  "schema": {
+    "type": "object",
+    "title": "Design & Development",
+    "properties": {
+      "multiple_format_explanation": {
+        "type": "string"
+      },
+      "instructional_methods_description": {
+        "type": "string"
+      },
+      "prerequisites": {
+        "type": "object",
+        "properties": {
+          "has_prerequisites": {
+            "type": "boolean"
+          },
+          "prerequisites_determination_description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "has_prerequisites"
+        ]
+      },
+      "learning_environment_assessement": {
+        "type": "object",
+        "properties": {
+          "assessment_method": {
+            "type": "string",
+            "enum": [
+              "Learner Evaluations",
+              "Instructor Feedback",
+              "Other"
+            ]
+          },
+          "assessment_method_other": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "assessment_method"
+        ]
+      },
+      "learning_environment_interactions": {
+        "type": "object",
+        "properties": {
+          "learner_to_learner": {
+            "type": "object",
+            "properties": {
+              "interaction_method": {
+                "type": "string",
+                "enum": [
+                  "Discussion",
+                  "Group work",
+                  "Online chat rooms/discussion boards",
+                  "Other"
+                ]
+              },
+              "interaction_method_other": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "interaction_method"
+            ]
+          },
+          "learner_to_instructor": {
+            "type": "object",
+            "properties": {
+              "interaction_method": {
+                "type": "string",
+                "enum": [
+                  "Discussion",
+                  "Formal classroom instruction",
+                  "E-mail/telephone communication",
+                  "Question & answer session",
+                  "Other"
+                ]
+              },
+              "interaction_method_other": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "interaction_method"
+            ]
+          },
+          "learner_to_content": {
+            "type": "object",
+            "properties": {
+              "interaction_method": {
+                "type": "string",
+                "enum": [
+                  "Simulations",
+                  "Knowledge check questions",
+                  "Assessments",
+                  "Research assignments",
+                  "Other"
+                ]
+              },
+              "interaction_method_other": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "interaction_method"
+            ]
+          }
+        },
+        "required": [
+          "learner_to_learner",
+          "learner_to_instructor",
+          "learner_to_content"
+        ]
+      },
+      "training_location_appropriateness": {
+        "type": "string"
+      },
+      "facility_assessment_process": {
+        "type": "string"
+      },
+      "exhibit_space": {
+        "type": "object",
+        "properties": {
+          "has_exhibit_space": {
+            "type": "boolean"
+          },
+          "exhibit_space_separation": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "has_exhibit_space"
+        ]
+      },
+      "registration_scheduling_process": {
+        "type": "string"
+      },
+      "learner_material_access": {
+        "type": "string"
+      },
+      "reference_material_process": {
+        "type": "string"
+      },
+      "ce_document_distribution_process": {
+        "type": "string"
+      },
+      "learner_tracking_verification_access": {
+        "type": "string"
+      },
+      "educational_strategies": {
+        "type": "object",
+        "properties": {
+          "strategies": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "Job Aids",
+                "Resource List",
+                "Simulations",
+                "Group Exercise",
+                "Knowledge Check Questions",
+                "Other"
+              ]
+            }
+          },
+          "strategies_other": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "strategies"
+        ]
+      }
+    },
+    "required": [
+      "multiple_format_explanation",
+      "instructional_methods_description",
+      "prerequisites",
+      "learning_environment_assessement",
+      "learning_environment_interactions",
+      "training_location_appropriateness",
+      "facility_assessment_process",
+      "exhibit_space",
+      "registration_scheduling_process",
+      "learner_material_access",
+      "reference_material_process",
+      "ce_document_distribution_process",
+      "learner_tracking_verification_access",
+      "educational_strategies"
+    ]
+  },
+  "form": [
+    {
+      "type": "message",
+      "message": "<div class=\"alert alert-info\">Design & Development</div>"
+    },
+    {
+      "type": "section",
+      "title": "1. If using multiple formats, please explain how each format is used.",
+      "labelHtmlClass": "h4",
+      "items": [
+        {
+          "type": "message",
+          "message": "<p>This is especially important when discussing a blended approach. Put N/A to indicate Not Applicable if you only used one type of format.</p>"
+        },
+        {
+          "type": "message",
+          "htmlClass": "alert alert-info",
+          "message": "EXAMPLE: We conducted a live teleconference with Subject Matter Experts accepting questions via the registration site and also during the conference. We then provided a transcript on the CMS website so that learners could refresh their memory and share with their colleagues. We also extracted and posted Frequently Asked Questions (FAQs) to the CMS website."
+        },
+        {
+          "key": "multiple_format_explanation",
+          "type": "textarea",
+          "notitle": true
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "title": "2. Describe how the instructional methods used in this format will facilitate achievement of the desired learning objectives.",
+      "labelHtmlClass": "h4",
+      "items": [
+        {
+          "type": "message",
+          "htmlClass": "alert alert-info",
+          "message": "EXAMPLE: We chose a live presentation via a teleconference with a downloadable presentation because it gets the information to the audience quickly and also allows time for discussion. This will enable the health care providers to adapt their Medicare practices quickly. It will also ensure we hear any provider issues from the providers and address these in follow-up activities."
+        },
+        {
+          "type": "message",
+          "htmlClass": "alert alert-info",
+          "message": "EXAMPLE: We chose a WBT format because this information is enduring and the content is not expected to change. We will include case studies to assist in assimilation of content and in adapting this to practice gaps."
+        },
+        {
+          "key": "instructional_methods_description",
+          "type": "textarea",
+          "notitle": true
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "title": "3. Are there any prerequisite types of knowledge or skills the learner needs in order to be successful in this activity?",
+      "labelHtmlClass": "h4",
+      "items": [
+        {
+          "key": "prerequisites.has_prerequisites",
+          "notitle": true,
+          "type": "radios-inline",
+          "titleMap": [
+            {
+              "value": true,
+              "name": "Yes"
+            },
+            {
+              "value": false,
+              "name": "No"
+            }
+          ]
+        },
+        {
+          "type": "div",
+          "condition": "model.prerequisites.has_prerequisites",
+          "items": [
+            {
+              "type": "message",
+              "message": "(If yes, please list them and provide an explanation about how you determine that the learner has met these prerequisites.)"
+            },
+            {
+              "type": "message",
+              "message": "EXAMPLE: Prerequisites: Although it is not a requirement, learners are encouraged to take the World of Medicare WBT prior to taking Your Office (YO) in the World of Medicare.<br/>Explanation: This is explained in the introduction of YO."
+            },
+            {
+              "key": "prerequisites.prerequisites_determination_description",
+              "type": "textarea",
+              "notitle": true,
+              "required": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "title": "4. How will the learning environment be assessed to ensure it supports the achievement of learning objectives?",
+      "labelHtmlClass": "h4",
+      "items": [
+        {
+          "key": "learning_environment_assessement.assessment_method",
+          "type": "radio",
+          "notitle": true
+        },
+        {
+          "type": "div",
+          "items": [
+            {
+              "type": "message",
+              "message": "Please specify:"
+            },
+            {
+              "key": "learning_environment_assessement.assessment_method_other",
+              "type": "textarea",
+              "notitle": true,
+              "required": true
+            }
+          ],
+          "condition": {
+            "functionBody": "return model.learning_environment_assessement.assessment_method == 'Other';"
+          }
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "title": "5. How will the learning environment support learner-to-learner, learner-to-instructor, and learner-to-content interactions?",
+      "labelHtmlClass": "h4",
+      "items": [
+        {
+          "type": "flex",
+          "flex-flow": "row wrap",
+          "items": [
+            {
+              "type": "div",
+              "items": [
+                {
+                  "title": "Learner to Learner",
+                  "type": "radio",
+                  "key": "learning_environment_interactions.learner_to_learner.interaction_method"
+                },
+                {
+                  "title": "Please specify:",
+                  "key": "learning_environment_interactions.learner_to_learner.interaction_method_other",
+                  "type": "textarea",
+                  "required": true,
+                  "condition": {
+                    "functionBody": "return model.learning_environment_interactions.learner_to_learner.interaction_method == 'Other';"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "div",
+              "items": [
+                {
+                  "title": "Learner to Instructor",
+                  "type": "radio",
+                  "key": "learning_environment_interactions.learner_to_instructor.interaction_method"
+                },
+                {
+                  "title": "Please specify:",
+                  "key": "learning_environment_interactions.learner_to_instructor.interaction_method_other",
+                  "type": "textarea",
+                  "required": true,
+                  "condition": {
+                    "functionBody": "return model.learning_environment_interactions.learner_to_instructor.interaction_method == 'Other';"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "div",
+              "items": [
+                {
+                  "title": "Learner to Content",
+                  "type": "radio",
+                  "key": "learning_environment_interactions.learner_to_content.interaction_method"
+                },
+                {
+                  "title": "Please specify:",
+                  "key": "learning_environment_interactions.learner_to_content.interaction_method_other",
+                  "type": "textarea",
+                  "required": true,
+                  "condition": {
+                    "functionBody": "return model.learning_environment_interactions.learner_to_content.interaction_method == 'Other';"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Question 6, 7, and 8 apply to live activities ONLY.",
+      "labelHtmlClass": "h3",
+      "type": "section",
+      "expandable": true,
+      "items": [
+        {
+          "type": "section",
+          "title": "6. Explain the process used for determining the appropriateness of the training location (e.g., conference furnishings, ventilation, temperature, visual field, sightlines, sound, compliance with the Americans with Disabilities Act [ADA], etc.):",
+          "labelHtmlClass": "h4",
+          "items": [
+            {
+              "type": "message",
+              "htmlClass": "alert alert-info",
+              "message": "EXAMPLE: The location was convenient to attendees. On our pre-site visit, we ensured that the conference center would have a manager available to us via cell phone to address any unexpected issues such as temperature or noise issues. We contracted for two screens to ensure good visibility. We did a sound check the night before the conference."
+            },
+            {
+              "key": "training_location_appropriateness",
+              "type": "textarea",
+              "notitle": true
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "title": "7. If you use the same training location multiple times over a period of time, explain the process used for periodic facility assessment to ensure that the training location continues to be adequate.",
+          "labelHtmlClass": "h4",
+          "items": [
+            {
+              "type": "message",
+              "htmlClass": "alert alert-info",
+              "message": "EXAMPLE: Prior to each meeting, we review our conference checklist with the facility staff. We spend additional time reviewing our needs with any new staff."
+            },
+            {
+              "key": "facility_assessment_process",
+              "type": "textarea",
+              "notitle": true
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "title": "8. Will there be exhibit space?",
+          "labelHtmlClass": "h4",
+          "items": [
+            {
+              "type": "message",
+              "message": "<p>You must ensure that the selling of advertising or exhibit space is a business transaction entirely separate from the accredited activity.</p>"
+            },
+            {
+              "key": "exhibit_space.has_exhibit_space",
+              "notitle": true,
+              "type": "radios-inline",
+              "titleMap": [
+                {
+                  "value": true,
+                  "name": "Yes"
+                },
+                {
+                  "value": false,
+                  "name": "No"
+                }
+              ]
+            },
+            {
+              "type": "div",
+              "condition": "model.exhibit_space.has_exhibit_space",
+              "items": [
+                {
+                  "type": "message",
+                  "message": "<p>If yes, how will you ensure that the selling of advertising or exhibit space is a business transaction entirely separate? Please describe below:</p>"
+                },
+                {
+                  "key": "exhibit_space.exhibit_space_separation",
+                  "type": "textarea",
+                  "notitle": true,
+                  "required": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "message",
+      "message": "<p>The remainder of this form applies to both live and enduring activities.</p>"
+    },
+    {
+      "type": "section",
+      "title": "9. Describe the process for registration and/or scheduling for the activity, including the availability of competent staff to support, advise, and respond to questions regarding the activity.",
+      "labelHtmlClass": "h4",
+      "items": [
+        {
+          "type": "message",
+          "htmlClass": "alert alert-info",
+          "message": "EXAMPLE: Adequate registration staff was secured and trained prior to the activity. We also had an additional staff member on hand to answer attendee technical questions during the activity."
+        },
+        {
+          "key": "registration_scheduling_process",
+          "type": "textarea",
+          "notitle": true
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "title": "10. Provide information on how learners will access the materials.",
+      "labelHtmlClass": "h4",
+      "items": [
+        {
+          "type": "message",
+          "htmlClass": "alert alert-info",
+          "message": "EXAMPLE: Live Webinar: On our push e-mail and on the web registration page, we announce where on the CMS website attendees can download the PowerPoint presentation."
+        },
+        {
+          "key": "learner_material_access",
+          "type": "textarea",
+          "notitle": true
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "title": "11. Describe your system for ensuring that reference materials used in designing the course, course materials, and media resources will be kept up to date.",
+      "labelHtmlClass": "h4",
+      "items": [
+        {
+          "type": "message",
+          "htmlClass": "alert alert-info",
+          "message": "EXAMPLE: Annual internal review of the course includes review of the materials and resources for the most current information."
+        },
+        {
+          "key": "reference_material_process",
+          "type": "textarea",
+          "notitle": true
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "title": "12. CMSCE will provide (via URL and PDF) a CE Information & Instructions document which contains necessary disclosure and credit information. It must be distributed to participants prior to the activity. How will you provide this document to learners?",
+      "labelHtmlClass": "h4",
+      "items": [
+        {
+          "type": "message",
+          "htmlClass": "alert alert-info",
+          "message": "Example: We will email the document to all registered learners, and provide the link via the webinar platform."
+        },
+        {
+          "key": "ce_document_distribution_process",
+          "type": "textarea",
+          "notitle": true
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "title": "13. Explain how you intend to track and verify learner participation for this activity (e.g., completion of an attendance sheet, submission of a post-assessment and evaluation, etc.)? The requirements for satisfactory completion and attendance level should be the same for all learners. Attendance requirements should be set high for live events.<br/>NOTE: YOU MUST BE ABLE TO PROVIDE ATTENDANCE RECORDS FOR ALL PARTICIPANTS RECEIVING CE CREDIT.",
+      "labelHtmlClass": "h4",
+      "items": [
+        {
+          "type": "message",
+          "htmlClass": "alert alert-info",
+          "message": "EXAMPLE: WBT: The LMS will document learner time involved in the WBT.<br/>Live: We will have sign in/sign out sheets with a staffed registration desk."
+        },
+        {
+          "key": "learner_tracking_verification_access",
+          "type": "textarea",
+          "notitle": true
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "title": "14. What other educational strategies will you include in order to enhance your learners' change as an adjunct to this activity?",
+      "labelHtmlClass": "h4",
+      "items": [
+        {
+          "type": "message",
+          "htmlClass": "alert alert-info",
+          "message": "EXAMPLE: To support changes in physicians' approaches to overweight and obese patients, we will develop a wall chart, a poster featuring a body mass index (BMI) table, and links to online and downloadable BMI calculators for hand-held devices."
+        },
+        {
+          "type": "checkboxes",
+          "key": "educational_strategies.strategies",
+          "title": "All Strategies"
+
+        },
+        {
+          "title": "Other - please specify:",
+          "key": "educational_strategies.strategies_other",
+          "type": "textarea",
+          "required": true,
+          "condition": {
+            "functionBody": "return model.educational_strategies.strategies.includes('Other');"
+          }
+        }
+      ]
+    }
+  ],
+  "data": {
+    "multiple_format_explanation": "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim.",
+    "instructional_methods_description": "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim.",
+    "prerequisites": {
+      "has_prerequisites": false,
+      "prerequisites_determination_description": ""
+    },
+    "learning_environment_assessement": {
+      "assessment_method": "Learner Evaluations",
+      "assessment_method_other": ""
+    },
+    "learning_environment_interactions": {
+      "learner_to_learner": {
+        "interaction_method": "Discussion",
+        "interaction_method_other": ""
+      },
+      "learner_to_instructor": {
+        "interaction_method": "Discussion",
+        "interaction_method_other": ""
+      },
+      "learner_to_content": {
+        "interaction_method": "Simulations",
+        "interaction_method_other": ""
+      }
+    },
+    "training_location_appropriateness": "lorem",
+    "facility_assessment_process": "lorem",
+    "exhibit_space": {
+      "has_exhibit_space": false,
+      "exhibit_space_separation": null
+    },
+    "registration_scheduling_process": "lorem",
+    "learner_material_access": "lorem",
+    "reference_material_process": "lorem",
+    "ce_document_distribution_process": "lorem",
+    "learner_tracking_verification_access": "lorem",
+    "educational_strategies": {
+      "strategies": [
+        "job aids, resource list"
+      ],
+      "strategies_other": null
+    }
+  }
+}

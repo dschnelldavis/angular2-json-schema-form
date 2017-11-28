@@ -16,21 +16,25 @@
  *   http://ulion.github.io/jsonform/playground/
  */
 
-export const Examples: any = {
+export const CMSCEExamples: any = {
   'ng-jsf': {
     name: 'Angular JSON Schema Form examples',
     schemas: [
-      { name: 'CMSCE - Start an Activity',        file: 'cmsce-start-activity', },
-      { name: 'CMSCE - Start a Series',        file: 'cmsce-start-series', },
-      { name: 'CMSCE - Add an Activity to Series',       file: 'cmsce-add-activity-to-series', },
+      { name: 'CMSCE - Apply for Credentials',        file: 'cmsce-apply-for-credentials', },
+      { name: 'CMSCE - Start an Activity',            file: 'cmsce-start-activity', },
+      { name: 'CMSCE - Start a Series',               file: 'cmsce-start-series', },
+      { name: 'CMSCE - Needs Assessment',             file: 'cmsce-needs-assessment', },
+      { name: 'CMSCE - Objectives Matrix',            file: 'cmsce-objectives-matrix', },
+      { name: 'CMSCE - Add an Activity to Series',    file: 'cmsce-add-activity-to-series', },
       { name: 'CMSCE - Design and Development',       file: 'cmsce-Design-and-Development', },
-      { name: 'Flexbox layout',                  file: 'ng-jsf-flex-layout', },
+      { name: 'CMSCE - Disclosure and Attestation ',  file: 'cmsce-Disclosure-and-Attestation', },
+      // { name: 'Flexbox layout',                  file: 'ng-jsf-flex-layout', },
       // { name: 'Simple Array',                    file: 'ng-jsf-simple-array', },
-      { name: 'Nested Arrays',                   file: 'ng-jsf-nested-arrays', },
-      { name: 'Deep Recursive References',       file: 'ng-jsf-deep-ref', },
-      { name: 'Select Control Lists',            file: 'ng-jsf-select-list-examples', },
+      // { name: 'Nested Arrays',                   file: 'ng-jsf-nested-arrays', },
+      // { name: 'Deep Recursive References',       file: 'ng-jsf-deep-ref', },
+      // { name: 'Select Control Lists',            file: 'ng-jsf-select-list-examples', },
       // { name: 'Select Control Widgets',          file: 'ng-jsf-select-widget-examples', },
-      { name: 'Data Only (no Schema or Layout)', file: 'ng-jsf-data-only', },
+      // { name: 'Data Only (no Schema or Layout)', file: 'ng-jsf-data-only', },
       // { name: 'Layout Only (no Schema or Data)', file: 'ng-jsf-layout-only', },
       // { name: 'JSON Meta-Schema - Draft 6',    file: 'json-schema-draft06', },
       // { name: 'JSON Meta-Schema - Draft 4',    file: 'json-schema-draft04', },
@@ -56,6 +60,7 @@ export const Examples: any = {
     ]
   },
   */
+  /*
   'rjsf': {
     name: 'React JSON Schema Form examples',
     url: 'https://mozilla-services.github.io/react-jsonschema-form/',
@@ -78,6 +83,8 @@ export const Examples: any = {
       { name: 'Alternatives',               file: 'rjsf-alternatives', },
     ]
   },
+  */
+  /*
   'jsf': {
     name: 'JSONForm (jQuery) examples',
     url: 'http://ulion.github.io/jsonform/playground/',
@@ -174,4 +181,5 @@ export const Examples: any = {
         file: 'jsf-previousvalues-multidimensional', urlParameters: '?example=previousvalues-multidimensional', },
     ]
   }
+  */
 };

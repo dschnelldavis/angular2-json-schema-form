@@ -8,10 +8,11 @@ import 'rxjs/add/operator/map';
 
 import { Examples } from './example-schemas.model';
 import { JsonPointer } from '../../lib/src/shared';
+import { CMSCEExamples } from './cmsce-schemas.model';
 
 @Component({
-  selector: 'demo',
-  templateUrl: 'demo.component.html',
+  selector: 'cmsce-demo',
+  templateUrl: 'cmsce-demo.component.html',
   animations: [
     trigger('expandSection', [
       state('in', style({ height: '*' })),
@@ -25,20 +26,18 @@ import { JsonPointer } from '../../lib/src/shared';
     ]),
   ],
 })
-export class DemoComponent implements OnInit {
-  examples: any = Examples;
-  frameworkList: any = ['material-design', 'bootstrap-3', 'bootstrap-4', 'no-framework'];
+export class CmsceDemoComponent implements OnInit {
+  examples: any = CMSCEExamples;
+  frameworkList: any = ['bootstrap-4', 'no-framework'];
   frameworks: any = {
-    'material-design': 'Material Design',
-    'bootstrap-3': 'Bootstrap 3',
     'bootstrap-4': 'Bootstrap 4',
     'no-framework': 'None (plain HTML)',
   };
   selectedSet = 'ng-jsf';
   selectedSetName = '';
-  selectedExample = 'ng-jsf-flex-layout';
-  selectedExampleName = 'Flexbox layout';
-  selectedFramework = 'material-design';
+  selectedExample = 'cmsce-start-activity';
+  selectedExampleName = 'CMSCE - Start an Activity';
+  selectedFramework = 'bootstrap-4';
   visible: { [item: string]: boolean } = {
     options: true,
     schema: true,

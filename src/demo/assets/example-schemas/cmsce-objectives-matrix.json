@@ -1,0 +1,268 @@
+{
+  "schema": {
+    "type": "object",
+    "definitions": {
+      "question_obj": {
+        "type": "object",
+        "title": "Question",
+        "properties": {
+          "post_assessment_question": {
+            "type": "string"
+          },
+          "post_assessment_answer": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "post_assessment_question",
+          "post_assessment_answer"
+        ]
+      }
+    },
+    "title": "Objectives Matrix",
+    "properties": {
+      "objectives": {
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "type": "object",
+          "properties": {
+            "learning_objective": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "learning_objective",
+            "supporting_materials"
+          ]
+        }
+      }
+    },
+    "required": [
+      "objectives"
+    ]
+  },
+  "form": [
+    {
+      "type": "help",
+      "helpvalue": "<div class=\"alert alert-primary\">Objectives Matrix</div>"
+    },
+    {
+      "title": "Instructions",
+      "htmlClass": "alert alert-info",
+      "labelHtmlClass": "h3",
+      "type": "section",
+      "expandable": true,
+      "expanded": false,
+      "items": [
+        {
+          "type": "message",
+          "message": "For CME credit (AMA PRA Category 1 Credit™) activities, objectives must:"
+        },
+        {
+          "type": "message",
+          "message": "<ul><li>Be written to change physician competence, physician performance, or patient objectives, and</li><li>Be written in the context of desirable physician attributes. (See the resources included at the end of Section III: Design & Development in the Activity Developer Guide for more information on writing objectives for CME.)</li></ul>"
+        },
+        {
+          "type": "message",
+          "message": "Note: Remember that if the series is submitted for each activity to be assessed and accredited separately, each activity must have its own objectives."
+        },
+        {
+          "type": "message",
+          "message": "Complete the matrix to ensure all learning objectives are taught/covered during the activity and that learner achievement of each objective is assessed."
+        }
+      ]
+    },
+    {
+      "title": "Objectives",
+      "labelHtmlClass": "h3",
+      "type": "section",
+      "expandable": true,
+      "expanded": true,
+      "items": [
+        {
+          "type": "array",
+          "key": "objectives",
+          "notitle": true,
+          "items": [
+            {
+              "type": "section",
+              "expandable": true,
+              "title": "<h4>{{ 'Objective ' + $index }}</h4>",
+              "labelHtmlClass": "h4",
+              "items": [
+                {
+                  "title": "Measurable Learning Objective",
+                  "key": "objectives[].learning_objective",
+                  "placeholder": "Example: 1. Define business etiquette",
+                  "type": "textarea"
+                },
+                {
+                  "type": "array",
+                  "notitle": true,
+                  "key": "objectives[].supporting_materials",
+                  "items": [
+                    {
+                      "type": "section",
+                      "labelHtmlClass": "h4",
+                      "expandable": true,
+                      "expanded": true,
+                      "items": [
+                        {
+                          "type": "flex",
+                          "flex-flow": "row wrap",
+                          "items": [
+                            {
+                              "flex": "5 5 300px",
+                              "title": "Activity Title or Module/ Lesson Title",
+                              "key": "objectives[].supporting_materials[].lesson_title",
+                              "placeholder": "Example: Lesson 1"
+                            },
+                            {
+                              "flex": "1 1 150px",
+                              "title": "Estimated Time",
+                              "key": "objectives[].supporting_materials[].estimated_time",
+                              "placeholder": "Example: 10 Minutes"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "flex",
+                          "flex-flow": "row wrap",
+                          "items": [
+                            {
+                              "type": "div",
+                              "title": "Instructional Materials Used",
+                              "flex": "1 1 150px",
+                              "items": [
+                                {
+                                  "type": "checkboxes",
+                                  "notitle": true,
+                                  "key": "objectives[].supporting_materials[].instructional_materials.instructional_material_type"
+                                },
+                                {
+                                  "notitle": true,
+                                  "key": "objectives[].supporting_materials[].instructional_materials.instructional_material_type_other",
+                                  "placeholder": "Other (Please specify)",
+                                  "condition": {
+                                    "functionBody": "try { return model.objectives[arrayIndices[0]].supporting_materials[arrayIndices[1]].instructional_materials.instructional_material_type.includes('Other (Please specify)') } catch(e) { return false }"
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "type": "div",
+                              "title": "Instructional Method Used",
+                              "flex": "1 1 150px",
+                              "items": [
+                                {
+                                  "type": "checkboxes",
+                                  "notitle": true,
+                                  "key": "objectives[].supporting_materials[].instructional_methods.instructional_method_type"
+                                },
+                                {
+                                  "notitle": true,
+                                  "key": "objectives[].supporting_materials[].instructional_methods.instructional_method_type_other",
+                                  "placeholder": "Other (Please specify)",
+                                  "condition": {
+                                    "functionBody": "try { return model.objectives[arrayIndices[0]].supporting_materials[arrayIndices[1]].instructional_methods.instructional_method_type.includes('Other (Please specify)') } catch(e) { return false }"
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "type": "div",
+                              "title": "Learning Styles Accommodated by Instructional Method",
+                              "flex": "1 1 150px",
+                              "items": [
+                                {
+                                  "type": "checkboxes",
+                                  "notitle": true,
+                                  "key": "objectives[].supporting_materials[].learning_styles.learning_style_type"
+                                },
+                                {
+                                  "notitle": true,
+                                  "key": "objectives[].supporting_materials[].learning_styles.learning_style_type_other",
+                                  "placeholder": "Other (Please specify)",
+                                  "condition": {
+                                    "functionBody": "try { return model.objectives[arrayIndices[0]].supporting_materials[arrayIndices[1]].learning_styles.learning_style_type.includes('Other (Please specify)') } catch(e) { return false }"
+                                  }
+                                }
+                              ]
+                            }
+
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "data": {
+    "objectives": [
+      {
+        "learning_objective": "juggling poodles",
+        "supporting_materials": [
+          {
+            "lesson_title": "Chapter 1",
+            "estimated_time": "12 min",
+            "instructional_materials": {
+              "instructional_material_type": ["Audio aids", "Other (Please specify)"],
+              "instructional_material_type_other": "Audio aids test"
+            },
+            "instructional_methods": {
+              "instructional_method_type": [
+                "Lecture",
+                "Group Discussion",
+                "Other (Please specify)"
+              ],
+              "instructional_method_type_other": "angry mouse"
+            },
+            "learning_styles": {
+              "learning_style_type": [
+                "Auditory",
+                "Other (Please specify)"
+              ],
+              "learning_style_type_other": "angry mouse CD"
+            }
+          },
+          {
+            "lesson_title": "Chapter 2",
+            "estimated_time": "15 min",
+            "instructional_materials": {
+              "instructional_material_type": ["Slide presentation", "Audio aids", "Other (Please specify)"],
+              "instructional_material_type_other": "Audio aids test"
+            }
+          }
+        ]
+      },
+      {
+        "learning_objective": "herding cats",
+        "supporting_materials": [
+          {
+            "lesson_title": "Chapter 3",
+            "estimated_time": "12 min",
+            "instructional_materials": {
+              "instructional_material_type": ["Audio aids", "Other (Please specify)"],
+              "instructional_material_type_other": "Audio aids test"
+            }
+          },
+          {
+            "lesson_title": "Chapter 4",
+            "estimated_time": "15 min",
+            "instructional_materials": {
+              "instructional_material_type": ["Audio aids", "Other (Please specify)"],
+              "instructional_material_type_other": "Audio aids test"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -8,11 +8,11 @@ import {
 } from '../../shared';
 
 /**
- * Bootstrap 3 framework for Angular JSON Schema Form.
+ * Bootstrap 4 framework for Angular JSON Schema Form.
  *
  */
 @Component({
-  selector: 'bootstrap-3-framework',
+  selector: 'bootstrap-4-framework',
   template: `
     <div
       [class]="options?.htmlClass"
