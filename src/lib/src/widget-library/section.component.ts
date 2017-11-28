@@ -57,8 +57,8 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
     </fieldset>`,
   styles: [`
     .legend { font-weight: bold; }
-    .expandable > legend:before { content: '▶'; padding-right: .3em; }
-    .expanded > legend:before { content: '▼'; padding-right: .2em; }
+    .expandable > legend:before, .expandable > label:before  { content: '▶'; padding-right: .3em; }
+    .expanded > legend:before, .expanded > label:before  { content: '▼'; padding-right: .2em; }
   `],
 })
 export class SectionComponent implements OnInit {
