@@ -453,7 +453,10 @@ export class JsonSchemaFormService {
             'model', 'arrayIndices', layoutNode.options.condition.functionBody
           );
           result = dynFn(this.data, dataIndex);
-        } catch (e) { }
+        } catch (e) {
+          result = true;
+          console.error("condition functionBody errored out on evaluation: " + layoutNode.options.condition.functionBody);
+        }
       }
     }
     return result;
