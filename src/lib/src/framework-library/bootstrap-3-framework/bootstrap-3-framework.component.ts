@@ -289,6 +289,9 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
         this.widgetOptions.expandable = true;
         this.widgetOptions.title = 'Authentication settings';
         return null;
+      case 'fieldset':
+        this.widgetOptions.title = this.options.title;
+        return null;
       default:
         this.widgetOptions.title = null;
         return this.jsf.setItemTitle(this);
