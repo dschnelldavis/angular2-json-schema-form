@@ -62,8 +62,6 @@ export function buildLayout(jsf, widgetLibrary) {
         if (hasOwn(newNode.options, 'legend')) {
           newNode.options.title = newNode.options.legend;
           delete newNode.options.legend;
-        } else if (hasOwn(newNode, 'name') && !/^\d+$/.test(newNode.name)) {
-          newNode.options.title = fixTitle(newNode.name);
         }
       }
       if (!hasOwn(newNode.options, 'validationMessages')) {
@@ -167,9 +165,6 @@ export function buildLayout(jsf, widgetLibrary) {
       const LastKey = JsonPointer.toKey(newNode.dataPointer);
       if (!newNode.name && isString(LastKey) && LastKey !== '-') {
         newNode.name = LastKey;
-        if (!newNode.options.title && !/^\d+$/.test(newNode.name)) {
-          newNode.options.title = fixTitle(newNode.name);
-        }
       }
       const shortDataPointer = removeRecursiveReferences(
         newNode.dataPointer, jsf.dataRecursiveRefMap, jsf.arrayMap
@@ -253,6 +248,10 @@ export function buildLayout(jsf, widgetLibrary) {
       } else {
         // TODO: create item in FormGroup model from layout key (?)
         updateInputOptions(newNode, {}, jsf);
+      }
+
+      if (!newNode.options.hasOwnProperty('title') && !/^\d+$/.test(newNode.name)) {
+        newNode.options.title = fixTitle(newNode.name);
       }
 
       if (hasOwn(newNode.options, 'copyValueTo')) {
