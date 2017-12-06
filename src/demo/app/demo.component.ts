@@ -189,16 +189,6 @@ export class DemoComponent implements OnInit {
       });
   }
 
-  loadSelectedFramework() {
-    console.log('loadSelectedFramework');
-    window.location.href =
-      '/?set=' + this.selectedSet +
-      '&example=' + this.selectedExample +
-      '&framework=' + this.selectedFramework +
-      '&language=' + this.selectedLanguage;
-  //  this.generateForm(this.jsonFormSchema);
-  }
-
   loadSelectedLanguage() {
     console.log('loadSelectedLanguage');
     window.location.href =
