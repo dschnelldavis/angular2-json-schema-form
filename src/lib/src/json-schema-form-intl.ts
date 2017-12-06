@@ -1,16 +1,7 @@
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-
 import {Injectable} from '@angular/core';
 import {Subject} from 'rxjs/Subject';
 
-
-/** Datepicker data that requires internationalization. */
+/** JsonSchemaForm data that requires internationalization. */
 @Injectable()
 export class JsonSchemaFormIntl {
   /**

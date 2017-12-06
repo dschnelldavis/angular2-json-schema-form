@@ -23,6 +23,18 @@ import { DemoRootComponent } from './demo-root.component';
 import { routes } from './demo.routes';
 import { ActivatedRoute, Router } from '@angular/router';
 
+import { Framework } from '../../lib/src/framework-library/framework';
+
+import { FrameworkNoFramework } from '../../lib/src/framework-library/framework.no-framework';
+
+import { Bootstrap3FrameworkModule } from '../../lib/src/framework-library/bootstrap-3-framework/bootstrap-3-framework.module';
+import { FrameworkBootstrap3 } from '../../lib/src/framework-library/framework.bootstrap3';
+
+import { Bootstrap4FrameworkModule } from '../../lib/src/framework-library/bootstrap-4-framework/bootstrap-4-framework.module';
+import { FrameworkBootstrap4 } from '../../lib/src/framework-library/framework.bootstrap4';
+
+import { MaterialDesignFrameworkModule } from '../../lib/src/framework-library/material-design-framework/material-design-framework.module';
+import { FrameworkMaterialDesign } from '../../lib/src/framework-library/framework.material-design';
 
 let language = '';
 
@@ -32,13 +44,12 @@ let language = '';
     BrowserModule, BrowserAnimationsModule, FlexLayoutModule, FormsModule,
     HttpClientModule, MatButtonModule, MatCardModule, MatCheckboxModule,
     MatIconModule, MatMenuModule, MatSelectModule, MatToolbarModule,
-    RouterModule.forRoot(routes), JsonSchemaFormModule
+    RouterModule.forRoot(routes), JsonSchemaFormModule,
+    Bootstrap3FrameworkModule,
+    Bootstrap4FrameworkModule,
+    MaterialDesignFrameworkModule
   ],
   providers: [
-    /*
-    {provide: JsonSchemaFormIntl, useClass: JsonSchemaFormIntlFr
-    },
-    */
     {
         provide: JsonSchemaFormIntl,  useFactory:
            function(route: ActivatedRoute) {
@@ -54,7 +65,11 @@ let language = '';
                 }
            },
            deps: [ActivatedRoute]
-    }
+    },
+    { provide: Framework, useClass: FrameworkNoFramework, multi: true },
+    { provide: Framework, useClass: FrameworkBootstrap3, multi: true },
+    { provide: Framework, useClass: FrameworkBootstrap4, multi: true },
+    { provide: Framework, useClass: FrameworkMaterialDesign, multi: true }
   ],
   bootstrap: [ DemoRootComponent ]
 })
