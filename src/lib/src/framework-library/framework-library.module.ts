@@ -1,9 +1,7 @@
-import { NgModule } from '@angular/core';
+import { NgModule, ModuleWithProviders } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { WidgetLibraryModule } from '../widget-library/widget-library.module';
 import { WidgetLibraryService } from '../widget-library/widget-library.service';
-
 import { FrameworkLibraryService } from './framework-library.service';
 
 import { Bootstrap3FrameworkModule } from './bootstrap-3-framework/bootstrap-3-framework.module';
@@ -14,7 +12,7 @@ import { Bootstrap4FrameworkModule } from './bootstrap-4-framework/bootstrap-4-f
 
 @NgModule({
   imports:         [
-    CommonModule, WidgetLibraryModule,
+    CommonModule,
     Bootstrap3FrameworkModule, MaterialDesignFrameworkModule, Bootstrap4FrameworkModule
   ],
   declarations:    [ NoFrameworkComponent ],
@@ -22,7 +20,13 @@ import { Bootstrap4FrameworkModule } from './bootstrap-4-framework/bootstrap-4-f
     NoFrameworkComponent,
     Bootstrap3FrameworkModule, MaterialDesignFrameworkModule, Bootstrap4FrameworkModule
   ],
-  entryComponents: [ NoFrameworkComponent ],
-  providers:       [ WidgetLibraryService, FrameworkLibraryService ]
+  entryComponents: [ NoFrameworkComponent ]
 })
-export class FrameworkLibraryModule { }
+export class FrameworkLibraryModule {
+  static forRoot(): ModuleWithProviders {
+    return {
+      ngModule: MaterialDesignFrameworkModule,
+      providers: [ WidgetLibraryService, FrameworkLibraryService ]
+    }
+  }
+}
