@@ -24,6 +24,7 @@ export const ANGULAR_MATERIAL_MODULES = [
  * MatToolbarModule,
  */
 
+import { WidgetLibraryModule } from '../../widget-library/widget-library.module';
 import { JsonSchemaFormService } from '../../json-schema-form.service';
 
 import { MATERIAL_FRAMEWORK_COMPONENTS } from './index';
@@ -31,7 +32,7 @@ import { MATERIAL_FRAMEWORK_COMPONENTS } from './index';
 @NgModule({
   imports: [
     CommonModule, FormsModule, ReactiveFormsModule, FlexLayoutModule,
-    ...ANGULAR_MATERIAL_MODULES
+    ...ANGULAR_MATERIAL_MODULES, WidgetLibraryModule
   ],
   declarations:    [ ...MATERIAL_FRAMEWORK_COMPONENTS ],
   exports:         [ ...MATERIAL_FRAMEWORK_COMPONENTS ],
