@@ -185,7 +185,7 @@ export class JsonPointer {
    */
   static set(object, pointer, value, insert = false) {
     const keyArray = this.parse(pointer);
-    if (keyArray !== null) {
+    if (keyArray !== null && keyArray.length) {
       let subObject = object;
       for (let i = 0; i < keyArray.length - 1; ++i) {
         let key = keyArray[i];
