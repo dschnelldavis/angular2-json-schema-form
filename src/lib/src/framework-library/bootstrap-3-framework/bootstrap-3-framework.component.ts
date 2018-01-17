@@ -87,6 +87,7 @@ import {
     :host /deep/ .radio-inline + .checkbox-inline { margin-left: 0; margin-right: 10px; }
     :host /deep/ .checkbox-inline:last-child,
     :host /deep/ .radio-inline:last-child { margin-right: 0; }
+    :host /deep/ .ng-invalid.ng-touched { border: 1px solid #f44336; }
   `],
 })
 export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
