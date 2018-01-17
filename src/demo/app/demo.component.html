@@ -70,7 +70,7 @@
   fxLayout.lt-sm="column" fxLayoutAlign.lt-sm="flex-start center">
 
   <mat-card fxFlex="0 0 calc(50% - 12px)">
-    <h4 class="defualt-cursor" (click)="toggleVisible('options')">
+    <h4 class="default-cursor" (click)="toggleVisible('options')">
       {{visible.options ? '▼' : '▶'}} Selected Framework and Options
     </h4>
     <div *ngIf="visible.options" fxLayout="column" [@expandSection]="true">
@@ -83,6 +83,19 @@
             *ngFor="let framework of frameworkList"
             [value]="framework">
             {{frameworks[framework]}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-select
+          [(ngModel)]="selectedLanguage"
+          (change)="loadSelectedLanguage()"
+          name="language"
+          placeholder="Language">
+          <mat-option
+            *ngFor="let language of languageList"
+            [value]="language">
+            {{languages[language]}}
           </mat-option>
         </mat-select>
       </mat-form-field>
@@ -112,7 +125,7 @@
       </div>
     </div>
     <hr>
-    <h4 class="defualt-cursor" (click)="toggleVisible('schema')">
+    <h4 class="default-cursor" (click)="toggleVisible('schema')">
       {{visible.schema ? '▼' : '▶'}} Input JSON Schema and Form Layout
     </h4>
     <div *ngIf="visible.schema" [@expandSection]="true"
@@ -128,7 +141,7 @@
   </mat-card>
 
   <mat-card fxFlex="0 0 calc(50% - 12px)">
-    <h4 class="defualt-cursor" (click)="toggleVisible('form')">
+    <h4 class="default-cursor" (click)="toggleVisible('form')">
       {{visible.form ? '▼' : '▶'}} Generated Form
     </h4>
     <div *ngIf="visible.form" class="json-schema-form" [@expandSection]="true">
@@ -149,7 +162,7 @@
 
     </div>
     <hr>
-    <h4 class="defualt-cursor" (click)="toggleVisible('output')">
+    <h4 class="default-cursor" (click)="toggleVisible('output')">
       {{visible.output ? '▼' : '▶'}} Form Output
     </h4>
     <div *ngIf="visible.output" fxLayout="column" [@expandSection]="true">

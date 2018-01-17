@@ -438,7 +438,7 @@ export function updateInputOptions(layoutNode, schema, jsf) {
       } else if (JsonPointer.has(schema, '/items/enum')) {
         newOptions.enum = schema.items.enum;
         if (!hasOwn(newOptions, 'enumNames') && JsonPointer.has(schema, '/items/enumNames')) {
-          newOptions.enum = schema.items.enumNames;
+          newOptions.enumNames = schema.items.enumNames;
         }
       } else if (JsonPointer.has(schema, '/items/oneOf')) {
         newTitleMap = getTitleMapFromOneOf(schema.items, newOptions.flatList);

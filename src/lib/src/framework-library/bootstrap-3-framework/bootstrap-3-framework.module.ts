@@ -1,10 +1,9 @@
-import { NgModule } from '@angular/core';
+import { NgModule, ModuleWithProviders } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { WidgetLibraryModule } from '../../widget-library/widget-library.module';
 
-import { WidgetLibraryService } from '../../widget-library/widget-library.service';
-import { FrameworkLibraryService } from '../framework-library.service';
+import { JsonSchemaFormService } from '../../json-schema-form.service';
 
 import { Bootstrap3FrameworkComponent } from './bootstrap-3-framework.component';
 
@@ -12,7 +11,13 @@ import { Bootstrap3FrameworkComponent } from './bootstrap-3-framework.component'
   imports:         [ CommonModule, WidgetLibraryModule ],
   declarations:    [ Bootstrap3FrameworkComponent ],
   exports:         [ Bootstrap3FrameworkComponent ],
-  entryComponents: [ Bootstrap3FrameworkComponent ],
-  providers:       [ WidgetLibraryService, FrameworkLibraryService ]
+  entryComponents: [ Bootstrap3FrameworkComponent ]
 })
-export class Bootstrap3FrameworkModule { }
+export class Bootstrap3FrameworkModule {
+  static forRoot(): ModuleWithProviders {
+    return {
+      ngModule: Bootstrap3FrameworkModule,
+      providers: [ JsonSchemaFormService ]
+    }
+  }
+}

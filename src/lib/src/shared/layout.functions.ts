@@ -62,8 +62,6 @@ export function buildLayout(jsf, widgetLibrary) {
         if (hasOwn(newNode.options, 'legend')) {
           newNode.options.title = newNode.options.legend;
           delete newNode.options.legend;
-        } else if (hasOwn(newNode, 'name') && !/^\d+$/.test(newNode.name)) {
-          newNode.options.title = fixTitle(newNode.name);
         }
       }
       if (!hasOwn(newNode.options, 'validationMessages')) {

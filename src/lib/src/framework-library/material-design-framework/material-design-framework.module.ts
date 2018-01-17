@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, ModuleWithProviders } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FlexLayoutModule } from '@angular/flex-layout';
@@ -36,7 +36,13 @@ import { MATERIAL_FRAMEWORK_COMPONENTS } from './index';
   ],
   declarations:    [ ...MATERIAL_FRAMEWORK_COMPONENTS ],
   exports:         [ ...MATERIAL_FRAMEWORK_COMPONENTS ],
-  entryComponents: [ ...MATERIAL_FRAMEWORK_COMPONENTS ],
-  providers:       [ JsonSchemaFormService ]
+  entryComponents: [ ...MATERIAL_FRAMEWORK_COMPONENTS ]
 })
-export class MaterialDesignFrameworkModule { }
+export class MaterialDesignFrameworkModule {
+  static forRoot(): ModuleWithProviders {
+    return {
+      ngModule: MaterialDesignFrameworkModule,
+      providers: [ JsonSchemaFormService ]
+    }
+  }
+}

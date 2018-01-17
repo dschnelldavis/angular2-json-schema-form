@@ -159,12 +159,14 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
 
       this.options.htmlClass =
         addClasses(this.options.htmlClass, 'schema-form-' + this.layoutNode.type);
-      this.options.htmlClass =
-        this.layoutNode.type === 'array' ?
-          addClasses(this.options.htmlClass, 'list-group') :
-        this.layoutNode.arrayItem && this.layoutNode.type !== '$ref' ?
-          addClasses(this.options.htmlClass, 'list-group-item') :
-          addClasses(this.options.htmlClass, 'form-group');
+      if (this.layoutNode.type !== 'flex')  {
+          this.options.htmlClass =
+            this.layoutNode.type === 'array' ?
+              addClasses(this.options.htmlClass, 'list-group') :
+            this.layoutNode.arrayItem && this.layoutNode.type !== '$ref' ?
+              addClasses(this.options.htmlClass, 'list-group-item') :
+              addClasses(this.options.htmlClass, 'form-group');
+      }
       this.widgetOptions.htmlClass = '';
       this.options.labelHtmlClass =
         addClasses(this.options.labelHtmlClass, 'control-label');
@@ -286,6 +288,9 @@ export class Bootstrap3FrameworkComponent implements OnInit, OnChanges {
       case 'authfieldset':
         this.widgetOptions.expandable = true;
         this.widgetOptions.title = 'Authentication settings';
+        return null;
+      case 'fieldset':
+        this.widgetOptions.title = this.options.title;
         return null;
       default:
         this.widgetOptions.title = null;
