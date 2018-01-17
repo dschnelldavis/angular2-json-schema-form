@@ -250,7 +250,7 @@ export function buildLayout(jsf, widgetLibrary) {
         updateInputOptions(newNode, {}, jsf);
       }
 
-      if (!newNode.options.hasOwnProperty('title') && !/^\d+$/.test(newNode.name)) {
+      if (!newNode.options.title && !/^\d+$/.test(newNode.name)) {
         newNode.options.title = fixTitle(newNode.name);
       }
 
