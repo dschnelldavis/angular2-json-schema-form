@@ -26,7 +26,6 @@ export class JsonSchemaFormModule {
       providers: [ ]
         .concat([JsonSchemaFormService])
         .concat(FrameworkLibraryModule.forRoot().providers)
-        .concat(WidgetLibraryModule.forRoot().providers)
     }
   }
 }

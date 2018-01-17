@@ -570,8 +570,7 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
     } else if (this.form && isArray(this.form.layout)) {
       this.jsf.layout = _.cloneDeep(this.form.layout);
     } else {
-      this.jsf.layout = this.jsf.formOptions.addSubmit === false ?
-        [ '*' ] : [ '*', { type: 'submit', title: 'Submit' } ];
+      this.jsf.layout = ['*'];
     }
 
     // Check for alternate layout inputs

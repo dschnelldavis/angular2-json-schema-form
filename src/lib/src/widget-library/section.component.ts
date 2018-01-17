@@ -40,6 +40,12 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
         [class]="options?.labelHtmlClass || ''"
         [innerHTML]="sectionTitle"
         (click)="toggleExpanded()"></legend>
+      <div *ngIf="options?.messageLocation !== 'bottom'">
+        <p *ngIf="options?.description"
+        class="help-block"
+        [class]="options?.labelHelpBlockClass || ''"
+        [innerHTML]="options?.description"></p>
+      </div>
       <root-widget *ngIf="expanded"
         [dataIndex]="dataIndex"
         [layout]="layoutNode.items"
@@ -54,6 +60,12 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
         [style.flex-direction]="getFlexAttribute('flex-direction')"
         [style.flex-wrap]="getFlexAttribute('flex-wrap')"
         [style.justify-content]="getFlexAttribute('justify-content')"></root-widget>
+      <div *ngIf="options?.messageLocation === 'bottom'">
+        <p *ngIf="options?.description"
+        class="help-block"
+        [class]="options?.labelHelpBlockClass || ''"
+        [innerHTML]="options?.description"></p>
+      </div>
     </fieldset>`,
   styles: [`
     .legend { font-weight: bold; }
