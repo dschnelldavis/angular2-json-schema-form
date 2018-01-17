@@ -1,8 +1,8 @@
-import { NgModule } from '@angular/core';
+import { NgModule, ModuleWithProviders } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { WidgetLibraryModule } from '../widget-library/widget-library.module';
 import { WidgetLibraryService } from '../widget-library/widget-library.service';
+import { WidgetLibraryModule } from '../widget-library/widget-library.module';
 
 import { FrameworkLibraryService } from './framework-library.service';
 import { NoFrameworkComponent } from './no-framework.component';
@@ -15,7 +15,13 @@ import { NoFrameworkComponent } from './no-framework.component';
   exports:         [
     NoFrameworkComponent,
   ],
-  entryComponents: [ NoFrameworkComponent ],
-  providers:       [ WidgetLibraryService, FrameworkLibraryService ]
+  entryComponents: [ NoFrameworkComponent ]
 })
-export class FrameworkLibraryModule { }
+export class FrameworkLibraryModule {
+  static forRoot(): ModuleWithProviders {
+    return {
+      ngModule: FrameworkLibraryModule,
+      providers: [ WidgetLibraryService, FrameworkLibraryService ]
+    }
+  }
+}

@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, ModuleWithProviders } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
@@ -8,7 +8,6 @@ import { WidgetLibraryModule } from './widget-library/widget-library.module';
 import { JsonSchemaFormComponent } from './json-schema-form.component';
 
 import { JsonSchemaFormService } from './json-schema-form.service';
-import { FrameworkLibraryService } from './framework-library/framework-library.service';
 
 @NgModule({
   imports: [
@@ -18,9 +17,15 @@ import { FrameworkLibraryService } from './framework-library/framework-library.s
   declarations: [ JsonSchemaFormComponent ],
   exports: [
     JsonSchemaFormComponent, FrameworkLibraryModule, WidgetLibraryModule
-  ],
-  providers: [
-    JsonSchemaFormService, FrameworkLibraryService
   ]
 })
-export class JsonSchemaFormModule { }
+export class JsonSchemaFormModule {
+  static forRoot(): ModuleWithProviders {
+    return {
+      ngModule: JsonSchemaFormModule,
+      providers: [ ]
+        .concat([JsonSchemaFormService])
+        .concat(FrameworkLibraryModule.forRoot().providers)
+    }
+  }
+}
