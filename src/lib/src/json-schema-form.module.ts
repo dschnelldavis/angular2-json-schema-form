@@ -9,7 +9,6 @@ import { JsonSchemaFormComponent } from './json-schema-form.component';
 
 import { JsonSchemaFormService } from './json-schema-form.service';
 import { FrameworkLibraryService } from './framework-library/framework-library.service';
-import { WidgetLibraryService } from './widget-library/widget-library.service';
 
 @NgModule({
   imports: [
@@ -21,7 +20,7 @@ import { WidgetLibraryService } from './widget-library/widget-library.service';
     JsonSchemaFormComponent, FrameworkLibraryModule, WidgetLibraryModule
   ],
   providers: [
-    JsonSchemaFormService, FrameworkLibraryService, WidgetLibraryService
+    JsonSchemaFormService, FrameworkLibraryService
   ]
 })
 export class JsonSchemaFormModule { }
