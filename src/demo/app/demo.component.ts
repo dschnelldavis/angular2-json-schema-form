@@ -190,13 +190,11 @@ export class DemoComponent implements OnInit {
   }
 
   loadSelectedLanguage() {
-    console.log('loadSelectedLanguage');
     window.location.href =
       '/?set=' + this.selectedSet +
       '&example=' + this.selectedExample +
       '&framework=' + this.selectedFramework +
       '&language=' + this.selectedLanguage;
-   // this.generateForm(this.jsonFormSchema);
   }
 
   // Display the form entered by the user

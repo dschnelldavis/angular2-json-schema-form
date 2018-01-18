@@ -20,6 +20,6 @@ export class WidgetLibraryModule {
     return {
       ngModule: WidgetLibraryModule,
       providers: [ JsonSchemaFormService ]
-    }
+    };
   }
 }

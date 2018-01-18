@@ -26,9 +26,9 @@
   },
   "value": {
     "friends": [
-      { "nick": "tidoust", "gender": "male", "age": 34 },
-      { "nick": "titine", "gender": "female", "age": 6 },
-      { "nick": "E.T.", "gender": "alien" }
+      { "nick": "tidoust", "gender": "male",   "age": 34 },
+      { "nick": "titine",  "gender": "female", "age": 6 },
+      { "nick": "E.T.",    "gender": "alien" }
     ]
   }
 }

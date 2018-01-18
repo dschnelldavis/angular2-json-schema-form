@@ -21,7 +21,8 @@ import {
   buildFormGroup, buildFormGroupTemplate, formatFormData, getControl
 } from './shared/form-group.functions';
 import { buildLayout, getLayoutNode } from './shared/layout.functions';
-import { JsonSchemaFormIntl } from './json-schema-form-intl';
+import { enValidationMessages } from './locale/en-validation-messages';
+import { frValidationMessages } from './locale/fr-validation-messages';
 
 export interface TitleMapItem {
   name?: string, value?: any, checked?: boolean, group?: string, items?: TitleMapItem[]
@@ -70,6 +71,8 @@ export class JsonSchemaFormService {
   templateRefLibrary: any = {}; // Library of formGroup templates for adding to form
   hasRootReference = false; // Does the form include a recursive reference to itself?
 
+  language = 'en-US'; // Does the form include a recursive reference to itself?
+
   // Default global form options
   defaultFormOptions: any = {
     addSubmit: 'auto', // Add a submit button if layout does not have one?
@@ -112,14 +115,22 @@ export class JsonSchemaFormService {
       disabled: false, // Set control as disabled? (not editable, and excluded from output)
       readonly: false, // Set control as read only? (not editable, but included in output)
       returnEmptyFields: true, // return values for fields that contain no data?
-      validationMessages: {} // injected
+      validationMessages: {} // set by setLanguage()
     },
   };
 
-  constructor(public _intl: JsonSchemaFormIntl) {
-    // inject translation
-    this.defaultFormOptions.defautWidgetOptions.validationMessages = _.cloneDeep(_intl.validationMessages);
+  constructor() {
+    this.setLanguage(this.language);
   }
+
+  setLanguage(language: string = 'en-US') {
+    this.language = language;
+    const validationMessages = language.slice(0, 2) === 'fr' ?
+      frValidationMessages : enValidationMessages;
+    this.defaultFormOptions.defautWidgetOptions.validationMessages =
+      _.cloneDeep(validationMessages);
+  }
+
   getData() { return this.data; }
 
   getSchema() { return this.schema; }

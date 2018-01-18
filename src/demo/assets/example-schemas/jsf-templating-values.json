@@ -1,17 +1,8 @@
 {
   "schema": {
-    "firstname": {
-      "type": "string",
-      "title": "First name"
-    },
-    "lastname": {
-      "type": "string",
-      "title": "Last name"
-    },
-    "fullname": {
-      "type": "string",
-      "title": "Full name"
-    }
+    "firstname": { "type": "string", "title": "First name" },
+    "lastname":  { "type": "string", "title": "Last name" },
+    "fullname":  { "type": "string", "title": "Full name" }
   },
   "form": [
     "firstname",
