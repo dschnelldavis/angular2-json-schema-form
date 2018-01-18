@@ -9,7 +9,12 @@ A [JSON Schema](http://json-schema.org) Form builder for Angular 4 and 5, simila
   * [Mozilla](https://blog.mozilla.org/services/)'s [React JSON Schema Form](https://github.com/mozilla-services/react-jsonschema-form) for [React](https://facebook.github.io/react/) ([examples](https://mozilla-services.github.io/react-jsonschema-form/)), and
   * [Joshfire](http://www.joshfire.com)'s [JSON Form](http://github.com/joshfire/jsonform/wiki) for [jQuery](https://jquery.com) ([examples](http://ulion.github.io/jsonform/playground/))
 
-Note: This is currently a personal proof-of-concept project, and is NOT affiliated with any of the organizations listed above. (Though they are all awesome, and totally worth checking out.)
+Note: This is currently a personal proof-of-concept project, and is not affiliated with any of the organizations listed above. (Though they are all awesome, and totally worth checking out.)
+
+## Breaking change in version 0.7.0-alpha.1 and above
+
+You must now import both JsonSchemaFormModule and a framework module. (Don't worry, it's easy.)
+For full details, see 'To install from NPM and use in your own project', below.
 
 ## Check out the live demo and play with the examples
 
@@ -54,21 +59,39 @@ npm install angular2-json-schema-form
 Then import JsonSchemaFormModule in your main application module, like this:
 
 ```javascript
-import { BrowserModule }                      from '@angular/platform-browser';
-import { NgModule }                           from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
 
-import { JsonSchemaFormModule }               from 'angular2-json-schema-form';
+import {
+  JsonSchemaFormModule, MaterialDesignFrameworkModule
+} from 'angular2-json-schema-form';
 
-import { AppComponent }                       from './app.component';
+import { AppComponent } from './app.component';
 
 @NgModule({
   declarations: [ AppComponent ],
-  imports:      [ BrowserModule, JsonSchemaFormModule ],
-  providers:    [],
-  bootstrap:    [ AppComponent ]
+  imports: [
+    BrowserModule, MaterialDesignFrameworkModule,
+    JsonSchemaFormModule.forRoot(MaterialDesignFrameworkModule)
+  ],
+  providers: [],
+  bootstrap: [ AppComponent ]
 })
 export class AppModule { }
 ```
+
+Note that you have to import both the main JsonSchemaFormModule and a separate framework module (in this example, MaterialDesignFrameworkModule).
+
+The framework module is listed in your imports section twice, once by itself (to load the framework's components) and again in the JsonSchemaFormModule.forRoot() function (to load the framework's service and tell Angular JSON Schema Form to use it).
+
+Four framework modules are currently included:
+
+* MaterialDesignFrameworkModule — Material Design
+* Bootstrap3FrameworkModule — Bootstrap 3
+* Bootstrap4FrameworkModule — Bootstrap 4
+* NoFrameworkModule — plain HTML (for testing)
+
+It is also possible to load multiple frameworks and switch between them at runtime, like the example playground on GitHub. But most typical sites will just load one framework.
 
 #### Seed Application Examples
 
@@ -80,9 +103,9 @@ For complete examples of how to install and configure Angular JSON Schema Form t
 
 #### Additional notes for Angular CLI
 
-Make sure you are running the latest version of Angular CLI.
+Make sure you are running a recent version of Angular CLI.
 
-Older versions of Angular CLI (e.g. 1.0.1) may fail with the error `Critical dependency: the request of a dependency is an expression` while trying to compile ajv (Another JSON Schema Validator). But this error has been fixed in newer versions. So if you receive that error, upgrade your Angular CLI to the latest version.
+Very old versions of Angular CLI (e.g. 1.0.1) may fail with the error `Critical dependency: the request of a dependency is an expression` while trying to compile ajv (Another JSON Schema Validator). But this error has been fixed in newer versions. So if you receive that error, upgrade your Angular CLI.
 
 #### Additional notes for SystemJS
 
@@ -95,6 +118,8 @@ Add these lines to the 'map' section of systemjs.config.js:
 'lodash':                    'npm:lodash/lodash.min.js'
 ```
 
+(Note: These instructions have not been tested recently. If you use SystemJS and have problems, please post a bug report on GitHub.)
+
 ## Using Angular JSON Schema Form
 
 ### Basic use
@@ -103,30 +128,15 @@ For basic use, after loading JsonSchemaFormModule as described above, to display
 
 ```html
 <json-schema-form
-  framework="bootstrap-3"
   loadExternalAssets="true"
   [schema]="yourJsonSchema"
   (onSubmit)="yourOnSubmitFn($event)">
 </json-schema-form>
 ```
 
-Where the `framework` is the name of the display framework to use (`bootstrap-3`, `bootstrap-4`, `material-design`, or `no-framework`), `schema` is a valid JSON schema object, and `onSubmit` calls a function to process the submitted JSON form data. If you don't already have your own schemas, you can find a bunch of samples to test with in the `src/demo/assets/example-schemas` folder, as described above.
+Where `schema` is a valid JSON schema object, and `onSubmit` calls a function to process the submitted JSON form data. If you don't already have your own schemas, you can find a bunch of samples to test with in the `src/demo/assets/example-schemas` folder, as described above.
 
-Setting `loadExternalAssets="true"` will automatically load any additional assets needed by the display framework. It is useful when you are trying out this library, but should be removed in production sites, which should instead load all required assets separately. For full details see 'Changing or adding frameworks', below.
-
-Note: If you prefer brackets around all your attributes, the following is functionally equivalent:
-
-```html
-<json-schema-form
-  [framework]="'bootstrap-3'"
-  [loadExternalAssets]="true"
-  [schema]="yourJsonSchema"
-  (onSubmit)="yourOnSubmitFn($event)">
-</json-schema-form>
-```
-
-If you use this syntax, make sure to include the nested quotes (`"'` and `'"`) around the framework name.
-
+Setting `loadExternalAssets="true"` will automatically load any additional assets needed by the display framework. It is useful when you are trying out this library, but production sites should instead load all required assets separately. For full details see 'Changing or adding frameworks', below.
 
 ### Data-only mode
 
@@ -134,7 +144,6 @@ Angular JSON Schema Form can also create a form entirely from a JSON object—wi
 
 ```html
 <json-schema-form
-  framework="bootstrap-4"
   loadExternalAssets="true"
   [(ngModel)]="exampleJsonObject">
 </json-schema-form>
@@ -166,13 +175,14 @@ Also, notice that the 'ngModel' input supports Angular's 2-way data binding, jus
 
 For more control over your form, you may provide these additional inputs:
 
-  * `layout` - array with a custom form layout (see Angular Schema Form's [form definitions](https://github.com/json-schema-form/angular-schema-form/blob/master/docs/index.md#form-definitions) for information about how to construct a form layout)
-  * `data` - object to populate the form with default or previously submitted values
-  * `options` - object to set any global options for the form
-  * `widgets` to add custom widgets
-  * `framework` - string or object to set which framework to use
-    set to 'bootstrap-3', 'bootstrap-4', 'material-design', or
-    'no-framework' (the default), or pass in your own custom framework object
+  * `layout` array with a custom form layout (see Angular Schema Form's [form definitions](https://github.com/json-schema-form/angular-schema-form/blob/master/docs/index.md#form-definitions) for information about how to construct a form layout)
+  * `data` object to populate the form with default or previously submitted values
+  * `options` object to set any global options for the form
+  * `widgets` object to add custom widgets
+  * `language` string to set the error message language (currently supports 'en' and 'fr')
+  * `framework` string or object to set which framework to use
+
+For `framework`, you can pass in your own custom framework object, or, if you've loaded multiple frameworks, you can specify the name of the framework you want to use. To switch between the included frameworks, use 'material-design', 'bootstrap-3', 'bootstrap-4', and 'no-framework'.
 
 If you want more detailed output, you may provide additional functions for `onChanges` to read the values in real time as the form is being filled out, and you may implement your own custom validation indicators from the boolean `isValid` or the detailed `validationErrors` outputs.
 
@@ -185,6 +195,7 @@ Here is an example:
   [(data)]="yourData"
   [options]="yourFormOptions"
   [widgets]="yourCustomWidgets"
+  language="fr"
   framework="material-design"
   loadExternalAssets="true"
   (onChanges)="yourOnChangesFn($event)"
@@ -194,18 +205,40 @@ Here is an example:
 </json-schema-form>
 ```
 
+Note: If you prefer brackets around all your attributes, the following is functionally equivalent:
+
+```html
+<json-schema-form
+[schema]="yourJsonSchema"
+[layout]="yourJsonFormLayout"
+[(data)]="yourData"
+[options]="yourFormOptions"
+[widgets]="yourCustomWidgets"
+[language]="'fr'"
+[framework]="'material-design'"
+[loadExternalAssets]="true"
+(onChanges)="yourOnChangesFn($event)"
+(onSubmit)="yourOnSubmitFn($event)"
+(isValid)="yourIsValidFn($event)"
+(validationErrors)="yourValidationErrorsFn($event)">
+</json-schema-form>
+```
+
+If you use this syntax, make sure to include the nested quotes (`"'` and `'"`) around the language and framework names. (If you leave out the inner quotes, Angular will read them as a variable names, rather than strings, which will cause errors. All un-bracketed attributes, however, are automatically read as strings, so they don't need inner quotes.)
+
 #### Single-input mode
 
 You may also combine all your inputs into one compound object and include it as a `form` input, like so:
 
 ```javascript
 let yourCompoundInputObject = {
-  schema:    { ... },  // required
+  schema:    { ... },  // REQUIRED
   layout:    [ ... ],  // optional
   data:      { ... },  // optional
   options:   { ... },  // optional
   widgets:   { ... },  // optional
-  framework: { ... }   // optional
+  language:   '...' ,  // optional
+  framework:  '...'    // (or { ... }) optional
 }
 ```
 
@@ -216,9 +249,9 @@ let yourCompoundInputObject = {
 </json-schema-form>
 ```
 
-You can also mix these two styles depending on your needs. In the example playground, all examples use the combined `form` input for `schema`, `layout`, and `data`, which enables each example to control those three inputs, but the playground uses another input for `framework`, enabling you to change the framework independent of the example.
+You can also mix these two styles depending on your needs. In the example playground, all examples use the combined `form` input for `schema`, `layout`, and `data`, which enables each example to control those three inputs, but the playground uses separate inputs for `language` and `framework`, enabling it to change those settings independent of the example.
 
-Combining inputs is useful if you have many unique forms and store each form's data and schema together. If you have one form (or many identical forms), it will likely be more useful to use separate inputs for your data and schema—though even in that case, if you use a custom layout, you could store your schema and layout together and use one input for both.
+Combining inputs is useful if you have many unique forms and store each form's data and schema together. If you have one form (or many identical forms), it will likely be more useful to use separate inputs for your data and schema. Though even in that case, if you use a custom layout, you could store your schema and layout together and use one input for both.
 
 #### Compatibility modes
 
@@ -254,9 +287,7 @@ JSON Form (jQuery) compatibility:
 </json-schema-form>
 ```
 
-Note: 2-way data binding will work with any dedicated data input,
-      including 'data', 'model', 'ngModel', or 'formData'.
-      However, 2-way binding will _not_ work with the combined 'form' input.
+Note: 2-way data binding will work with any dedicated data input, including 'data', 'model', 'ngModel', or 'formData'. However, 2-way binding will _not_ work with the combined 'form' input.
 
 #### Debugging inputs and outputs
 
@@ -377,7 +408,7 @@ maxItems         |  array    | maximumItems,          currentItems
 uniqueItems      |  array    | duplicateItems
  contains      * |  array    | requiredItem
 
-* Note: The contains and dependencies validators are still in development, and do not yet work correctly.
+* Note: The `contains` and `dependencies` validators are still in development, and do not yet work correctly.
 
 ### Changing or adding widgets
 

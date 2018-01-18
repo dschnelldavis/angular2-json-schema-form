@@ -5,8 +5,6 @@ import { hasOwn } from '../shared/utility.functions';
 
 import { Framework } from './framework';
 
-import { FrameworkNoFramework } from './framework.no-framework';
-
 // Possible future frameworks:
 // - Foundation 6:
 //   http://justindavis.co/2017/06/15/using-foundation-6-in-angular-4/
@@ -21,16 +19,18 @@ export class FrameworkLibraryService {
   stylesheets: (HTMLStyleElement|HTMLLinkElement)[];
   scripts: HTMLScriptElement[];
   loadExternalAssets = false;
-  defaultFramework = 'no-framework';
-  frameworkLibrary: Framework[] = [];
+  defaultFramework: string;
+  frameworkLibrary: { [name: string]: Framework } = {};
 
   constructor(
-    @Inject(WidgetLibraryService) private widgetLibrary: WidgetLibraryService,
-      @Inject(Framework) _frameworks: any[]
+    @Inject(Framework) private frameworks: any[],
+    @Inject(WidgetLibraryService) private widgetLibrary: WidgetLibraryService
   ) {
-    for (let framework of _frameworks) {
-       this.frameworkLibrary[framework.name] = framework;
-    }
+    this.frameworks.forEach(framework =>
+      this.frameworkLibrary[framework.name] = framework
+    );
+    this.defaultFramework = this.frameworks[0].name;
+    this.setFramework(this.defaultFramework);
   }
 
   public setLoadExternalAssets(loadExternalAssets = true): void {
@@ -38,27 +38,16 @@ export class FrameworkLibraryService {
   }
 
   public setFramework(
-    framework?: string|Framework, loadExternalAssets = this.loadExternalAssets
+    framework: string|Framework = this.defaultFramework,
+    loadExternalAssets = this.loadExternalAssets
   ): boolean {
-    if (!framework) { return false; }
-    let registerNewWidgets = false;
-    if (!framework || framework === 'default') {
-      this.activeFramework = this.frameworkLibrary[this.defaultFramework];
-      registerNewWidgets = true;
-    } else if (typeof framework === 'string' && this.hasFramework(framework)) {
-      this.activeFramework = this.frameworkLibrary[framework];
-      registerNewWidgets = true;
-    } else if (typeof framework === 'object' && hasOwn(framework, 'framework')) {
-      this.activeFramework = framework;
-      registerNewWidgets = true;
-    }
-    if (!this.activeFramework) {
-      console.error('Framework: ' + framework + ' not found');
-      this.activeFramework = new FrameworkNoFramework();
-    }
-    return registerNewWidgets ?
-      this.registerFrameworkWidgets(this.activeFramework) :
-      registerNewWidgets;
+    this.activeFramework =
+      typeof framework === 'string' && this.hasFramework(framework) ?
+        this.frameworkLibrary[framework] :
+      typeof framework === 'object' && hasOwn(framework, 'framework') ?
+        framework :
+        this.frameworkLibrary[this.defaultFramework];
+    return this.registerFrameworkWidgets(this.activeFramework);
   }
 
   registerFrameworkWidgets(framework: Framework): boolean {

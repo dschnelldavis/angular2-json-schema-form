@@ -24,10 +24,11 @@ export const ANGULAR_MATERIAL_MODULES = [
  * MatToolbarModule,
  */
 
-import { WidgetLibraryModule } from '../../widget-library/widget-library.module';
 import { JsonSchemaFormService } from '../../json-schema-form.service';
-
+import { WidgetLibraryModule } from '../../widget-library/widget-library.module';
+import { Framework } from '../framework';
 import { MATERIAL_FRAMEWORK_COMPONENTS } from './index';
+import { MaterialDesignFramework } from './material-design.framework';
 
 @NgModule({
   imports: [
@@ -42,7 +43,9 @@ export class MaterialDesignFrameworkModule {
   static forRoot(): ModuleWithProviders {
     return {
       ngModule: MaterialDesignFrameworkModule,
-      providers: [ JsonSchemaFormService ]
-    }
+      providers: [
+        { provide: Framework, useClass: MaterialDesignFramework, multi: true }
+      ]
+    };
   }
 }

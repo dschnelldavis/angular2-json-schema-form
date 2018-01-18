@@ -30,6 +30,13 @@ export {
 export { dateToString, stringToDate, findDate } from './src/shared/date.functions';
 export { OrderableDirective } from './src/shared/orderable.directive';
 
+export { JsonSchemaFormComponent } from './src/json-schema-form.component';
+export { JsonSchemaFormService } from './src/json-schema-form.service';
+export { JsonSchemaFormModule } from './src/json-schema-form.module';
+
+export { WidgetLibraryService } from './src/widget-library/widget-library.service';
+export { WidgetLibraryModule } from './src/widget-library/widget-library.module';
+
 export { AddReferenceComponent } from './src/widget-library/add-reference.component';
 export { OneOfComponent } from './src/widget-library/one-of.component';
 export { ButtonComponent } from './src/widget-library/button.component';
@@ -53,9 +60,15 @@ export { TabsComponent } from './src/widget-library/tabs.component';
 export { TemplateComponent } from './src/widget-library/template.component';
 export { TextareaComponent } from './src/widget-library/textarea.component';
 
-export { WidgetLibraryService } from './src/widget-library/widget-library.service';
-export { WidgetLibraryModule } from './src/widget-library/widget-library.module';
+export { FrameworkLibraryService } from './src/framework-library/framework-library.service';
+// export { FrameworkLibraryModule } from './src/framework-library/framework-library.module';
 
+export { Framework } from './src/framework-library/framework';
+export { NoFramework } from './src/framework-library/no-framework/no.framework';
+export { NoFrameworkComponent } from './src/framework-library/no-framework/no-framework.component';
+export { NoFrameworkModule } from './src/framework-library/no-framework/no-framework.module';
+
+export { MaterialDesignFramework } from './src/framework-library/material-design-framework/material-design.framework';
 export { FlexLayoutRootComponent } from './src/framework-library/material-design-framework/flex-layout-root.component';
 export { FlexLayoutSectionComponent } from './src/framework-library/material-design-framework/flex-layout-section.component';
 export { MaterialAddReferenceComponent } from './src/framework-library/material-design-framework/material-add-reference.component';
@@ -78,14 +91,10 @@ export { MaterialTextareaComponent } from './src/framework-library/material-desi
 export { MaterialDesignFrameworkComponent } from './src/framework-library/material-design-framework/material-design-framework.component';
 export { MaterialDesignFrameworkModule } from './src/framework-library/material-design-framework/material-design-framework.module';
 
-export { NoFrameworkComponent } from './src/framework-library/no-framework.component';
-
+export { Bootstrap3Framework } from './src/framework-library/bootstrap-3-framework/bootstrap-3.framework';
 export { Bootstrap3FrameworkComponent } from './src/framework-library/bootstrap-3-framework/bootstrap-3-framework.component';
+export { Bootstrap3FrameworkModule } from './src/framework-library/bootstrap-3-framework/bootstrap-3-framework.module';
+
+export { Bootstrap4Framework } from './src/framework-library/bootstrap-4-framework/bootstrap-4.framework';
 export { Bootstrap4FrameworkComponent } from './src/framework-library/bootstrap-4-framework/bootstrap-4-framework.component';
-
-export { FrameworkLibraryService } from './src/framework-library/framework-library.service';
-export { FrameworkLibraryModule } from './src/framework-library/framework-library.module';
-
-export { JsonSchemaFormComponent } from './src/json-schema-form.component';
-export { JsonSchemaFormService } from './src/json-schema-form.service';
-export { JsonSchemaFormModule } from './src/json-schema-form.module';
+export { Bootstrap4FrameworkModule } from './src/framework-library/bootstrap-4-framework/bootstrap-4-framework.module';

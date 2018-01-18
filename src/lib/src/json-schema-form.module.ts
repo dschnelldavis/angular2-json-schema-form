@@ -2,30 +2,38 @@ import { NgModule, ModuleWithProviders } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-import { FrameworkLibraryModule } from './framework-library/framework-library.module';
+import { FrameworkLibraryService } from './framework-library/framework-library.service';
 import { WidgetLibraryModule } from './widget-library/widget-library.module';
+import { WidgetLibraryService } from './widget-library/widget-library.service';
 
 import { JsonSchemaFormComponent } from './json-schema-form.component';
 
 import { JsonSchemaFormService } from './json-schema-form.service';
 
+import { NoFrameworkComponent } from './framework-library/no-framework/no-framework.component';
+import { Framework } from './framework-library/framework';
+import { NoFramework } from './framework-library/no-framework/no.framework';
+import { NoFrameworkModule } from './framework-library/no-framework/no-framework.module';
+
 @NgModule({
   imports: [
     CommonModule, FormsModule, ReactiveFormsModule,
-    FrameworkLibraryModule, WidgetLibraryModule
+    WidgetLibraryModule, NoFrameworkModule
   ],
   declarations: [ JsonSchemaFormComponent ],
-  exports: [
-    JsonSchemaFormComponent, FrameworkLibraryModule, WidgetLibraryModule
-  ]
+  exports: [ JsonSchemaFormComponent, WidgetLibraryModule ]
 })
 export class JsonSchemaFormModule {
-  static forRoot(): ModuleWithProviders {
+  static forRoot(...frameworks): ModuleWithProviders {
+    const loadFrameworks = frameworks.length ?
+      frameworks.map(framework => framework.forRoot().providers[0]) :
+      [{ provide: Framework, useClass: NoFramework, multi: true }];
     return {
       ngModule: JsonSchemaFormModule,
-      providers: [ ]
-        .concat([JsonSchemaFormService])
-        .concat(FrameworkLibraryModule.forRoot().providers)
-    }
+      providers: [
+        JsonSchemaFormService, FrameworkLibraryService, WidgetLibraryService,
+        ...loadFrameworks
+      ]
+    };
   }
 }

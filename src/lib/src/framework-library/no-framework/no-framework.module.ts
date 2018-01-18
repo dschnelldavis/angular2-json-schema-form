@@ -4,21 +4,22 @@ import { CommonModule } from '@angular/common';
 import { JsonSchemaFormService } from '../../json-schema-form.service';
 import { WidgetLibraryModule } from '../../widget-library/widget-library.module';
 import { Framework } from '../framework';
-import { Bootstrap3FrameworkComponent } from './bootstrap-3-framework.component';
-import { Bootstrap3Framework } from './bootstrap-3.framework';
+// No framework - plain HTML controls (styles from form layout only)
+import { NoFrameworkComponent } from './no-framework.component';
+import { NoFramework } from './no.framework';
 
 @NgModule({
   imports:         [ CommonModule, WidgetLibraryModule ],
-  declarations:    [ Bootstrap3FrameworkComponent ],
-  exports:         [ Bootstrap3FrameworkComponent ],
-  entryComponents: [ Bootstrap3FrameworkComponent ]
+  declarations:    [ NoFrameworkComponent ],
+  exports:         [ NoFrameworkComponent ],
+  entryComponents: [ NoFrameworkComponent ]
 })
-export class Bootstrap3FrameworkModule {
+export class NoFrameworkModule {
   static forRoot(): ModuleWithProviders {
     return {
-      ngModule: Bootstrap3FrameworkModule,
+      ngModule: NoFrameworkModule,
       providers: [
-        { provide: Framework, useClass: Bootstrap3Framework, multi: true }
+        { provide: Framework, useClass: NoFramework, multi: true }
       ]
     };
   }

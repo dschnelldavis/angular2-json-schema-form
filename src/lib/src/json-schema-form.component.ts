@@ -116,6 +116,8 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
 
   @Input() ngModel: any; // Alternate input for Angular forms
 
+  @Input() language: string; // Language
+
   // Development inputs, for testing and debugging
   @Input() loadExternalAssets: boolean; // Load external framework assets?
   @Input() debug: boolean; // Show debug information?
@@ -197,9 +199,14 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
   }
 
   updateForm() {
-    if (!this.formInitialized) {
+    if (!this.formInitialized || !this.formValuesInput ||
+      (this.language && this.language !== this.jsf.language)
+    ) {
       this.initializeForm();
-    } else if (this.formValuesInput) {
+    } else {
+      if (this.language && this.language !== this.jsf.language) {
+        this.jsf.setLanguage(this.language);
+      }
 
       // Get names of changed inputs
       let changedInput = Object.keys(this.previousInputs)
@@ -235,8 +242,6 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
       Object.keys(this.previousInputs)
         .filter(input => this.previousInputs[input] !== this[input])
         .forEach(input => this.previousInputs[input] = this[input]);
-    } else {
-      this.initializeForm();
     }
   }
 
@@ -351,6 +356,9 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
    * 2. form.options - Single input style
    */
   private initializeOptions() {
+    if (this.language && this.language !== this.jsf.language) {
+      this.jsf.setLanguage(this.language);
+    }
     this.jsf.setOptions({ debug: !!this.debug });
     let loadExternalAssets: boolean = this.loadExternalAssets || false;
     let framework: any = this.framework || 'default';
