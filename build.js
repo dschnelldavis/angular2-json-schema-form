@@ -11,7 +11,6 @@ const ngc = require('@angular/compiler-cli/src/main').main;
 const rollup = require('rollup');
 const uglify = require('rollup-plugin-uglify');
 const sourcemaps = require('rollup-plugin-sourcemaps');
-// const nodeResolve = require('rollup-plugin-node-resolve');
 const nodeResolve = require('rollup-plugin-node-resolve-angular');
 const commonjs = require('rollup-plugin-commonjs');
 const inlineResources = require('./inline-resources');
@@ -81,19 +80,23 @@ return Promise.resolve()
       },
       output: {
         name: camelCase(libName),
-        // ATTENTION:
-        // Add all dependencies and peer dependencies of your library to
-        // `globals` and `external`. This is required for UMD bundle users.
+        // ATTENTION: Add all dependencies and peer dependencies of your library
+        // to `globals` and `external`. This is required for UMD bundle users.
         globals: {
           // key   = The library name
           // value = The global variable name on the window object
-          // https://github.com/rollup/rollup/wiki/JavaScript-API#globals
+          // https://rollupjs.org/guide/en#javascript-api
+          '@angular/cdk': 'ng.cdk',
           '@angular/common': 'ng.common',
           '@angular/core': 'ng.core',
+          '@angular/flex-layout': 'ng.flexLayout',
           '@angular/forms': 'ng.forms',
+          '@angular/material': 'ng.material',
           '@angular/platform-browser': 'ng.platformBrowser',
           'ajv': 'Ajv',
-          'lodash': '_'
+          'hammerjs': 'hammerjs',
+          'lodash': '_',
+          'rxjs': 'rxjs'
         }
       }
     };
