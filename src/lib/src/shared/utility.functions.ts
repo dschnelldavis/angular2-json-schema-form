@@ -128,7 +128,7 @@ export function forEachCopy(
   errors = false
 ): any {
   if (!hasValue(object)) { return; }
-  if ((isObject(object) || isArray(object)) && typeof fn !== 'function') {
+  if ((isObject(object) || isArray(object)) && typeof object !== 'function') {
     let newObject: any = isArray(object) ? [] : {};
     for (let key of Object.keys(object)) {
       newObject[key] = fn(object[key], key, object);

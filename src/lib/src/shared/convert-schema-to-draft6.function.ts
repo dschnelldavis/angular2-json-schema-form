@@ -1,3 +1,5 @@
+import * as _ from 'lodash';
+
 /**
  * 'convertSchemaToDraft6' function
  *
@@ -311,13 +313,7 @@ export function convertSchemaToDraft6(schema, options: OptionObject = {}) {
       ) {
         newSchema[key] = convertSchemaToDraft6(newSchema[key], { changed, draft });
       } else {
-        const clone = object => typeof clone !== 'object' ? object :
-          typeof object.map === 'function' ?
-            [ ...object.map(item => clone(item)) ] :
-            Object.keys(object).reduce((objClone, objKey) =>
-              Object.assign(objClone, { [objKey]: clone(object[objKey]) }), {}
-            );
-        newSchema[key] = clone(newSchema[key]);
+        newSchema[key] = _.cloneDeep(newSchema[key]);
       }
     });
 
