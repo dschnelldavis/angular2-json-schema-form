@@ -23,16 +23,18 @@ import { buildTitleMap, isArray } from '../shared';
         [id]="'control' + layoutNode?._id"
         [name]="controlName">
         <ng-template ngFor let-selectItem [ngForOf]="selectList">
-          <option *ngIf="!isArray(selectItem?.items)"
+          <option *ngIf="!isArray(selectItem?.items) && showOption(selectItem, layoutNode)"
             [value]="selectItem?.value">
             <span [innerHTML]="selectItem?.name"></span>
           </option>
           <optgroup *ngIf="isArray(selectItem?.items)"
             [label]="selectItem?.group">
-            <option *ngFor="let subItem of selectItem.items"
-              [value]="subItem?.value">
-              <span [innerHTML]="subItem?.name"></span>
-            </option>
+            <ng-container *ngFor="let subItem of selectItem.items">
+              <option *ngIf="showOption(subItem, layoutNode)"
+                [value]="subItem?.value">
+                <span [innerHTML]="subItem?.name"></span>
+              </option>
+            </ng-container>
           </optgroup>
         </ng-template>
       </select>
@@ -46,18 +48,20 @@ import { buildTitleMap, isArray } from '../shared';
         [name]="controlName"
         (change)="updateValue($event)">
         <ng-template ngFor let-selectItem [ngForOf]="selectList">
-          <option *ngIf="!isArray(selectItem?.items)"
+          <option *ngIf="!isArray(selectItem?.items) && showOption(selectItem, layoutNode)"
             [selected]="selectItem?.value === controlValue"
             [value]="selectItem?.value">
             <span [innerHTML]="selectItem?.name"></span>
           </option>
           <optgroup *ngIf="isArray(selectItem?.items)"
             [label]="selectItem?.group">
-            <option *ngFor="let subItem of selectItem.items"
-              [attr.selected]="subItem?.value === controlValue"
-              [value]="subItem?.value">
-              <span [innerHTML]="subItem?.name"></span>
-            </option>
+            <ng-container *ngFor="let subItem of selectItem.items">
+              <option *ngIf="showOption(subItem, layoutNode) && showOption(selectItem, layoutNode)"
+                [attr.selected]="subItem?.value === controlValue"
+                [value]="subItem?.value">
+                <span [innerHTML]="subItem?.name"></span>
+              </option>
+            </ng-container>
           </optgroup>
         </ng-template>
       </select>
@@ -91,5 +95,23 @@ export class SelectComponent implements OnInit {
 
   updateValue(event) {
     this.jsf.updateValue(this, event.target.value);
+  }
+
+  showOption(item: any, layoutNode: any): boolean {
+    if (item.conditionKey !== undefined && layoutNode.options.conditionMap !== undefined) {
+      item.options = new Object();
+
+      for (const condition of layoutNode.options.conditionMap) {
+        if (condition.key === item.conditionKey) {
+          item.options.condition = condition.condition;
+          return this.jsf.evaluateCondition(item, this.dataIndex);
+        }
+      }
+    } else if (item !== undefined && item.condition !== undefined) {
+      item.options = new Object();
+      item.options.condition = item.condition;
+      return this.jsf.evaluateCondition(item, this.dataIndex);
+    }
+    return true;
   }
 }
