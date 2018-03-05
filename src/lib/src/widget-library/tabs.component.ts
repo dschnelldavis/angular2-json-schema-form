@@ -32,6 +32,23 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
         [layoutIndex]="(layoutIndex || []).concat(i)"
         [layoutNode]="layoutItem"></select-framework-widget>
 
+    </div>
+    <div class='stepper-buttons'>
+      <button *ngIf="options?.previous && selectedItem > 0"
+              [class]="options?.previous.fieldHtmlClass" (click)="selectPrevious()">
+        {{options?.previous.title}}
+      </button>
+      <button *ngIf="options?.next && layoutNode.items.length > selectedItem + 1"
+              [class]="options?.next.fieldHtmlClass" (click)="selectNext()">
+        {{options?.next.title}}
+      </button>
+      <ng-container *ngFor='let item of options?.buttons?.items'>
+        <button *ngIf="item.shows === undefined || item.shows?.indexOf(selectedItem) >= 0
+          || (item.shows?.indexOf(-1) >= 0 && layoutNode.items.length === selectedItem + 1)"
+                [class]="item.fieldHtmlClass" (click)="updateValue(item, $event)">
+          {{item.title}}
+        </button>
+      </ng-container>
     </div>`,
   styles: [` a { cursor: pointer; } `],
 })
@@ -78,5 +95,26 @@ export class TabsComponent implements OnInit {
 
   setTabTitle(item: any, index: number): string {
     return this.jsf.setArrayItemTitle(this, item, index);
+  }
+
+  selectNext() {
+    const nextItem = this.selectedItem + 1;
+    if (nextItem < this.layoutNode.items.length) {
+      this.select(nextItem);
+    }
+  }
+
+  selectPrevious() {
+    if (this.selectedItem > 0) {
+      this.select(this.selectedItem - 1);
+    }
+  }
+
+  updateValue(item, event) {
+    if (typeof item.onClick === 'function') {
+      item.onClick(event);
+    } else {
+      this.jsf.updateValue(item, event.target.value);
+    }
   }
 }
