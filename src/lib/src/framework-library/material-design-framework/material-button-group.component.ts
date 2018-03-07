@@ -16,6 +16,7 @@ import { buildTitleMap } from '../../shared';
           [innerHTML]="options?.title"></label>
       </div>
       <mat-button-toggle-group
+		[class]="options?.fieldHtmlClass"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.required]="options?.required"

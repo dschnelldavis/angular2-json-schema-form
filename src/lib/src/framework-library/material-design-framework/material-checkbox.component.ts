@@ -8,6 +8,7 @@ import { hasOwn } from './../../shared/utility.functions';
   selector: 'material-checkbox-widget',
   template: `
     <mat-checkbox *ngIf="boundControl && !showSlideToggle"
+	[class]="options?.htmlClass"
       [formControl]="formControl"
       align="left"
       [color]="options?.color || 'primary'"
@@ -21,6 +22,7 @@ import { hasOwn } from './../../shared/utility.functions';
         [innerHTML]="options?.title"></span>
     </mat-checkbox>
     <mat-checkbox *ngIf="!boundControl && !showSlideToggle"
+	[class]="options?.htmlClass"
       align="left"
       [color]="options?.color || 'primary'"
       [disabled]="controlDisabled || options?.readonly"
@@ -37,6 +39,7 @@ import { hasOwn } from './../../shared/utility.functions';
     </mat-checkbox>
     <mat-slide-toggle *ngIf="boundControl && showSlideToggle"
       [formControl]="formControl"
+	  [class]="options?.htmlClass"
       align="left"
       [color]="options?.color || 'primary'"
       [id]="'control' + layoutNode?._id"
@@ -50,6 +53,7 @@ import { hasOwn } from './../../shared/utility.functions';
     </mat-slide-toggle>
     <mat-slide-toggle *ngIf="!boundControl && showSlideToggle"
       align="left"
+	  [class]="options?.htmlClass"
       [color]="options?.color || 'primary'"
       [disabled]="controlDisabled || options?.readonly"
       [id]="'control' + layoutNode?._id"

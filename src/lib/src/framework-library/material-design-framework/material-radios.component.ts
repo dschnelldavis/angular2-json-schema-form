@@ -16,6 +16,7 @@ import { buildTitleMap } from '../../shared';
           [innerHTML]="options?.title"></label>
       </div>
       <mat-radio-group *ngIf="boundControl"
+		[class]="options?.fieldHtmlClass"
         [formControl]="formControl"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.readonly]="options?.readonly ? 'readonly' : null"
@@ -30,6 +31,7 @@ import { buildTitleMap } from '../../shared';
         </mat-radio-button>
       </mat-radio-group>
       <mat-radio-group *ngIf="!boundControl"
+		[class]="options?.fieldHtmlClass"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.required]="options?.required"
