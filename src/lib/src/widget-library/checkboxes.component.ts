@@ -60,7 +60,6 @@ export class CheckboxesComponent implements OnInit {
   formControl: AbstractControl;
   controlName: string;
   controlValue: any;
-  controlDisabled = false;
   boundControl = false;
   options: any;
   layoutOrientation: string;
@@ -88,6 +87,10 @@ export class CheckboxesComponent implements OnInit {
         checkboxItem.checked = formArray.value.includes(checkboxItem.value)
       );
     }
+  }
+
+  get controlDisabled(): boolean {
+    return this.jsf.evaluateDisabled(this.layoutNode, this.dataIndex);
   }
 
   updateValue(event) {

@@ -21,6 +21,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
         [attr.pattern]="options?.pattern"
         [attr.placeholder]="options?.placeholder"
         [attr.required]="options?.required"
+        [attr.disabled]="controlDisabled ? '' : null"
         [class]="options?.fieldHtmlClass || ''"
         [id]="'control' + layoutNode?._id"
         [name]="controlName"
@@ -52,7 +53,6 @@ export class InputComponent implements OnInit {
   formControl: AbstractControl;
   controlName: string;
   controlValue: string;
-  controlDisabled = false;
   boundControl = false;
   options: any;
   autoCompleteList: string[] = [];
@@ -67,6 +67,10 @@ export class InputComponent implements OnInit {
   ngOnInit() {
     this.options = this.layoutNode.options || {};
     this.jsf.initializeControl(this);
+  }
+
+  get controlDisabled(): boolean {
+    return this.jsf.evaluateDisabled(this.layoutNode, this.dataIndex);
   }
 
   updateValue(event) {

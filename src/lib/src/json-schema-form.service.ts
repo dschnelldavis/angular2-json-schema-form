@@ -119,6 +119,9 @@ export class JsonSchemaFormService {
     },
   };
 
+  evaluateDisabled = this._evaluate('disabled', false);
+  evaluateCondition = this._evaluate('condition', true);
+
   constructor() {
     this.setLanguage(this.language);
   }
@@ -391,37 +394,6 @@ export class JsonSchemaFormService {
       );
   }
 
-  evaluateCondition(layoutNode: any, dataIndex: number[]): boolean {
-    const arrayIndex = dataIndex && dataIndex[dataIndex.length - 1];
-    let result = true;
-    if (hasValue((layoutNode.options || {}).condition)) {
-      if (typeof layoutNode.options.condition === 'string') {
-        let pointer = layoutNode.options.condition
-        if (hasValue(arrayIndex)) {
-          pointer = pointer.replace('[arrayIndex]', `[${arrayIndex}]`);
-        }
-        pointer = JsonPointer.parseObjectPath(pointer);
-        result = !!JsonPointer.get(this.data, pointer);
-        if (!result && pointer[0] === 'model') {
-          result = !!JsonPointer.get({ model: this.data }, pointer);
-        }
-      } else if (typeof layoutNode.options.condition === 'function') {
-        result = layoutNode.options.condition(this.data);
-      } else if (typeof layoutNode.options.condition.functionBody === 'string') {
-        try {
-          const dynFn = new Function(
-            'model', 'arrayIndices', layoutNode.options.condition.functionBody
-          );
-          result = dynFn(this.data, dataIndex);
-        } catch (e) {
-          result = true;
-          console.error("condition functionBody errored out on evaluation: " + layoutNode.options.condition.functionBody);
-        }
-      }
-    }
-    return result;
-  }
-
   initializeControl(ctx: any, bind = true): boolean {
     if (!isObject(ctx)) { return false; }
     if (isEmpty(ctx.options)) {
@@ -433,7 +405,6 @@ export class JsonSchemaFormService {
     if (ctx.formControl) {
       ctx.controlName = this.getFormControlName(ctx);
       ctx.controlValue = ctx.formControl.value;
-      ctx.controlDisabled = ctx.formControl.disabled;
       ctx.options.errorMessage = ctx.formControl.status === 'VALID' ? null :
         this.formatErrors(ctx.formControl.errors, ctx.options.validationMessages);
       ctx.options.showErrors = this.formOptions.validateOnRender === true ||
@@ -443,7 +414,9 @@ export class JsonSchemaFormService {
           this.formatErrors(ctx.formControl.errors, ctx.options.validationMessages)
       );
       ctx.formControl.valueChanges.subscribe(value => {
-        if (!_.isEqual(ctx.controlValue, value)) { ctx.controlValue = value }
+        if (!_.isEqual(ctx.controlValue, value)) {
+           ctx.controlValue = value;
+        }
       });
     } else {
       ctx.controlName = ctx.layoutNode.name;
@@ -671,5 +644,54 @@ export class JsonSchemaFormService {
     // Remove layoutNode from layout
     JsonPointer.remove(this.layout, this.getLayoutPointer(ctx));
     return true;
+  }
+
+/**
+ * Returns a function which evaluates the value for an option in layout node.
+ * If value is not found or an error occurred while evaluation then it simply
+ * returns default value. eg.
+ * {
+ *   key: "name",
+ *   disabled: "is_editable"
+ * }
+ * will enable/disable the 'name' control wrt the value of 'is_editable'.
+ *
+ * @param {string}  key          [description]
+ * @param {boolean} defaultValue [description]
+ */
+  _evaluate(key: string, defaultValue: boolean){
+    return (layoutNode: any, dataIndex: number[]): boolean=> {
+      if(!hasValue((layoutNode.options || {})[key])){
+        return defaultValue;
+      }
+      const arrayIndex = dataIndex && dataIndex[dataIndex.length - 1];
+      let result = defaultValue;
+      let expression: any = layoutNode.options[key];
+      if (typeof expression === 'string') {
+        if (hasValue(arrayIndex)) {
+          expression = expression.replace('[arrayIndex]', `[${arrayIndex}]`);
+        }
+        expression = JsonPointer.parseObjectPath(expression);
+        result = !!JsonPointer.get(this.data, expression);
+        if (!result && expression[0] === 'model') {
+          result = !!JsonPointer.get({ model: this.data }, expression);
+        }
+      } else if(typeof expression === 'number' || typeof expression === 'boolean'){
+        result = !!expression;
+      } else if (typeof expression === 'function') {
+        result = expression(this.data);
+      } else if (typeof expression.functionBody === 'string') {
+        try {
+          const dynFn = new Function(
+            'model', 'arrayIndices', expression.functionBody
+          );
+          result = dynFn(this.data, dataIndex);
+        } catch (e) {
+          result = true;
+          console.error("condition functionBody errored out on evaluation: " + expression.functionBody);
+        }
+      }
+      return result;
+    }
   }
 }

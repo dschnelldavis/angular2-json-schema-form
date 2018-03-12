@@ -19,6 +19,7 @@ import { buildTitleMap, isArray } from '../shared';
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.required]="options?.required"
+        [attr.disabled]="controlDisabled ? '' : null"
         [class]="options?.fieldHtmlClass || ''"
         [id]="'control' + layoutNode?._id"
         [name]="controlName">
@@ -67,7 +68,6 @@ export class SelectComponent implements OnInit {
   formControl: AbstractControl;
   controlName: string;
   controlValue: any;
-  controlDisabled = false;
   boundControl = false;
   options: any;
   selectList: any[] = [];
@@ -87,6 +87,10 @@ export class SelectComponent implements OnInit {
       this.options.enum, !!this.options.required, !!this.options.flatList
     );
     this.jsf.initializeControl(this);
+  }
+
+  get controlDisabled(): boolean {
+    return this.jsf.evaluateDisabled(this.layoutNode, this.dataIndex);
   }
 
   updateValue(event) {

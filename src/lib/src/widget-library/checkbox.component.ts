@@ -12,6 +12,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
       <input *ngIf="boundControl"
         [formControl]="formControl"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
+        [attr.disabled]="controlDisabled ? '' : null"
         [class]="(options?.fieldHtmlClass || '') + (isChecked ?
           (' ' + (options?.activeClass || '') + ' ' + (options?.style?.selected || '')) :
           (' ' + (options?.style?.unselected || '')))"
@@ -41,7 +42,6 @@ export class CheckboxComponent implements OnInit {
   formControl: AbstractControl;
   controlName: string;
   controlValue: any;
-  controlDisabled = false;
   boundControl = false;
   options: any;
   trueValue: any = true;
@@ -60,6 +60,10 @@ export class CheckboxComponent implements OnInit {
     if (this.controlValue === null || this.controlValue === undefined) {
       this.controlValue = this.options.title;
     }
+  }
+
+  get controlDisabled(): boolean {
+    return this.jsf.evaluateDisabled(this.layoutNode, this.dataIndex);
   }
 
   updateValue(event) {
