@@ -13,7 +13,6 @@ export class FileComponent implements OnInit {
   formControl: AbstractControl;
   controlName: string;
   controlValue: any;
-  controlDisabled = false;
   boundControl = false;
   options: any;
   @Input() layoutNode: any;
@@ -27,6 +26,10 @@ export class FileComponent implements OnInit {
   ngOnInit() {
     this.options = this.layoutNode.options || {};
     this.jsf.initializeControl(this);
+  }
+
+  get controlDisabled(): boolean {
+    return this.jsf.evaluateDisabled(this.layoutNode, this.dataIndex);
   }
 
   updateValue(event) {

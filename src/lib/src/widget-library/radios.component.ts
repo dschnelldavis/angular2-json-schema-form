@@ -67,7 +67,6 @@ export class RadiosComponent implements OnInit {
   formControl: AbstractControl;
   controlName: string;
   controlValue: any;
-  controlDisabled = false;
   boundControl = false;
   options: any;
   layoutOrientation = 'vertical';
@@ -92,6 +91,10 @@ export class RadiosComponent implements OnInit {
       this.options.enum, true
     );
     this.jsf.initializeControl(this);
+  }
+
+  get controlDisabled(): boolean {
+    return this.jsf.evaluateDisabled(this.layoutNode, this.dataIndex);
   }
 
   updateValue(event) {

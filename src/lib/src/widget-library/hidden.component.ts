@@ -8,6 +8,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
   template: `
     <input *ngIf="boundControl"
       [formControl]="formControl"
+      [attr.disabled]="controlDisabled ? '' : null"
       [id]="'control' + layoutNode?._id"
       [name]="controlName"
       type="hidden">
@@ -22,7 +23,6 @@ export class HiddenComponent implements OnInit {
   formControl: AbstractControl;
   controlName: string;
   controlValue: any;
-  controlDisabled = false;
   boundControl = false;
   @Input() layoutNode: any;
   @Input() layoutIndex: number[];
@@ -34,5 +34,9 @@ export class HiddenComponent implements OnInit {
 
   ngOnInit() {
     this.jsf.initializeControl(this);
+  }
+
+  get controlDisabled(): boolean {
+    return this.jsf.evaluateDisabled(this.layoutNode, this.dataIndex);
   }
 }

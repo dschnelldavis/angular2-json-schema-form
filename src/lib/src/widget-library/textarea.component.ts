@@ -22,6 +22,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
         [attr.placeholder]="options?.placeholder"
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.required]="options?.required"
+        [attr.disabled]="controlDisabled ? '' : null"
         [class]="options?.fieldHtmlClass || ''"
         [id]="'control' + layoutNode?._id"
         [name]="controlName"></textarea>
@@ -45,7 +46,6 @@ export class TextareaComponent implements OnInit {
   formControl: AbstractControl;
   controlName: string;
   controlValue: any;
-  controlDisabled = false;
   boundControl = false;
   options: any;
   @Input() layoutNode: any;
@@ -59,6 +59,10 @@ export class TextareaComponent implements OnInit {
   ngOnInit() {
     this.options = this.layoutNode.options || {};
     this.jsf.initializeControl(this);
+  }
+
+  get controlDisabled(): boolean {
+    return this.jsf.evaluateDisabled(this.layoutNode, this.dataIndex);
   }
 
   updateValue(event) {

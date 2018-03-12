@@ -18,6 +18,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
         [attr.max]="options?.maximum"
         [attr.min]="options?.minimum"
         [attr.placeholder]="options?.placeholder"
+        [attr.disabled]="controlDisabled ? '' : null"
         [attr.required]="options?.required"
         [attr.readonly]="options?.readonly ? 'readonly' : null"
         [attr.step]="options?.multipleOf || options?.step || 'any'"
@@ -51,7 +52,6 @@ export class NumberComponent implements OnInit {
   formControl: AbstractControl;
   controlName: string;
   controlValue: any;
-  controlDisabled = false;
   boundControl = false;
   options: any;
   allowNegative = true;
@@ -70,6 +70,10 @@ export class NumberComponent implements OnInit {
     this.options = this.layoutNode.options || {};
     this.jsf.initializeControl(this);
     if (this.layoutNode.dataType === 'integer') { this.allowDecimal = false; }
+  }
+
+  get controlDisabled(): boolean {
+    return this.jsf.evaluateDisabled(this.layoutNode, this.dataIndex);
   }
 
   updateValue(event) {
