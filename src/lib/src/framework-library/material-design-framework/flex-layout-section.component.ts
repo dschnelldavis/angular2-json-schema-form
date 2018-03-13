@@ -28,8 +28,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
         [style.justify-content]="getFlexAttribute('justify-content')"
         [style.align-items]="getFlexAttribute('align-items')"
         [style.align-content]="getFlexAttribute('align-content')"
-        [fxLayout]="options?.fxLayout"
-        [fxLayoutWrap]="options?.fxLayoutWrap"
+        [fxLayout]="getFlexAttribute('layout')"
         [fxLayoutGap]="options?.fxLayoutGap"
         [fxLayoutAlign]="options?.fxLayoutAlign"
         [attr.fxFlexFill]="options?.fxLayoutAlign"></flex-layout-root-widget>
@@ -59,8 +58,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
         [style.justify-content]="getFlexAttribute('justify-content')"
         [style.align-items]="getFlexAttribute('align-items')"
         [style.align-content]="getFlexAttribute('align-content')"
-        [fxLayout]="options?.fxLayout"
-        [fxLayoutWrap]="options?.fxLayoutWrap"
+        [fxLayout]="getFlexAttribute('layout')"
         [fxLayoutGap]="options?.fxLayoutGap"
         [fxLayoutAlign]="options?.fxLayoutAlign"
         [attr.fxFlexFill]="options?.fxLayoutAlign"></flex-layout-root-widget>
@@ -93,8 +91,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
             [style.justify-content]="getFlexAttribute('justify-content')"
             [style.align-items]="getFlexAttribute('align-items')"
             [style.align-content]="getFlexAttribute('align-content')"
-            [fxLayout]="options?.fxLayout"
-            [fxLayoutWrap]="options?.fxLayoutWrap"
+            [fxLayout]="getFlexAttribute('layout')"
             [fxLayoutGap]="options?.fxLayoutGap"
             [fxLayoutAlign]="options?.fxLayoutAlign"
             [attr.fxFlexFill]="options?.fxLayoutAlign"></flex-layout-root-widget>
@@ -131,8 +128,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
           [style.justify-content]="getFlexAttribute('justify-content')"
           [style.align-items]="getFlexAttribute('align-items')"
           [style.align-content]="getFlexAttribute('align-content')"
-          [fxLayout]="options?.fxLayout"
-          [fxLayoutWrap]="options?.fxLayoutWrap"
+          [fxLayout]="getFlexAttribute('layout')"
           [fxLayoutGap]="options?.fxLayoutGap"
           [fxLayoutAlign]="options?.fxLayoutAlign"
           [attr.fxFlexFill]="options?.fxLayoutAlign"></flex-layout-root-widget>
@@ -212,6 +208,9 @@ export class FlexLayoutSectionComponent implements OnInit {
           this.options[attribute] || ['column', 'nowrap'][index];
       case 'justify-content': case 'align-items': case 'align-content':
         return this.options[attribute];
+      case 'layout':
+        return (this.options.fxLayout || 'row') +
+          this.options.fxLayoutWrap ? ' ' + this.options.fxLayoutWrap : '';
     }
   }
 }
