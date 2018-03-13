@@ -210,8 +210,7 @@ export class FlexLayoutSectionComponent implements OnInit {
         return this.options[attribute];
       case 'layout':
         return (this.options.fxLayout || 'row') +
-          this.options.fxLayoutWrap ? ' ' : '' +
-          this.options.fxLayoutWrap;
+          this.options.fxLayoutWrap ? ' ' + this.options.fxLayoutWrap : '';
     }
   }
 }
