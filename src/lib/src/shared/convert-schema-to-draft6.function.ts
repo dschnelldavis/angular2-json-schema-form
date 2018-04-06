@@ -204,7 +204,7 @@ export function convertSchemaToDraft6(schema, options: OptionObject = {}) {
     if (newSchema.id.slice(-1) === '#') {
       newSchema.id = newSchema.id.slice(0, -1);
     }
-    newSchema.$id = newSchema.id + '-CONVERTED-TO-DRAFT-06#';
+    newSchema.$id = newSchema.id + '-CONVERTED-TO-DRAFT-07#';
     delete newSchema.id;
     changed = true;
   }
@@ -221,10 +221,10 @@ export function convertSchemaToDraft6(schema, options: OptionObject = {}) {
   if (typeof newSchema.$schema === 'string' &&
     /http\:\/\/json\-schema\.org\/draft\-0[1-4]\/schema\#/.test(newSchema.$schema)
   ) {
-    newSchema.$schema = 'http://json-schema.org/draft-06/schema#';
+    newSchema.$schema = 'http://json-schema.org/draft-07/schema#';
     changed = true;
   } else if (changed && typeof newSchema.$schema === 'string') {
-    const addToDescription = 'Converted to draft 6 from ' + newSchema.$schema;
+    const addToDescription = 'Converted to draft 7 from ' + newSchema.$schema;
     if (typeof newSchema.description === 'string' && newSchema.description.length) {
       newSchema.description += '\n' + addToDescription;
     } else {
