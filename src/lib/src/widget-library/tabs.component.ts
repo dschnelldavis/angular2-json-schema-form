@@ -1,6 +1,6 @@
-import { Component, Input, OnInit } from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 
-import { JsonSchemaFormService } from '../json-schema-form.service';
+import {JsonSchemaFormService} from '../json-schema-form.service';
 
 @Component({
   selector: 'tabs-widget',
@@ -8,29 +8,29 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
     <ul
       [class]="options?.labelHtmlClass || ''">
       <li *ngFor="let item of layoutNode?.items; let i = index"
-        [class]="(options?.itemLabelHtmlClass || '') + (selectedItem === i ?
+          [class]="(options?.itemLabelHtmlClass || '') + (selectedItem === i ?
           (' ' + (options?.activeClass || '') + ' ' + (options?.style?.selected || '')) :
           (' ' + options?.style?.unselected))"
-        role="presentation"
-        data-tabs>
+          role="presentation"
+          data-tabs>
         <a *ngIf="showAddTab || item.type !== '$ref'"
            [class]="'nav-link' + (selectedItem === i ? (' ' + options?.activeClass + ' ' + options?.style?.selected) :
             (' ' + options?.style?.unselected))"
-          [innerHTML]="setTabTitle(item, i)"
-          (click)="select(i)"></a>
+           [innerHTML]="setTabTitle(item, i)"
+           (click)="select(i)"></a>
       </li>
     </ul>
 
     <div *ngFor="let layoutItem of layoutNode?.items; let i = index"
-      [class]="options?.htmlClass || ''">
+         [class]="options?.htmlClass || ''">
 
       <select-framework-widget *ngIf="selectedItem === i"
-        [class]="(options?.fieldHtmlClass || '') +
+                               [class]="(options?.fieldHtmlClass || '') +
           ' ' + (options?.activeClass || '') +
           ' ' + (options?.style?.selected || '')"
-        [dataIndex]="layoutNode?.dataType === 'array' ? (dataIndex || []).concat(i) : dataIndex"
-        [layoutIndex]="(layoutIndex || []).concat(i)"
-        [layoutNode]="layoutItem"></select-framework-widget>
+                               [dataIndex]="layoutNode?.dataType === 'array' ? (dataIndex || []).concat(i) : dataIndex"
+                               [layoutIndex]="(layoutIndex || []).concat(i)"
+                               [layoutNode]="layoutItem"></select-framework-widget>
 
     </div>
     <div class='stepper-buttons'>
@@ -45,12 +45,14 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
       <ng-container *ngFor='let item of options?.buttons?.items'>
         <button *ngIf="item.shows === undefined || item.shows?.indexOf(selectedItem) >= 0
           || (item.shows?.indexOf(-1) >= 0 && layoutNode.items.length === selectedItem + 1)"
-                [class]="item.fieldHtmlClass" (click)="updateValue(item, $event)">
+                [class]="item.fieldHtmlClass" (click)="doAction(item.action)">
           {{item.title}}
         </button>
       </ng-container>
     </div>`,
-  styles: [` a { cursor: pointer; } `],
+  styles: [` a {
+    cursor: pointer;
+  } `],
 })
 export class TabsComponent implements OnInit {
   options: any;
@@ -63,7 +65,8 @@ export class TabsComponent implements OnInit {
 
   constructor(
     private jsf: JsonSchemaFormService
-  ) { }
+  ) {
+  }
 
   ngOnInit() {
     this.options = this.layoutNode.options || {};
@@ -80,7 +83,8 @@ export class TabsComponent implements OnInit {
         dataIndex: this.dataIndex.concat(index)
       });
       this.updateControl();
-    };
+    }
+    ;
     this.selectedItem = index;
   }
 
@@ -116,5 +120,9 @@ export class TabsComponent implements OnInit {
     } else {
       this.jsf.updateValue(item, event.target.value);
     }
+  }
+
+  doAction(actionCode) {
+    this.jsf.doAction(actionCode);
   }
 }

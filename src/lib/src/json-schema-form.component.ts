@@ -156,7 +156,9 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
     private widgetLibrary: WidgetLibraryService,
     public jsf: JsonSchemaFormService,
     private sanitizer: DomSanitizer
-  ) { }
+  ) {
+    jsf.rootComponent = this;
+  }
 
   get stylesheets(): SafeResourceUrl[] {
     const stylesheets = this.frameworkLibrary.getFrameworkStylesheets();
@@ -730,5 +732,9 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
         this.validationErrors.emit(this.jsf.ajvErrors);
       }
     }
+  }
+
+  doAction(actionCode: string) {
+    this.onSubmit.emit(actionCode);
   }
 }
