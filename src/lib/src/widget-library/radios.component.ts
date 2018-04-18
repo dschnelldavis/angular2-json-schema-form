@@ -26,11 +26,11 @@ import { buildTitleMap } from '../shared';
           [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
           [attr.readonly]="options?.readonly ? 'readonly' : null"
           [attr.required]="options?.required"
-          [checked]="radioItem?.value === controlValue"
+          [checked]="controlValue !== null && radioItem?.value.toString() === controlValue.toString()"
           [class]="options?.fieldHtmlClass || ''"
           [disabled]="controlDisabled"
           [id]="'control' + layoutNode?._id + '/' + radioItem?.value"
-          [name]="controlName"
+          [name]="controlName + layoutNode?._id"
           [value]="radioItem?.value"
           (change)="updateValue($event)">
         <span [innerHTML]="radioItem?.name"></span>
@@ -51,11 +51,11 @@ import { buildTitleMap } from '../shared';
             [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
             [attr.readonly]="options?.readonly ? 'readonly' : null"
             [attr.required]="options?.required"
-            [checked]="radioItem?.value === controlValue"
+            [checked]="controlValue !== null && radioItem?.value.toString() === controlValue.toString()"
             [class]="options?.fieldHtmlClass || ''"
             [disabled]="controlDisabled"
             [id]="'control' + layoutNode?._id + '/' + radioItem?.value"
-            [name]="controlName"
+            [name]="controlName + layoutNode?._id"
             [value]="radioItem?.value"
             (change)="updateValue($event)">
           <span [innerHTML]="radioItem?.name"></span>

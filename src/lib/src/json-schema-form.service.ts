@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
-import { AbstractControl, FormArray, FormGroup } from '@angular/forms';
-import { filter } from 'rxjs/operators/filter';
-import { Subject } from 'rxjs/Subject';
+import {Injectable} from '@angular/core';
+import {AbstractControl, FormArray, FormGroup} from '@angular/forms';
+import {filter} from 'rxjs/operators/filter';
+import {Subject} from 'rxjs/Subject';
 
 import * as Ajv from 'ajv';
 import * as _ from 'lodash';
@@ -12,7 +12,7 @@ import {
 import {
   fixTitle, forEach, hasOwn, toTitleCase
 } from './shared/utility.functions';
-import { JsonPointer } from './shared/jsonpointer.functions';
+import {JsonPointer} from './shared/jsonpointer.functions';
 import {
   buildSchemaFromData, buildSchemaFromLayout, removeRecursiveReferences,
   resolveSchemaReferences
@@ -20,15 +20,21 @@ import {
 import {
   buildFormGroup, buildFormGroupTemplate, formatFormData, getControl
 } from './shared/form-group.functions';
-import { buildLayout, getLayoutNode } from './shared/layout.functions';
-import { enValidationMessages } from './locale/en-validation-messages';
-import { frValidationMessages } from './locale/fr-validation-messages';
+import {buildLayout, getLayoutNode} from './shared/layout.functions';
+import {enValidationMessages} from './locale/en-validation-messages';
+import {frValidationMessages} from './locale/fr-validation-messages';
+import {JsonSchemaFormComponent} from './json-schema-form.component';
 
 export interface TitleMapItem {
-  name?: string, value?: any, checked?: boolean, group?: string, items?: TitleMapItem[]
+  name?: string,
+  value?: any,
+  checked?: boolean,
+  group?: string,
+  items?: TitleMapItem[]
 };
+
 export interface ErrorMessages {
-  [control_name: string]: { message: string|Function|Object, code: string }[]
+  [control_name: string]: { message: string | Function | Object, code: string }[]
 };
 
 
@@ -39,7 +45,7 @@ export class JsonSchemaFormService {
   AngularSchemaFormCompatibility = false;
   tpldata: any = {};
 
-  ajvOptions: any = { allErrors: true, jsonPointers: true, unknownFormats: 'ignore' };
+  ajvOptions: any = {allErrors: true, jsonPointers: true, unknownFormats: 'ignore'};
   ajv: any = new Ajv(this.ajvOptions); // AJV: Another JSON Schema Validator
   validateFormData: any = null; // Compiled AJV function to validate active form's schema
 
@@ -67,17 +73,19 @@ export class JsonSchemaFormService {
   dataRecursiveRefMap: Map<string, string> = new Map(); // Maps recursive reference points in form data
   schemaRecursiveRefMap: Map<string, string> = new Map(); // Maps recursive reference points in schema
   schemaRefLibrary: any = {}; // Library of schemas for resolving schema $refs
-  layoutRefLibrary: any = { '': null }; // Library of layout nodes for adding to form
+  layoutRefLibrary: any = {'': null}; // Library of layout nodes for adding to form
   templateRefLibrary: any = {}; // Library of formGroup templates for adding to form
   hasRootReference = false; // Does the form include a recursive reference to itself?
 
   language = 'en-US'; // Does the form include a recursive reference to itself?
 
+  _rootComponent: JsonSchemaFormComponent;
+
   // Default global form options
   defaultFormOptions: any = {
     addSubmit: 'auto', // Add a submit button if layout does not have one?
-      // for addSubmit: true = always, false = never,
-      // 'auto' = only if layout is undefined (form is built from schema alone)
+    // for addSubmit: true = always, false = never,
+    // 'auto' = only if layout is undefined (form is built from schema alone)
     debug: false, // Show debugging output?
     disableInvalidSubmit: true, // Disable submit if form invalid?
     formDisabled: false, // Set entire form as disabled? (not editable, and disables outputs)
@@ -85,20 +93,20 @@ export class JsonSchemaFormService {
     fieldsRequired: false, // (set automatically) Are there any required fields in the form?
     framework: 'no-framework', // The framework to load
     loadExternalAssets: false, // Load external css and JavaScript for framework?
-    pristine: { errors: true, success: true },
+    pristine: {errors: true, success: true},
     supressPropertyTitles: false,
     setSchemaDefaults: 'auto', // Set fefault values from schema?
-      // true = always set (unless overridden by layout default or formValues)
-      // false = never set
-      // 'auto' = set in addable components, and everywhere if formValues not set
+    // true = always set (unless overridden by layout default or formValues)
+    // false = never set
+    // 'auto' = set in addable components, and everywhere if formValues not set
     setLayoutDefaults: 'auto', // Set fefault values from layout?
-      // true = always set (unless overridden by formValues)
-      // false = never set
-      // 'auto' = set in addable components, and everywhere if formValues not set
+    // true = always set (unless overridden by formValues)
+    // false = never set
+    // 'auto' = set in addable components, and everywhere if formValues not set
     validateOnRender: 'auto', // Validate fields immediately, before they are touched?
-      // true = validate all fields immediately
-      // false = only validate fields after they are touched by user
-      // 'auto' = validate fields with values immediately, empty fields after they are touched
+    // true = validate all fields immediately
+    // false = only validate fields after they are touched by user
+    // 'auto' = validate fields with values immediately, empty fields after they are touched
     widgets: {}, // Any custom widgets to load
     defautWidgetOptions: { // Default options for form control widgets
       listItems: 1, // Number of list items to initially add to arrays with no default value
@@ -123,6 +131,10 @@ export class JsonSchemaFormService {
     this.setLanguage(this.language);
   }
 
+  set rootComponent(rootComponent) {
+    this._rootComponent = rootComponent;
+  }
+
   setLanguage(language: string = 'en-US') {
     this.language = language;
     const validationMessages = language.slice(0, 2) === 'fr' ?
@@ -131,11 +143,17 @@ export class JsonSchemaFormService {
       _.cloneDeep(validationMessages);
   }
 
-  getData() { return this.data; }
+  getData() {
+    return this.data;
+  }
 
-  getSchema() { return this.schema; }
+  getSchema() {
+    return this.schema;
+  }
 
-  getLayout() { return this.layout; }
+  getLayout() {
+    return this.layout;
+  }
 
   resetAllValues() {
     this.JsonFormCompatibility = false;
@@ -188,7 +206,7 @@ export class JsonSchemaFormService {
         for (const error of value) {
           const err = {};
           err[error['code']] = error['message'];
-          this.formGroup.get(key).setErrors(err, { emitEvent: true });
+          this.formGroup.get(key).setErrors(err, {emitEvent: true});
         }
       }
     });
@@ -206,7 +224,9 @@ export class JsonSchemaFormService {
     const compileErrors = errors => {
       const compiledErrors = {};
       (errors || []).forEach(error => {
-        if (!compiledErrors[error.dataPath]) { compiledErrors[error.dataPath] = []; }
+        if (!compiledErrors[error.dataPath]) {
+          compiledErrors[error.dataPath] = [];
+        }
         compiledErrors[error.dataPath].push(error.message);
       });
       return compiledErrors;
@@ -231,7 +251,9 @@ export class JsonSchemaFormService {
       this.validateData(this.formGroup.value);
 
       // Set up observables to emit data and validation info when form data changes
-      if (this.formValueSubscription) { this.formValueSubscription.unsubscribe(); }
+      if (this.formValueSubscription) {
+        this.formValueSubscription.unsubscribe();
+      }
       this.formValueSubscription = this.formGroup.valueChanges
         .subscribe(formValue => this.validateData(formValue));
     }
@@ -280,12 +302,16 @@ export class JsonSchemaFormService {
   }
 
   buildSchemaFromData(data?: any, requireAllFields = false): any {
-    if (data) { return buildSchemaFromData(data, requireAllFields); }
+    if (data) {
+      return buildSchemaFromData(data, requireAllFields);
+    }
     this.schema = buildSchemaFromData(this.formValues, requireAllFields);
   }
 
   buildSchemaFromLayout(layout?: any): any {
-    if (layout) { return buildSchemaFromLayout(layout); }
+    if (layout) {
+      return buildSchemaFromLayout(layout);
+    }
     this.schema = buildSchemaFromLayout(this.layout);
   }
 
@@ -295,9 +321,11 @@ export class JsonSchemaFormService {
   }
 
   parseText(
-    text = '', value: any = {}, values: any = {}, key: number|string = null
+    text = '', value: any = {}, values: any = {}, key: number | string = null
   ): string {
-    if (!text || !/{{.+?}}/.test(text)) { return text; }
+    if (!text || !/{{.+?}}/.test(text)) {
+      return text;
+    }
     return text.replace(/{{(.+?)}}/g, (...a) =>
       this.parseExpression(a[1], value, values, key, this.tpldata)
     );
@@ -305,9 +333,11 @@ export class JsonSchemaFormService {
 
   parseExpression(
     expression = '', value: any = {}, values: any = {},
-    key: number|string = null, tpldata: any = null
+    key: number | string = null, tpldata: any = null
   ) {
-    if (typeof expression !== 'string') { return ''; }
+    if (typeof expression !== 'string') {
+      return '';
+    }
     const index = typeof key === 'number' ? (key + 1) + '' : (key || '');
     expression = expression.trim();
     if ((expression[0] === "'" || expression[0] === '"') &&
@@ -316,17 +346,21 @@ export class JsonSchemaFormService {
     ) {
       return expression.slice(1, expression.length - 1);
     }
-    if (expression === 'idx' || expression === '$index') { return index; }
-    if (expression === 'value' && !hasOwn(values, 'value')) { return value; }
+    if (expression === 'idx' || expression === '$index') {
+      return index;
+    }
+    if (expression === 'value' && !hasOwn(values, 'value')) {
+      return value;
+    }
     if (['"', "'", ' ', '||', '&&', '+'].every(delim => expression.indexOf(delim) === -1)) {
       const pointer = JsonPointer.parseObjectPath(expression);
       return pointer[0] === 'value' && JsonPointer.has(value, pointer.slice(1)) ?
-          JsonPointer.get(value, pointer.slice(1)) :
+        JsonPointer.get(value, pointer.slice(1)) :
         pointer[0] === 'values' && JsonPointer.has(values, pointer.slice(1)) ?
           JsonPointer.get(values, pointer.slice(1)) :
-        pointer[0] === 'tpldata' && JsonPointer.has(tpldata, pointer.slice(1)) ?
-          JsonPointer.get(tpldata, pointer.slice(1)) :
-        JsonPointer.has(values, pointer) ? JsonPointer.get(values, pointer) : '';
+          pointer[0] === 'tpldata' && JsonPointer.has(tpldata, pointer.slice(1)) ?
+            JsonPointer.get(tpldata, pointer.slice(1)) :
+            JsonPointer.has(values, pointer) ? JsonPointer.get(values, pointer) : '';
     }
     if (expression.indexOf('[idx]') > -1) {
       expression = expression.replace(/\[idx\]/g, <string>index);
@@ -374,7 +408,9 @@ export class JsonSchemaFormService {
         [parentNode, '/options/legend']
       ]
     );
-    if (!text) { return text; }
+    if (!text) {
+      return text;
+    }
     const childValue = isArray(parentValues) && index < parentValues.length ?
       parentValues[index] : parentValues;
     return this.parseText(text, childValue, parentValues, index);
@@ -403,7 +439,7 @@ export class JsonSchemaFormService {
         pointer = JsonPointer.parseObjectPath(pointer);
         result = !!JsonPointer.get(this.data, pointer);
         if (!result && pointer[0] === 'model') {
-          result = !!JsonPointer.get({ model: this.data }, pointer);
+          result = !!JsonPointer.get({model: this.data}, pointer);
         }
       } else if (typeof layoutNode.options.condition === 'function') {
         result = layoutNode.options.condition(this.data);
@@ -423,7 +459,9 @@ export class JsonSchemaFormService {
   }
 
   initializeControl(ctx: any, bind = true): boolean {
-    if (!isObject(ctx)) { return false; }
+    if (!isObject(ctx)) {
+      return false;
+    }
     if (isEmpty(ctx.options)) {
       ctx.options = !isEmpty((ctx.layoutNode || {}).options) ?
         ctx.layoutNode.options : _.cloneDeep(this.formOptions);
@@ -443,7 +481,9 @@ export class JsonSchemaFormService {
           this.formatErrors(ctx.formControl.errors, ctx.options.validationMessages)
       );
       ctx.formControl.valueChanges.subscribe(value => {
-        if (!_.isEqual(ctx.controlValue, value)) { ctx.controlValue = value }
+        if (!_.isEqual(ctx.controlValue, value)) {
+          ctx.controlValue = value
+        }
       });
     } else {
       ctx.controlName = ctx.layoutNode.name;
@@ -457,40 +497,44 @@ export class JsonSchemaFormService {
   }
 
   formatErrors(errors: any, validationMessages: any = {}): string {
-    if (isEmpty(errors)) { return null; }
-    if (!isObject(validationMessages)) { validationMessages = {}; }
+    if (isEmpty(errors)) {
+      return null;
+    }
+    if (!isObject(validationMessages)) {
+      validationMessages = {};
+    }
     const addSpaces = string => string[0].toUpperCase() + (string.slice(1) || '')
       .replace(/([a-z])([A-Z])/g, '$1 $2').replace(/_/g, ' ');
     const formatError = (error) => typeof error === 'object' ?
       Object.keys(error).map(key =>
         error[key] === true ? addSpaces(key) :
-        error[key] === false ? 'Not ' + addSpaces(key) :
-        addSpaces(key) + ': ' + formatError(error[key])
+          error[key] === false ? 'Not ' + addSpaces(key) :
+            addSpaces(key) + ': ' + formatError(error[key])
       ).join(', ') :
       addSpaces(error.toString());
     const messages = [];
     return Object.keys(errors)
-      // Hide 'required' error, unless it is the only one
+    // Hide 'required' error, unless it is the only one
       .filter(errorKey => errorKey !== 'required' || Object.keys(errors).length === 1)
       .map(errorKey =>
         // If validationMessages is a string, return it
         typeof validationMessages === 'string' ? validationMessages :
-        // If custom error message is a function, return function result
-        typeof validationMessages[errorKey] === 'function' ?
-          validationMessages[errorKey](errors[errorKey]) :
-        // If custom error message is a string, replace placeholders and return
-        typeof validationMessages[errorKey] === 'string' ?
-          // Does error message have any {{property}} placeholders?
-          !/{{.+?}}/.test(validationMessages[errorKey]) ?
-            validationMessages[errorKey] :
-            // Replace {{property}} placeholders with values
-            Object.keys(errors[errorKey])
-              .reduce((errorMessage, errorProperty) => errorMessage.replace(
-                new RegExp('{{' + errorProperty + '}}', 'g'),
-                errors[errorKey][errorProperty]
-              ), validationMessages[errorKey]) :
-          // If no custom error message, return formatted error data instead
-          addSpaces(errorKey) + ' Error: ' + formatError(errors[errorKey])
+          // If custom error message is a function, return function result
+          typeof validationMessages[errorKey] === 'function' ?
+            validationMessages[errorKey](errors[errorKey]) :
+            // If custom error message is a string, replace placeholders and return
+            typeof validationMessages[errorKey] === 'string' ?
+              // Does error message have any {{property}} placeholders?
+              !/{{.+?}}/.test(validationMessages[errorKey]) ?
+                validationMessages[errorKey] :
+                // Replace {{property}} placeholders with values
+                Object.keys(errors[errorKey])
+                  .reduce((errorMessage, errorProperty) => errorMessage.replace(
+                    new RegExp('{{' + errorProperty + '}}', 'g'),
+                    errors[errorKey][errorProperty]
+                  ), validationMessages[errorKey]) :
+              // If no custom error message, return formatted error data instead
+              addSpaces(errorKey) + ' Error: ' + formatError(errors[errorKey])
       ).join('<br>');
   }
 
@@ -520,7 +564,9 @@ export class JsonSchemaFormService {
     const formArray = <FormArray>this.getFormControl(ctx);
 
     // Remove all existing items
-    while (formArray.value.length) { formArray.removeAt(0); }
+    while (formArray.value.length) {
+      formArray.removeAt(0);
+    }
 
     // Re-add an item for each checked box
     const refPointer = removeRecursiveReferences(
@@ -540,7 +586,9 @@ export class JsonSchemaFormService {
     if (
       !ctx.layoutNode || !isDefined(ctx.layoutNode.dataPointer) ||
       ctx.layoutNode.type === '$ref'
-    ) { return null; }
+    ) {
+      return null;
+    }
     return getControl(this.formGroup, this.getDataPointer(ctx));
   }
 
@@ -548,20 +596,26 @@ export class JsonSchemaFormService {
     if (
       !ctx.layoutNode || !isDefined(ctx.layoutNode.dataPointer) ||
       ctx.layoutNode.type === '$ref'
-    ) { return null; }
+    ) {
+      return null;
+    }
     const control = getControl(this.formGroup, this.getDataPointer(ctx));
     return control ? control.value : null;
   }
 
   getFormControlGroup(ctx: any): FormArray | FormGroup {
-    if (!ctx.layoutNode || !isDefined(ctx.layoutNode.dataPointer)) { return null; }
+    if (!ctx.layoutNode || !isDefined(ctx.layoutNode.dataPointer)) {
+      return null;
+    }
     return getControl(this.formGroup, this.getDataPointer(ctx), true);
   }
 
   getFormControlName(ctx: any): string {
     if (
       !ctx.layoutNode || !isDefined(ctx.layoutNode.dataPointer) || !hasValue(ctx.dataIndex)
-    ) { return null; }
+    ) {
+      return null;
+    }
     return JsonPointer.toKey(this.getDataPointer(ctx));
   }
 
@@ -576,21 +630,27 @@ export class JsonSchemaFormService {
   getDataPointer(ctx: any): string {
     if (
       !ctx.layoutNode || !isDefined(ctx.layoutNode.dataPointer) || !hasValue(ctx.dataIndex)
-    ) { return null; }
+    ) {
+      return null;
+    }
     return JsonPointer.toIndexedPointer(
       ctx.layoutNode.dataPointer, ctx.dataIndex, this.arrayMap
     );
   }
 
   getLayoutPointer(ctx: any): string {
-    if (!hasValue(ctx.layoutIndex)) { return null; }
+    if (!hasValue(ctx.layoutIndex)) {
+      return null;
+    }
     return '/' + ctx.layoutIndex.join('/items/');
   }
 
   isControlBound(ctx: any): boolean {
     if (
       !ctx.layoutNode || !isDefined(ctx.layoutNode.dataPointer) || !hasValue(ctx.dataIndex)
-    ) { return false; }
+    ) {
+      return false;
+    }
     const controlGroup = this.getFormControlGroup(ctx);
     const name = this.getFormControlName(ctx);
     return controlGroup ? hasOwn(controlGroup.controls, name) : false;
@@ -600,7 +660,9 @@ export class JsonSchemaFormService {
     if (
       !ctx.layoutNode || !isDefined(ctx.layoutNode.$ref) ||
       !hasValue(ctx.dataIndex) || !hasValue(ctx.layoutIndex)
-    ) { return false; }
+    ) {
+      return false;
+    }
 
     // Create a new Angular form control from a template in templateRefLibrary
     const newFormGroup = buildFormGroup(this.templateRefLibrary[ctx.layoutNode.$ref]);
@@ -638,7 +700,9 @@ export class JsonSchemaFormService {
       !ctx.layoutNode || !isDefined(ctx.layoutNode.dataPointer) ||
       !hasValue(ctx.dataIndex) || !hasValue(ctx.layoutIndex) ||
       !isDefined(oldIndex) || !isDefined(newIndex) || oldIndex === newIndex
-    ) { return false; }
+    ) {
+      return false;
+    }
 
     // Move item in the formArray
     const formArray = <FormArray>this.getFormControlGroup(ctx);
@@ -657,7 +721,9 @@ export class JsonSchemaFormService {
     if (
       !ctx.layoutNode || !isDefined(ctx.layoutNode.dataPointer) ||
       !hasValue(ctx.dataIndex) || !hasValue(ctx.layoutIndex)
-    ) { return false; }
+    ) {
+      return false;
+    }
 
     // Remove the Angular form control from the parent formArray or formGroup
     if (ctx.layoutNode.arrayItem) { // Remove array item from formArray
@@ -671,5 +737,9 @@ export class JsonSchemaFormService {
     // Remove layoutNode from layout
     JsonPointer.remove(this.layout, this.getLayoutPointer(ctx));
     return true;
+  }
+
+  doAction(actionCode) {
+    this._rootComponent.doAction(actionCode);
   }
 }
