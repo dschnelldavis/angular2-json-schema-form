@@ -1,6 +1,6 @@
-# Contributing to Angular JSON Schema Form
+# Contributing to NG JSON Schema Form
 
-We would love for you to contribute to Angular JSON Schema Form!
+We would love for you to contribute to NG JSON Schema Form!
 Here's more information about how to contribute:
 
  - [Issues and Bugs](#issue)
