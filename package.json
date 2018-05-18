@@ -5,7 +5,7 @@
     "name": "Shamoon Siddiqui",
     "email": "shamoon@develop.io"
   },
-  "description": "Angular JSON Schema Form builder",
+  "description": "NG JSON Schema Form builder",
   "keywords": [
     "Angular",
     "ng",
@@ -28,10 +28,10 @@
   "bugs": {
     "url": "https://github.com/shamoons/ng-json-schema-form/issues"
   },
-  "main": "./bundles/angular2-json-schema-form.umd.js",
-  "module": "./angular2-json-schema-form.es5.js",
-  "es2015": "./angular2-json-schema-form.js",
-  "typings": "./angular2-json-schema-form.d.ts",
+  "main": "./bundles/ng-json-schema-form.umd.js",
+  "module": "./ng-json-schema-form.es5.js",
+  "es2015": "./ng-json-schema-form.js",
+  "typings": "./ng-json-schema-form.d.ts",
   "engines": {
     "node": ">= 6.9.0",
     "npm": ">= 3.0.0"

@@ -17,7 +17,7 @@ import {
 
 // To include JsonSchemaFormModule after downloading from NPM, use this instead:
 //
-//   import { JsonSchemaFormModule, NoFrameworkModule } from 'angular2-json-schema-form';
+//   import { JsonSchemaFormModule, NoFrameworkModule } from 'ng-json-schema-form';
 //
 // but replace "NoFrameworkModule" with the framework you want to use,
 // then import both JsonSchemaFormModule and the framework module, like this:

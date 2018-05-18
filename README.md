@@ -1,4 +1,4 @@
-# Angular JSON Schema Form
+# NG JSON Schema Form
 
 [![npm version](https://img.shields.io/npm/v/ng-json-schema-form.svg?style=plastic)](https://www.npmjs.com/package/ng-json-schema-form) [![npm downloads](https://img.shields.io/npm/dm/ng-json-schema-form.svg?style=plastic)](https://www.npmjs.com/package/ng-json-schema-form) [![GitHub MIT License](https://img.shields.io/github/license/shamoons/ng-json-schema-form.svg?style=social)](https://github.com/shamoons/ng-json-schema-form)
 [![Dependencies](https://david-dm.org/shamoons/ng-json-schema-form.svg)](https://david-dm.org/shamoons/ng-json-schema-form) [![devDependencies](https://david-dm.org/shamoons/ng-json-schema-form/dev-status.svg)](https://david-dm.org/shamoons/ng-json-schema-form?type=dev)
