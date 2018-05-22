@@ -447,6 +447,12 @@ export function updateInputOptions(layoutNode, schema, jsf) {
     }
   }
 
+  // Map the readOnly property from JsonSchema's camelcased to non-camelcased
+  if (hasOwn(newOptions, 'readOnly')) {
+    newOptions.readonly = newOptions.readOnly;
+    delete newOptions.readOnly;
+  }
+
   // If schema type is integer, enforce by setting multipleOf = 1
   if (schema.type === 'integer' && !hasValue(newOptions.multipleOf)) {
     newOptions.multipleOf = 1;
