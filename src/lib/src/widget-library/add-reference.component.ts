@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
+import { AbstractWidget } from '.';
 
 @Component({
   selector: 'add-reference-widget',
@@ -15,21 +16,13 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
     </button>`,
     changeDetection: ChangeDetectionStrategy.Default,
 })
-export class AddReferenceComponent implements OnInit {
-  options: any;
+export class AddReferenceComponent extends AbstractWidget {
   itemCount: number;
   previousLayoutIndex: number[];
   previousDataIndex: number[];
-  @Input() layoutNode: any;
-  @Input() layoutIndex: number[];
-  @Input() dataIndex: number[];
 
-  constructor(
-    private jsf: JsonSchemaFormService
-  ) { }
-
-  ngOnInit() {
-    this.options = this.layoutNode.options || {};
+  constructor(jsf: JsonSchemaFormService) {
+    super(jsf);
   }
 
   get showAddButton(): boolean {

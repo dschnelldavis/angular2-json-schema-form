@@ -1,7 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
+import { AbstractWidget } from '.';
 
 @Component({
   selector: 'checkbox-widget',
@@ -37,26 +37,16 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
         [innerHTML]="options?.title"></span>
     </label>`,
 })
-export class CheckboxComponent implements OnInit {
-  formControl: AbstractControl;
-  controlName: string;
-  controlValue: any;
-  controlDisabled = false;
-  boundControl = false;
-  options: any;
+export class CheckboxComponent extends AbstractWidget implements OnInit {
   trueValue: any = true;
   falseValue: any = false;
-  @Input() layoutNode: any;
-  @Input() layoutIndex: number[];
-  @Input() dataIndex: number[];
 
-  constructor(
-    private jsf: JsonSchemaFormService
-  ) { }
+  constructor(jsf: JsonSchemaFormService) {
+    super(jsf);
+  }
 
   ngOnInit() {
-    this.options = this.layoutNode.options || {};
-    this.jsf.initializeControl(this);
+    super.ngOnInit();
     if (this.controlValue === null || this.controlValue === undefined) {
       this.controlValue = this.options.title;
     }

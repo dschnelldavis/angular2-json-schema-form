@@ -1,7 +1,8 @@
-import { Component, Input, Host } from '@angular/core';
+import { Component, Input, Host, OnInit } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { hasValue, JsonPointer } from '../shared';
+import { AbstractWidget } from '.';
 
 @Component({
   selector: 'root-widget',
@@ -47,17 +48,15 @@ import { hasValue, JsonPointer } from '../shared';
     }
   `],
 })
-export class RootComponent {
-  options: any;
-  @Input() dataIndex: number[];
-  @Input() layoutIndex: number[];
-  @Input() layout: any[];
+export class RootComponent extends AbstractWidget implements OnInit {
   @Input() isOrderable: boolean;
   @Input() isFlexItem = false;
 
-  constructor(
-    private jsf: JsonSchemaFormService
-  ) { }
+  constructor(jsf: JsonSchemaFormService) {
+    super(jsf);
+  }
+
+  ngOnInit() {}
 
   isDraggable(node: any): boolean {
     return node.arrayItem && node.type !== '$ref' &&

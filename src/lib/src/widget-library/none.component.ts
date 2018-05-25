@@ -1,12 +1,16 @@
-import { Component, Input } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { Component } from '@angular/core';
+
+import { JsonSchemaFormService } from '../json-schema-form.service';
+import { AbstractWidget } from '.';
 
 @Component({
   selector: 'none-widget',
   template: ``,
 })
-export class NoneComponent {
-  @Input() layoutNode: any;
-  @Input() layoutIndex: number[];
-  @Input() dataIndex: number[];
+export class NoneComponent extends AbstractWidget {
+
+  constructor(jsf: JsonSchemaFormService) {
+    super(jsf);
+  }
+
 }
