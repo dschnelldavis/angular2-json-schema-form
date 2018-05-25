@@ -3,6 +3,8 @@ import { AbstractControl } from '@angular/forms';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { buildTitleMap, isArray } from '../shared';
+import { AbstractWidget } from '.';
+import { AbstractWidget } from '.';
 
 @Component({
   selector: 'select-widget',
@@ -63,33 +65,20 @@ import { buildTitleMap, isArray } from '../shared';
       </select>
     </div>`,
 })
-export class SelectComponent implements OnInit {
-  formControl: AbstractControl;
-  controlName: string;
-  controlValue: any;
-  controlDisabled = false;
-  boundControl = false;
-  options: any;
+export class SelectComponent extends AAbstractWidget implements OnInit {
   selectList: any[] = [];
   isArray = isArray;
-  @Input() layoutNode: any;
-  @Input() layoutIndex: number[];
-  @Input() dataIndex: number[];
 
-  constructor(
-    private jsf: JsonSchemaFormService
-  ) { }
+  constructor(jsf: JsonSchemaFormService) {
+    super(jsf);
+  }
 
   ngOnInit() {
-    this.options = this.layoutNode.options || {};
+    super.ngOnInit();
     this.selectList = buildTitleMap(
       this.options.titleMap || this.options.enumNames,
       this.options.enum, !!this.options.required, !!this.options.flatList
     );
-    this.jsf.initializeControl(this);
   }
 
-  updateValue(event) {
-    this.jsf.updateValue(this, event.target.value);
-  }
 }

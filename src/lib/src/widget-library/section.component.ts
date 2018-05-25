@@ -1,7 +1,8 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 import { toTitleCase } from '../shared';
 import { JsonSchemaFormService } from '../json-schema-form.service';
+import { AbstractWidget } from '.';
 
 @Component({
   selector: 'section-widget',
@@ -73,25 +74,20 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
     .expanded > legend:before, .expanded > label:before  { content: '▼'; padding-right: .2em; }
   `],
 })
-export class SectionComponent implements OnInit {
-  options: any;
+export class SectionComponent extends AbstractWidget implements OnInit {
   expanded = true;
   containerType: string;
-  @Input() layoutNode: any;
-  @Input() layoutIndex: number[];
-  @Input() dataIndex: number[];
 
-  constructor(
-    private jsf: JsonSchemaFormService
-  ) { }
+  constructor(jsf: JsonSchemaFormService) {
+    super(jsf);
+  }
 
   get sectionTitle() {
     return this.options.notitle ? null : this.jsf.setItemTitle(this);
   }
 
   ngOnInit() {
-    this.jsf.initializeControl(this);
-    this.options = this.layoutNode.options || {};
+    super.ngOnInit();
     this.expanded = typeof this.options.expanded === 'boolean' ?
       this.options.expanded : !this.options.expandable;
     switch (this.layoutNode.type) {
