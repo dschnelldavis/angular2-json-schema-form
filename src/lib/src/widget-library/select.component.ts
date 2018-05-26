@@ -1,9 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { buildTitleMap, isArray } from '../shared';
-import { AbstractWidget } from '.';
 import { AbstractWidget } from '.';
 
 @Component({
@@ -65,7 +63,7 @@ import { AbstractWidget } from '.';
       </select>
     </div>`,
 })
-export class SelectComponent extends AAbstractWidget implements OnInit {
+export class SelectComponent extends AbstractWidget implements OnInit {
   selectList: any[] = [];
   isArray = isArray;
 
