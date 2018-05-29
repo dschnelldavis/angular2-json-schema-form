@@ -3,7 +3,7 @@ import { FormArray, AbstractControl } from '@angular/forms';
 
 import { JsonSchemaFormService, TitleMapItem } from '../json-schema-form.service';
 import { buildTitleMap } from '../shared';
-import { AbstractWidget } from '.';
+import { AbstractWidget } from './abstract-widget';
 
 @Component({
   selector: 'checkboxes-widget',

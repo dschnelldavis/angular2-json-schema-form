@@ -15,7 +15,6 @@ export abstract class AbstractWidget implements OnInit {
     @Input() layoutIndex: Array<number>;
     @Input() dataIndex: Array<number>;
 
-
     constructor(protected jsf: JsonSchemaFormService) {}
 
     ngOnInit() {

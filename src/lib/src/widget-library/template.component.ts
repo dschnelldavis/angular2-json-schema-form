@@ -4,7 +4,7 @@ import {
 } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
-import { AbstractWidget } from '.';
+import { AbstractWidget } from './abstract-widget';
 
 @Component({
   selector: 'template-widget',

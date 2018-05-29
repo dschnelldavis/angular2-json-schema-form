@@ -1,4 +1,4 @@
-import { AbstractWidget } from './abstract-widget.component';
+import { AbstractWidget } from './abstract-widget';
 import { AddReferenceComponent } from './add-reference.component';
 import { OneOfComponent } from './one-of.component';
 import { ButtonComponent } from './button.component';
@@ -31,7 +31,7 @@ export const BASIC_WIDGETS = [
   TemplateComponent, TextareaComponent
 ];
 
-export { AbstractWidget } from './abstract-widget.component';
+export { AbstractWidget } from './abstract-widget';
 export { AddReferenceComponent } from './add-reference.component';
 export { OneOfComponent } from './one-of.component';
 export { ButtonComponent } from './button.component';

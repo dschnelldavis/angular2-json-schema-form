@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { buildTitleMap } from '../shared';
-import { AbstractWidget } from '.';
+import { AbstractWidget } from './abstract-widget';
 
 @Component({
   selector: 'radios-widget',

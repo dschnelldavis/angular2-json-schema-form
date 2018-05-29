@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { hasOwn } from '../shared/utility.functions';
-import { AbstractWidget } from '.';
+import { AbstractWidget } from './abstract-widget';
 
 @Component({
   selector: 'submit-widget',

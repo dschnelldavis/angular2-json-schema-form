@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { toTitleCase } from '../shared';
 import { JsonSchemaFormService } from '../json-schema-form.service';
-import { AbstractWidget } from '.';
+import { AbstractWidget } from './abstract-widget';
 
 @Component({
   selector: 'section-widget',

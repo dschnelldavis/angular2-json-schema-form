@@ -2,7 +2,7 @@ import { Component, Input, Host, OnInit } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { hasValue, JsonPointer } from '../shared';
-import { AbstractWidget } from '.';
+import { AbstractWidget } from './abstract-widget';
 
 @Component({
   selector: 'root-widget',

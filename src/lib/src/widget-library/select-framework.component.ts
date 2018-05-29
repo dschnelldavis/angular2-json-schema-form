@@ -1,7 +1,7 @@
 import { Component, ComponentFactoryResolver } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
-import { TemplateComponent } from '.';
+import { TemplateComponent } from './template.component';
 
 @Component({
   selector: 'select-framework-widget',
