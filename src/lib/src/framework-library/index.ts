@@ -1,5 +1,5 @@
 export { FrameworkLibraryService } from './framework-library.service';
-export { FrameworkLibraryModule } from './framework-library.module';
+// export { FrameworkLibraryModule } from './framework-library.module';
 
 export { NoFramework } from './no-framework/no.framework';
 export { NoFrameworkModule } from './no-framework/no-framework.module';
