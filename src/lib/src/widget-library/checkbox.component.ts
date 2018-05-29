@@ -45,6 +45,10 @@ export class CheckboxComponent extends AbstractWidget implements OnInit {
     super(jsf);
   }
 
+  get isChecked() {
+    return this.jsf.getFormControlValue(this) === this.trueValue;
+  }
+
   ngOnInit() {
     super.ngOnInit();
     if (this.controlValue === null || this.controlValue === undefined) {
@@ -55,9 +59,5 @@ export class CheckboxComponent extends AbstractWidget implements OnInit {
   updateValue(event) {
     event.preventDefault();
     this.jsf.updateValue(this, event.target.checked ? this.trueValue : this.falseValue);
-  }
-
-  get isChecked() {
-    return this.jsf.getFormControlValue(this) === this.trueValue;
   }
 }
