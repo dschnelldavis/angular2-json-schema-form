@@ -1,19 +1,48 @@
-import { NO_ERRORS_SCHEMA, Component } from '@angular/core';
+import { NO_ERRORS_SCHEMA, Component, NgModule, Injectable } from '@angular/core';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { JsonSchemaFormService } from '../..';
+import { JsonSchemaFormService, Framework } from '../..';
 
 import { AbstractWidget } from './abstract-widget';
 import { AddReferenceComponent } from './add-reference.component';
 import { ButtonComponent } from './button.component';
 import { CheckboxComponent } from './checkbox.component';
 import { CheckboxesComponent } from './checkboxes.component';
+import { MessageComponent } from './message.component';
+import { RadiosComponent } from './radios.component';
+import { SelectFrameworkComponent } from './select-framework.component';
+import { SelectWidgetComponent } from './select-widget.component';
+import { SelectComponent } from './select.component';
+import { TemplateComponent } from './template.component';
+import { CommonModule } from '@angular/common';
+
+@Component({
+    selector: 'test-component',
+    template: '<div>Hello World</div>'
+})
+class TestComponent {}
+
+@Injectable()
+class TestFramework extends Framework {
+  name = 'TestFramework';
+  framework = TestComponent;
+};
+
+@NgModule({
+    imports: [ CommonModule ],
+    declarations: [ TestComponent, MessageComponent ],
+    entryComponents: [ TestComponent, MessageComponent ],
+    providers: [
+        { provide: Framework, useClass: TestFramework, multi: true }
+    ]
+})
+class TestModule {}
 
 describe('widgets', () => {
     let fixture: ComponentFixture<any>;
     let mockFormService: JsonSchemaFormService;
 
-    function setupCompoent<A extends AbstractWidget>(clazz: new (...args: any[]) => A, onBeforeInit: Function = (comp: A) => {}): A {
+    function setupComponent<A extends AbstractWidget>(clazz: new (...args: any[]) => A, onBeforeInit: Function = (comp: A) => {}): A {
         fixture = TestBed.createComponent(clazz);
 
         const component = fixture.componentInstance;
@@ -44,11 +73,17 @@ describe('widgets', () => {
         });
 
         TestBed.configureTestingModule({
+            imports: [ TestModule ],
             declarations: [
                 AddReferenceComponent,
                 ButtonComponent,
                 CheckboxComponent,
-                CheckboxesComponent
+                CheckboxesComponent,
+                RadiosComponent,
+                SelectFrameworkComponent,
+                SelectWidgetComponent,
+                SelectComponent,
+                TemplateComponent
             ],
             providers: [{
                 provide: JsonSchemaFormService,
@@ -63,7 +98,7 @@ describe('widgets', () => {
         let component: AddReferenceComponent;
 
         beforeEach(() => {
-            component = setupCompoent(AddReferenceComponent, (comp) => {
+            component = setupComponent(AddReferenceComponent, (comp) => {
                 comp.layoutNode.options = {maxItems: 3};
             });
         });
@@ -111,7 +146,7 @@ describe('widgets', () => {
         let component: ButtonComponent;
 
         beforeEach(() => {
-            component = setupCompoent(ButtonComponent);
+            component = setupComponent(ButtonComponent);
         });
 
         it('should use the default update method when no click handler', () => {
@@ -131,7 +166,7 @@ describe('widgets', () => {
         let component: CheckboxComponent;
 
         beforeEach(() => {
-            component = setupCompoent(CheckboxComponent, (comp) => {
+            component = setupComponent(CheckboxComponent, (comp) => {
                 comp.controlValue = true;
             });
         });
@@ -159,7 +194,7 @@ describe('widgets', () => {
         let component: CheckboxesComponent;
 
         beforeEach(() => {
-            component = setupCompoent(CheckboxesComponent, (comp) => {
+            component = setupComponent(CheckboxesComponent, (comp) => {
                 comp.controlValue = true;
                 comp.layoutNode.options = {titleMap: [
                     {value: 'check1', name: 'Test1'},
@@ -182,7 +217,7 @@ describe('widgets', () => {
             expect(component.layoutOrientation).toEqual('horizontal');
         });
 
-        it('should initialize valeus in titleMap list', () => {
+        it('should initialize values in titleMap list', () => {
             component.boundControl = true;
             fixture.detectChanges();
             expect(component.checkboxList).toEqual([{
@@ -225,4 +260,124 @@ describe('widgets', () => {
             expect(mockFormService.updateArrayCheckboxList).toHaveBeenCalledWith(component, component.checkboxList);
         });
     });
+
+    // File
+    // Hidden
+    // Input
+    // Message - verify message set
+    // None
+    // Number - verify allowDecimal set
+    // OneOf
+
+    describe('RadiosComponent', () => {
+        let component: RadiosComponent;
+
+        beforeEach(() => {
+            component = setupComponent(RadiosComponent, (comp) => {
+                comp.layoutNode.options = {titleMap: [
+                    {value: 'radio1', name: 'Test1'},
+                    {value: 'radio2', name: 'Test2'}
+                ], required: true};
+
+                return true;
+            });
+        });
+
+        it('should set orianentation to horizontal', () => {
+            component.layoutNode.type = 'radios-inline';
+            fixture.detectChanges();
+            expect(component.layoutOrientation).toEqual('horizontal');
+        });
+
+        it('should initialize values in titleMap list', () => {
+            fixture.detectChanges();
+            expect(component.radiosList).toEqual([{
+                name: 'Test1',
+                value: 'radio1'
+            }, {
+                name: 'Test2',
+                value: 'radio2'
+            }]);
+        });
+    });
+
+    describe('RootComponent', () => {});
+
+    describe('SectionComponent', () => {});
+
+    describe('SelectFrameworkComponent', () => {
+        let component: SelectFrameworkComponent;
+
+        beforeEach(() => {
+            component = setupComponent(SelectFrameworkComponent, (comp) => {
+                comp['jsf'].framework = TestComponent;
+            });
+        });
+
+        it('should instantiate framework', () => {
+            expect(component.newComponent.componentType).toEqual(TestComponent);
+        });
+    });
+
+    describe('SelectWidgetComponent', () => {
+        let component: SelectWidgetComponent;
+
+        beforeEach(() => {
+            component = setupComponent(SelectWidgetComponent, (comp) => {
+                comp.layoutNode.widget = MessageComponent;
+            });
+        });
+
+        it('should instantiate widget', () => {
+            expect(component.newComponent.componentType).toEqual(MessageComponent);
+        });
+    });
+
+    describe('SelectComponent', () => {
+        let component: SelectComponent;
+
+        beforeEach(() => {
+            component = setupComponent(SelectComponent, (comp) => {
+                comp.layoutNode.options = {titleMap: [
+                    {value: 'option1', name: 'Test1'},
+                    {value: 'option2', name: 'Test2'}
+                ], required: true};
+            });
+        });
+
+        it('should initialize values in titleMap list', () => {
+            expect(component.selectList).toEqual([{
+                name: 'Test1',
+                value: 'option1'
+            }, {
+                name: 'Test2',
+                value: 'option2'
+            }]);
+        });
+    });
+
+    describe('SubmitComponent', () => {});
+
+    // Tab
+
+    describe('TabsComponent', () => {});
+
+    describe('TemplateComponent', () => {
+        let component: TemplateComponent;
+
+        beforeEach(() => {
+            component = setupComponent(TemplateComponent, (comp) => {
+                comp.layoutNode.options = {template: TestComponent};
+            });
+        });
+
+        it('should instantiate template and set properties', () => {
+            expect(component.newComponent.componentType).toEqual(TestComponent);
+            expect(component.newComponent.instance.layoutNode).toEqual(component.layoutNode);
+            expect(component.newComponent.instance.layoutIndex).toEqual(component.layoutIndex);
+            expect(component.newComponent.instance.dataIndex).toEqual(component.dataIndex);
+        });
+    });
+
+    // TextArea
 });
