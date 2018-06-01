@@ -3,7 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { JsonSchemaFormService, Framework } from '../..';
 
-import { AbstractWidget } from './abstract-widget';
+import { Widget } from './widget';
 import { AddReferenceComponent } from './add-reference.component';
 import { ButtonComponent } from './button.component';
 import { CheckboxComponent } from './checkbox.component';
@@ -13,6 +13,8 @@ import { RadiosComponent } from './radios.component';
 import { SelectFrameworkComponent } from './select-framework.component';
 import { SelectWidgetComponent } from './select-widget.component';
 import { SelectComponent } from './select.component';
+import { SubmitComponent } from './submit.component';
+import { TabsComponent } from './tabs.component';
 import { TemplateComponent } from './template.component';
 import { CommonModule } from '@angular/common';
 
@@ -42,13 +44,14 @@ describe('widgets', () => {
     let fixture: ComponentFixture<any>;
     let mockFormService: JsonSchemaFormService;
 
-    function setupComponent<A extends AbstractWidget>(clazz: new (...args: any[]) => A, onBeforeInit: Function = (comp: A) => {}): A {
+    function setupComponent<A extends Widget>(clazz: new (...args: any[]) => A, onBeforeInit: Function = (comp: A) => {}): A {
         fixture = TestBed.createComponent(clazz);
 
         const component = fixture.componentInstance;
         component.layoutNode = {};
         component.layoutIndex = [0];
         component.dataIndex = [];
+        component.jsf.formOptions = {};
 
         if (!onBeforeInit(component)) {
             fixture.detectChanges();
@@ -83,6 +86,8 @@ describe('widgets', () => {
                 SelectFrameworkComponent,
                 SelectWidgetComponent,
                 SelectComponent,
+                SubmitComponent,
+                TabsComponent,
                 TemplateComponent
             ],
             providers: [{
@@ -356,11 +361,31 @@ describe('widgets', () => {
         });
     });
 
-    describe('SubmitComponent', () => {});
+    describe('SubmitComponent', () => {
+        let component: SubmitComponent;
+
+        beforeEach(() => {
+            component = setupComponent(SubmitComponent, (comp) => {
+                comp.layoutNode.type = 'submit';
+            });
+        });
+
+        it('should fail', fail);
+    });
 
     // Tab
 
-    describe('TabsComponent', () => {});
+    describe('TabsComponent', () => {
+        let component: TabsComponent;
+
+        beforeEach(() => {
+            component = setupComponent(TabsComponent, (comp) => {
+                comp.layoutNode.items = [{}];
+            });
+        });
+
+        it('should fail', fail);
+    });
 
     describe('TemplateComponent', () => {
         let component: TemplateComponent;

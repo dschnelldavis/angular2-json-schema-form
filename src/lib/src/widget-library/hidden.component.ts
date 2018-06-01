@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
-import { AbstractWidget } from './abstract-widget';
+import { Widget } from './widget';
 
 @Component({
   selector: 'hidden-widget',
@@ -18,7 +18,7 @@ import { AbstractWidget } from './abstract-widget';
       type="hidden"
       [value]="controlValue">`,
 })
-export class HiddenComponent extends AbstractWidget {
+export class HiddenComponent extends Widget {
 
   constructor(jsf: JsonSchemaFormService) {
     super(jsf);

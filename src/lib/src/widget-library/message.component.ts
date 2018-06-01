@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
-import { AbstractWidget } from './abstract-widget';
+import { Widget } from './widget';
 
 @Component({
   selector: 'message-widget',
@@ -10,7 +10,7 @@ import { AbstractWidget } from './abstract-widget';
       [class]="options?.labelHtmlClass || ''"
       [innerHTML]="message"></span>`,
 })
-export class MessageComponent extends AbstractWidget implements OnInit {
+export class MessageComponent extends Widget implements OnInit {
   message: string = null;
 
   constructor(jsf: JsonSchemaFormService) {

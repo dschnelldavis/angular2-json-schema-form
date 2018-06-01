@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
 
-import { AbstractWidget } from './abstract-widget';
+import { Widget } from './widget';
 
 // TODO: Add this control
 
@@ -10,7 +10,7 @@ import { AbstractWidget } from './abstract-widget';
   selector: 'file-widget',
   template: ``,
 })
-export class FileComponent extends AbstractWidget {
+export class FileComponent extends Widget {
 
   constructor(jsf: JsonSchemaFormService) {
     super(jsf);

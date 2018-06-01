@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
-import { AbstractWidget } from './abstract-widget';
+import { Widget } from './widget';
 
 @Component({
   selector: 'add-reference-widget',
@@ -14,7 +14,7 @@ import { AbstractWidget } from './abstract-widget';
       <span *ngIf="options?.title" [innerHTML]="buttonText"></span>
     </button>`
 })
-export class AddReferenceComponent extends AbstractWidget {
+export class AddReferenceComponent extends Widget {
   itemCount: number;
   previousLayoutIndex: number[];
   previousDataIndex: number[];

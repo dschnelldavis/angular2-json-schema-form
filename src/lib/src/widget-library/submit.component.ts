@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { hasOwn } from '../shared/utility.functions';
-import { AbstractWidget } from './abstract-widget';
+import { Widget } from './widget';
 
 @Component({
   selector: 'submit-widget',
@@ -22,7 +22,7 @@ import { AbstractWidget } from './abstract-widget';
         (click)="updateValue($event)">
     </div>`,
 })
-export class SubmitComponent extends AbstractWidget implements OnInit {
+export class SubmitComponent extends Widget implements OnInit {
 
   constructor(jsf: JsonSchemaFormService) {
     super(jsf);

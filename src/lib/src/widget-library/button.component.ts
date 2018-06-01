@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
-import { AbstractWidget } from './abstract-widget';
+import { Widget } from './widget';
 
 @Component({
   selector: 'button-widget',
@@ -23,7 +23,7 @@ import { AbstractWidget } from './abstract-widget';
       </button>
     </div>`,
 })
-export class ButtonComponent extends AbstractWidget {
+export class ButtonComponent extends Widget {
 
   constructor(jsf: JsonSchemaFormService) {
     super(jsf);

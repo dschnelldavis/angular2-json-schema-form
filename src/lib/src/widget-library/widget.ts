@@ -3,7 +3,7 @@ import { AbstractControl } from '@angular/forms';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
 
-export abstract class AbstractWidget implements OnInit {
+export abstract class Widget implements OnInit {
     boundControl = false;
     controlDisabled = false;
     controlName: string;

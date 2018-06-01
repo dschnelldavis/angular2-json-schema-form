@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
-import { AbstractWidget } from './abstract-widget';
+import { Widget } from './widget';
 
 @Component({
   selector: 'textarea-widget',
@@ -41,7 +41,7 @@ import { AbstractWidget } from './abstract-widget';
         (input)="updateValue($event)">{{controlValue}}</textarea>
     </div>`,
 })
-export class TextareaComponent extends AbstractWidget {
+export class TextareaComponent extends Widget {
 
   constructor(jsf: JsonSchemaFormService) {
     super(jsf);

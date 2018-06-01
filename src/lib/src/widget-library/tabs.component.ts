@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
-import { AbstractWidget } from './abstract-widget';
+import { Widget } from './widget';
 
 @Component({
   selector: 'tabs-widget',
@@ -36,7 +36,7 @@ import { AbstractWidget } from './abstract-widget';
     </div>`,
   styles: [` a { cursor: pointer; } `],
 })
-export class TabsComponent extends AbstractWidget implements OnInit {
+export class TabsComponent extends Widget implements OnInit {
   itemCount: number;
   selectedItem = 0;
   showAddTab = true;

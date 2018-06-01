@@ -4,13 +4,13 @@ import {
 } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
-import { AbstractWidget } from './abstract-widget';
+import { Widget } from './widget';
 
 @Component({
   selector: 'template-widget',
   template: `<div #widgetContainer></div>`,
 })
-export class TemplateComponent extends AbstractWidget implements OnInit, OnChanges {
+export class TemplateComponent extends Widget implements OnInit, OnChanges {
   newComponent: ComponentRef<any> = null;
   @ViewChild('widgetContainer', { read: ViewContainerRef })
     widgetContainer: ViewContainerRef;

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { buildTitleMap, isArray } from '../shared';
-import { AbstractWidget } from './abstract-widget';
+import { Widget } from './widget';
 
 @Component({
   selector: 'select-widget',
@@ -63,7 +63,7 @@ import { AbstractWidget } from './abstract-widget';
       </select>
     </div>`,
 })
-export class SelectComponent extends AbstractWidget implements OnInit {
+export class SelectComponent extends Widget implements OnInit {
   selectList: any[] = [];
   isArray = isArray;
 

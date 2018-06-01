@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
-import { AbstractWidget } from './abstract-widget';
+import { Widget } from './widget';
 
 @Component({
   selector: 'tab-widget',
@@ -13,7 +13,7 @@ import { AbstractWidget } from './abstract-widget';
         [layout]="layoutNode.items"></root-widget>
     </div>`,
 })
-export class TabComponent extends AbstractWidget implements OnInit {
+export class TabComponent extends Widget implements OnInit {
 
   constructor(jsf: JsonSchemaFormService) {
     super(jsf);

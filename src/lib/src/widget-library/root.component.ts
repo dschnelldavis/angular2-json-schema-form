@@ -2,7 +2,7 @@ import { Component, Input, Host, OnInit } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { hasValue, JsonPointer } from '../shared';
-import { AbstractWidget } from './abstract-widget';
+import { Widget } from './widget';
 
 @Component({
   selector: 'root-widget',
@@ -48,7 +48,7 @@ import { AbstractWidget } from './abstract-widget';
     }
   `],
 })
-export class RootComponent extends AbstractWidget implements OnInit {
+export class RootComponent extends Widget implements OnInit {
   @Input() isOrderable: boolean;
   @Input() isFlexItem = false;
 

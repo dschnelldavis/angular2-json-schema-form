@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { toTitleCase } from '../shared';
 import { JsonSchemaFormService } from '../json-schema-form.service';
-import { AbstractWidget } from './abstract-widget';
+import { Widget } from './widget';
 
 @Component({
   selector: 'section-widget',
@@ -74,7 +74,7 @@ import { AbstractWidget } from './abstract-widget';
     .expanded > legend:before, .expanded > label:before  { content: '▼'; padding-right: .2em; }
   `],
 })
-export class SectionComponent extends AbstractWidget implements OnInit {
+export class SectionComponent extends Widget implements OnInit {
   expanded = true;
   containerType: string;
 

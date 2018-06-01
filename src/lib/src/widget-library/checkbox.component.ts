@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
-import { AbstractWidget } from './abstract-widget';
+import { Widget } from './widget';
 
 @Component({
   selector: 'checkbox-widget',
@@ -37,7 +37,7 @@ import { AbstractWidget } from './abstract-widget';
         [innerHTML]="options?.title"></span>
     </label>`,
 })
-export class CheckboxComponent extends AbstractWidget implements OnInit {
+export class CheckboxComponent extends Widget implements OnInit {
   trueValue: any = true;
   falseValue: any = false;
 

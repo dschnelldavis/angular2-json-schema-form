@@ -3,7 +3,7 @@ import { FormArray, AbstractControl } from '@angular/forms';
 
 import { JsonSchemaFormService, TitleMapItem } from '../json-schema-form.service';
 import { buildTitleMap } from '../shared';
-import { AbstractWidget } from './abstract-widget';
+import { Widget } from './widget';
 
 @Component({
   selector: 'checkboxes-widget',
@@ -57,7 +57,7 @@ import { AbstractWidget } from './abstract-widget';
       </div>
     </div>`,
 })
-export class CheckboxesComponent extends AbstractWidget implements OnInit {
+export class CheckboxesComponent extends Widget implements OnInit {
   layoutOrientation: string;
   formArray: AbstractControl;
   checkboxList: TitleMapItem[] = [];

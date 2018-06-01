@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
-import { AbstractWidget } from './abstract-widget';
+import { Widget } from './widget';
 
 @Component({
   selector: 'input-widget',
@@ -48,7 +48,7 @@ import { AbstractWidget } from './abstract-widget';
         </datalist>
     </div>`,
 })
-export class InputComponent extends AbstractWidget {
+export class InputComponent extends Widget {
   autoCompleteList: string[] = [];
 
   constructor(jsf: JsonSchemaFormService) {
