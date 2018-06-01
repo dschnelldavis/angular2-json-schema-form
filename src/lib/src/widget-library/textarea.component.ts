@@ -42,9 +42,7 @@ import { Widget } from './widget';
     </div>`,
 })
 export class TextareaComponent extends Widget {
-
   constructor(jsf: JsonSchemaFormService) {
     super(jsf);
   }
-
 }

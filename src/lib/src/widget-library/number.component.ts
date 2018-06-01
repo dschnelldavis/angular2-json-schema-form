@@ -48,10 +48,10 @@ import { Widget } from './widget';
     </div>`,
 })
 export class NumberComponent extends Widget implements OnInit {
-  allowNegative = true;
-  allowDecimal = true;
-  allowExponents = false;
-  lastValidNumber = '';
+  allowDecimal = true; // Not implemented
+  allowExponents = false; // Not implemented
+  allowNegative = true; // Not implemented
+  lastValidNumber = ''; // Not implemented
 
   constructor(jsf: JsonSchemaFormService) {
     super(jsf);
@@ -59,7 +59,8 @@ export class NumberComponent extends Widget implements OnInit {
 
   ngOnInit() {
     super.ngOnInit();
-    if (this.layoutNode.dataType === 'integer') { this.allowDecimal = false; }
+    // TODO
+    // if (this.layoutNode.dataType === 'integer') { this.allowDecimal = false; }
   }
 
 }

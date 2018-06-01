@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { hasOwn } from '../shared/utility.functions';
-import { Widget } from './widget';
+import { ButtonComponent } from './button.component';
 
 @Component({
   selector: 'submit-widget',
@@ -22,7 +22,7 @@ import { Widget } from './widget';
         (click)="updateValue($event)">
     </div>`,
 })
-export class SubmitComponent extends Widget implements OnInit {
+export class SubmitComponent extends ButtonComponent implements OnInit {
 
   constructor(jsf: JsonSchemaFormService) {
     super(jsf);
@@ -38,14 +38,6 @@ export class SubmitComponent extends Widget implements OnInit {
     }
     if (this.controlValue === null || this.controlValue === undefined) {
       this.controlValue = this.options.title;
-    }
-  }
-
-  updateValue(event) {
-    if (typeof this.options.onClick === 'function') {
-      this.options.onClick(event);
-    } else {
-      this.jsf.updateValue(this, event.target.value);
     }
   }
 }

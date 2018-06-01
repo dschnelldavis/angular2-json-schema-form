@@ -14,7 +14,6 @@ import { Widget } from './widget';
     </div>`,
 })
 export class TabComponent extends Widget implements OnInit {
-
   constructor(jsf: JsonSchemaFormService) {
     super(jsf);
   }

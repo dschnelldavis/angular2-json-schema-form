@@ -1,22 +1,19 @@
+import { CommonModule } from '@angular/common';
 import { NO_ERRORS_SCHEMA, Component, NgModule, Injectable } from '@angular/core';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { Subject } from 'rxjs/Subject';
+
 import { JsonSchemaFormService, Framework } from '../..';
 
-import { Widget } from './widget';
-import { AddReferenceComponent } from './add-reference.component';
-import { ButtonComponent } from './button.component';
-import { CheckboxComponent } from './checkbox.component';
-import { CheckboxesComponent } from './checkboxes.component';
-import { MessageComponent } from './message.component';
-import { RadiosComponent } from './radios.component';
-import { SelectFrameworkComponent } from './select-framework.component';
-import { SelectWidgetComponent } from './select-widget.component';
-import { SelectComponent } from './select.component';
-import { SubmitComponent } from './submit.component';
-import { TabsComponent } from './tabs.component';
-import { TemplateComponent } from './template.component';
-import { CommonModule } from '@angular/common';
+import {
+    AddReferenceComponent, ButtonComponent, CheckboxComponent, CheckboxesComponent,
+    FileComponent, HiddenComponent, InputComponent, MessageComponent, NoneComponent, NumberComponent,
+    OneOfComponent, RadiosComponent, RootComponent, SectionComponent,
+    SelectFrameworkComponent, SelectWidgetComponent, SelectComponent, SubmitComponent,
+    TabComponent, TabsComponent, TemplateComponent, TextareaComponent,
+    BASIC_WIDGETS, Widget
+} from '.';
 
 @Component({
     selector: 'test-component',
@@ -32,8 +29,8 @@ class TestFramework extends Framework {
 
 @NgModule({
     imports: [ CommonModule ],
-    declarations: [ TestComponent, MessageComponent ],
-    entryComponents: [ TestComponent, MessageComponent ],
+    declarations: [ TestComponent ],
+    entryComponents: [ TestComponent ],
     providers: [
         { provide: Framework, useClass: TestFramework, multi: true }
     ]
@@ -68,6 +65,7 @@ describe('widgets', () => {
             getParentNode: {},
             initializeControl: undefined,
             setArrayItemTitle: '',
+            setItemTitle: '',
             updateArrayCheckboxList: undefined,
             updateValue: undefined
         });
@@ -78,17 +76,7 @@ describe('widgets', () => {
         TestBed.configureTestingModule({
             imports: [ TestModule ],
             declarations: [
-                AddReferenceComponent,
-                ButtonComponent,
-                CheckboxComponent,
-                CheckboxesComponent,
-                RadiosComponent,
-                SelectFrameworkComponent,
-                SelectWidgetComponent,
-                SelectComponent,
-                SubmitComponent,
-                TabsComponent,
-                TemplateComponent
+                BASIC_WIDGETS
             ],
             providers: [{
                 provide: JsonSchemaFormService,
@@ -266,13 +254,117 @@ describe('widgets', () => {
         });
     });
 
-    // File
-    // Hidden
-    // Input
-    // Message - verify message set
-    // None
-    // Number - verify allowDecimal set
-    // OneOf
+    describe('FileComponent', () => {
+        let component: FileComponent;
+
+        beforeEach(() => {
+            component = setupComponent(FileComponent);
+        });
+
+        it('should instantiate', () => {
+            expect(component).toBeDefined();
+        });
+    });
+
+    describe('HiddenComponent', () => {
+        let component: HiddenComponent;
+
+        beforeEach(() => {
+            component = setupComponent(HiddenComponent);
+        });
+
+        it('should instantiate', () => {
+            expect(component).toBeDefined();
+        });
+    });
+
+    describe('InputComponent', () => {
+        let component: InputComponent;
+
+        beforeEach(() => {
+            component = setupComponent(InputComponent);
+        });
+
+        it('should instantiate', () => {
+            expect(component).toBeDefined();
+        });
+    });
+
+    describe('MessageComponent', () => {
+        let component: MessageComponent;
+
+        beforeEach(() => {
+            component = setupComponent(MessageComponent, (comp) => {
+                comp.layoutNode.options = {
+                    help: 'Help',
+                    helpvalue: 'HelpValue',
+                    msg: 'Msg',
+                    message: 'Message'
+                };
+
+                return true;
+            });
+        });
+
+        it('should set message to options.help', () => {
+            fixture.detectChanges();
+            expect(component.message).toEqual(component.options.help);
+        });
+
+        it('should set message to options.helpvalue', () => {
+            component.layoutNode.options.help = null;
+            fixture.detectChanges();
+            expect(component.message).toEqual(component.options.helpvalue);
+        });
+
+        it('should set message to options.msg', () => {
+            component.layoutNode.options.help = component.layoutNode.options.helpvalue = null;
+            fixture.detectChanges();
+            expect(component.message).toEqual(component.options.msg);
+        });
+
+        it('should set message to options.message', () => {
+            component.layoutNode.options.help = component.layoutNode.options.helpvalue = component.layoutNode.options.msg = null;
+            fixture.detectChanges();
+            expect(component.message).toEqual(component.options.message);
+        });
+    });
+
+    describe('NoneComponent', () => {
+        let component: NoneComponent;
+
+        beforeEach(() => {
+            component = setupComponent(NoneComponent);
+        });
+
+        it('should instantiate', () => {
+            expect(component).toBeDefined();
+        });
+    });
+
+    describe('NumberComponent', () => {
+        let component: NumberComponent;
+
+        beforeEach(() => {
+            component = setupComponent(NumberComponent);
+        });
+
+        it('should instantiate', () => {
+            expect(component).toBeDefined();
+        });
+    });
+
+    describe('OneOfComponent', () => {
+        let component: OneOfComponent;
+
+        beforeEach(() => {
+            component = setupComponent(OneOfComponent);
+        });
+
+        it('should instantiate', () => {
+            expect(component).toBeDefined();
+        });
+    });
 
     describe('RadiosComponent', () => {
         let component: RadiosComponent;
@@ -288,7 +380,7 @@ describe('widgets', () => {
             });
         });
 
-        it('should set orianentation to horizontal', () => {
+        it('should set orientation to horizontal', () => {
             component.layoutNode.type = 'radios-inline';
             fixture.detectChanges();
             expect(component.layoutOrientation).toEqual('horizontal');
@@ -306,9 +398,25 @@ describe('widgets', () => {
         });
     });
 
-    describe('RootComponent', () => {});
+    describe('RootComponent', () => {
+        let component: RootComponent;
 
-    describe('SectionComponent', () => {});
+        beforeEach(() => {
+            component = setupComponent(RootComponent);
+        });
+
+        it('should fail', fail);
+    });
+
+    describe('SectionComponent', () => {
+        let component: SectionComponent;
+
+        beforeEach(() => {
+            component = setupComponent(SectionComponent);
+        });
+
+        it('should fail', fail);
+    });
 
     describe('SelectFrameworkComponent', () => {
         let component: SelectFrameworkComponent;
@@ -329,12 +437,12 @@ describe('widgets', () => {
 
         beforeEach(() => {
             component = setupComponent(SelectWidgetComponent, (comp) => {
-                comp.layoutNode.widget = MessageComponent;
+                comp.layoutNode.widget = TestComponent;
             });
         });
 
         it('should instantiate widget', () => {
-            expect(component.newComponent.componentType).toEqual(MessageComponent);
+            expect(component.newComponent.componentType).toEqual(TestComponent);
         });
     });
 
@@ -367,13 +475,49 @@ describe('widgets', () => {
         beforeEach(() => {
             component = setupComponent(SubmitComponent, (comp) => {
                 comp.layoutNode.type = 'submit';
+                comp['jsf'].isValidChanges = new Subject<boolean>();
+
+                return true;
             });
         });
 
-        it('should fail', fail);
+        it('should set controlDisabled to options.disabled', () => {
+            component.layoutNode.options = {disabled: true};
+            fixture.detectChanges();
+            expect(component.controlDisabled).toBeTruthy();
+        });
+
+        it('should set controlDisabled to form valid state', () => {
+            component['jsf'].formOptions.disableInvalidSubmit = true;
+            component['jsf'].isValid = false;
+            fixture.detectChanges();
+            expect(component.controlDisabled).toBeTruthy();
+            component['jsf'].isValidChanges.next(true);
+            expect(component.controlDisabled).toBeFalsy();
+        });
+
+        it('should set controlValue to options.title', () => {
+            component.controlValue = null;
+            component.layoutNode.options = {title: 'Submit'};
+            fixture.detectChanges();
+            expect(component.controlValue).toEqual('Submit');
+        });
     });
 
-    // Tab
+    describe('TabComponent', () => {
+        let component: TabComponent;
+
+        beforeEach(() => {
+            component = setupComponent(TabComponent, (comp) => {
+                comp.layoutNode.options = {items: []};
+            });
+        });
+
+        it('should instantiate', () => {
+            expect(component).toBeDefined();
+            expect(component.options).toEqual({items: []});
+        });
+    });
 
     describe('TabsComponent', () => {
         let component: TabsComponent;
@@ -402,7 +546,19 @@ describe('widgets', () => {
             expect(component.newComponent.instance.layoutIndex).toEqual(component.layoutIndex);
             expect(component.newComponent.instance.dataIndex).toEqual(component.dataIndex);
         });
+
+        it('should fail', fail);
     });
 
-    // TextArea
+    describe('TextareaComponent', () => {
+        let component: TextareaComponent;
+
+        beforeEach(() => {
+            component = setupComponent(TextareaComponent);
+        });
+
+        it('should instantiate', () => {
+            expect(component).toBeDefined();
+        });
+    });
 });
