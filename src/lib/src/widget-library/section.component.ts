@@ -112,7 +112,7 @@ export class SectionComponent extends Widget implements OnInit {
       this.layoutNode.type === 'flex' ||
       !!this.options.displayFlex ||
       this.options.display === 'flex';
-    if (attribute !== 'flex' && !flexActive) { return null; }
+    if (!flexActive && attribute !== 'flex' && attribute !== 'display') { return null; }
     switch (attribute) {
       case 'is-flex':
         return flexActive;

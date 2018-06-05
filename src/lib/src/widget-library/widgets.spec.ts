@@ -499,6 +499,31 @@ describe('widgets', () => {
             component = setupComponent(SectionComponent);
         });
 
+        it('should default to div', () => {
+            expect(component.containerType).toEqual('div');
+        });
+
+        it('should set container type to fieldset', () => {
+            ['fieldset', 'array', 'tab', 'advancedfieldset',
+            'authfieldset', 'optionfieldset', 'selectfieldset'].forEach((type) => {
+                component.containerType = 'div';
+                component.layoutNode.type = type;
+                component.ngOnInit();
+                expect(component.containerType).toEqual('fieldset');
+            });
+        });
+
+        it('should set default expanded to false', () => {
+            component.layoutNode.options = {expanded: false};
+            component.ngOnInit();
+            expect(component.expanded).toBeFalsy();
+
+            component.layoutNode.options.expanded = undefined;
+            component.layoutNode.options.expandable = true;
+            component.ngOnInit();
+            expect(component.expanded).toBeFalsy();
+        });
+
         it('should NOT toggle the expanded property by default', () => {
             component.toggleExpanded();
             expect(component.expanded).toBeTruthy();
@@ -518,6 +543,81 @@ describe('widgets', () => {
         it('should call service for title', () => {
             (<jasmine.Spy>mockFormService.setItemTitle).and.returnValue('Hi');
             expect(component.sectionTitle).toEqual('Hi');
+        });
+
+        describe('getFlexAttribute', () => {
+            it('should return null', () => {
+                expect(component.getFlexAttribute('is-flex')).toBeNull();
+            });
+
+            it('should return undefined', () => {
+                expect(component.getFlexAttribute('flex')).toBeUndefined();
+            });
+
+            it('should return is-flex as true', () => {
+                component.layoutNode.type = 'flex';
+                expect(component.getFlexAttribute('is-flex')).toBeTruthy();
+
+                component.layoutNode = {};
+                component.options.displayFlex = true;
+
+                expect(component.getFlexAttribute('is-flex')).toBeTruthy();
+
+                component.options.displayFlex = undefined;
+                component.options.display = 'flex';
+
+                expect(component.getFlexAttribute('is-flex')).toBeTruthy();
+            });
+
+            it('should return is-flex as false', () => {
+                expect(component.getFlexAttribute('is-flex')).toBeFalsy();
+            });
+
+            it('should resolve display as flex', () => {
+                component.layoutNode.type = 'flex';
+                expect(component.getFlexAttribute('display')).toEqual('flex');
+            });
+
+            it('should resolve display as initial', () => {
+                expect(component.getFlexAttribute('display')).toEqual('initial');
+            });
+
+            it('should resolve flex-direction and flex-wrap with defaults', () => {
+                component.layoutNode.type = 'flex';
+                expect(component.getFlexAttribute('flex-direction')).toEqual('column');
+                expect(component.getFlexAttribute('flex-wrap')).toEqual('nowrap');
+            });
+
+            it('should resolve flex-direction and flex-wrap with options', () => {
+                component.layoutNode.type = 'flex';
+                component.options = {
+                    'flex-direction': 'row',
+                    'flex-wrap': 'wrap'
+                };
+                expect(component.getFlexAttribute('flex-direction')).toEqual('row');
+                expect(component.getFlexAttribute('flex-wrap')).toEqual('wrap');
+            });
+
+            it('should resolve flex-direction and flex-wrap with flex-flow', () => {
+                component.layoutNode.type = 'flex';
+                component.options = {
+                    'flex-flow': 'row wrap'
+                };
+                expect(component.getFlexAttribute('flex-direction')).toEqual('row');
+                expect(component.getFlexAttribute('flex-wrap')).toEqual('wrap');
+            });
+
+            it('should resolve justify-content, align-items, align-content', () => {
+                component.layoutNode.type = 'flex';
+                component.options = {
+                    'justify-content': 'flex-start',
+                    'align-items': 'flex-end',
+                    'align-content': 'center'
+                };
+                expect(component.getFlexAttribute('justify-content')).toEqual('flex-start');
+                expect(component.getFlexAttribute('align-items')).toEqual('flex-end');
+                expect(component.getFlexAttribute('align-content')).toEqual('center');
+            });
         });
     });
 
