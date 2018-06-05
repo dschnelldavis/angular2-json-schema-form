@@ -51,6 +51,7 @@ import { Widget } from './widget';
 export class RootComponent extends Widget implements OnInit {
   @Input() isOrderable: boolean;
   @Input() isFlexItem = false;
+  @Input() layout: any[];
 
   constructor(jsf: JsonSchemaFormService) {
     super(jsf);
