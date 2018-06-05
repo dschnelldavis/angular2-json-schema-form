@@ -66,11 +66,7 @@ export class TabsComponent extends Widget implements OnInit {
 
   updateControl() {
     const lastItem = this.layoutNode.items[this.layoutNode.items.length - 1];
-    if (lastItem.type === '$ref' &&
-      this.itemCount >= (lastItem.options.maxItems || 1000)
-    ) {
-      this.showAddTab = false;
-    }
+    this.showAddTab = lastItem.type !== '$ref' || this.itemCount < (lastItem.options.maxItems || 1000);
   }
 
   setTabTitle(item: any, index: number): string {

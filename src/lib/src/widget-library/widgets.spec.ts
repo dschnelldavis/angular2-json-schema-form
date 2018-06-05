@@ -60,6 +60,7 @@ describe('widgets', () => {
     beforeEach(async(() => {
         mockFormService = jasmine.createSpyObj('JsonSchemaFormService', {
             addItem: undefined,
+            evaluateCondition: true,
             getFormControl: null,
             getFormControlValue: null,
             getParentNode: {},
@@ -161,25 +162,39 @@ describe('widgets', () => {
         beforeEach(() => {
             component = setupComponent(CheckboxComponent, (comp) => {
                 comp.controlValue = true;
+
+                return true;
             });
         });
 
         it('should return true for checked', () => {
+            fixture.detectChanges();
             (<jasmine.Spy>mockFormService.getFormControlValue).and.returnValue(true);
             expect(component.isChecked).toBeTruthy();
         });
 
         it('should return false for checked', () => {
+            fixture.detectChanges();
             (<jasmine.Spy>mockFormService.getFormControlValue).and.returnValue(false);
             expect(component.isChecked).toBeFalsy();
         });
 
         it('should call jsf to update value', () => {
+            fixture.detectChanges();
             component.updateValue({target: {checked: true}, preventDefault: jasmine.createSpy('0')});
             expect(mockFormService.updateValue).toHaveBeenCalledWith(component, true);
 
             component.updateValue({target: {}, preventDefault: jasmine.createSpy('1')});
             expect(mockFormService.updateValue).toHaveBeenCalledWith(component, false);
+        });
+
+        it('should set controlValue via options', () => {
+            component.layoutNode.options = {
+                title: 'test'
+            };
+            component.controlValue = null;
+            fixture.detectChanges();
+            expect(component.controlValue).toEqual('test');
         });
     });
 
@@ -403,9 +418,78 @@ describe('widgets', () => {
 
         beforeEach(() => {
             component = setupComponent(RootComponent);
+            component.dataIndex = [2];
         });
 
-        it('should fail', fail);
+        it('should be draggable', () => {
+            component.isOrderable = true;
+
+            expect(component.isDraggable({
+                arrayItem: true,
+                type: 'number',
+                arrayItemType: 'list'
+            })).toBeTruthy();
+
+            component.isOrderable = undefined;
+
+            expect(component.isDraggable({
+                arrayItem: true,
+                type: 'number',
+                arrayItemType: 'list'
+            })).toBeTruthy();
+        });
+
+        it('should NOT be draggable', () => {
+            component.isOrderable = false;
+
+            expect(component.isDraggable({
+                arrayItem: true,
+                type: 'number',
+                arrayItemType: 'list'
+            })).toBeFalsy();
+
+            component.isOrderable = true;
+
+            expect(component.isDraggable({
+                arrayItem: false,
+                type: 'number',
+                arrayItemType: 'list'
+            })).toBeFalsy();
+            expect(component.isDraggable({
+                arrayItem: true,
+                type: '$ref',
+                arrayItemType: 'list'
+            })).toBeFalsy();
+            expect(component.isDraggable({
+                arrayItem: true,
+                type: 'number',
+                arrayItemType: 'array'
+            })).toBeFalsy();
+        });
+
+        it('should get flex attribute from defaults', () => {
+            expect(component.getFlexAttribute({}, 'flex-grow')).toEqual('1');
+        });
+
+        it('should get flex attribute from base options', () => {
+            expect(component.getFlexAttribute({options: {'flex-shrink': '0'}}, 'flex-shrink')).toEqual('0');
+        });
+
+        it('should get flex attribute from options.flex', () => {
+            expect(component.getFlexAttribute({options: {flex: '1 1 200px'}}, 'flex-basis')).toEqual('200px');
+        });
+
+        it('should show widget', () => {
+            (<jasmine.Spy>mockFormService.evaluateCondition).and.returnValue(true);
+            expect(component.showWidget({})).toBeTruthy();
+            expect(mockFormService.evaluateCondition).toHaveBeenCalledWith({}, component.dataIndex);
+        });
+
+        it('should hide widget', () => {
+            (<jasmine.Spy>mockFormService.evaluateCondition).and.returnValue(false);
+            expect(component.showWidget({})).toBeFalsy();
+            expect(mockFormService.evaluateCondition).toHaveBeenCalledWith({}, component.dataIndex);
+        });
     });
 
     describe('SectionComponent', () => {
@@ -415,7 +499,26 @@ describe('widgets', () => {
             component = setupComponent(SectionComponent);
         });
 
-        it('should fail', fail);
+        it('should NOT toggle the expanded property by default', () => {
+            component.toggleExpanded();
+            expect(component.expanded).toBeTruthy();
+        });
+
+        it('should toggle the expanded property', () => {
+            component.options.expandable = true;
+            component.toggleExpanded();
+            expect(component.expanded).toBeFalsy();
+        });
+
+        it('should return null for title', () => {
+            component.options.notitle = true;
+            expect(component.sectionTitle).toBeNull();
+        });
+
+        it('should call service for title', () => {
+            (<jasmine.Spy>mockFormService.setItemTitle).and.returnValue('Hi');
+            expect(component.sectionTitle).toEqual('Hi');
+        });
     });
 
     describe('SelectFrameworkComponent', () => {
@@ -524,11 +627,56 @@ describe('widgets', () => {
 
         beforeEach(() => {
             component = setupComponent(TabsComponent, (comp) => {
-                comp.layoutNode.items = [{}];
+                comp.layoutNode.items = [{options: {}}];
             });
         });
 
-        it('should fail', fail);
+        it('should call service to setTitle', () => {
+            (<jasmine.Spy>mockFormService.setArrayItemTitle).and.returnValue('Hello');
+            expect(component.setTabTitle({x: 0}, 2)).toEqual('Hello');
+            expect(mockFormService.setArrayItemTitle).toHaveBeenCalledWith(component, {x: 0}, 2);
+        });
+
+        it('should show tab', () => {
+            component.showAddTab = false;
+            component.layoutNode.items[0].type = 'number';
+            component.updateControl();
+            expect(component.showAddTab).toBeTruthy();
+        });
+
+        it('should show tab', () => {
+            component.showAddTab = false;
+            component.layoutNode.items[0].type = '$ref';
+            component.updateControl();
+            expect(component.showAddTab).toBeTruthy();
+        });
+
+        it('should NOT show tab', () => {
+            component.showAddTab = true;
+            component.layoutNode.items[0].type = '$ref';
+            component.layoutNode.items[0].options.maxItems = 1;
+            component.itemCount = 1;
+            component.updateControl();
+            expect(component.showAddTab).toBeFalsy();
+        });
+
+        it('should call service to select tab', () => {
+            component.layoutNode.items[0].type = '$ref';
+            component.select(0);
+            expect(component.selectedItem).toEqual(0);
+            expect(mockFormService.addItem).toHaveBeenCalledWith({
+                layoutNode: component.layoutNode.items[0],
+                layoutIndex: [0, 0],
+                dataIndex: [0]
+            });
+            expect(component.itemCount).toEqual(1);
+        });
+
+        it('should NOT call service to show existing tab', () => {
+            component.select(0);
+            expect(component.selectedItem).toEqual(0);
+            expect(mockFormService.addItem).not.toHaveBeenCalled();
+        });
     });
 
     describe('TemplateComponent', () => {
@@ -547,7 +695,11 @@ describe('widgets', () => {
             expect(component.newComponent.instance.dataIndex).toEqual(component.dataIndex);
         });
 
-        it('should fail', fail);
+        it('should update component when input changes', () => {
+            component.dataIndex = [3];
+            component.ngOnChanges();
+            expect(component.newComponent.instance.dataIndex).toEqual(component.dataIndex);
+        });
     });
 
     describe('TextareaComponent', () => {

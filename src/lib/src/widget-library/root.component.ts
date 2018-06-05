@@ -65,7 +65,7 @@ export class RootComponent extends Widget implements OnInit {
 
   // Set attributes for flexbox child
   // (container attributes are set in section.component)
-  getFlexAttribute(node: any, attribute: string) {
+  getFlexAttribute(node: any, attribute: string): string {
     const index = ['flex-grow', 'flex-shrink', 'flex-basis'].indexOf(attribute);
     return ((node.options || {}).flex || '').split(/\s+/)[index] ||
       (node.options || {})[attribute] || ['1', '1', 'auto'][index];
