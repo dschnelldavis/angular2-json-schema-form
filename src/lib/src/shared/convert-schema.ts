@@ -1,29 +1,29 @@
 import * as _ from 'lodash';
 
 /**
- * 'convertSchemaToDraft6' function
+ * 'convertSchemaToDraft7' function
  *
- * Converts a JSON Schema from draft 1 through 4 format to draft 6 format
+ * Converts a JSON Schema from draft 1 through 4 format to draft 7 format
  *
  * Inspired by on geraintluff's JSON Schema 3 to 4 compatibility function:
  *   https://github.com/geraintluff/json-schema-compatibility
- * Also uses suggestions from AJV's JSON Schema 4 to 6 migration guide:
+ * Also uses suggestions from AJV's JSON Schema 4 to 7 migration guide:
  *   https://github.com/epoberezkin/ajv/releases/tag/5.0.0
  * And additional details from the official JSON Schema documentation:
  *   http://json-schema.org
  *
- * @param  { object } originalSchema - JSON schema (draft 1, 2, 3, 4, or 6)
+ * @param  { object } originalSchema - JSON schema (draft 1, 2, 3, 4, 6, or 7)
  * @param  { OptionObject = {} } options - options: parent schema changed?, schema draft number?
- * @return { object } - JSON schema (draft 6)
+ * @return { object } - JSON schema (draft 7)
  */
 export interface OptionObject { changed?: boolean, draft?: number };
-export function convertSchemaToDraft6(schema, options: OptionObject = {}) {
+export function convertSchemaToDraft7(schema, options: OptionObject = {}) {
   let draft: number = options.draft || null;
   let changed: boolean = options.changed || false;
 
   if (typeof schema !== 'object') { return schema; }
   if (typeof schema.map === 'function') {
-    return [ ...schema.map(subSchema => convertSchemaToDraft6(subSchema, { changed, draft })) ];
+    return [ ...schema.map(subSchema => convertSchemaToDraft7(subSchema, { changed, draft })) ];
   }
   let newSchema = { ...schema };
   const simpleTypes = ['array', 'boolean', 'integer', 'null', 'number', 'object', 'string'];
@@ -45,8 +45,8 @@ export function convertSchemaToDraft6(schema, options: OptionObject = {}) {
   // Convert v1-v3 'extends' to 'allOf'
   if (typeof newSchema.extends === 'object') {
     newSchema.allOf = typeof newSchema.extends.map === 'function' ?
-      newSchema.extends.map(subSchema => convertSchemaToDraft6(subSchema, { changed, draft })) :
-      [ convertSchemaToDraft6(newSchema.extends, { changed, draft }) ];
+      newSchema.extends.map(subSchema => convertSchemaToDraft7(subSchema, { changed, draft })) :
+      [ convertSchemaToDraft7(newSchema.extends, { changed, draft }) ];
     delete newSchema.extends;
     changed = true;
   }
@@ -304,14 +304,14 @@ export function convertSchemaToDraft6(schema, options: OptionObject = {}) {
       ) {
         const newKey = {};
         Object.keys(newSchema[key]).forEach(subKey => newKey[subKey] =
-          convertSchemaToDraft6(newSchema[key][subKey], { changed, draft })
+          convertSchemaToDraft7(newSchema[key][subKey], { changed, draft })
         );
         newSchema[key] = newKey;
       } else if (
         [ 'items', 'additionalItems', 'additionalProperties',
           'allOf', 'anyOf', 'oneOf', 'not' ].includes(key)
       ) {
-        newSchema[key] = convertSchemaToDraft6(newSchema[key], { changed, draft });
+        newSchema[key] = convertSchemaToDraft7(newSchema[key], { changed, draft });
       } else {
         newSchema[key] = _.cloneDeep(newSchema[key]);
       }
