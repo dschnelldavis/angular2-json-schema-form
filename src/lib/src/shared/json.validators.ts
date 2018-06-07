@@ -586,7 +586,7 @@ export class JsonValidators {
   static minItems(minimumItems: number): IValidatorFn {
     if (!hasValue(minimumItems)) { return JsonValidators.nullValidator; }
     return (control: AbstractControl, invert = false): ValidationErrors|null => {
-      if (isEmpty(control.value)) { return null; }
+      if (!isDefined(control.value)) { return null; }
       let currentItems = isArray(control.value) ? control.value.length : 0;
       let isValid = currentItems >= minimumItems;
       return xor(isValid, invert) ?
