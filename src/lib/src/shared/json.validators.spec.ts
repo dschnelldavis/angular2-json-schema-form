@@ -44,6 +44,10 @@ describe('pattern', () => {});
                 controlValue = [1, 2, 3, 4];
                 expect(JsonValidators.minItems(3)(control)).toBeNull();
             });
+            it('should be valid when value < minItems and inverted', () => {
+                controlValue = [1, 2];
+                expect(JsonValidators.minItems(3)(control, true)).toBeNull();
+            });
         });
         describe('invalid', () => {
             it('should be invalid when value < minItems', () => {
@@ -64,6 +68,15 @@ describe('pattern', () => {});
                     }
                 });
             });
+            it('should be invalid when value > minItems and inverted', () => {
+                controlValue = [1, 2, 3, 4];
+                expect(JsonValidators.minItems(3)(control, true)).toEqual({
+                    minItems: {
+                        minimumItems: 3,
+                        currentItems: 4
+                    }
+                });
+            });
         });
     });
 
@@ -80,6 +93,10 @@ describe('pattern', () => {});
                 controlValue = [1, 2, 3];
                 expect(JsonValidators.maxItems(3)(control)).toBeNull();
             });
+            it('should be valid when value > maxItems and inverted', () => {
+                controlValue = [1, 2, 3, 4];
+                expect(JsonValidators.maxItems(3)(control, true)).toBeNull();
+            });
         });
         describe('invalid', () => {
             it('should be invalid when value > maxItems', () => {
@@ -91,10 +108,56 @@ describe('pattern', () => {});
                     }
                 });
             });
+            it('should be invalid when value <= maxItems and inverted', () => {
+                controlValue = [1, 2];
+                expect(JsonValidators.maxItems(3)(control, true)).toEqual({
+                    maxItems: {
+                        maximumItems: 3,
+                        currentItems: 2
+                    }
+                });
+            });
         });
     });
 
-    describe('uniqueItems', () => {});
+    describe('uniqueItems', () => {
+        describe('valid', () => {
+            it('should be valid when all items unique', () => {
+                controlValue = [1, 2, 3, 4];
+                expect(JsonValidators.uniqueItems()(control)).toBeNull();
+            });
+            it('should be valid when no items', () => {
+                controlValue = [];
+                expect(JsonValidators.uniqueItems()(control)).toBeNull();
+            });
+            it('should be valid when no value', () => {
+                expect(JsonValidators.uniqueItems()(control)).toBeNull();
+            });
+            it('should be valid when duplicates and inverted', () => {
+                controlValue = [1, 3, 5, 2, 3, 4, 5];
+                expect(JsonValidators.uniqueItems()(control, true)).toBeNull();
+            });
+        });
+        describe('invalid', () => {
+            it('should be invalid when there are duplicates', () => {
+                controlValue = [1, 3, 5, 2, 3, 4, 5];
+                expect(JsonValidators.uniqueItems()(control)).toEqual({
+                    uniqueItems: {
+                        duplicateItems: [3, 5]
+                    }
+                });
+            });
+            it('should be invalid when unique and inverted', () => {
+                controlValue = [1, 3, 5];
+                expect(JsonValidators.uniqueItems()(control, true)).toEqual({
+                    uniqueItems: {
+                        duplicateItems: []
+                    }
+                });
+            });
+        });
+    });
+
     describe('contains', () => {});
 describe('nullValidator', () => {});
     describe('composeAnyOf', () => {});

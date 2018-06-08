@@ -627,7 +627,7 @@ export class JsonValidators {
       let sorted: any[] = control.value.slice().sort();
       let duplicateItems = [];
       for (let i = 1; i < sorted.length; i++) {
-        if (sorted[i - 1] === sorted[i] && duplicateItems.includes(sorted[i])) {
+        if (sorted[i - 1] === sorted[i] && !duplicateItems.includes(sorted[i])) {
           duplicateItems.push(sorted[i]);
         }
       }
