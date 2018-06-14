@@ -22,11 +22,49 @@ describe('minLength', () => {});
 describe('maxLength', () => {});
 describe('pattern', () => {});
     describe('format', () => {});
-    describe('minimum', () => {});
+  describe('minimum', () => {});
     describe('exclusiveMinimum', () => {});
-    describe('maximum', () => {});
+  describe('maximum', () => {});
     describe('exclusiveMaximum', () => {});
-    describe('multipleOf', () => {});
+
+    describe('multipleOf', () => {
+        describe('valid', () => {
+            it('should be vaild when multiple', () => {
+                controlValue = 12;
+                expect(JsonValidators.multipleOf(1)(control)).toBeNull();
+                expect(JsonValidators.multipleOf(2)(control)).toBeNull();
+                expect(JsonValidators.multipleOf(3)(control)).toBeNull();
+                expect(JsonValidators.multipleOf(4)(control)).toBeNull();
+                expect(JsonValidators.multipleOf(6)(control)).toBeNull();
+                expect(JsonValidators.multipleOf(12)(control)).toBeNull();
+            });
+            it('should be valid when invalid and inverted', () => {
+                controlValue = 12;
+                expect(JsonValidators.multipleOf(5)(control, true)).toBeNull();
+            });
+        });
+        describe('invalid', () => {
+            it('should be invalid when not multiple ', () => {
+                controlValue = 12;
+                expect(JsonValidators.multipleOf(5)(control)).toEqual({
+                    multipleOf: {
+                        multipleOfValue: 5,
+                        currentValue: 12
+                    }
+                });
+            });
+            it('should be invalid when valid and inverted', () => {
+                controlValue = 12;
+                expect(JsonValidators.multipleOf(3)(control, true)).toEqual({
+                    multipleOf: {
+                        multipleOfValue: 3,
+                        currentValue: 12
+                    }
+                });
+            });
+        });
+    });
+
     describe('minProperties', () => {});
     describe('maxProperties', () => {});
     describe('dependencies', () => {});
