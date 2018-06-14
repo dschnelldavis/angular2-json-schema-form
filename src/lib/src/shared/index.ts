@@ -26,7 +26,7 @@ export {
   resolveSchemaReferences, getSubSchema, combineAllOf, fixRequiredArrayProperties
 } from './json-schema.functions';
 
-export { convertSchemaToDraft6 } from './convert-schema-to-draft6.function';
+export { convertSchemaToDraft7 } from './convert-schema.function';
 
 export { mergeSchemas } from './merge-schemas.function';
 

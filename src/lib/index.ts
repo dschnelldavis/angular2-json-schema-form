@@ -18,7 +18,7 @@ export {
   updateInputOptions, getTitleMapFromOneOf, getControlValidators,
   resolveSchemaReferences, getSubSchema, combineAllOf, fixRequiredArrayProperties
 } from './src/shared/json-schema.functions';
-export { convertSchemaToDraft6 } from './src/shared/convert-schema-to-draft6.function';
+export { convertSchemaToDraft7 } from './src/shared/convert-schema.function';
 export { mergeSchemas } from './src/shared/merge-schemas.function';
 export {
   buildFormGroupTemplate, buildFormGroup, formatFormData,

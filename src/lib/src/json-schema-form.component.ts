@@ -10,7 +10,7 @@ import * as _ from 'lodash';
 import { FrameworkLibraryService } from './framework-library/framework-library.service';
 import { WidgetLibraryService } from './widget-library/widget-library.service';
 import { JsonSchemaFormService } from './json-schema-form.service';
-import { convertSchemaToDraft6 } from './shared/convert-schema-to-draft6.function';
+import { convertSchemaToDraft7 } from './shared/convert-schema.function';
 import { resolveSchemaReferences } from './shared/json-schema.functions';
 import {
   hasValue, inArray, isArray, isEmpty, isNumber, isObject
@@ -460,7 +460,7 @@ export class JsonSchemaFormComponent implements ControlValueAccessor, OnChanges,
 
       // If needed, update JSON Schema to draft 6 format, including
       // draft 3 (JSON Form style) and draft 4 (Angular Schema Form style)
-      this.jsf.schema = convertSchemaToDraft6(this.jsf.schema);
+      this.jsf.schema = convertSchemaToDraft7(this.jsf.schema);
 
       // Initialize ajv and compile schema
       this.jsf.compileAjvSchema();
