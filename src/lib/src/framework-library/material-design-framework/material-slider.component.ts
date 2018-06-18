@@ -7,6 +7,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
   selector: 'material-slider-widget',
   template: `
     <mat-slider thumbLabel *ngIf="boundControl"
+	[class]="options?.fieldHtmlClass"
       [formControl]="formControl"
       [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
       [id]="'control' + layoutNode?._id"
@@ -16,6 +17,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
       [style.width]="'100%'"
       (blur)="options.showErrors = true"></mat-slider>
     <mat-slider thumbLabel *ngIf="!boundControl"
+	[class]="options?.fieldHtmlClass"
       [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
       [disabled]="controlDisabled || options?.readonly"
       [id]="'control' + layoutNode?._id"

@@ -13,6 +13,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
       <span matPrefix *ngIf="options?.prefix || options?.fieldAddonLeft"
         [innerHTML]="options?.prefix || options?.fieldAddonLeft"></span>
       <textarea matInput *ngIf="boundControl"
+		[class]="options?.fieldHtmlClass"
         [formControl]="formControl"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.list]="'control' + layoutNode?._id + 'Autocomplete'"
@@ -27,6 +28,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
         [style.width]="'100%'"
         (blur)="options.showErrors = true"></textarea>
       <textarea matInput *ngIf="!boundControl"
+		[class]="options?.fieldHtmlClass"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
         [attr.list]="'control' + layoutNode?._id + 'Autocomplete'"
         [attr.maxlength]="options?.maxLength"

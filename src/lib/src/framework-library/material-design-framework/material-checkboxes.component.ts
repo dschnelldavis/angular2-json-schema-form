@@ -12,6 +12,7 @@ import { buildFormGroup, buildTitleMap, hasOwn, JsonPointer } from '../../shared
   template: `
     <div>
       <mat-checkbox type="checkbox"
+	  [class]="options?.htmlClass"
         [checked]="allChecked"
         [color]="options?.color || 'primary'"
         [disabled]="controlDisabled || options?.readonly"
@@ -30,6 +31,7 @@ import { buildFormGroup, buildTitleMap, hasOwn, JsonPointer } from '../../shared
         <li *ngFor="let checkboxItem of checkboxList"
           [class]="options?.htmlClass || ''">
           <mat-checkbox type="checkbox"
+		  [class]="options?.htmlClass"
             [(ngModel)]="checkboxItem.checked"
             [color]="options?.color || 'primary'"
             [disabled]="controlDisabled || options?.readonly"

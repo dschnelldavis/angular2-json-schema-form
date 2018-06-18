@@ -8,6 +8,7 @@ import { JsonSchemaFormService } from '../../json-schema-form.service';
   template: `
     <section [class]="options?.htmlClass || ''" align="end">
       <button mat-raised-button *ngIf="showAddButton"
+		[class]="options?.fieldHtmlClass"
         [color]="options?.color || 'accent'"
         [disabled]="options?.readonly"
         (click)="addItem($event)">

@@ -1,6 +1,6 @@
-# Contributing to Angular JSON Schema Form
+# Contributing to NG JSON Schema Form
 
-We would love for you to contribute to Angular JSON Schema Form!
+We would love for you to contribute to NG JSON Schema Form!
 Here's more information about how to contribute:
 
  - [Issues and Bugs](#issue)
@@ -33,12 +33,12 @@ This library is released under the [MIT](https://opensource.org/licenses/MIT) Li
 ## <a name="coc"></a> Code of Conduct
 Be courteous to other people. If you're not sure how to do that, please read and follow our [Code of Conduct][code-of-conduct].
 
-[new-issue]: https://github.com/dschnelldavis/angular2-json-schema-form/issues/new
-[pull-requests]: https://github.com/dschnelldavis/angular2-json-schema-form/pulls
-[github]: https://github.com/dschnelldavis/angular2-json-schema-form
+[new-issue]: https://github.com/shamoons/ng-json-schema-form/issues/new
+[pull-requests]: https://github.com/shamoons/ng-json-schema-form/pulls
+[github]: https://github.com/shamoons/ng-json-schema-form
 [js-style-guide]: https://google.github.io/styleguide/jsguide.html
 [jsfiddle]: http://jsfiddle.net
 [plunker]: http://plnkr.co/edit
 [runnable]: http://runnable.com
 [stackoverflow]: http://stackoverflow.com/questions/tagged/angular2-json-schema-form
-[code-of-conduct]: https://github.com/dschnelldavis/angular2-json-schema-form/CODE_OF_CONDUCT.md
+[code-of-conduct]: https://github.com/shamoons/ng-json-schema-form/CODE_OF_CONDUCT.md

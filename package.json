@@ -1,11 +1,11 @@
 {
-  "name": "angular2-json-schema-form",
-  "version": "0.7.0-alpha.1",
+  "name": "ng-json-schema-form",
+  "version": "0.8.0",
   "author": {
-    "name": "David Schnell-Davis",
-    "email": "dschnelldavis@gmail.com"
+    "name": "Shamoon Siddiqui",
+    "email": "shamoon@develop.io"
   },
-  "description": "Angular JSON Schema Form builder",
+  "description": "NG JSON Schema Form builder",
   "keywords": [
     "Angular",
     "ng",
@@ -23,15 +23,15 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dschnelldavis/angular2-json-schema-form"
+    "url": "git+https://github.com/shamoons/ng-json-schema-form"
   },
   "bugs": {
-    "url": "https://github.com/dschnelldavis/angular2-json-schema-form/issues"
+    "url": "https://github.com/shamoons/ng-json-schema-form/issues"
   },
-  "main": "./bundles/angular2-json-schema-form.umd.js",
-  "module": "./angular2-json-schema-form.es5.js",
-  "es2015": "./angular2-json-schema-form.js",
-  "typings": "./angular2-json-schema-form.d.ts",
+  "main": "./bundles/ng-json-schema-form.umd.js",
+  "module": "./ng-json-schema-form.es5.js",
+  "es2015": "./ng-json-schema-form.js",
+  "typings": "./ng-json-schema-form.d.ts",
   "engines": {
     "node": ">= 6.9.0",
     "npm": ">= 3.0.0"
