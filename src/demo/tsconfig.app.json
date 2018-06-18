@@ -7,7 +7,7 @@
     "baseUrl": "",
     "types": [],
     "paths": {
-      "angular2-json-schema-form": [
+      "ng-json-schema-form": [
         "../../src"
       ]
     }
