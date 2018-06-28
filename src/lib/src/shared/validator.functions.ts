@@ -1,7 +1,5 @@
 import { AbstractControl, ValidationErrors } from '@angular/forms';
-import { Observable } from 'rxjs/Observable';
-import { fromPromise } from 'rxjs/observable/fromPromise';
-import { toPromise } from 'rxjs/operator/toPromise';
+import { Observable, from } from 'rxjs';
 
 /**
  * Validator utility function library:
@@ -540,7 +538,7 @@ export function isObservable(object): object is Observable<any> {
  * @return { Promise<any> }
  */
 export function _toPromise(object): Promise<any> {
-  return isPromise(object) ? object : toPromise.call(object);
+  return isPromise(object) ? object : object.toPromise();
 }
 
 /**
@@ -550,7 +548,7 @@ export function _toPromise(object): Promise<any> {
  * @return { Observable<any> }
  */
 export function toObservable(object): Observable<any> {
-  const observable = isPromise(object) ? fromPromise(object) : object;
+  const observable = isPromise(object) ? from(object) : object;
   if (isObservable(observable)) { return observable; }
   console.error('toObservable error: Expected validator to return Promise or Observable.');
   return new Observable();
