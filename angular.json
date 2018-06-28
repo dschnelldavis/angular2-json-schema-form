@@ -1,0 +1,124 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "angular2-json-schema-form": {
+      "root": "src",
+      "sourceRoot": "src/demo",
+      "projectType": "application",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "dist/demo",
+            "index": "src/demo/index.html",
+            "main": "src/demo/main.ts",
+            "tsConfig": "src/demo/tsconfig.app.json",
+            "polyfills": "src/demo/polyfills.ts",
+            "assets": [
+              "src/demo/assets",
+              "src/demo/favicon.ico"
+            ],
+            "styles": [
+              "src/demo/styles.scss"
+            ],
+            "scripts": []
+          },
+          "configurations": {
+            "production": {
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "aot": true,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/demo/environments/environment.ts",
+                  "with": "src/demo/environments/environment.prod.ts"
+                }
+              ]
+            }
+          }
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "browserTarget": "angular2-json-schema-form:build"
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "angular2-json-schema-form:build:production"
+            }
+          }
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "browserTarget": "angular2-json-schema-form:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "src/demo/test.ts",
+            "karmaConfig": "./karma.conf.js",
+            "polyfills": "src/demo/polyfills.ts",
+            "tsConfig": "src/demo/tsconfig.spec.json",
+            "scripts": [],
+            "styles": [
+              "src/demo/styles.scss"
+            ],
+            "assets": [
+              "src/demo/assets",
+              "src/demo/favicon.ico"
+            ]
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [],
+            "exclude": []
+          }
+        }
+      }
+    },
+    "angular2-json-schema-form-e2e": {
+      "root": "src",
+      "sourceRoot": "src/e2e",
+      "projectType": "application",
+      "architect": {
+        "e2e": {
+          "builder": "@angular-devkit/build-angular:protractor",
+          "options": {
+            "protractorConfig": "./protractor.conf.js",
+            "devServerTarget": "angular2-json-schema-form:serve"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [],
+            "exclude": []
+          }
+        }
+      }
+    }
+  },
+  "defaultProject": "angular2-json-schema-form",
+  "schematics": {
+    "@schematics/angular:component": {
+      "flat": true,
+      "prefix": "",
+      "styleext": "scss"
+    },
+    "@schematics/angular:directive": {
+      "prefix": ""
+    }
+  }
+}
