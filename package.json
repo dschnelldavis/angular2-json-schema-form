@@ -9,12 +9,8 @@
   "keywords": [
     "Angular",
     "ng",
-    "Angular4",
-    "Angular 4",
-    "ng4",
-    "Angular5",
-    "Angular 5",
-    "ng5",
+    "Angular6",
+    "Angular 6",
     "JSON Schema",
     "form",
     "forms",
@@ -56,20 +52,9 @@
   },
   "dependencies": {
     "ajv": "^6.0.1",
-    "lodash": "4.x"
-  },
-  "peerDependencies": {
-    "@angular/cdk": ">=6.0.0",
-    "@angular/common": ">=6.0.0",
-    "@angular/core": ">=6.0.0",
-    "@angular/flex-layout": ">=6.0.0-beta.11",
-    "@angular/forms": ">=6.0.0",
-    "@angular/material": ">=6.0.0",
-    "@angular/platform-browser": ">=6.0.0",
-    "rxjs": ">=6.0.0"
+    "lodash": "^4.17.4"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "~0.6.8",
     "@angular/animations": "^6.0.0",
     "@angular/cdk": "^6.0.0",
     "@angular/cli": "^6.0.0",
@@ -114,8 +99,8 @@
     "rxjs": "^6.0.0",
     "ts-node": "^4.1.0",
     "tslint": "^5.9.1",
+    "typescript": "~2.7.2",
     "typedoc": "^0.9.0",
-    "typescript": "^2.7.2",
     "zone.js": "^0.8.26"
   }
 }
