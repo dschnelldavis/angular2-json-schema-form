@@ -4,7 +4,7 @@ import { trigger, state, style, animate, transition } from '@angular/animations'
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 
-import 'rxjs/add/operator/map';
+import { map } from 'rxjs/operators';
 
 import { Examples } from './example-schemas.model';
 import { JsonPointer } from '../../lib/src/shared';
