@@ -392,7 +392,10 @@ export class JsonPointer {
       console.error(`forEachDeep error: Iterator is not a function:`, fn);
       return;
     }
+    const firstPointerPart = pointer.split('/')[1];
+    if (firstPointerPart && rootObject.hasOwnProperty(firstPointerPart)) {
     if (!bottomUp) { fn(object, pointer, rootObject); }
+    }
     if (isObject(object) || isArray(object)) {
       for (let key of Object.keys(object)) {
         const newPointer = pointer + '/' + this.escape(key);
