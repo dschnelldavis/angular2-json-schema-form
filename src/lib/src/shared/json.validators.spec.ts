@@ -15,7 +15,49 @@ describe('JsonValidators', () => {
     });
 
 describe('required', () => {});
-    describe('type', () => {});
+
+    describe('type', () => {
+        describe('valid', () => {
+            it('should be valid when matches type', () => {
+                controlValue = 12;
+                expect(JsonValidators.type('number')(control)).toBeNull();
+                expect(JsonValidators.type('integer')(control)).toBeNull();
+            });
+            it('should be valid when null', () => {
+                expect(JsonValidators.type('number')(control)).toBeNull();
+            });
+        });
+        describe('invalid', () => {
+            it('should be invalid when not of type', () => {
+                controlValue = 12;
+                expect(JsonValidators.type('string')(control)).toEqual({
+                    type: {
+                        requiredType: 'string',
+                        currentValue: 12
+                    }
+                });
+            });
+            it('should be invalid when not of 1 or more are not or type', () => {
+                controlValue = 1.2;
+                expect(JsonValidators.type(['string', 'boolean', 'integer'])(control)).toEqual({
+                    type: {
+                        requiredType: ['string', 'boolean', 'integer'],
+                        currentValue: 1.2
+                    }
+                });
+            });
+            it('should be invalid when valid and inverted', () => {
+                controlValue = 12;
+                expect(JsonValidators.type('number')(control, true)).toEqual({
+                    type: {
+                        requiredType: 'number',
+                        currentValue: 12
+                    }
+                });
+            });
+        });
+    });
+
     describe('enum', () => {});
     describe('const', () => {});
 describe('minLength', () => {});
