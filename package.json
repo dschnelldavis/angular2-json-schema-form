@@ -40,7 +40,9 @@
     "ng": "ng",
     "serve": "ng serve",
     "start": "ng serve",
-    "test": "ng test",
+    "test": "ng test --cc --app lib --sr && ng test --cc --app demo --sr",
+    "test:lib": "ng test --cc --app lib",
+    "test:demo": "ng test --cc --app demo",
     "lint": "ng lint",
     "docs": "typedoc src/lib/src/",
     "clean": "rimraf out-ngc dist/*",
@@ -95,14 +97,15 @@
     "core-js": "^2.5.3",
     "glob": "^7.1.2",
     "hammerjs": "2.x",
-    "jasmine-core": "^2.9.1",
+    "jasmine-core": "^3.1.0",
     "jasmine-spec-reporter": "^4.2.1",
     "karma": "^2.0.0",
     "karma-chrome-launcher": "^2.2.0",
     "karma-cli": "^1.0.1",
-    "karma-coverage-istanbul-reporter": "^1.4.0",
+    "karma-coverage-istanbul-reporter": "^2.0.1",
     "karma-jasmine": "^1.1.1",
-    "karma-jasmine-html-reporter": "^0.2.2",
+    "karma-jasmine-html-reporter": "^1.1.0",
+    "karma-mocha-reporter": "^2.2.5",
     "protractor": "^5.2.2",
     "rimraf": "^2.6.2",
     "rollup": "^0.55.0",
@@ -115,6 +118,6 @@
     "tslint": "^5.9.1",
     "typedoc": "^0.9.0",
     "typescript": "~2.6.2",
-    "zone.js": "^0.8.20"
+    "zone.js": "^0.8.21"
   }
 }

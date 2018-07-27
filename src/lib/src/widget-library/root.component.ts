@@ -1,7 +1,8 @@
-import { Component, Input, Host } from '@angular/core';
+import { Component, Input, Host, OnInit } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { hasValue, JsonPointer } from '../shared';
+import { Widget } from './widget';
 
 @Component({
   selector: 'root-widget',
@@ -47,17 +48,16 @@ import { hasValue, JsonPointer } from '../shared';
     }
   `],
 })
-export class RootComponent {
-  options: any;
-  @Input() dataIndex: number[];
-  @Input() layoutIndex: number[];
-  @Input() layout: any[];
+export class RootComponent extends Widget implements OnInit {
   @Input() isOrderable: boolean;
   @Input() isFlexItem = false;
+  @Input() layout: any[];
 
-  constructor(
-    private jsf: JsonSchemaFormService
-  ) { }
+  constructor(jsf: JsonSchemaFormService) {
+    super(jsf);
+  }
+
+  ngOnInit() {}
 
   isDraggable(node: any): boolean {
     return node.arrayItem && node.type !== '$ref' &&
@@ -66,7 +66,7 @@ export class RootComponent {
 
   // Set attributes for flexbox child
   // (container attributes are set in section.component)
-  getFlexAttribute(node: any, attribute: string) {
+  getFlexAttribute(node: any, attribute: string): string {
     const index = ['flex-grow', 'flex-shrink', 'flex-basis'].indexOf(attribute);
     return ((node.options || {}).flex || '').split(/\s+/)[index] ||
       (node.options || {})[attribute] || ['1', '1', 'auto'][index];

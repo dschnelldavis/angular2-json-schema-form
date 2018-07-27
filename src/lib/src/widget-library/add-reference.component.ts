@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
+import { Widget } from './widget';
 
 @Component({
   selector: 'add-reference-widget',
@@ -12,34 +12,20 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
       (click)="addItem($event)">
       <span *ngIf="options?.icon" [class]="options?.icon"></span>
       <span *ngIf="options?.title" [innerHTML]="buttonText"></span>
-    </button>`,
-    changeDetection: ChangeDetectionStrategy.Default,
+    </button>`
 })
-export class AddReferenceComponent implements OnInit {
-  options: any;
+export class AddReferenceComponent extends Widget {
   itemCount: number;
   previousLayoutIndex: number[];
   previousDataIndex: number[];
-  @Input() layoutNode: any;
-  @Input() layoutIndex: number[];
-  @Input() dataIndex: number[];
 
-  constructor(
-    private jsf: JsonSchemaFormService
-  ) { }
-
-  ngOnInit() {
-    this.options = this.layoutNode.options || {};
+  constructor(jsf: JsonSchemaFormService) {
+    super(jsf);
   }
 
   get showAddButton(): boolean {
     return !this.layoutNode.arrayItem ||
       this.layoutIndex[this.layoutIndex.length - 1] < this.options.maxItems;
-  }
-
-  addItem(event) {
-    event.preventDefault();
-    this.jsf.addItem(this);
   }
 
   get buttonText(): string {
@@ -50,5 +36,10 @@ export class AddReferenceComponent implements OnInit {
     };
     return parent.layoutNode.add ||
       this.jsf.setArrayItemTitle(parent, this.layoutNode, this.itemCount);
+  }
+
+  addItem(event) {
+    event.preventDefault();
+    this.jsf.addItem(this);
   }
 }

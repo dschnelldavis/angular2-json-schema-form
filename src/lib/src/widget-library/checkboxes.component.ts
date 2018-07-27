@@ -1,8 +1,9 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormArray, AbstractControl } from '@angular/forms';
 
 import { JsonSchemaFormService, TitleMapItem } from '../json-schema-form.service';
 import { buildTitleMap } from '../shared';
+import { Widget } from './widget';
 
 @Component({
   selector: 'checkboxes-widget',
@@ -56,29 +57,19 @@ import { buildTitleMap } from '../shared';
       </div>
     </div>`,
 })
-export class CheckboxesComponent implements OnInit {
-  formControl: AbstractControl;
-  controlName: string;
-  controlValue: any;
-  controlDisabled = false;
-  boundControl = false;
-  options: any;
+export class CheckboxesComponent extends Widget implements OnInit {
   layoutOrientation: string;
   formArray: AbstractControl;
   checkboxList: TitleMapItem[] = [];
-  @Input() layoutNode: any;
-  @Input() layoutIndex: number[];
-  @Input() dataIndex: number[];
 
-  constructor(
-    private jsf: JsonSchemaFormService
-  ) { }
+  constructor(jsf: JsonSchemaFormService) {
+    super(jsf);
+  }
 
   ngOnInit() {
-    this.options = this.layoutNode.options || {};
     this.layoutOrientation = (this.layoutNode.type === 'checkboxes-inline' ||
       this.layoutNode.type === 'checkboxbuttons') ? 'horizontal' : 'vertical';
-    this.jsf.initializeControl(this);
+    super.ngOnInit();
     this.checkboxList = buildTitleMap(
       this.options.titleMap || this.options.enumNames, this.options.enum, true
     );

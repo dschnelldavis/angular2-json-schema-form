@@ -1,7 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
+import { Widget } from './widget';
 
 @Component({
   selector: 'checkbox-widget',
@@ -37,26 +37,20 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
         [innerHTML]="options?.title"></span>
     </label>`,
 })
-export class CheckboxComponent implements OnInit {
-  formControl: AbstractControl;
-  controlName: string;
-  controlValue: any;
-  controlDisabled = false;
-  boundControl = false;
-  options: any;
+export class CheckboxComponent extends Widget implements OnInit {
   trueValue: any = true;
   falseValue: any = false;
-  @Input() layoutNode: any;
-  @Input() layoutIndex: number[];
-  @Input() dataIndex: number[];
 
-  constructor(
-    private jsf: JsonSchemaFormService
-  ) { }
+  constructor(jsf: JsonSchemaFormService) {
+    super(jsf);
+  }
+
+  get isChecked() {
+    return this.jsf.getFormControlValue(this) === this.trueValue;
+  }
 
   ngOnInit() {
-    this.options = this.layoutNode.options || {};
-    this.jsf.initializeControl(this);
+    super.ngOnInit();
     if (this.controlValue === null || this.controlValue === undefined) {
       this.controlValue = this.options.title;
     }
@@ -65,9 +59,5 @@ export class CheckboxComponent implements OnInit {
   updateValue(event) {
     event.preventDefault();
     this.jsf.updateValue(this, event.target.checked ? this.trueValue : this.falseValue);
-  }
-
-  get isChecked() {
-    return this.jsf.getFormControlValue(this) === this.trueValue;
   }
 }

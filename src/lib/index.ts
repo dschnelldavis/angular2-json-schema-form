@@ -37,6 +37,7 @@ export { JsonSchemaFormModule } from './src/json-schema-form.module';
 export { WidgetLibraryService } from './src/widget-library/widget-library.service';
 export { WidgetLibraryModule } from './src/widget-library/widget-library.module';
 
+export { Widget } from './src/widget-library/widget';
 export { AddReferenceComponent } from './src/widget-library/add-reference.component';
 export { OneOfComponent } from './src/widget-library/one-of.component';
 export { ButtonComponent } from './src/widget-library/button.component';

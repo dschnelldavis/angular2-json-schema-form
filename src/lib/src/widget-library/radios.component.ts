@@ -1,8 +1,8 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
 import { buildTitleMap } from '../shared';
+import { Widget } from './widget';
 
 @Component({
   selector: 'radios-widget',
@@ -63,25 +63,16 @@ import { buildTitleMap } from '../shared';
       </div>
     </div>`,
 })
-export class RadiosComponent implements OnInit {
-  formControl: AbstractControl;
-  controlName: string;
-  controlValue: any;
-  controlDisabled = false;
-  boundControl = false;
-  options: any;
+export class RadiosComponent extends Widget implements OnInit {
   layoutOrientation = 'vertical';
   radiosList: any[] = [];
-  @Input() layoutNode: any;
-  @Input() layoutIndex: number[];
-  @Input() dataIndex: number[];
 
-  constructor(
-    private jsf: JsonSchemaFormService
-  ) { }
+  constructor(jsf: JsonSchemaFormService) {
+    super(jsf);
+  }
 
   ngOnInit() {
-    this.options = this.layoutNode.options || {};
+    super.ngOnInit();
     if (this.layoutNode.type === 'radios-inline' ||
       this.layoutNode.type === 'radiobuttons'
     ) {
@@ -91,10 +82,6 @@ export class RadiosComponent implements OnInit {
       this.options.titleMap || this.options.enumNames,
       this.options.enum, true
     );
-    this.jsf.initializeControl(this);
   }
 
-  updateValue(event) {
-    this.jsf.updateValue(this, event.target.value);
-  }
 }

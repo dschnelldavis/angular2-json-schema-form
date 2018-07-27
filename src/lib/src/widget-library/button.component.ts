@@ -1,7 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
+import { Component } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
+import { Widget } from './widget';
 
 @Component({
   selector: 'button-widget',
@@ -23,31 +23,17 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
       </button>
     </div>`,
 })
-export class ButtonComponent implements OnInit {
-  formControl: AbstractControl;
-  controlName: string;
-  controlValue: any;
-  controlDisabled = false;
-  boundControl = false;
-  options: any;
-  @Input() layoutNode: any;
-  @Input() layoutIndex: number[];
-  @Input() dataIndex: number[];
+export class ButtonComponent extends Widget {
 
-  constructor(
-    private jsf: JsonSchemaFormService
-  ) { }
-
-  ngOnInit() {
-    this.options = this.layoutNode.options || {};
-    this.jsf.initializeControl(this);
+  constructor(jsf: JsonSchemaFormService) {
+    super(jsf);
   }
 
   updateValue(event) {
     if (typeof this.options.onClick === 'function') {
       this.options.onClick(event);
     } else {
-      this.jsf.updateValue(this, event.target.value);
+      super.updateValue(event);
     }
   }
 }

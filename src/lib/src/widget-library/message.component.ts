@@ -1,7 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
+import { Widget } from './widget';
 
 @Component({
   selector: 'message-widget',
@@ -10,16 +10,12 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
       [class]="options?.labelHtmlClass || ''"
       [innerHTML]="message"></span>`,
 })
-export class MessageComponent implements OnInit {
-  options: any;
+export class MessageComponent extends Widget implements OnInit {
   message: string = null;
-  @Input() layoutNode: any;
-  @Input() layoutIndex: number[];
-  @Input() dataIndex: number[];
 
-  constructor(
-    private jsf: JsonSchemaFormService
-  ) { }
+  constructor(jsf: JsonSchemaFormService) {
+    super(jsf);
+  }
 
   ngOnInit() {
     this.options = this.layoutNode.options || {};

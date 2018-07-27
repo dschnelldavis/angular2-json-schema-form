@@ -586,7 +586,7 @@ export class JsonValidators {
   static minItems(minimumItems: number): IValidatorFn {
     if (!hasValue(minimumItems)) { return JsonValidators.nullValidator; }
     return (control: AbstractControl, invert = false): ValidationErrors|null => {
-      if (isEmpty(control.value)) { return null; }
+      if (!isDefined(control.value)) { return null; }
       let currentItems = isArray(control.value) ? control.value.length : 0;
       let isValid = currentItems >= minimumItems;
       return xor(isValid, invert) ?
@@ -627,7 +627,7 @@ export class JsonValidators {
       let sorted: any[] = control.value.slice().sort();
       let duplicateItems = [];
       for (let i = 1; i < sorted.length; i++) {
-        if (sorted[i - 1] === sorted[i] && duplicateItems.includes(sorted[i])) {
+        if (sorted[i - 1] === sorted[i] && !duplicateItems.includes(sorted[i])) {
           duplicateItems.push(sorted[i]);
         }
       }

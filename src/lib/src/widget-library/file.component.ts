@@ -1,7 +1,8 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
+import { Component } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
+
+import { Widget } from './widget';
 
 // TODO: Add this control
 
@@ -9,27 +10,10 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
   selector: 'file-widget',
   template: ``,
 })
-export class FileComponent implements OnInit {
-  formControl: AbstractControl;
-  controlName: string;
-  controlValue: any;
-  controlDisabled = false;
-  boundControl = false;
-  options: any;
-  @Input() layoutNode: any;
-  @Input() layoutIndex: number[];
-  @Input() dataIndex: number[];
+export class FileComponent extends Widget {
 
-  constructor(
-    private jsf: JsonSchemaFormService
-  ) { }
-
-  ngOnInit() {
-    this.options = this.layoutNode.options || {};
-    this.jsf.initializeControl(this);
+  constructor(jsf: JsonSchemaFormService) {
+    super(jsf);
   }
 
-  updateValue(event) {
-    this.jsf.updateValue(this, event.target.value);
-  }
 }

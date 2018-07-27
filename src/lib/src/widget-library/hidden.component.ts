@@ -1,7 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
+import { Component } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
+import { Widget } from './widget';
 
 @Component({
   selector: 'hidden-widget',
@@ -18,21 +18,10 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
       type="hidden"
       [value]="controlValue">`,
 })
-export class HiddenComponent implements OnInit {
-  formControl: AbstractControl;
-  controlName: string;
-  controlValue: any;
-  controlDisabled = false;
-  boundControl = false;
-  @Input() layoutNode: any;
-  @Input() layoutIndex: number[];
-  @Input() dataIndex: number[];
+export class HiddenComponent extends Widget {
 
-  constructor(
-    private jsf: JsonSchemaFormService
-  ) { }
-
-  ngOnInit() {
-    this.jsf.initializeControl(this);
+  constructor(jsf: JsonSchemaFormService) {
+    super(jsf);
   }
+
 }

@@ -5,6 +5,7 @@
   },
   "apps": [
     {
+      "name": "demo",
       "root": "src/demo",
       "outDir": "dist/demo",
       "assets": [ "assets", "favicon.ico" ],
@@ -22,6 +23,14 @@
         "dev": "environments/environment.ts",
         "prod": "environments/environment.prod.ts"
       }
+    }, {
+      "name": "lib",
+      "root": "src/lib",
+      "polyfills": "polyfills.ts",
+      "main": "index.ts",
+      "test": "test.ts",
+      "tsconfig": "tsconfig.app.json",
+      "testTsconfig": "tsconfig.spec.json"
     }
   ],
   "e2e": {

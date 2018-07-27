@@ -1,18 +1,18 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "declaration": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "inlineSources": true,
+    "lib": [ "es2015", "dom", "es7" ],
     "module": "es2015",
     "moduleResolution": "node",
-    "sourceMap": true,
-    "inlineSources": true,
-    "declaration": true,
-    "experimentalDecorators": true,
     "removeComments": true,
-    "suppressImplicitAnyIndexErrors": true,
     "skipLibCheck": true,
+    "sourceMap": true,
     "stripInternal": true,
-    "lib": [ "es2015", "dom", "es7" ],
-    "emitDecoratorMetadata": true
+    "suppressImplicitAnyIndexErrors": true,
+    "target": "es5"
   },
   "atom": {
     "rewriteTsconfig": false

@@ -1,7 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
+import { Component } from '@angular/core';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
+import { Widget } from './widget';
 
 @Component({
   selector: 'input-widget',
@@ -48,28 +48,11 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
         </datalist>
     </div>`,
 })
-export class InputComponent implements OnInit {
-  formControl: AbstractControl;
-  controlName: string;
-  controlValue: string;
-  controlDisabled = false;
-  boundControl = false;
-  options: any;
+export class InputComponent extends Widget {
   autoCompleteList: string[] = [];
-  @Input() layoutNode: any;
-  @Input() layoutIndex: number[];
-  @Input() dataIndex: number[];
 
-  constructor(
-    private jsf: JsonSchemaFormService
-  ) { }
-
-  ngOnInit() {
-    this.options = this.layoutNode.options || {};
-    this.jsf.initializeControl(this);
+  constructor(jsf: JsonSchemaFormService) {
+    super(jsf);
   }
 
-  updateValue(event) {
-    this.jsf.updateValue(this, event.target.value);
-  }
 }

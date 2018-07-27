@@ -1,9 +1,14 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "baseUrl": "",
-    "module": "commonjs",
+    "baseUrl": "./",
+    "module": "es2015",
     "declaration": false,
-    "emitDecoratorMetadata": true
-  }
+    "types": ["jasmine", "node"]
+  },
+  "files": ["test.ts"],
+  "include": [
+    "**/*.spec.ts",
+    "**/*.d.ts"
+  ]
 }
