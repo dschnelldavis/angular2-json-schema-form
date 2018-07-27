@@ -499,8 +499,12 @@ export class JsonSchemaFormService {
     // Set value of current control
     ctx.controlValue = value;
     if (ctx.boundControl) {
-      ctx.formControl.setValue(value);
-      ctx.formControl.markAsDirty();
+      if (isArray(value)) {
+        this.updateArray(ctx, value);
+      } else {
+        ctx.formControl.setValue(value);
+        ctx.formControl.markAsDirty();
+      }
     }
     ctx.layoutNode.value = value;
 
@@ -516,7 +520,7 @@ export class JsonSchemaFormService {
     }
   }
 
-  updateArrayCheckboxList(ctx: any, checkboxList: TitleMapItem[]): void {
+  protected updateArray(ctx: any, items: any[]): void {
     const formArray = <FormArray>this.getFormControl(ctx);
 
     // Remove all existing items
@@ -526,12 +530,10 @@ export class JsonSchemaFormService {
     const refPointer = removeRecursiveReferences(
       ctx.layoutNode.dataPointer + '/-', this.dataRecursiveRefMap, this.arrayMap
     );
-    for (const checkboxItem of checkboxList) {
-      if (checkboxItem.checked) {
-        const newFormControl = buildFormGroup(this.templateRefLibrary[refPointer]);
-        newFormControl.setValue(checkboxItem.value);
-        formArray.push(newFormControl);
-      }
+    for (const item of items) {
+      const newFormControl = buildFormGroup(this.templateRefLibrary[refPointer]);
+      newFormControl.setValue(item);
+      formArray.push(newFormControl);
     }
     formArray.markAsDirty();
   }
