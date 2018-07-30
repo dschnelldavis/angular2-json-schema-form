@@ -101,7 +101,7 @@ export class JsonSchemaFormService {
       // 'auto' = validate fields with values immediately, empty fields after they are touched
     widgets: {}, // Any custom widgets to load
     defaultWidgetOptions: { // Default options for form control widgets
-      listItems: 1, // Number of list items to initially add to arrays with no default value
+      listItems: 0, // Number of list items to initially add to arrays with no default value
       addable: true, // Allow adding items to an array or $ref point?
       orderable: true, // Allow reordering items within an array?
       removable: true, // Allow removing items from an array or $ref point?
