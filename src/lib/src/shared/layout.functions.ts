@@ -454,7 +454,7 @@ export function buildLayout(jsf, widgetLibrary) {
       dataType: 'object',
       items: fullLayout,
       name: '',
-      options: _.cloneDeep(jsf.formOptions.defautWidgetOptions),
+      options: _.cloneDeep(jsf.formOptions.defaultWidgetOptions),
       recursiveReference: true,
       required: false,
       type: 'section',

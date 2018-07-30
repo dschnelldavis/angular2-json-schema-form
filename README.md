@@ -335,11 +335,11 @@ let yourFormLayout = [
 ]
 ```
 
-To set messages for the entire form, add them to the form options, inside the defautWidgetOptions validationMessages object, like this:
+To set messages for the entire form, add them to the form options, inside the defaultWidgetOptions validationMessages object, like this:
 
 ```javascript
 let yourFormOptions = {
-  defautWidgetOptions: {
+  defaultWidgetOptions: {
     validationMessages: {
       // Put your error messages for the entire form here
     }

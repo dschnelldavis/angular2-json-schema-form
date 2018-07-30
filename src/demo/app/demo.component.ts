@@ -63,7 +63,7 @@ export class DemoComponent implements OnInit {
     loadExternalAssets: true, // Load external css and JavaScript for frameworks
     returnEmptyFields: false, // Don't return values for empty input fields
     setSchemaDefaults: true, // Always use schema defaults for empty fields
-    defautWidgetOptions: { feedback: true }, // Show inline feedback icons
+    defaultWidgetOptions: { feedback: true }, // Show inline feedback icons
   };
   liveFormData: any = {};
   formValidationErrors: any;
@@ -245,8 +245,8 @@ export class DemoComponent implements OnInit {
 
   toggleFormOption(option: string) {
     if (option === 'feedback') {
-      this.jsonFormOptions.defautWidgetOptions.feedback =
-        !this.jsonFormOptions.defautWidgetOptions.feedback;
+      this.jsonFormOptions.defaultWidgetOptions.feedback =
+        !this.jsonFormOptions.defaultWidgetOptions.feedback;
     } else {
       this.jsonFormOptions[option] = !this.jsonFormOptions[option];
     }
