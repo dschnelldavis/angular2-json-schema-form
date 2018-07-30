@@ -97,7 +97,10 @@ export class MaterialCheckboxesComponent implements OnInit {
   updateValue() {
     this.options.showErrors = true;
     if (this.boundControl) {
-      this.jsf.updateArrayCheckboxList(this, this.checkboxList);
+      this.jsf.updateValue(this, this.checkboxList
+        .filter(checkboxItem => checkboxItem.checked)
+        .map(checkboxItem => checkboxItem.value)
+      );
     }
   }
 

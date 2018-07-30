@@ -186,18 +186,17 @@ export class JsonValidators {
     return (control: AbstractControl, invert = false): ValidationErrors|null => {
       if (isEmpty(control.value)) { return null; }
       const currentValue: any = control.value;
-      const isEqual = (enumValue, inputValue) =>
-        enumValue === inputValue ||
-        (isNumber(enumValue) && +inputValue === +enumValue) ||
-        (isBoolean(enumValue, 'strict') &&
-          toJavaScriptType(inputValue, 'boolean') === enumValue) ||
-        (enumValue === null && !hasValue(inputValue)) ||
-        _.isEqual(enumValue, inputValue);
-      const isValid = isArray(currentValue) ?
-        currentValue.every(inputValue => allowedValues.some(enumValue =>
-          isEqual(enumValue, inputValue)
-        )) :
-        allowedValues.some(enumValue => isEqual(enumValue, currentValue));
+      const areEqual = (enumValue, inputValue) =>
+        enumValue === inputValue
+        || (isNumber(enumValue) && +inputValue === +enumValue)
+        || (isBoolean(enumValue, 'strict') && toJavaScriptType(inputValue, 'boolean') === enumValue)
+        || (enumValue === null && !hasValue(inputValue))
+        || _.isEqual(enumValue, inputValue);
+      const isValid = isArray(currentValue)
+        ? currentValue.every(inputValue => allowedValues.some(enumValue =>
+          areEqual(enumValue, inputValue)
+        ))
+        : allowedValues.some(enumValue => areEqual(enumValue, currentValue));
       return xor(isValid, invert) ?
         null : { 'enum': { allowedValues, currentValue } };
     };
