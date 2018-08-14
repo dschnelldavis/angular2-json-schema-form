@@ -225,11 +225,6 @@ export function buildLayout(jsf, widgetLibrary) {
           ) {
             newNode.options.listItems =
               newNode.options.maxItems - newNode.options.tupleItems;
-          } else if (newNode.options.minItems >
-            newNode.options.tupleItems + newNode.options.listItems
-          ) {
-            newNode.options.listItems =
-              newNode.options.minItems - newNode.options.tupleItems;
           }
           if (!nodeDataMap.has('maxItems')) {
             nodeDataMap.set('maxItems', newNode.options.maxItems);
@@ -454,7 +449,7 @@ export function buildLayout(jsf, widgetLibrary) {
       dataType: 'object',
       items: fullLayout,
       name: '',
-      options: _.cloneDeep(jsf.formOptions.defautWidgetOptions),
+      options: _.cloneDeep(jsf.formOptions.defaultWidgetOptions),
       recursiveReference: true,
       required: false,
       type: 'section',
@@ -599,7 +594,9 @@ export function buildLayoutFromSchema(
     if (!newNode.options.minItems && isInputRequired(jsf.schema, schemaPointer)) {
       newNode.options.minItems = 1;
     }
-    if (!hasOwn(newNode.options, 'listItems')) { newNode.options.listItems = 1; }
+    if (!hasOwn(newNode.options, 'listItems')) {
+      newNode.options.listItems = jsf.formOptions.defaultWidgetOptions.listItems;
+    }
     newNode.options.tupleItems = isArray(schema.items) ? schema.items.length : 0;
     if (newNode.options.maxItems <= newNode.options.tupleItems) {
       newNode.options.tupleItems = newNode.options.maxItems;
@@ -608,10 +605,6 @@ export function buildLayoutFromSchema(
       newNode.options.tupleItems + newNode.options.listItems
     ) {
       newNode.options.listItems = newNode.options.maxItems - newNode.options.tupleItems;
-    } else if (newNode.options.minItems >
-      newNode.options.tupleItems + newNode.options.listItems
-    ) {
-      newNode.options.listItems = newNode.options.minItems - newNode.options.tupleItems;
     }
     if (!nodeDataMap.has('maxItems')) {
       nodeDataMap.set('maxItems', newNode.options.maxItems);

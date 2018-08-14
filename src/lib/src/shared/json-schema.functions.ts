@@ -411,7 +411,7 @@ export function updateInputOptions(layoutNode, schema, jsf) {
   // Set all option values in layoutNode.options
   let newOptions: any = { };
   const fixUiKeys = key => key.slice(0, 3).toLowerCase() === 'ui:' ? key.slice(3) : key;
-  mergeFilteredObject(newOptions, jsf.formOptions.defautWidgetOptions, [], fixUiKeys);
+  mergeFilteredObject(newOptions, jsf.formOptions.defaultWidgetOptions, [], fixUiKeys);
   [ [ JsonPointer.get(schema, '/ui:widget/options'), [] ],
     [ JsonPointer.get(schema, '/ui:widget'), [] ],
     [ schema, [
