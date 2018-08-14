@@ -225,11 +225,11 @@ export function buildLayout(jsf, widgetLibrary) {
           ) {
             newNode.options.listItems =
               newNode.options.maxItems - newNode.options.tupleItems;
-          } else if (newNode.options.minItems >
-            newNode.options.tupleItems + newNode.options.listItems
-          ) {
-            newNode.options.listItems =
-              newNode.options.minItems - newNode.options.tupleItems;
+          // } else if (newNode.options.minItems >
+          //   newNode.options.tupleItems + newNode.options.listItems
+          // ) {
+          //   newNode.options.listItems =
+          //     newNode.options.minItems - newNode.options.tupleItems;
           }
           if (!nodeDataMap.has('maxItems')) {
             nodeDataMap.set('maxItems', newNode.options.maxItems);
@@ -610,10 +610,10 @@ export function buildLayoutFromSchema(
       newNode.options.tupleItems + newNode.options.listItems
     ) {
       newNode.options.listItems = newNode.options.maxItems - newNode.options.tupleItems;
-    } else if (newNode.options.minItems >
-      newNode.options.tupleItems + newNode.options.listItems
-    ) {
-      newNode.options.listItems = newNode.options.minItems - newNode.options.tupleItems;
+    // } else if (newNode.options.minItems >
+    //   newNode.options.tupleItems + newNode.options.listItems
+    // ) {
+    //   newNode.options.listItems = newNode.options.minItems - newNode.options.tupleItems;
     }
     if (!nodeDataMap.has('maxItems')) {
       nodeDataMap.set('maxItems', newNode.options.maxItems);
