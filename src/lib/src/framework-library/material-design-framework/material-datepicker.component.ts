@@ -23,6 +23,7 @@ import { dateToString, hasOwn, stringToDate } from '../../shared';
         [placeholder]="options?.title"
         [required]="options?.required"
         [style.width]="'100%'"
+        [value]="dateValue"
         (blur)="options.showErrors = true">
       <input matInput *ngIf="!boundControl"
         [attr.aria-describedby]="'control' + layoutNode?._id + 'Status'"
