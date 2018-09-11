@@ -56,6 +56,9 @@
   },
   "dependencies": {
     "ajv": "^6.0.1",
+    "angularx-flatpickr": "^6.0.0",
+    "flatpickr": "^4.5.2",
+    "jquery": "^3.3.1",
     "lodash": "4.x"
   },
   "peerDependencies": {
@@ -66,7 +69,9 @@
     "@angular/forms": ">=4.0.0",
     "@angular/material": ">=5.0.0",
     "@angular/platform-browser": ">=4.0.0",
-    "rxjs": ">=5.0.0"
+    "rxjs": ">=5.0.0",
+    "ng-semantic": "^1.1.13",
+    "semantic-ui": "^2.3.3"
   },
   "devDependencies": {
     "@angular/animations": "^5.2.1",
