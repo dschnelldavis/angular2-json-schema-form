@@ -15,8 +15,14 @@
       "tsconfig": "tsconfig.app.json",
       "testTsconfig": "tsconfig.spec.json",
       "prefix": "",
-      "styles": [ "styles.scss" ],
-      "scripts": [ ],
+      "styles": [
+        "styles.scss",
+        "../../node_modules/flatpickr/dist/flatpickr.css"
+      ],
+      "scripts": [
+        "../../node_modules/jquery/dist/jquery.min.js",
+        "../../node_modules/semantic-ui/dist/semantic.min.js"
+      ],
       "environmentSource": "environments/environment.ts",
       "environments": {
         "dev": "environments/environment.ts",

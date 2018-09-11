@@ -32,11 +32,12 @@ export class DemoComponent implements OnInit {
     'en': 'English',
     'fr': 'French',
   };
-  frameworkList: any = ['material-design', 'bootstrap-3', 'bootstrap-4', 'no-framework'];
+  frameworkList: any = ['material-design', 'bootstrap-3', 'bootstrap-4', 'semantic-ui', 'no-framework'];
   frameworks: any = {
     'material-design': 'Material Design',
     'bootstrap-3': 'Bootstrap 3',
     'bootstrap-4': 'Bootstrap 4',
+    'semantic-ui': 'Semantic UI',
     'no-framework': 'None (plain HTML)',
   };
   selectedSet = 'ng-jsf';

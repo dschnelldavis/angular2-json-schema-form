@@ -98,3 +98,7 @@ export { Bootstrap3FrameworkModule } from './src/framework-library/bootstrap-3-f
 export { Bootstrap4Framework } from './src/framework-library/bootstrap-4-framework/bootstrap-4.framework';
 export { Bootstrap4FrameworkComponent } from './src/framework-library/bootstrap-4-framework/bootstrap-4-framework.component';
 export { Bootstrap4FrameworkModule } from './src/framework-library/bootstrap-4-framework/bootstrap-4-framework.module';
+
+export { SemanticUIFramework } from './src/framework-library/semantic-ui-framework/semantic-ui.framework';
+export { SemanticUIFrameworkComponent } from './src/framework-library/semantic-ui-framework/semantic-ui-framework.component';
+export { SemanticUIFrameworkModule } from './src/framework-library/semantic-ui-framework/semantic-ui-framework.module';
